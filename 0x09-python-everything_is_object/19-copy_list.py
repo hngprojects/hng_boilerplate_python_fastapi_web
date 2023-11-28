@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-"""
-returns a copy of a list.
-"""
+#!/usr/bin/python3"
 def copy_list(l):
     return l[:]
