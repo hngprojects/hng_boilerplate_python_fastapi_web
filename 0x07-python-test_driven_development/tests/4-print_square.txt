@@ -1,0 +1,49 @@
+                          PRINTING A SQUARE MODULE
+			  =========================
+IMPORTING THE MODULE
+
+>>> print_square = __import__("4-print_square").print_square
+
+
+
+    		   TESTS
+		   ======
+
+Passing no argument:
+>>> print_square()
+Traceback (most recent call last):
+...
+TypeError: print_square() missing 1 required positional argument: 'size'
+
+passing none as an argument:
+>>> print_square(None)
+Traceback (most recent call last):
+...
+TypeError: size must be an integer
+
+passing a negative value as input
+>>> print_square(-3)
+Traceback (most recent call last):
+ValueError: size must be >= 0
+
+passing a string as input:
+>>> print_square("string")
+Traceback (most recent call last):
+TypeError: size must be an integer
+
+passing a float as input:
+>>> print_square(4.4)
+Traceback (most recent call last):
+TypeError: size must be an integer
+
+
+passing zero as the input:
+>>> print_square(0)
+Traceback (most recent call last):
+ValueError: size must be >= 0
+
+passing a positive integer as input
+>>> print_square(3)
+###
+###
+###

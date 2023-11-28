@@ -1,0 +1,43 @@
+			SAY_MY_MAME MODULE
+			------------------
+
+iMPORTING THE MODULE
+---------------------
+
+>>> say_my_name = __import__("3-say_my_name").say_my_name
+
+			TESTS
+			-----
+passing no arguement:
+>>> say_my_name()
+Traceback (most recent call last):
+TypeError: say_my_name() missing 1 required positional argument: 'first_name'
+
+passing a number as the second argumemt:
+>>> say_my_name("Rhlee", 21)
+Traceback (most recent call last):
+...
+TypeError: last_name must be a string
+
+passing a number as the first argument:
+>>> say_my_name(21, "Rhlee")
+Traceback (most recent call last):
+TypeError: first_name must be a string
+
+passing none as the first name:
+>>> say_my_name(None, "Rhlee")
+Traceback (most recent call last):
+TypeError: first_name must be a string
+
+passing none as the first name:
+>>> say_my_name("Rhlee", None)
+Traceback (most recent call last):
+TypeError: last_name must be a string
+
+passing the first name only:
+>>> say_my_name("Rhlee")
+My name is Rhlee 
+
+passing both names as the input
+>>> say_my_name("Rhlee", "21") #doctest: +REPORT_NDIFF
+My name is Rhlee 21
