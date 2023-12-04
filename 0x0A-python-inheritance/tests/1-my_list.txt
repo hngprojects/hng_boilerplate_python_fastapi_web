@@ -1,0 +1,121 @@
+importing the module
+
+
+>>> List = __import__("1-my_list").MyList
+
+Test 1:
+
+>>> List = __import__("1-my_list").MyList
+>>> mylist = List()
+>>> mylist.append(3)
+>>> print(mylist)
+[3]
+>>> mylist.pop()
+3
+>>> mylist
+[]
+>>> mylist.append(1)
+>>> mylist.append(4)
+>>> mylist.append(2)
+>>> mylist.append(3)
+>>> mylist.append(5)
+>>> print(mylist)
+[1, 4, 2, 3, 5]
+>>> mylist.print_sorted()
+[1, 2, 3, 4, 5]
+
+
+Test 2:
+Gives undefined object
+
+>>> MyList = __import__('1-my_list').MyList
+>>> undefined.print_sorted()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'undefined' is not defined
+
+
+
+Test 3:
+passing on a list to the derived class
+
+>>> MyList = __import__('1-my_list').MyList
+>>> a = [2, 3, 5, 6]
+>>> 
+>>> List = MyList(a)
+>>> List.print_sorted()
+[2, 3, 5, 6]
+
+
+Test 4:
+
+gives an empty list
+
+>>> MyList = __import__('1-my_list').MyList
+>>> a = []
+>>> 
+>>> List = MyList(a)
+>>> List.print_sorted()
+[]
+
+
+
+Test 5:
+
+passing just one number
+
+>>> MyList = __import__('1-my_list').MyList
+>>> List = MyList()
+>>> List.append(4)
+>>> List.print_sorted()
+[4]
+
+
+
+
+Test 6:
+
+Testing with the simillar number
+
+Type "help", "copyright", "credits" or "license" for more information.
+>>> MyList = __import__('1-my_list').MyList
+>>> List = MyList()
+>>> List.append(1)
+>>> List.append(1)
+>>> List.print_sorted()
+[1, 1]
+
+
+Test 7:
+
+passing on a parent object instead of the subclass
+
+Python 3.10.12 (main, Jun 11 2023, 05:26:28) [GCC 11.4.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> MyList = __import__('1-my_list').MyList
+>>> num = [2, 4, 5, 6, 7]
+>>> 
+>>> num.print_sorted()
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'list' object has no attribute 'print_sorted'
+
+
+
+test 8:
+
+testing with negative elements
+
+>>> MyList = __import__('1-my_list').MyList
+>>> 
+>>> List = MyList()
+>>> 
+>>> List.append(-3)
+>>> List.append(-7)
+>>> List.append(-45)
+>>> List.append(5)
+>>> List.append(7)
+>>> List
+[-3, -7, -45, 5, 7]
+>>> List.print_sorted()
+[-45, -7, -3, 5, 7]
