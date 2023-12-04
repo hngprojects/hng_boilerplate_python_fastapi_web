@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 
 """
-lookup - returns a kist of attributes
-
+a module that returns a kist of attributes
 """
 def lookup(obj):
     """
     function that lists attributes and methods
 
     args:
+
     @obj:
     object
 
