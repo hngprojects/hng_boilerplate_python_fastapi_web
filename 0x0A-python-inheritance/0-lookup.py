@@ -5,14 +5,14 @@ a module that returns a kist of attributes
 """
 def lookup(obj):
     """
-    function that lists attributes and methods
+    a function to list a classes attributes
 
     args:
 
     @obj:
-    object
+    the object input
 
     @return:
-    list of atts and methods
+    a list of the objects attributes
     """
     return (dir(obj))
