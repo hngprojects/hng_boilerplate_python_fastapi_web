@@ -16,5 +16,6 @@ def read_file(filename=""):
     """
 
     with open(filename, "r", encoding='UTF-8') as files:
-        print(files)
+        for line in files:
+            print(files, end="")
 
