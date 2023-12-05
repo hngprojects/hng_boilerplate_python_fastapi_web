@@ -1,18 +1,14 @@
 #!/usr/bin/python3
 
-
-""" My class module
+"""
+a module that creates a dictionary from an object for json
+serialization
 """
 
 
-class MyClass:
-    """ 
-    My class
+def class_to_json(obj):
     """
-
-    def __init__(self, name):
-        self.name = name
-        self.number = 0
-
-    def __str__(self):
-        return "[MyClass] {} - {:d}".format(self.name, self.number)
+    returns an dictionary representation of an object
+    """
+    if obj.__dict__:
+        return (obj.__dict__)
