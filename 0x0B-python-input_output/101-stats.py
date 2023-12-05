@@ -20,4 +20,4 @@ if __name__ == "__main__":
 
         for line in sys.stdin:
             if i == 10:
-                print(size)
+                print(size
