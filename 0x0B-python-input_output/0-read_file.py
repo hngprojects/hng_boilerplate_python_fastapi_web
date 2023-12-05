@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 """
-a module to  read  a file and print it to the standard output
+a function that reads from a file and prints it to standard output
 """
 
 
 def read_file(filename=""):
     """
-    a function to read and print a file
+    a function that reads and printts
 
     Args:
             filename - the path to the file
