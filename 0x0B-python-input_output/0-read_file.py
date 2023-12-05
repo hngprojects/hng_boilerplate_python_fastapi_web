@@ -1,21 +1,19 @@
 #!/usr/bin/python3
 """
-function reads a text file and prints it
+a module to  read  a file and print it to the standard output
 """
 
 
 def read_file(filename=""):
     """
-    function reads a textfile and prints it to stdout
+    a function to read and print a file
 
     Args:
-            filename - the filename
+            filename - the path to the file
 
     return:
             nothing
     """
-
-    with open(filename, mode="r", encoding='utf-8') as files:
+    with open(filename, mode="r", encoding="utf-8") as files:
         for line in files:
-            print(files, end="")
-
+            print(line, end="")
