@@ -8,10 +8,11 @@ def read_file(filename=""):
     """
     function reads a textfile and prints it to stdout
 
-    args:
+    Args:
+            filename - the filename
 
-    @filename:
-    the filename
+    return:
+            nothing
     """
 
     with open(filename, "r", encoding='UTF-8') as files:
