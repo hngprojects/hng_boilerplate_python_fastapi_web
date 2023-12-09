@@ -39,8 +39,7 @@ TypeError: size must be an integer
 
 passing zero as the input:
 >>> print_square(0)
-Traceback (most recent call last):
-ValueError: size must be >= 0
+
 
 passing a positive integer as input
 >>> print_square(3)
