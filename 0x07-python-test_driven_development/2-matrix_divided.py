@@ -4,6 +4,7 @@ A matrix division module
 
 """
 
+
 def matrix_divided(matrix, div):
     """
     The function matrix_divided divides the input
@@ -45,6 +46,6 @@ def matrix_divided(matrix, div):
                 raise TypeError(lists)
         list_length = len(a)
 
-    Matrix= list(map(lambda a : list(map(lambda b : round(b / div, 2), a)), matrix))
+    Mat = list(map(lambda a: list(map(lambda b: round(b/div, 2), a)), matrix))
 
-    return (Matrix)
+    return (Mat)
