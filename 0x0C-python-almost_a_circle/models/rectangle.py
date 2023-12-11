@@ -4,6 +4,7 @@ Class rectangle
 """
 from models.base import Base
 
+
 class Rectangle(Base):
     """
     Sub-Class rectangle that
