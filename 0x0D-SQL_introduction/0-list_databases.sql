@@ -1,3 +1,3 @@
 -- shows tables in server
 
-SELECT *
+SELECT * FROM MySQL server
