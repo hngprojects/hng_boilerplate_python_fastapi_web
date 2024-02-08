@@ -1,0 +1,85 @@
+			2-matrix divide module
+			----------------------
+
+importing matrix_divide
+
+>>> matrix_divide = __import__("matrix").matrix_divided
+
+
+Dividing a matrix by 2:
+>>> matrix_divide([[1, 2, 3], [4, 5, 6]], 3)
+[[0.33, 0.67, 1.0], [1.33, 1.67, 2.0]]
+
+Trying to divide the matris by 0:
+>>> matrix_divide([[1, 2, 3], [4, 5, 6]], 0)
+Traceback (most recent call last):
+...
+ZeroDivisionError: division by zero
+
+Trying to divide by a float number:
+>>> matrix_divide([[1, 2, 3], [4, 5, 6]], 1.5)
+[[0.67, 1.33, 2.0], [2.67, 3.33, 4.0]]
+
+Trying to divide an empty matrix:
+matrix_divide([[1, 2, 3], []], 5)
+Traceback (most recent call last):
+...
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+Trying to give a tuple instead of a matrix:
+>>> matrix_divide((1, 2, 3), 2)
+Traceback (most recent call last):
+...
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+Trying with a matrix whose elemets are of different sizes
+>>> matrix_divide([[1, 2, 4], [1, 2]], 2)
+Traceback (most recent call last):
+...
+TypeError: Each row of the matrix must have the same size
+
+
+Trying to give a matrix of strings:
+>>> matrix_divide([["hi", "hello"], ["how", "today"]], 2)
+Traceback (most recent call last):
+...
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+Trying to put put string numerals:
+>>> matrix_divide([["1", "2"], ["3", "4"]], 2)
+Traceback (most recent call last):
+...
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+Trying to test  a mix of number and strings:
+>>> matrix_divide([[1, "3"], ["2", 4]], 3)
+Traceback (most recent call last):
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+Trying to test a matrix where one of the elements is empty
+>>> matrix_divide([[2, 3], []], 3)
+Traceback (most recent call last):
+...
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+Testing a matrix which one of the elements is a tuple
+>>> matrix_divide([[3, 4], (3, 5)], 3)
+Traceback (most recent call last):
+TypeError: matrix must be a matrix (list of lists) of integers/floats
+
+
+Testing the case where the div is a list
+>>> matrix_divide([[1, 2], [2, 4]], [1, 2])
+Traceback (most recent call last):
+TypeError: div must be a number
+
+Testing where div is a string
+>>> matrix_divide([[2, 3], [4, 5]], "8")
+Traceback (most recent call last):
+...
+TypeError: div must be a number
+
+
+Dividing with a matrix which contains negative numbers
+>>> matrix_divide([[-4, 5], [3, -6]], 2)
+[[-2.0, 2.5], [1.5, -3.0]]

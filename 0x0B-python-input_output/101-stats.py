@@ -1,81 +1,48 @@
 #!/usr/bin/python3
-
-
-"""
-Initialize dictionaries to store file sizes and status code counts
-"""
-import sys
 import signal
+import sys
 
+def print_statistics(total_size, status_counts):
+    """Print statistics based on current metrics."""
+    print("File size: {:d}".format(total_size))
+    for status_code in sorted(status_counts.keys()):
+        print("{}: {}".format(status_code, status_counts[status_code]))
 
-file_sizes = {}
-status_code_counts = {}
+def signal_handler(sig, frame):
+    """Handle KeyboardInterrupt (Ctrl+C) to print final statistics."""
+    print_statistics(total_size, status_counts)
+    sys.exit(0)
 
-"""
-Initialize variables to keep track of total file size and line count
-"""
 total_size = 0
-line_count = 0
+status_counts = {}
 
-"""
-Define a signal handler for CTRL + C
-"""
-
-
-def handle_interrupt(signal, frame):
-    print_metrics()
-
-
-"""
-Register the signal handler for CTRL + C
-"""
-signal.signal(signal.SIGINT, handle_interrupt)
-
-
-def print_metrics():
-    print("Total file size:", total_size)
-    for code in sorted(status_code_counts.keys()):
-        print(f"{code}: {status_code_counts[code]}")
-
+# Register the signal handler for Ctrl+C
+signal.signal(signal.SIGINT, signal_handler)
 
 try:
-    for line in sys.stdin:
-        line_count += 1
-        parts = line.split()
-
-        """
-        Check if the line has the expected format
-        """
-        if len(parts) >= 9:
-            status_code = parts[-2]
+    for i, line in enumerate(sys.stdin, 1):
+        try:
+            parts = line.split()
             size = int(parts[-1])
+            status_code = int(parts[-2])
 
-            """
-            Update total file size
-            """
             total_size += size
 
-            """
-            Update file size dictionary
-            """
-            file_sizes[line_count] = total_size
-
-            """
-            Update status code counts dictionary
-            """
-            if status_code in status_code_counts:
-                status_code_counts[status_code] += 1
+            if status_code in status_counts:
+                status_counts[status_code] += 1
             else:
-                status_code_counts[status_code] = 1
+                status_counts[status_code] = 1
 
-            """
-            Print statistics every 10 lines
-            """
-            if line_count % 10 == 0:
-                print_metrics()
+            if i % 10 == 0:
+                print_statistics(total_size, status_counts)
 
-except KeyboardInterrupt:
-    """
-    Handle KeyboardInterrupt (CTRL + C)
-    """
-    print_metrics()
+        except (ValueError, IndexError):
+            # Ignore lines that don't match the expected format
+            pass
+
+except KeyboardInterrupt as e:
+    #Handle Ctrl+C interruption
+    print_statistics(total_size, status_counts)
+    print(e)
+    sys.exit(0)
+
