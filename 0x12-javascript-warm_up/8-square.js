@@ -10,5 +10,5 @@ if (!isNaN(num)) {
     console.log(line);
   }
 } else {
-  console.log('Missing number of occurrences');
+  console.log('Missing size');
 }
