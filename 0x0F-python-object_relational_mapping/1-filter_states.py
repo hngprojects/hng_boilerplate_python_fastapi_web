@@ -20,7 +20,7 @@ def filter_by_n(username, password, database):
     """
     try:
         db = MySQLdb.connect(host='localhost', port=3306, user=username,
-                             passwd=password, db=database)
+                             passwd='Njenga008!', db=database)
 
         cursor = db.cursor()
         cursor.execute("SELECT * FROM states WHERE name LIKE 'N%' ORDER BY id")
