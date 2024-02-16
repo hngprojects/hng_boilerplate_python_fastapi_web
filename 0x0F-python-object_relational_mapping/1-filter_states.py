@@ -23,18 +23,20 @@ def filter_by_n(username, password, database):
                              passwd='Njenga008!', db=database)
 
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM states WHERE name LIKE 'N%' ORDER BY id")
-
-        states = cursor.fetchall()
+        query = "SELECT id, name FROM (SELECT name, MIN(id) AS id FROM states "
+        queryext = "WHERE name LIKE 'N%' GROUP BY name) AS t ORDER BY id;"
+        q = query + queryext
+        cursor.execute(q)
+        statess = cursor.fetchall()
 
         cursor.close()
         db.close()
 
     except MySQLdb.Error as e:
-        return
+        print("MySQL Error:", e)
 
-    if states:
-        for state in states:
+    if statess:
+        for state in statess:
             print(state)
 
 
