@@ -2,9 +2,9 @@ import MySQLdb
 
 # Establish a connection to the MySQL database
 db = MySQLdb.connect(host="localhost",
-                     user="username",
+                     user="root",
                      passwd="Njenga008!",
-                     db="my_database")
+                     db="hbtn_0e_0_usa")
 
 # Create a cursor object using cursor() method
 cursor = db.cursor()
