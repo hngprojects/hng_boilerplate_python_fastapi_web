@@ -13,10 +13,7 @@ if __name__ == "__main__":
                          passwd='Njenga008!', db=database)
 
     cursor = db.cursor()
-    query = "SELECT id, name FROM (SELECT name, MIN(id) AS id FROM states "
-    queryext = "WHERE name LIKE 'N%' GROUP BY name) AS t ORDER BY id;"
-    q = query + queryext
-    cursor.execute(q)
+    cursor.execute("SELECT * FROM states WHERE name LIKE BINARY 'N%' ORDER BY id")
     statess = cursor.fetchall()
 
     cursor.close()
