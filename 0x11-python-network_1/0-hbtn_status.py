@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Module fetches https://alx-intranet.hbtn.io/status
+Tis Module fetches https://alx-intranet.hbtn.io/status
 """
 import urllib.request
 
