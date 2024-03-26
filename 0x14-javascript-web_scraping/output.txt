@@ -1,0 +1,216 @@
+node-npmlog (>= 4.1.2~)
+node-pumpify
+node-number
+node-getpass
+node-concat
+node-locate
+node-crypto
+node-object
+node-minimatch
+node-ip
+node-unpipe
+node-iconv
+node-extend
+node-strict
+node-editor
+node-get
+node-builtin
+node-cli
+node-dashdash
+node-normalize
+node-term
+node-url
+node-assert
+node-copy
+node-find
+node-write
+node-text
+node-process
+node-defaults
+node-sorted
+node-supports
+node-deep
+node-lru
+node-function
+node-y18n
+node-extsprintf
+node-invert
+node-isstream
+node-glob (>= 7.1.2~)
+node-psl
+node-sshpk
+node-readable
+node-xtend
+node-lcid
+node-config
+node-jsbn
+node-parallel
+node-builtins
+node-rc
+node-verror
+node-cliui
+node-debug
+node-detect
+node-slash
+node-balanced
+node-co
+node-camelcase
+node-retry (>= 0.10.1~)
+node-ms
+node-which
+node-ci
+node-asynckit
+node-har
+node-err
+node-ajv
+node-run
+node-combined
+node-sha (>= 2.0.1~)
+node-isexe
+node-genfun
+node-latest
+node-errno
+node-os
+node-es6
+node-graceful
+node-lodash
+node-osenv (>= 0.1.5~)
+node-brace
+node-from2
+node-has
+node-unique
+node-request (>= 2.83~)
+node-tunnel
+node-aws4
+node-resolve
+node-rimraf (>= 2.6.2~)
+node-wide
+node-read
+node-delayed
+node-duplexify
+node-columnify
+node-libnpx
+node-lockfile (>= 1.0.3~)
+node-which (>= 1.3~)
+node-wrap
+node-console
+node-configstore
+node-jsonparse
+node-cross
+node-ansi
+node-prepend
+node-punycode
+node-core
+node-gauge
+node-bl
+node-pseudomap
+node-dot
+node-spdx
+node-widest
+node-imurmurhash
+node-duplexer3
+node-mkdirp (>= 0.5.1~)
+node-bluebird
+node-json
+node-gyp (>= 3.6.2~)
+node-boxen
+node-make
+node-ecc
+node-color
+node-npm
+node-mimic
+node-stream
+node-decamelize
+node-are
+node-shebang
+node-semver
+node-fast
+node-lowercase
+node-caseless
+node-require
+node-define
+node-through2
+node-read (>= 1.0.7~)
+node-validate
+node-wrappy
+node-move
+node-registry
+node-ini (>= 1.3.5~)
+node-jsprim
+node-package
+node-asn1
+node-encoding
+node-chownr
+node-promise
+node-proto
+node-qs
+node-aproba
+node-mem
+node-hosted
+node-uid
+node-archy (>= 1.0~)
+node-abbrev (>= 1.1.1~)
+node-chalk
+node-promzard
+node-tweetnacl
+node-yallist
+node-iferr
+node-flush
+node-escape
+node-is
+node-minimist
+node-http
+node-xdg
+node-cyclist
+node-nopt
+node-opener
+node-signal
+node-bcrypt
+node-performance
+node-pify
+node-call
+node-inherits (>= 2.0.3~)
+node-isarray
+node-path
+node-slide (>= 1.1.6~)
+node-oauth
+node-once (>= 1.4~)
+node-through
+node-ansistyles
+node-wcwidth
+node-form
+node-qw
+node-tough
+node-util
+node-colors
+node-ssri
+node-string
+node-inflight
+node-end
+node-tar (>= 4.4~)
+node-import
+node-mississippi
+node-safe
+node-prr
+node-strip
+node-p
+node-mute
+node-execa
+node-yargs
+node-cacache
+node-mime
+node-timed
+node-clone
+node-got
+node-forever
+node-asap
+node-jsonstream (>= 1.3.2~)
+node-pump
+node-uuid
+node-lazy
+node-semver (>= 5.5~)
+node-fs
+node-set
+node-typedarray
+node-delegates
+node-aws
