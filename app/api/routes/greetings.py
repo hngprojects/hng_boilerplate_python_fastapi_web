@@ -14,7 +14,7 @@ async def english_greeting():
 
 
 @greetings_router.get("/french")
-async def english_greeting():
+async def french_greeting():
     """Greet the user in French"""
     return JsonResponse(
         message="successful",
