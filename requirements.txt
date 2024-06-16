@@ -1,0 +1,12 @@
+fastapi
+SQLAlchemy
+alembic
+pydantic
+python-decouple
+pytest
+python-jose
+python-multipart
+python-dotenv
+bcrypt
+passlib
+pymysql
