@@ -1,0 +1,1 @@
+"""Pydantic schema classes for validation"""
