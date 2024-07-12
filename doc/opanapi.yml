@@ -367,6 +367,64 @@ paths:
               schema:
                 $ref: "#/components/schemas/Success"
 
+  /api/v1/users/profile:
+    get:
+      tags:
+        - User
+      summary: Get the profile of the authenticated user
+      operationId: getProfile
+      description: |
+        Returns the profile information of the authenticated user
+      responses:
+        "200":
+          description: User profile fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      tags:
+        - User
+      summary: Update the profile of the authenticated user
+      operationId: updateProfile
+      description: |
+        Update the profile information of the authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+      responses:
+        "200":
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
 components:
   schemas:
     Success:
