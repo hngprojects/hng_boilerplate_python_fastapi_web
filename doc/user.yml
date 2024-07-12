@@ -1,9 +1,9 @@
 openapi: 3.0.0
 
 info:
-  description: This API provides detail to our Saas boilerplate endpoints.
+  description: This API provides details of our Saas boilerplate endpoints.
   version: "1.0.0"
-  title: HNG stage-three backend task
+  title: HNG Stage-Three Backend Task
   contact:
     email: dynamo@gmail.com
   license:
@@ -13,15 +13,40 @@ info:
 tags:
   - name: Guide
   - name: Authentication
-    # description: Secured Admin-only calls
+  - name: User
   - name: Organisation
-    # description: Operations available to regular developers
   - name: Wishlist
+
+components:
+  schemas:
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        org_id:
+          type: integer
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
 
 paths:
   /api/v1/auth/register:
     post:
       summary: Register a new user
+      tags:
+        - Authentication
       requestBody:
         required: true
         content:
@@ -45,16 +70,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                  user_id:
-                    type: integer
+                $ref: '#/components/schemas/MessageResponse'
 
   /api/v1/auth/login:
     post:
-      summary: Logins a user in
+      summary: Log in a user
+      tags:
+        - Authentication
       requestBody:
         required: true
         content:
@@ -72,14 +94,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
+                $ref: '#/components/schemas/TokenResponse'
 
   /api/v1/users/{user_id}:
     get:
-      summary: Gets a user's details
+      summary: Get a user's details
+      tags:
+        - User
       parameters:
         - name: user_id
           in: path
@@ -92,19 +113,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  user_id:
-                    type: integer
-                  username:
-                    type: string
-                  email:
-                    type: string
-                  org_id:
-                    type: integer
+                $ref: '#/components/schemas/UserResponse'
 
     put:
       summary: Update user details
+      tags:
+        - User
       parameters:
         - name: user_id
           in: path
@@ -128,13 +142,12 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/MessageResponse'
 
     delete:
       summary: Delete user
+      tags:
+        - User
       parameters:
         - name: user_id
           in: path
@@ -147,7 +160,4 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  message:
-                    type: string
+                $ref: '#/components/schemas/MessageResponse'
