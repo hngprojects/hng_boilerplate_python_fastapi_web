@@ -1,0 +1,153 @@
+openapi: 3.0.0
+
+info:
+  description: This API provides detail to our Saas boilerplate endpoints.
+  version: "1.0.0"
+  title: HNG stage-three backend task
+  contact:
+    email: dynamo@gmail.com
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: Guide
+  - name: Authentication
+    # description: Secured Admin-only calls
+  - name: Organisation
+    # description: Operations available to regular developers
+  - name: Wishlist
+
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                lastName:
+                  type: string  
+                email:
+                  type: string
+                phone:
+                  type: string  
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  user_id:
+                    type: integer
+
+  /api/v1/auth/login:
+    post:
+      summary: Logins a user in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+
+  /api/v1/users/{user_id}:
+    get:
+      summary: Gets a user's details
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                  username:
+                    type: string
+                  email:
+                    type: string
+                  org_id:
+                    type: integer
+
+    put:
+      summary: Update user details
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+    delete:
+      summary: Delete user
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
