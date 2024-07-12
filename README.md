@@ -134,6 +134,59 @@ This project is a community forum application where users can join various commu
       }
       ```
 
+- **List All Communities**
+  - **URL:** `/api/communities`
+  - **Method:** `GET`
+  - **Request Body:** `None`
+  - **Response:**
+    - Success: 200 OK
+      ```json
+      {
+        "message": "Communities retrieved successfully.",
+        "data": [
+          {
+            "id": "integer",
+            "name": "string",
+            "description": "string",
+            "created_by": "integer",
+            "date_created": "datetime"
+          },
+          ...
+        ]
+      }
+      ```
+    - Failure: 400 Bad Request
+      ```json
+      {
+        "message": "Error message."
+      }
+      ```
+
+- **Retrieve Community by Name**
+  - **URL:** `/api/communities/{name}`
+  - **Method:** `GET`
+  - **Request Body:** `None`
+  - **Response:**
+    - Success: 200 OK
+      ```json
+      {
+        "message": "Community retrieved successfully.",
+        "data": {
+          "id": "integer",
+          "name": "string",
+          "description": "string",
+          "created_by": "integer",
+          "date_created": "datetime"
+        }
+      }
+      ```
+    - Failure: 404 Not Found
+      ```json
+      {
+        "message": "Community not found."
+      }
+      ```
+
 ### Discussion Management
 
 - **Create Topic**
@@ -255,67 +308,3 @@ This project is a community forum application where users can join various commu
         "message": "Error message."
       }
       ```
-
-### Database Design
-
-```plaintext
-Table Users {
-  id int [pk, increment]
-  username varchar(50) [unique, not null]
-  email varchar(100) [unique, not null]
-  password varchar(255) [not null]
-  first_name varchar(50)
-  last_name varchar(50)
-  date_created timestamp [default: `current_timestamp`]
-  last_updated timestamp [default: `current_timestamp`]
-}
-
-Table Communities {
-  id int [pk, increment]
-  name varchar(100) [not null]
-  description text
-  created_by int [not null, ref: > Users.id]
-  date_created timestamp [default: `current_timestamp`]
-}
-
-Table UserCommunity {
-  community_id int [not null, ref: > Communities.id]
-  user_id int [not null, ref: > Users.id]
-  role varchar(50) [default: 'member']
-  indexes {
-    (community_id, user_id) [pk]
-  }
-}
-
-Table Topics {
-  id int [pk, increment]
-  title varchar(255) [not null]
-  content text [not null]
-  community_id int [not null, ref: > Communities.id]
-  created_by int [not null, ref: > Users.id]
-  date_created timestamp [default: `current_timestamp`]
-}
-
-Table Posts {
-  id int [pk, increment]
-  content text [not null]
-  topic_id int [not null, ref: > Topics.id]
-  created_by int [not null, ref: > Users.id]
-  date_created timestamp [default: `current_timestamp`]
-}
-
-Table Replies {
-  id int [pk, increment]
-  content text [not null]
-  post_id int [not null, ref: > Posts.id]
-  created_by int [not null, ref: > Users.id]
-  date_created timestamp [default: `current_timestamp`]
-}
-
-Table Notifications {
-  id int [pk, increment]
-  message text [not null]
-  community_id int [not null, ref: > Communities.id]
-  created_by int [not null, ref: > Users.id]
-  date_created timestamp [default: `current_timestamp`]
-}
