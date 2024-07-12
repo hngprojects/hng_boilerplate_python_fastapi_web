@@ -16,7 +16,7 @@ tags:
     # description: Secured Admin-only calls
   - name: Organisation
     # description: Operations available to regular developers
-  - name: Wishlist
+  - name: Waitlist
 
 paths:
   /guide:
@@ -57,8 +57,8 @@ paths:
             application/json:
               schema:
                 type: array
-                # items:
-                #   $ref: "#/components/schemas/InventoryItem"
+                items:
+                  $ref: "#/components/schemas/InventoryItem"
         "400":
           description: bad input parameter
     post:
@@ -82,7 +82,7 @@ paths:
         description: Inventory item to add
 
   # forgot-password
-  /api/v1/forgot-password:
+  /api/v1/auth/forgot-password:
     post:
       tags:
         - Authentication
@@ -110,7 +110,7 @@ paths:
               $ref: "#/components/schemas/ForgotPassword"
 
   # reset-password
-  /api/v1/change-password:
+  /api/v1/auth/change-password:
     post:
       tags:
         - Authentication
@@ -136,6 +136,66 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ChangePassword"
+
+  # add to waitlist
+  /api/v1/waitlist:
+    get:
+      tags:
+        - Waitlist
+      summary: Get a list of users in waitlist
+      operationId: fetchWaitlist
+      description: |
+        Returns a list of all available users in waitlist
+      responses:
+        "200":
+          description: Waitlist fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Success"
+    post:
+      tags:
+        - Waitlist
+      summary: Add to waitlist
+      operationId: addToWaitlist
+      description: |
+        Add a user to the waitlist (coming soon)
+      responses:
+        "200":
+          description: User added to waitlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Waitlist"
+
+  /api/v1/waitlist/{id}:
+    get:
+      tags:
+        - Waitlist
+      summary: Get a waitlist object
+      operationId: getWaitlist
+      description: |
+        Returns waitlist with the given `id`
+      responses:
+        "200":
+          description: Waitlist fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
 
 components:
   schemas:
@@ -217,6 +277,20 @@ components:
           type: string
           format: password
           example: "@password123"
+
+    Waitlist:
+      type: object
+      required:
+        - email
+      properties:
+        name:
+          type: string
+          format: int32
+          example: example@gmail.com
+        email:
+          type: string
+          format: int32
+          example: example@gmail.com
 
     # Guidelines for a quicker schema design
 
