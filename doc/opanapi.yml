@@ -80,8 +80,146 @@ paths:
             schema:
               $ref: "#/components/schemas/InventoryItem"
         description: Inventory item to add
+
+  # forgot-password
+  /api/v1/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Send email to reset user's password
+      operationId: forgotPassword
+      description: |
+        Sends an email to the user with a link to reset their password
+      responses:
+        "200":
+          description: forgot password success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ForgotPassword"
+
+  # reset-password
+  /api/v1/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change a user's password
+      operationId: changePassword
+      description: |
+        Change a user's password
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePassword"
+
 components:
   schemas:
+    Success:
+      type: object
+      required:
+        - status
+        - message
+        - data
+      properties:
+        status:
+          type: string
+          format: int32
+          example: "success"
+        message:
+          type: string
+          format: int64
+          example: "request processed successfully"
+        data:
+          type: object
+
+    Error:
+      type: object
+      required:
+        - status
+        - message
+        - statusCode
+      properties:
+        status:
+          type: string
+          format: int32
+        message:
+          type: string
+          format: int64
+        statusCode:
+          type: number
+
+    ValidationError:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                format: int32
+              message:
+                type: string
+                format: int64
+
+    ForgotPassword:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: int32
+          example: example@mail.com
+
+    ChangePassword:
+      type: object
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+          format: password
+          example: "@password123"
+        new_password:
+          type: string
+          format: password
+          example: "@password123"
+
+    # Guidelines for a quicker schema design
+
     InventoryItem:
       type: object
       required:
@@ -100,9 +238,9 @@ components:
         releaseDate:
           type: string
           format: date-time
-          example: '2016-08-29T09:12:33.001Z'
+          example: "2016-08-29T09:12:33.001Z"
         manufacturer:
-          $ref: '#/components/schemas/Manufacturer'
+          $ref: "#/components/schemas/Manufacturer"
     Manufacturer:
       required:
         - name
@@ -113,7 +251,7 @@ components:
         homePage:
           type: string
           format: url
-          example: 'https://www.acme-corp.com'
+          example: "https://www.acme-corp.com"
         phone:
           type: string
           example: 408-867-5309
