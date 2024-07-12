@@ -11,76 +11,174 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 
 tags:
-  - name: Guide
   - name: Authentication
-    # description: Secured Admin-only calls
   - name: Organisation
-    # description: Operations available to regular developers
   - name: Waitlist
 
 paths:
-  /guide:
-    get:
-      tags:
-        - Guide
-      summary: searches inventory
-      operationId: searchInventory
-      description: |
-        By passing in the appropriate options, you can search for
-        available inventory in the system
-      parameters:
-        - in: query
-          name: searchString
-          description: pass an optional search string for looking up inventory
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: skip
-          description: number of records to skip for pagination
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-        - in: query
-          name: limit
-          description: maximum number of records to return
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-            maximum: 50
-      responses:
-        "200":
-          description: search results matching criteria
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/InventoryItem"
-        "400":
-          description: bad input parameter
+  /api/v1/auth/register:
     post:
+      summary: Register a new user
       tags:
-        - Guide
-      summary: adds an inventory item
-      operationId: addInventory
-      description: Adds an item to the system
-      responses:
-        "201":
-          description: item created
-        "400":
-          description: "invalid input, object invalid"
-        "409":
-          description: an existing item already exists
+        - Authentication
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/InventoryItem"
-        description: Inventory item to add
+              type: object
+              required:
+                - firstName
+                - lastName
+                - email
+                - password
+              properties:
+                firstName:
+                  type: string
+                  format: int32
+                  example: firstName
+                lastName:
+                  type: string
+                  format: int32
+                  example: lastName
+                email:
+                  type: string
+                  format: int32
+                  example: example@gmail.com
+                phone:
+                  type: string
+                  format: int32
+                  example: 070998877635
+                password:
+                  type: string
+                  format: password
+                  example: "@password123"
+      responses:
+        "200":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
 
+  /api/v1/auth/login:
+    post:
+      summary: Log in a user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: int32
+                  example: example@gmail.com
+                password:
+                  type: string
+                  format: password
+                  example: "@password123"
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+
+  /api/v1/users/{user_id}:
+    get:
+      summary: Get a user's details
+      tags:
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      summary: Update user details
+      tags:
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      summary: Delete user
+      tags:
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: User deleted successfully
+        
   # forgot-password
   /api/v1/auth/forgot-password:
     post:
@@ -104,10 +202,18 @@ paths:
               schema:
                 $ref: "#/components/schemas/ValidationError"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ForgotPassword"
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: int32
+                  example: example@mail.com
 
   # reset-password
   /api/v1/auth/change-password:
@@ -181,10 +287,16 @@ paths:
             schema:
               $ref: "#/components/schemas/Waitlist"
 
-  /api/v1/waitlist/{id}:
+  /api/v1/waitlist/{wishlist_id}:
     get:
       tags:
         - Waitlist
+      parameters:
+        - name: wishlist_id
+          in: path
+          required: true
+          schema:
+            type: string
       summary: Get a waitlist object
       operationId: getWaitlist
       description: |
@@ -253,15 +365,29 @@ components:
                 type: string
                 format: int64
 
-    ForgotPassword:
+    MessageResponse:
       type: object
-      required:
-        - email
       properties:
+        message:
+          type: string
+
+    UserResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        username:
+          type: string
         email:
           type: string
-          format: int32
-          example: example@mail.com
+        org_id:
+          type: integer
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
 
     ChangePassword:
       type: object
@@ -291,42 +417,3 @@ components:
           type: string
           format: int32
           example: example@gmail.com
-
-    # Guidelines for a quicker schema design
-
-    InventoryItem:
-      type: object
-      required:
-        - id
-        - name
-        - manufacturer
-        - releaseDate
-      properties:
-        id:
-          type: string
-          format: uuid
-          example: d290f1ee-6c54-4b01-90e6-d701748f0851
-        name:
-          type: string
-          example: Widget Adapter
-        releaseDate:
-          type: string
-          format: date-time
-          example: "2016-08-29T09:12:33.001Z"
-        manufacturer:
-          $ref: "#/components/schemas/Manufacturer"
-    Manufacturer:
-      required:
-        - name
-      properties:
-        name:
-          type: string
-          example: ACME Corporation
-        homePage:
-          type: string
-          format: url
-          example: "https://www.acme-corp.com"
-        phone:
-          type: string
-          example: 408-867-5309
-      type: object
