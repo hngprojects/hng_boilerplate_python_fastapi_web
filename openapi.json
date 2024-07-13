@@ -1,30 +1,28 @@
 {
-	"openapi": "3.0.0",
-	"info": {
-		"title": "Backend-Benders API",
-		"description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
-		"contact": {
-			"name": "Backend Benders"
-		},
-		"licencse": {
-			"name": "Apache License",
-			"url": "http://www.apache.org/licenses/LICENSE-2.0"
-		},
-		"version": "1.0.0"
-	},
-	"servers": [
-		{
-			"url": "http:localhost/",
-			"descrition": "The local server host"
-		}
-	],
-	"paths": {
-		"/auth/register": {
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Backend-Benders API",
+    "description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
+    "contact": {
+      "name": "Backend Benders"
+    },
+    "licencse": {
+      "name": "Apache License",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http:localhost/",
+      "descrition": "The local server host"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
       "post": {
         "summary": "Register a new user",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -61,9 +59,7 @@
     "/auth/login": {
       "post": {
         "summary": "Log in a user",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -97,18 +93,13 @@
     "/api/users/{userId}": {
       "get": {
         "summary": "Get a single user",
-        "tags": [
-          "Users"
-        ],
+        "tags": ["Users"],
         "security": [
           {
             "BearerAuth": []
           }
         ],
-		-------add paths here--------
-	},
-	"components": {
-		"parameters": [
+        "parameters": [
           {
             "name": "userId",
             "in": "path",
@@ -138,9 +129,7 @@
     "/api/profile": {
       "get": {
         "summary": "Get authenticated user's profile",
-        "tags": [
-          "Profile"
-        ],
+        "tags": ["Profile"],
         "security": [
           {
             "BearerAuth": []
@@ -164,9 +153,7 @@
       },
       "put": {
         "summary": "Update authenticated user's profile",
-        "tags": [
-          "Profile"
-        ],
+        "tags": ["Profile"],
         "security": [
           {
             "BearerAuth": []
@@ -208,9 +195,7 @@
     "/auth/reset-password": {
       "post": {
         "summary": "Request password reset",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "requestBody": {
           "required": true,
           "content": {
@@ -237,9 +222,7 @@
     "/auth/change-password": {
       "put": {
         "summary": "Change authenticated user's password",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [
           {
             "BearerAuth": []
@@ -274,9 +257,7 @@
     "/auth/logout": {
       "post": {
         "summary": "Log out the authenticated user",
-        "tags": [
-          "Authentication"
-        ],
+        "tags": ["Authentication"],
         "security": [
           {
             "BearerAuth": []
@@ -293,15 +274,7 @@
       }
     }
   },
-		--------add components here-------
-	},
-	"externalDocs": {
-		"description": "Checkout our README file here",
-		"url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
-	}
-}
-
- 
+  "components": {
     "schemas": {
       "User": {
         "type": "object",
@@ -362,13 +335,7 @@
             "format": "password"
           }
         },
-        "required": [
-          "username",
-          "firstname",
-          "lastname",
-          "email",
-          "password"
-        ]
+        "required": ["username", "firstname", "lastname", "email", "password"]
       },
       "LoginCredentials": {
         "type": "object",
@@ -382,10 +349,7 @@
             "format": "password"
           }
         },
-        "required": [
-          "email",
-          "password"
-        ]
+        "required": ["email", "password"]
       },
       "AuthResponse": {
         "type": "object",
@@ -397,10 +361,7 @@
             "$ref": "#/components/schemas/User"
           }
         },
-        "required": [
-          "token",
-          "user"
-        ]
+        "required": ["token", "user"]
       },
       "UserUpdate": {
         "type": "object",
@@ -422,9 +383,7 @@
             "format": "email"
           }
         },
-        "required": [
-          "email"
-        ]
+        "required": ["email"]
       },
       "ChangePasswordRequest": {
         "type": "object",
@@ -438,10 +397,7 @@
             "format": "password"
           }
         },
-        "required": [
-          "current_password",
-          "new_password"
-        ]
+        "required": ["current_password", "new_password"]
       },
       "Error": {
         "type": "object",
@@ -471,18 +427,12 @@
                     "description": "A human-readable error message for this specific field"
                   }
                 },
-                "required": [
-                  "field",
-                  "code",
-                  "message"
-                ]
+                "required": ["field", "code", "message"]
               }
             }
           }
         },
-        "required": [
-          "message"
-        ]
+        "required": ["message"]
       }
     },
     "responses": {
@@ -697,5 +647,9 @@
         "bearerFormat": "JWT"
       }
     }
+  },
+  "externalDocs": {
+    "description": "Checkout our README file here",
+    "url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
   }
 }
