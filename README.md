@@ -308,3 +308,8 @@ This project is a community forum application where users can join various commu
         "message": "Error message."
       }
       ```
+
+
+
+  <img width="989" alt="database design for the forum" src="https://dbdiagram.io/d/66914a259939893daec898a0">
+
