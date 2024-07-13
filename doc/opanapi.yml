@@ -167,10 +167,13 @@ paths:
   /api/v1/users/{user_id}:
     get:
       summary: Get a user's details
+      security:
+        - BearerAuth: []
       tags:
         - User
       parameters:
         - name: user_id
+          description: The user id of the user to be retrueved
           in: path
           required: true
           schema:
@@ -191,6 +194,8 @@ paths:
 
     put:
       summary: Update user details
+      security:
+        - BearerAuth: []
       tags:
         - User
       parameters:
@@ -226,6 +231,8 @@ paths:
 
     delete:
       summary: Delete user
+      security:
+        - BearerAuth: []
       tags:
         - User
       parameters:
@@ -372,6 +379,8 @@ paths:
     get:
       tags:
         - User
+      security:
+        - BearerAuth: []
       summary: Get the profile of the authenticated user
       operationId: getProfile
       description: |
@@ -393,6 +402,8 @@ paths:
     put:
       tags:
         - User
+      security:
+        - BearerAuth: []
       summary: Update the profile of the authenticated user
       operationId: updateProfile
       description: |
@@ -430,6 +441,8 @@ paths:
     get:
       tags:
         - Notification
+      security:
+        - BearerAuth: []
       summary: Gets notifications for a particular authenticated user
       operationId: getNotifications
       description: |
@@ -454,6 +467,8 @@ paths:
     put:
       tags:
         - Notification
+      security:
+        - BearerAuth: []
       summary: Marks notification as read
       operationId: markNotificationAsRead
       description: |
@@ -602,3 +617,18 @@ components:
           example: "request processed successfully"
         data:
           type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
+            
