@@ -1,0 +1,1320 @@
+openapi: 3.0.0
+
+info:
+  description: This API provides detail to our Saas boilerplate endpoints.
+  version: "1.0.0"
+  title: HNG stage-three backend task
+  contact:
+    email: dynamo@gmail.com
+  license:
+    name: Apache 2.0
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+tags:
+  - name: Authentication
+  - name: User
+  - name: Organisation
+  - name: Waitlist
+  - name: Notification
+  - name: Blog
+
+paths:
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - email
+                - password
+              properties:
+                firstName:
+                  type: string
+                  format: int32
+                  example: firstName
+                lastName:
+                  type: string
+                  format: int32
+                  example: lastName
+                email:
+                  type: string
+                  format: int32
+                  example: example@gmail.com
+                phone:
+                  type: string
+                  format: int32
+                  example: 070998877635
+                password:
+                  type: string
+                  format: password
+                  example: "@password123"
+                referral_code:
+                  type: string
+                  format: int32
+                  example: XNGF09573
+      responses:
+        "200":
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    format: int32
+                    example: "success"
+                  message:
+                    type: string
+                    format: int64
+                    example: "User registered successfully"
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
+                      user:
+                        $ref: "#/components/schemas/User"
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /api/v1/auth/login:
+    post:
+      summary: Log in a user
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: int32
+                  example: example@gmail.com
+                password:
+                  type: string
+                  format: password
+                  example: "@password123"
+      responses:
+        "200":
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    format: int32
+                    example: "success"
+                  message:
+                    type: string
+                    format: int64
+                    example: "Login successful"
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
+                      user:
+                        $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /api/v1/auth/social:
+    post:
+      summary: Social authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Social authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    format: int32
+                    example: "success"
+                  message:
+                    type: string
+                    format: int64
+                    example: "Social authentication successful"
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
+                      user:
+                        $ref: "#/components/schemas/User"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: Blacklist access token
+      responses:
+        "200":
+          description: Logout a user by blacklisting the provided access token
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User logged out successfully"
+                  data:
+                    type: object
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+
+  /api/v1/auth/magic-link:
+    post:
+      summary: Magic link authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Magic Link Sent
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Magic link sent"
+                  data:
+                    type: object
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /api/v1/users/{user_id}:
+    get:
+      summary: Get a user's details
+      security:
+        - BearerAuth: []
+      tags:
+        - User
+      parameters:
+        - name: user_id
+          description: The user id of the user to be retrueved
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User details
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User detail"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+
+    put:
+      summary: Update user details
+      security:
+        - BearerAuth: []
+      tags:
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+      responses:
+        "200":
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User updated successfully"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+
+    delete:
+      summary: Delete user
+      security:
+        - BearerAuth: []
+      tags:
+        - User
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: User deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+  # forgot-password
+  /api/v1/auth/forgot-password:
+    post:
+      tags:
+        - Authentication
+      summary: Send email to reset user's password
+      operationId: forgotPassword
+      description: |
+        Sends an email to the user with a link to reset their password
+      responses:
+        "200":
+          description: forgot password success
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "A link to reset your password has been sent to your email"
+                  data:
+                    type: object
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  example: example@mail.com
+
+  # reset-password
+  /api/v1/auth/change-password:
+    post:
+      tags:
+        - Authentication
+      summary: Change a user's password
+      operationId: changePassword
+      description: |
+        Change a user's password
+      responses:
+        "200":
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Your password has been successfully changed"
+                  data:
+                    type: object
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChangePassword"
+
+  # add to waitlist
+  /api/v1/waitlist:
+    get:
+      tags:
+        - Waitlist
+      summary: Get a list of users in waitlist
+      operationId: fetchWaitlist
+      description: |
+        Returns a list of all available users in waitlist
+      responses:
+        "200":
+          description: Waitlist fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Fetched wailists"
+                  data:
+                    type: object
+                    required:
+                      - waitlists
+                    properties:
+                      waitlists:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Waitlist"
+    post:
+      tags:
+        - Waitlist
+      summary: Add to waitlist
+      operationId: addToWaitlist
+      description: |
+        Add a user to the waitlist (coming soon)
+      responses:
+        "200":
+          description: User added to waitlist
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Fetched wailists"
+                  data:
+                    type: object
+                    required:
+                      - waitlist
+                    properties:
+                      waitlist:
+                        $ref: "#/components/schemas/Waitlist"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Waitlist"
+
+  /api/v1/waitlist/{wishlist_id}:
+    get:
+      tags:
+        - Waitlist
+      parameters:
+        - name: wishlist_id
+          in: path
+          required: true
+          schema:
+            type: string
+      summary: Get a waitlist object
+      operationId: getWaitlist
+      description: |
+        Returns waitlist with the given `id`
+      responses:
+        "200":
+          description: Waitlist fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Fetched wailist"
+                  data:
+                    type: object
+                    required:
+                      - waitlist
+                    properties:
+                      waitlist:
+                        $ref: "#/components/schemas/Waitlist"
+
+  /api/v1/users/profile:
+    get:
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      summary: Get the profile of the authenticated user
+      operationId: getProfile
+      description: |
+        Returns the profile information of the authenticated user
+      responses:
+        "200":
+          description: User profile fetched successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+
+    put:
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      summary: Update the profile of the authenticated user
+      operationId: updateProfile
+      description: |
+        Update the profile information of the authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                phone:
+                  type: string
+
+      responses:
+        "200":
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+
+  /api/v1/notifications:
+    get:
+      tags:
+        - Notification
+      security:
+        - BearerAuth: []
+      summary: Gets notifications for a particular authenticated user
+      operationId: getNotifications
+      description: |
+        Retrieve all notifications for the authenticated user
+      responses:
+        "200":
+          description: Notifications fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+
+  /api/v1/notifications/{notification_id}:
+    put:
+      tags:
+        - Notification
+      security:
+        - BearerAuth: []
+      summary: Marks notification as read
+      operationId: markNotificationAsRead
+      description: |
+        Authorized user marks a specific notification id as read
+      parameters:
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    $ref: "#/components/schemas/Notification"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # post
+  /api/v1/posts:
+    get:
+      tags:
+        - Blog
+      summary: Get all blog posts
+      operationId: fetchPosts
+      description: |
+        Gets a list of all available post
+      responses:
+        "200":
+          description: Post fetch successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    type: object
+                    required:
+                      - posts
+                    properties:
+                      posts:
+                        $ref: "#/components/schemas/BlogPost"
+    post:
+      tags:
+        - Blog
+      security:
+        - BearerAuth: []
+      summary: Create a blog post
+      operationId: createPost
+      description: |
+        Create a new blog post
+      responses:
+        "200":
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Post created successfully"
+                  data:
+                    type: object
+                    required:
+                      - posts
+                    properties:
+                      posts:
+                        required:
+                          - title
+                          - content
+                        properties:
+                          title:
+                            type: string
+                            format: int64
+                            example: Example blog post
+                          content:
+                            type: string
+                            format: int64
+                            example: Lorem ipsum dolor
+                          created_at:
+                            type: string
+                            format: date
+                            example: 2024-07-13T10:29:39.572Z
+                          updated_at:
+                            type: string
+                            format: date
+                            example: 2024-07-13T10:29:39.572Z
+                          views:
+                            type: number
+                            example: 10
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  format: int64
+                  example: Example blog post
+                content:
+                  type: string
+                  format: int64
+                  example: Lorem ipsum dolor
+
+  /api/v1/posts/{post_id}:
+    get:
+      tags:
+        - Blog
+      summary: Get a single blog post
+      operationId: getBlog
+      parameters:
+        - name: post_id
+          description: The id of the post to be retrieved
+          in: path
+          required: true
+          schema:
+            type: string
+      description: |
+        Returns a single blog object
+      responses:
+        "200":
+          description: Post fetch successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Post fetch"
+                  data:
+                    type: object
+                    required:
+                      - post
+                    properties:
+                      post:
+                        $ref: "#/components/schemas/BlogPost"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+    put:
+      tags:
+        - Blog
+      security:
+        - BearerAuth: []
+      summary: Update a blog post
+      operationId: updatePost
+      parameters:
+        - name: post_id
+          description: The id of the post to be updated
+          in: path
+          required: true
+          schema:
+            type: string
+      description: |
+        Update the blog post with the given `post_id`
+      responses:
+        "200":
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Post updated successfully"
+                  data:
+                    type: object
+                    required:
+                      - post
+                    properties:
+                      post:
+                        $ref: "#/components/schemas/BlogPost"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  format: int64
+                  example: Example blog post
+                content:
+                  type: string
+                  format: int64
+                  example: Lorem ipsum dolor
+
+    delete:
+      tags:
+        - Blog
+      security:
+        - BearerAuth: []
+      summary: Delete blog post
+      operationId: deletePost
+      parameters:
+        - name: post_id
+          description: The id of the post to be deleted
+          in: path
+          required: true
+          schema:
+            type: string
+      description: |
+        Delete blog post with the provided `post_id`
+      responses:
+        "204":
+          description: Post deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
+
+components:
+  schemas:
+    Success:
+      type: object
+      required:
+        - status
+        - message
+        - data
+      properties:
+        status:
+          type: string
+          format: int32
+          example: "success"
+        message:
+          type: string
+          format: int64
+          example: "request processed successfully"
+        data:
+          type: object
+
+    Error:
+      type: object
+      required:
+        - status
+        - message
+        - statusCode
+      properties:
+        status:
+          type: string
+          format: int32
+        message:
+          type: string
+          format: int64
+        statusCode:
+          type: number
+          example: 400
+
+    BadRequestError:
+      type: object
+      required:
+        - status
+        - message
+        - statusCode
+      properties:
+        status:
+          type: string
+          example: Bad request
+        message:
+          type: string
+          example: Bad request
+        statusCode:
+          type: number
+          example: 400
+
+    AuthenticationError:
+      type: object
+      required:
+        - status
+        - message
+        - statusCode
+      properties:
+        status:
+          type: string
+          example: "Bad request"
+        message:
+          type: string
+          example: "Client error"
+        statusCode:
+          type: number
+          example: 401
+
+    ValidationError:
+      type: object
+      required:
+        - errors
+      properties:
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                format: int32
+              message:
+                type: string
+                format: int64
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    UserResponse:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+        org_id:
+          type: integer
+
+    TokenResponse:
+      type: object
+      properties:
+        token:
+          type: string
+
+    ChangePassword:
+      type: object
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+          format: password
+          example: "@password123"
+        new_password:
+          type: string
+          format: password
+          example: "@password123"
+
+    Waitlist:
+      type: object
+      required:
+        - email
+      properties:
+        name:
+          type: string
+          format: int32
+          example: example@gmail.com
+        email:
+          type: string
+          format: int32
+          example: example@gmail.com
+
+    Notification:
+      type: object
+      properties:
+        notification_id:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          example: 2024-07-13T12:14:29.692Z
+        data:
+          type: object
+
+    User:
+      type: object
+      required:
+        - userId
+        - firstName
+        - lastName
+        - email
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: 0a2e76d0-ced6-419f-a16c-9f8a9beda9bf
+        firstName:
+          type: string
+          format: int32
+          example: firstName
+        lastName:
+          type: string
+          format: int32
+          example: lastName
+        email:
+          type: string
+          format: int32
+          example: example@gmail.com
+        referral_code:
+          type: string
+          example: BNGHS0967
+        is_active:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date
+          example: 2024-07-13
+        last_updated:
+          type: string
+          format: date
+          example: 2024-07-13
+        is_deleted:
+          type: boolean
+          example: false
+        is_superadmin:
+          type: boolean
+          example: false
+
+    BlogPost:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        author:
+          $ref: "#/components/schemas/User"
+        title:
+          type: string
+          format: int64
+          example: Example blog post
+        content:
+          type: string
+          format: int64
+          example: Lorem ipsum dolor
+        created_at:
+          type: string
+          format: date
+          example: 2024-07-13T10:29:39.572Z
+        updated_at:
+          type: string
+          format: date
+          example: 2024-07-13T10:29:39.572Z
+        views:
+          type: number
+          example: 10
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
+
+servers:
+  - description: Custom serve
+    url: https://server.exampe.com/1.0.0
