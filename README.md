@@ -1,4 +1,3 @@
-
 **Documentation following OpenAPI specifications**
 https://abnurkan.github.io/HNG_STAGE3_API_TEST/
 
@@ -10,6 +9,8 @@ https://imgur.com/a/90xhWlG
 * jubriltayo
 * abnurkan
 * algamawiy
+* Kingsley-Opara
+* Dricy
 
 
 
