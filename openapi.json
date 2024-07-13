@@ -276,6 +276,12 @@
 		"/api/organisations": {
 			"get": {
 				"summary": "Gets a list of all the organisations of the authenticated user",
+				"tags": ["Organisations"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
 				"responses": {
 					"200": {
 						"description": "A JSON array of user organisations",
@@ -341,6 +347,12 @@
 			"post": {
 				"summary": "creates a organisation",
 				"description": "This endpoint creates a new organisation for the authenticated user",
+				"tags": ["Organisations"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
 				"requestBody": {
 					"description": "A dictionary of the details of the organisation to be created",
 					"content": {
@@ -446,6 +458,12 @@
 			"get": {
 				"summary": "gets a single organisation",
 				"description": "returns a single organisation from the organisations of the authenticated user",
+				"tags": ["Organisations"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
 				"parameters": [
 					{
 						"name": "orgId",
@@ -538,6 +556,12 @@
 			},
 			"post": {
 				"summary": "adds a user to the organisation",
+				"tags": ["Organisations"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
 				"parameters": [
 					{
 						"name": "orgId",
@@ -656,6 +680,12 @@
 			"delete": {
 				"summary": "deletes an organisation",
 				"description": "Deletes an organisation created by the authenticated user",
+				"tags": ["Organisations"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
 				"parameters": [
 					{
 						"name": "orgId",
@@ -737,6 +767,12 @@
 			"get": {
 				"summary": "returns a list of all users in the organisation",
 				"description": "A JSON array of all user objects in the organisation",
+				"tags": ["Organisations"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
 				"parameters": [
 					{
 						"name": "orgId",
@@ -845,10 +881,11 @@
 		},
 		"/api/payments": {
 			"get": {
+				"tags": ["Payments"],
 				"summary": "Gets all payments made by user",
 				"security": [
 					{
-						"bearerAuth": []
+						"BearerAuth": []
 					}
 				],
 				"responses": {
@@ -871,10 +908,11 @@
 				}
 			},
 			"post": {
+				"tags": ["Payments"],
 				"summary": "Creates a payment record",
 				"security": [
 					{
-						"bearerAuth": []
+						"BearerAuth": []
 					}
 				],
 				"requestBody": {
@@ -920,10 +958,11 @@
 				}
 			],
 			"get": {
+				"tags": ["Payments"],
 				"summary": "Gets a Single Payment",
 				"security": [
 					{
-						"bearerAuth": []
+						"BearerAuth": []
 					}
 				],
 				"responses": {
@@ -946,10 +985,11 @@
 				}
 			},
 			"delete": {
+				"tags": ["Payments"],
 				"summary": "Delete a payment record",
 				"security": [
 					{
-						"bearerAuth": []
+						"BearerAuth": []
 					}
 				],
 				"responses": {
@@ -967,6 +1007,7 @@
 		},
 		"/api/payments-providers": {
 			"get": {
+				"tags": ["Payments"],
 				"summary": "Gets all payment providers available",
 				"responses": {
 					"200": {
@@ -998,6 +1039,7 @@
 				}
 			],
 			"get": {
+				"tags": ["Payments"],
 				"summary": "Gets a single payment provider",
 				"responses": {
 					"200": {
@@ -1018,10 +1060,11 @@
 		},
 		"/api/notifications": {
 			"get": {
+				"tags": ["Notifications"],
 				"summary": "Gets all notifications for the authenticated user",
 				"security": [
 					{
-						"bearerAuth": []
+						"BearerAuth": []
 					}
 				],
 				"responses": {
@@ -1041,6 +1084,7 @@
 				}
 			},
 			"post": {
+				"tags": ["Notifications"],
 				"summary": "Creates a new notification",
 				"requestBody": {
 					"required": true,
@@ -1074,6 +1118,7 @@
 		},
 		"/api/notifications/{notification_id}": {
 			"get": {
+				"tags": ["Notifications"],
 				"summary": "Retrive a specific notification",
 				"parameters": [
 					{
@@ -1102,6 +1147,7 @@
 				}
 			},
 			"delete": {
+				"tags": ["Notifications"],
 				"summary": "Delete a notification",
 				"parameters": [
 					{
@@ -1125,10 +1171,11 @@
 		},
 		"/api/activity-log": {
 			"get": {
+				"tags": ["Activity"],
 				"summary": "Gets all activity logs for the authenticated user",
 				"security": [
 					{
-						"bearerAuth": []
+						"BearerAuth": []
 					}
 				],
 				"responses": {
@@ -1148,6 +1195,7 @@
 				}
 			},
 			"post": {
+				"tags": ["Activity"],
 				"summary": "Creates a new activity log",
 				"requestBody": {
 					"required": true,
@@ -1681,6 +1729,36 @@
 			}
 		}
 	},
+	"tags": [
+		{
+			"name": "Users",
+			"description": "Users operations"
+		},
+		{
+			"name": "Authentication",
+			"description": "Authentication operations"
+		},
+		{
+			"name": "Profile",
+			"description": "Profile operations"
+		},
+		{
+			"name": "Organisations",
+			"description": "Organisation operations"
+		},
+		{
+			"name": "Payments",
+			"description": "Payments operations"
+		},
+		{
+			"name": "Notifications",
+			"description": "Notification operations"
+		},
+		{
+			"name": "Activity",
+			"description": "Activity log operations"
+		}
+	],
 	"externalDocs": {
 		"description": "Checkout our README file here",
 		"url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
