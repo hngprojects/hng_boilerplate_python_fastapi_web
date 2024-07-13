@@ -17,6 +17,7 @@ tags:
   - name: Waitlist
   - name: Notification
   - name: Blog
+  - name: Payments
 
 paths:
   /api/v1/auth/register:
@@ -305,6 +306,7 @@ paths:
       summary: Get a user's details
       security:
         - BearerAuth: []
+        - OAuth2: []
       tags:
         - User
       parameters:
@@ -351,6 +353,7 @@ paths:
       summary: Update user details
       security:
         - BearerAuth: []
+        - OAuth2: []
       tags:
         - User
       parameters:
@@ -406,6 +409,7 @@ paths:
       summary: Delete user
       security:
         - BearerAuth: []
+        - OAuth2: []
       tags:
         - User
       parameters:
@@ -639,6 +643,7 @@ paths:
         - User
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Get the profile of the authenticated user
       operationId: getProfile
       description: |
@@ -680,6 +685,7 @@ paths:
         - User
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Update the profile of the authenticated user
       operationId: updateProfile
       description: |
@@ -741,6 +747,7 @@ paths:
         - Notification
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Gets notifications for a particular authenticated user
       operationId: getNotifications
       description: |
@@ -767,6 +774,7 @@ paths:
         - Notification
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Marks notification as read
       operationId: markNotificationAsRead
       description: |
@@ -843,6 +851,7 @@ paths:
         - Blog
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Create a blog post
       operationId: createPost
       description: |
@@ -975,6 +984,7 @@ paths:
         - Blog
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Update a blog post
       operationId: updatePost
       parameters:
@@ -1047,6 +1057,7 @@ paths:
         - Blog
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Delete blog post
       operationId: deletePost
       parameters:
@@ -1074,6 +1085,7 @@ paths:
         - User
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Export user data
       operationId: exportUserData
       description: |
@@ -1125,6 +1137,7 @@ paths:
         - Organisation
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Create a new organisation
       description: Create a new organisation
       requestBody:
@@ -1241,6 +1254,7 @@ paths:
         - Organisation
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Update organisation
       description: Update organisation
       parameters:
@@ -1291,6 +1305,7 @@ paths:
         - Organisation
       security:
         - BearerAuth: []
+        - OAuth2: []
       summary: Delete an organisation
       description: Delete Organisation
       parameters:
@@ -1310,26 +1325,497 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthenticationError"
 
+  /payment_intents:
+    post:
+      summary: Create Payment Intent
+      operationId: createPaymentIntent
+      tags:
+        - Payments
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - currency
+                - payment_method_types
+              properties:
+                amount:
+                  type: integer
+                  description: Amount in cents
+                currency:
+                  type: string
+                  example: "usd"
+                payment_method_types:
+                  type: array
+                  items:
+                    type: string
+                  example: ["card"]
+                user:
+                  type: string
+                  description: User ID (optional)
+
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntent"
+
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /payment_intents/{paymentIntentId}/confirm:
+    post:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Confirm Payment
+      operationId: confirmPayment
+      tags:
+        - Payments
+      parameters:
+        - name: paymentIntentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payment_method
+              properties:
+                payment_method:
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntent"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /payment_intents/{paymentIntentId}:
+    get:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Retrieve Payment Status
+      operationId: getPaymentStatus
+      tags:
+        - Payments
+      parameters:
+        - name: paymentIntentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentIntent"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /refunds:
+    post:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Refund Payment
+      operationId: refundPayment
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payment_intent
+              properties:
+                payment_intent:
+                  type: string
+                amount:
+                  type: integer
+                  description: Amount to refund.
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Refund"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /payment_methods:
+    post:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Create Payment Method
+      operationId: createPaymentMethod
+      tags:
+        - Payment Methods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - card
+              properties:
+                type:
+                  type: string
+                  enum: [card]
+                card:
+                  type: object
+                  properties:
+                    number:
+                      type: string
+                    exp_month:
+                      type: integer
+                    exp_year:
+                      type: integer
+                    cvc:
+                      type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /payment_methods/{paymentMethodId}/attach:
+    post:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Attach Payment Method to User
+      operationId: attachPaymentMethod
+      tags:
+        - Payment Methods
+      parameters:
+        - name: paymentMethodId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaymentMethod"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users/{userId}/payment_methods:
+    get:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: List Payment Methods for User
+      operationId: listPaymentMethods
+      tags:
+        - Payment Methods
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [card]
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/PaymentMethod"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /subscriptions:
+    post:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Create Subscription
+      operationId: createSubscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - items
+              properties:
+                user:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      price:
+                        type: string
+                      quantity:
+                        type: integer
+                payment_behavior:
+                  type: string
+                  enum: [default_incomplete, error_if_incomplete]
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /subscriptions/{subscriptionId}:
+    get:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Retrieve Subscription Details
+      operationId: getSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    patch:
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      summary: Update Subscription
+      operationId: updateSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubscriptionUpdate"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      summary: Cancel Subscription
+      operationId: cancelSubscription
+      security:
+        - BearerAuth: []
+        - OAuth2: []
+      tags:
+        - Subscriptions
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cancel_at_period_end
+          in: query
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
 components:
   schemas:
-    Success:
-      type: object
-      required:
-        - status
-        - message
-        - data
-      properties:
-        status:
-          type: string
-          format: int32
-          example: "success"
-        message:
-          type: string
-          format: int64
-          example: "request processed successfully"
-        data:
-          type: object
-
     Error:
       type: object
       required:
@@ -1343,23 +1829,6 @@ components:
         message:
           type: string
           format: int64
-        statusCode:
-          type: number
-          example: 400
-
-    BadRequestError:
-      type: object
-      required:
-        - status
-        - message
-        - statusCode
-      properties:
-        status:
-          type: string
-          example: Bad request
-        message:
-          type: string
-          example: Bad request
         statusCode:
           type: number
           example: 400
@@ -1400,30 +1869,6 @@ components:
               message:
                 type: string
                 format: int64
-
-    MessageResponse:
-      type: object
-      properties:
-        message:
-          type: string
-
-    UserResponse:
-      type: object
-      properties:
-        user_id:
-          type: integer
-        username:
-          type: string
-        email:
-          type: string
-        org_id:
-          type: integer
-
-    TokenResponse:
-      type: object
-      properties:
-        token:
-          type: string
 
     ChangePassword:
       type: object
@@ -1560,6 +2005,89 @@ components:
         description:
           type: string
           example: More than a tech company
+
+    PaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+        client_secret:
+          type: string
+
+    Refund:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: integer
+        status:
+          type: string
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          type: string
+        status:
+          type: string
+        current_period_end:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              price:
+                type: object
+              quantity:
+                type: integer
+
+    SubscriptionUpdate:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              price:
+                type: string
+              quantity:
+                type: integer
+        payment_method:
+          type: string
+
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        card:
+          type: object
+          properties:
+            brand:
+              type: string
+            last4:
+              type: string
+            exp_month:
+              type: integer
+            exp_year:
+              type: integer
 
   securitySchemes:
     BearerAuth:
