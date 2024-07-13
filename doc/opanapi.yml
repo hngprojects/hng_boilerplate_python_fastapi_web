@@ -17,7 +17,6 @@ tags:
   - name: Waitlist
   - name: Notification
 
-
 paths:
   /api/v1/auth/register:
     post:
@@ -618,7 +617,6 @@ components:
           example: "request processed successfully"
         data:
           type: object
-
   securitySchemes:
     BearerAuth:
       type: http
@@ -633,3 +631,4 @@ components:
             read: Grants read access
             write: Grants write access
             admin: Grants access to admin operations
+            
