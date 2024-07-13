@@ -79,7 +79,7 @@ paths:
                       example: A tech company 
                     message: 
                       type: string
-                      example: Organisation created successfully          
+                      example: Unable to create organisation record          
               
   /api/v1/organisation/{orgId}/user:
     post:
