@@ -55,6 +55,10 @@ paths:
                   type: string
                   format: password
                   example: "@password123"
+                referral_code:
+                  type: string
+                  format: int32
+                  example: XNGF09573
       responses:
         "200":
           description: User registered successfully
@@ -493,6 +497,183 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  # post
+  /api/v1/posts:
+    get:
+      tags:
+        - Blog
+      summary: Get all blog posts
+      operationId: fetchPosts
+      description: |
+        Gets a list of all available post
+      responses:
+        "200":
+          description: Post fetch successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+    post:
+      tags:
+        - Blog
+      security:
+        - BearerAuth: []
+      summary: Create a blog post
+      operationId: createPost
+      description: |
+        Create a new blog post
+      responses:
+        "200":
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  format: int64
+                  example: Example blog post
+                content:
+                  type: string
+                  format: int64
+                  example: Lorem ipsum dolor
+                created_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                updated_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                views:
+                  type: number
+                  example: 10
+
+  /api/v1/posts/{post_id}:
+    get:
+      tags:
+        - Blog
+      summary: Get a single blog
+      operationId: getBlog
+      parameters:
+        - name: post_id
+          description: The post id of the user to be retrieved
+          in: path
+          required: true
+          schema:
+            type: string
+      description: |
+        Returns a single blog object
+      responses:
+        "200":
+          description: Post fetch successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+    put:
+      tags:
+        - Blog
+      security:
+        - BearerAuth: []
+      summary: Update a blog post
+      operationId: updatePost
+      description: |
+        Update the blog post with the given `post_id`
+      responses:
+        "200":
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - content
+              properties:
+                title:
+                  type: string
+                  format: int64
+                  example: Example blog post
+                content:
+                  type: string
+                  format: int64
+                  example: Lorem ipsum dolor
+                created_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                updated_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                views:
+                  type: number
+                  example: 10
+    delete:
+      tags:
+        - Blog
+      security:
+        - BearerAuth: []
+      summary: Delete blog post
+      operationId: deletePost
+      description: |
+        Delete blog post with the provided `post_id`
+      responses:
+        "204":
+          description: Post deleted successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
 components:
   schemas:
     Success:
@@ -528,6 +709,7 @@ components:
           format: int64
         statusCode:
           type: number
+          example: 400
 
     ValidationError:
       type: object
@@ -617,6 +799,82 @@ components:
           example: "request processed successfully"
         data:
           type: object
+
+    User:
+      type: object
+      required:
+        - userId
+        - firstName
+        - lastName
+        - email
+        - password
+      properties:
+        userId:
+          type: string
+          format: uuid
+          example: 0a2e76d0-ced6-419f-a16c-9f8a9beda9bf
+        firstName:
+          type: string
+          format: int32
+          example: firstName
+        lastName:
+          type: string
+          format: int32
+          example: lastName
+        email:
+          type: string
+          format: int32
+          example: example@gmail.com
+        password:
+          type: string
+          format: password
+          example: "@password123"
+        is_active:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          format: date
+          example: 2024-07-13
+        last_updated:
+          type: string
+          format: date
+          example: 2024-07-13
+        is_deleted:
+          type: boolean
+          example: false
+        is_superadmin:
+          type: boolean
+          example: false
+
+    BlogPost:
+      type: object
+      required:
+        - title
+        - content
+      properties:
+        author:
+          $ref: "#components/schemas/User"
+        title:
+          type: string
+          format: int64
+          example: Example blog post
+        content:
+          type: string
+          format: int64
+          example: Lorem ipsum dolor
+        created_at:
+          type: string
+          format: date
+          example: 2024-07-13T10:29:39.572Z
+        updated_at:
+          type: string
+          format: date
+          example: 2024-07-13T10:29:39.572Z
+        views:
+          type: number
+          example: 10
+
   securitySchemes:
     BearerAuth:
       type: http
@@ -631,4 +889,7 @@ components:
             read: Grants read access
             write: Grants write access
             admin: Grants access to admin operations
-            
+
+servers:
+  - description: Custom serve
+    url: https://server.exampe.com/1.0.0
