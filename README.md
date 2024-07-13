@@ -1,6 +1,7 @@
 # HNG STAGE 3 BOILERPLATE
 
-Welcome to the documentation for Your Project API. This API provides endpoints for user authentication, message handling, payment processing, user management, organization management, and various other functionalities.
+The documentation below defines endpoint using openapi standard.
+This API provides endpoints for user authentication, message handling, payment processing, user management, organization management, and various other functionalities.
 
 ## Endpoints
 
