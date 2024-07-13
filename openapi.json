@@ -1,1489 +1,1688 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "Backend-Benders API",
-    "description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
-    "contact": {
-      "name": "Backend Benders"
-    },
-    "licencse": {
-      "name": "Apache License",
-      "url": "http://www.apache.org/licenses/LICENSE-2.0"
-    },
-    "version": "1.0.0"
-  },
-  "servers": [
-    {
-      "url": "http:localhost/",
-      "descrition": "The local server host"
-    }
-  ],
-  "paths": {
-    "/auth/register": {
-      "post": {
-        "summary": "Register a new user",
-        "tags": ["Authentication"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserRegistration"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User successfully registered",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        }
-      }
-    },
-    "/auth/login": {
-      "post": {
-        "summary": "Log in a user",
-        "tags": ["Authentication"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginCredentials"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successfully logged in",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuthResponse"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/InvalidCredentials"
-          },
-          "422": {
-            "$ref": "#/components/responses/InvalidLoginInput"
-          }
-        }
-      }
-    },
-    "/api/users/{userId}": {
-      "get": {
-        "summary": "Get a single user",
-        "tags": ["Users"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      }
-    },
-    "/api/profile": {
-      "get": {
-        "summary": "Get authenticated user's profile",
-        "tags": ["Profile"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update authenticated user's profile",
-        "tags": ["Profile"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Profile successfully updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        }
-      }
-    },
-    "/auth/reset-password": {
-      "post": {
-        "summary": "Request password reset",
-        "tags": ["Authentication"],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PasswordResetRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Password reset email sent"
-          },
-          "404": {
-            "$ref": "#/components/responses/EmailNotFound"
-          },
-          "422": {
-            "$ref": "#/components/responses/InvalidEmail"
-          }
-        }
-      }
-    },
-    "/auth/change-password": {
-      "put": {
-        "summary": "Change authenticated user's password",
-        "tags": ["Authentication"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChangePasswordRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Password successfully changed"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "422": {
-            "$ref": "#/components/responses/UnprocessableEntity"
-          }
-        }
-      }
-    },
-    "/auth/logout": {
-      "post": {
-        "summary": "Log out the authenticated user",
-        "tags": ["Authentication"],
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully logged out"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
-      }
-    },
-    "/api/organisations": {
-      "get": {
-        "summary": "Gets a list of all the organisations of the authenticated user",
-        "responses": {
-          "200": {
-            "description": "A JSON array of user organisations",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string",
-                      "description": "the request status"
-                    },
-                    "message": {
-                      "type": "string",
-                      "description": "message confirming all organisations were retrieved"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "orgId": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "description": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "User not authenticated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "creates a organisation",
-        "description": "This endpoint creates a new organisation for the authenticated user",
-        "requestBody": {
-          "description": "A dictionary of the details of the organisation to be created",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "The name of the organisation to be created"
-                  },
-                  "description": {
-                    "type": "string",
-                    "description": "A description of the organisation to be created"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "description": "Organisation created Successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "orgId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "User not authenticated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid syntax",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/organisations/{orgId}": {
-      "get": {
-        "summary": "gets a single organisation",
-        "description": "returns a single organisation from the organisations of the authenticated user",
-        "parameters": [
-          {
-            "name": "orgId",
-            "in": "path",
-            "description": "The ID of the organisation to get",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organisation retrieved Successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "orgId": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "description": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "User not authenticated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Organisation not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "adds a user to the organisation",
-        "parameters": [
-          {
-            "name": "orgId",
-            "in": "path",
-            "description": "The id of the organisation to add user",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "The details of the user to be added to organisation",
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "userId": {
-                    "type": "string",
-                    "description": "The id of the user to be added"
-                  }
-                }
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "User added to organisation successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid syntax",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "User or Organisation not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "summary": "deletes an organisation",
-        "description": "Deletes an organisation created by the authenticated user",
-        "parameters": [
-          {
-            "name": "orgId",
-            "in": "path",
-            "description": "The id of the organisation to add user",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Organisation deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "unauthorized request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Organisation not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/organisations/{orgId}/users": {
-      "get": {
-        "summary": "returns a list of all users in the organisation",
-        "description": "A JSON array of all user objects in the organisation",
-        "parameters": [
-          {
-            "name": "orgId",
-            "in": "path",
-            "description": "The id of the organisation to add user",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A JSON array of all users in the organisation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "organisationName": {
-                      "type": "string"
-                    },
-                    "orgId": {
-                      "type": "string"
-                    },
-                    "users": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "userId": {
-                            "type": "string"
-                          },
-                          "username": {
-                            "type": "string"
-                          },
-                          "email": {
-                            "type": "string"
-                          },
-                          "firstName": {
-                            "type": "string"
-                          },
-                          "lastName": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "User not authenticated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Organisation not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "status": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "statusCode": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/payments": {
-      "get": {
-        "summary": "Gets all payments made by user",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "All payments were returned",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Payment"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
-      },
-      "post": {
-        "summary": "Creates a payment record",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PaymentPost"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Payment record created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Payment"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          }
-        }
-      }
-    },
-    "/api/payments/{payment_id}": {
-      "parameters": [
-        {
-          "name": "payment_id",
-          "description": "The unique identifier of a payment record",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "$ref": "#/components/schemas/PaymentId"
-          }
-        }
-      ],
-      "get": {
-        "summary": "Gets a Single Payment",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Single payment object was returned",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Payment"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a payment record",
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Payment record deleted successfully"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      }
-    },
-    "/api/payments-providers": {
-      "get": {
-        "summary": "Gets all payment providers available",
-        "responses": {
-          "200": {
-            "description": "All providers were returned",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Provider"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/payments-providers/{provider_id}": {
-      "parameters": [
-        {
-          "name": "provider_id",
-          "description": "The unique identifier of a payment provider",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "get": {
-        "summary": "Gets a single payment provider",
-        "responses": {
-          "200": {
-            "description": "Single provider object was returned",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Provider"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "username": {
-            "type": "string"
-          },
-          "firstname": {
-            "type": "string"
-          },
-          "lastname": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "id",
-          "username",
-          "firstname",
-          "lastname",
-          "email",
-          "created_at",
-          "updated_at"
-        ]
-      },
-      "UserRegistration": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "firstname": {
-            "type": "string"
-          },
-          "lastname": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "password": {
-            "type": "string",
-            "format": "password"
-          }
-        },
-        "required": ["username", "firstname", "lastname", "email", "password"]
-      },
-      "LoginCredentials": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "password": {
-            "type": "string",
-            "format": "password"
-          }
-        },
-        "required": ["email", "password"]
-      },
-      "AuthResponse": {
-        "type": "object",
-        "properties": {
-          "token": {
-            "type": "string"
-          },
-          "user": {
-            "$ref": "#/components/schemas/User"
-          }
-        },
-        "required": ["token", "user"]
-      },
-      "UserUpdate": {
-        "type": "object",
-        "properties": {
-          "username": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          }
-        }
-      },
-      "PasswordResetRequest": {
-        "type": "object",
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email"
-          }
-        },
-        "required": ["email"]
-      },
-      "ChangePasswordRequest": {
-        "type": "object",
-        "properties": {
-          "current_password": {
-            "type": "string",
-            "format": "password"
-          },
-          "new_password": {
-            "type": "string",
-            "format": "password"
-          }
-        },
-        "required": ["current_password", "new_password"]
-      },
-      "Error": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "description": "A general error message"
-          },
-          "errors": {
-            "type": "object",
-            "description": "Detailed error information for each field",
-            "additionalProperties": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "field": {
-                    "type": "string",
-                    "description": "The name of the field that caused the error"
-                  },
-                  "code": {
-                    "type": "string",
-                    "description": "A specific error code"
-                  },
-                  "message": {
-                    "type": "string",
-                    "description": "A human-readable error message for this specific field"
-                  }
-                },
-                "required": ["field", "code", "message"]
-              }
-            }
-          }
-        },
-        "required": ["message"]
-      },
-      "PaymentId": {
-        "description": "The unique identifier of a payment",
-        "type": "string"
-      },
-      "Payment": {
-        "type": "object",
-        "required": ["id", "amount", "currency", "status", "createdAt"],
-        "properties": {
-          "id": {
-            "$ref": "#/components/schemas/PaymentId"
-          },
-          "amount": {
-            "type": "integer"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "PaymentPost": {
-        "type": "object",
-        "required": ["amount", "currency", "status"],
-        "properties": {
-          "amount": {
-            "type": "integer"
-          },
-          "currency": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "createdAt": {
-            "type": "string"
-          }
-        }
-      },
-      "Provider": {
-        "type": "object",
-        "required": ["provider_id", "provider_name"],
-        "properties": {
-          "provider_id": {
-            "type": "string"
-          },
-          "provider_name": {
-            "type": "string"
-          }
-        }
-      },
-      "Error404": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "description": "Not found",
-            "type": "string"
-          },
-          "code": {
-            "type": "integer"
-          }
-        }
-      },
-      "Error401": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "description": "Authentication failure",
-            "type": "string"
-          },
-          "code": {
-            "type": "integer"
-          }
-        }
-      },
-      "Error400": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "description": "Malformed request",
-            "type": "string"
-          },
-          "code": {
-            "type": "integer"
-          }
-        }
-      }
-    },
-    "responses": {
-      "BadRequest": {
-        "description": "Invalid input",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error400"
-            },
-            "example": {
-              "message": "Invalid input data",
-              "errors": {
-                "username": [
-                  {
-                    "field": "username",
-                    "code": "invalid_characters",
-                    "message": "Username contains invalid characters"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "Unauthorized": {
-        "description": "Unauthorized",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error401"
-            },
-            "example": {
-              "message": "Unauthorized",
-              "errors": {
-                "auth": [
-                  {
-                    "field": "auth",
-                    "code": "invalid_token",
-                    "message": "Invalid or expired authentication token"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "Conflict": {
-        "description": "Resource already exists",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "message": "Resource already exists",
-              "errors": {
-                "email": [
-                  {
-                    "field": "email",
-                    "code": "already_exists",
-                    "message": "A user with this email address already exists"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "NotFound": {
-        "description": "Resource not found",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error404"
-            },
-            "example": {
-              "message": "Resource not found",
-              "errors": {
-                "user": [
-                  {
-                    "field": "user",
-                    "code": "not_found",
-                    "message": "The requested user does not exist"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "InvalidLoginInput": {
-        "description": "Invalid login input",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "message": "Invalid login input",
-              "errors": {
-                "email": [
-                  {
-                    "field": "email",
-                    "code": "invalid_format",
-                    "message": "Please provide a valid email address"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "EmailNotFound": {
-        "description": "Email not found",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "message": "Email not found",
-              "errors": {
-                "email": [
-                  {
-                    "field": "email",
-                    "code": "not_found",
-                    "message": "No user account found with this email address"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "InvalidEmail": {
-        "description": "Invalid email format",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "message": "Invalid email format",
-              "errors": {
-                "email": [
-                  {
-                    "field": "email",
-                    "code": "invalid_format",
-                    "message": "Please provide a valid email address"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "InvalidCredentials": {
-        "description": "Invalid credentials",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "message": "Invalid credentials",
-              "errors": {
-                "auth": [
-                  {
-                    "field": "auth",
-                    "code": "invalid_credentials",
-                    "message": "The provided email or password is incorrect"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      },
-      "UnprocessableEntity": {
-        "description": "Validation error",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "message": "Validation failed",
-              "errors": {
-                "password": [
-                  {
-                    "field": "password",
-                    "code": "too_short",
-                    "message": "Password must be at least 8 characters long"
-                  },
-                  {
-                    "field": "password",
-                    "code": "missing_uppercase",
-                    "message": "Password must contain at least one uppercase letter"
-                  }
-                ]
-              }
-            }
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
-      }
-    }
-  },
-  "externalDocs": {
-    "description": "Checkout our README file here",
-    "url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
-  }
+	"openapi": "3.0.0",
+	"info": {
+		"title": "Backend-Benders API",
+		"description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
+		"contact": {
+			"name": "Backend Benders"
+		},
+		"license": {
+			"name": "Apache License",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0"
+		},
+		"version": "1.0.0"
+	},
+	"servers": [
+		{
+			"url": "http://localhost:3000/v1",
+			"description": "The local server host"
+		}
+	],
+	"paths": {
+		"/auth/register": {
+			"post": {
+				"summary": "Register a new user",
+				"tags": ["Authentication"],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserRegistration"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "User successfully registered",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthResponse"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"409": {
+						"$ref": "#/components/responses/Conflict"
+					},
+					"422": {
+						"$ref": "#/components/responses/UnprocessableEntity"
+					}
+				}
+			}
+		},
+		"/auth/login": {
+			"post": {
+				"summary": "Log in a user",
+				"tags": ["Authentication"],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/LoginCredentials"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Successfully logged in",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/AuthResponse"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/InvalidCredentials"
+					},
+					"422": {
+						"$ref": "#/components/responses/InvalidLoginInput"
+					}
+				}
+			}
+		},
+		"/api/users/{userId}": {
+			"get": {
+				"summary": "Get a single user",
+				"tags": ["Users"],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "integer"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				}
+			}
+		},
+		"/api/profile": {
+			"get": {
+				"summary": "Get authenticated user's profile",
+				"tags": ["Profile"],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					}
+				}
+			},
+			"put": {
+				"summary": "Update authenticated user's profile",
+				"tags": ["Profile"],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/UserUpdate"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Profile successfully updated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/User"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"422": {
+						"$ref": "#/components/responses/UnprocessableEntity"
+					}
+				}
+			}
+		},
+		"/auth/reset-password": {
+			"post": {
+				"summary": "Request password reset",
+				"tags": ["Authentication"],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PasswordResetRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Password reset email sent"
+					},
+					"404": {
+						"$ref": "#/components/responses/EmailNotFound"
+					},
+					"422": {
+						"$ref": "#/components/responses/InvalidEmail"
+					}
+				}
+			}
+		},
+		"/auth/change-password": {
+			"put": {
+				"summary": "Change authenticated user's password",
+				"tags": ["Authentication"],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ChangePasswordRequest"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "Password successfully changed"
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"422": {
+						"$ref": "#/components/responses/UnprocessableEntity"
+					}
+				}
+			}
+		},
+		"/auth/logout": {
+			"post": {
+				"summary": "Log out the authenticated user",
+				"tags": ["Authentication"],
+				"security": [
+					{
+						"BearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successfully logged out"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					}
+				}
+			}
+		},
+		"/api/organisations": {
+			"get": {
+				"summary": "Gets a list of all the organisations of the authenticated user",
+				"responses": {
+					"200": {
+						"description": "A JSON array of user organisations",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string",
+											"description": "the request status"
+										},
+										"message": {
+											"type": "string",
+											"description": "message confirming all organisations were retrieved"
+										},
+										"data": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"orgId": {
+														"type": "string"
+													},
+													"name": {
+														"type": "string"
+													},
+													"description": {
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "User not authenticated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "creates a organisation",
+				"description": "This endpoint creates a new organisation for the authenticated user",
+				"requestBody": {
+					"description": "A dictionary of the details of the organisation to be created",
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"name": {
+										"type": "string",
+										"description": "The name of the organisation to be created"
+									},
+									"description": {
+										"type": "string",
+										"description": "A description of the organisation to be created"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"201": {
+						"description": "Organisation created Successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"orgId": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "User not authenticated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid syntax",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/organisations/{orgId}": {
+			"get": {
+				"summary": "gets a single organisation",
+				"description": "returns a single organisation from the organisations of the authenticated user",
+				"parameters": [
+					{
+						"name": "orgId",
+						"in": "path",
+						"description": "The ID of the organisation to get",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Organisation retrieved Successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"data": {
+											"type": "object",
+											"properties": {
+												"orgId": {
+													"type": "string"
+												},
+												"name": {
+													"type": "string"
+												},
+												"description": {
+													"type": "string"
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "User not authenticated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Organisation not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "adds a user to the organisation",
+				"parameters": [
+					{
+						"name": "orgId",
+						"in": "path",
+						"description": "The id of the organisation to add user",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"description": "The details of the user to be added to organisation",
+					"content": {
+						"application/json": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"userId": {
+										"type": "string",
+										"description": "The id of the user to be added"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "User added to organisation successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"400": {
+						"description": "Invalid syntax",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "unauthorized request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User or Organisation not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"summary": "deletes an organisation",
+				"description": "Deletes an organisation created by the authenticated user",
+				"parameters": [
+					{
+						"name": "orgId",
+						"in": "path",
+						"description": "The id of the organisation to add user",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Organisation deleted successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "unauthorized request",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Organisation not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/organisations/{orgId}/users": {
+			"get": {
+				"summary": "returns a list of all users in the organisation",
+				"description": "A JSON array of all user objects in the organisation",
+				"parameters": [
+					{
+						"name": "orgId",
+						"in": "path",
+						"description": "The id of the organisation to add user",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "A JSON array of all users in the organisation",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"organisationName": {
+											"type": "string"
+										},
+										"orgId": {
+											"type": "string"
+										},
+										"users": {
+											"type": "array",
+											"items": {
+												"type": "object",
+												"properties": {
+													"userId": {
+														"type": "string"
+													},
+													"username": {
+														"type": "string"
+													},
+													"email": {
+														"type": "string"
+													},
+													"firstName": {
+														"type": "string"
+													},
+													"lastName": {
+														"type": "string"
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"description": "User not authenticated",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "Organisation not found",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"status": {
+											"type": "string"
+										},
+										"message": {
+											"type": "string"
+										},
+										"statusCode": {
+											"type": "integer",
+											"format": "int32"
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/payments": {
+			"get": {
+				"summary": "Gets all payments made by user",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All payments were returned",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Payment"
+									}
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					}
+				}
+			},
+			"post": {
+				"summary": "Creates a payment record",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/PaymentPost"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Payment record created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Payment"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					}
+				}
+			}
+		},
+		"/api/payments/{payment_id}": {
+			"parameters": [
+				{
+					"name": "payment_id",
+					"description": "The unique identifier of a payment record",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"$ref": "#/components/schemas/PaymentId"
+					}
+				}
+			],
+			"get": {
+				"summary": "Gets a Single Payment",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Single payment object was returned",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Payment"
+								}
+							}
+						}
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				}
+			},
+			"delete": {
+				"summary": "Delete a payment record",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Payment record deleted successfully"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				}
+			}
+		},
+		"/api/payments-providers": {
+			"get": {
+				"summary": "Gets all payment providers available",
+				"responses": {
+					"200": {
+						"description": "All providers were returned",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Provider"
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/payments-providers/{provider_id}": {
+			"parameters": [
+				{
+					"name": "provider_id",
+					"description": "The unique identifier of a payment provider",
+					"in": "path",
+					"required": true,
+					"schema": {
+						"type": "string"
+					}
+				}
+			],
+			"get": {
+				"summary": "Gets a single payment provider",
+				"responses": {
+					"200": {
+						"description": "Single provider object was returned",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Provider"
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				}
+			}
+		},
+		"/api/notifications": {
+			"get": {
+				"summary": "Gets all notifications for the authenticated user",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All notifications were returned",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/Notification"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Creates a new notification",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/Notification"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Notification created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Notification"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					}
+				}
+			}
+		},
+		"/api/notifications/{notification_id}": {
+			"get": {
+				"summary": "Retrive a specific notification",
+				"parameters": [
+					{
+						"name": "notification_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Notification retrieved successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/Notification"
+								}
+							}
+						}
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				}
+			},
+			"delete": {
+				"summary": "Delete a notification",
+				"parameters": [
+					{
+						"name": "notification_id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"responses": {
+					"204": {
+						"description": "Notification deleted successfully"
+					},
+					"404": {
+						"$ref": "#/components/responses/NotFound"
+					}
+				}
+			}
+		},
+		"/api/activity-log": {
+			"get": {
+				"summary": "Gets all activity logs for the authenticated user",
+				"security": [
+					{
+						"bearerAuth": []
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "All activity logs were returned",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": {
+										"$ref": "#/components/schemas/ActivityLog"
+									}
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"summary": "Creates a new activity log",
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ActivityLog"
+							}
+						}
+					}
+				},
+				"responses": {
+					"201": {
+						"description": "Activity log created successfully",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ActivityLog"
+								}
+							}
+						}
+					},
+					"400": {
+						"$ref": "#/components/responses/BadRequest"
+					},
+					"401": {
+						"$ref": "#/components/responses/Unauthorized"
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"User": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"type": "integer"
+					},
+					"username": {
+						"type": "string"
+					},
+					"firstname": {
+						"type": "string"
+					},
+					"lastname": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string",
+						"format": "email"
+					},
+					"created_at": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"updated_at": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"username",
+					"firstname",
+					"lastname",
+					"email",
+					"created_at",
+					"updated_at"
+				]
+			},
+			"UserRegistration": {
+				"type": "object",
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"firstname": {
+						"type": "string"
+					},
+					"lastname": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string",
+						"format": "email"
+					},
+					"password": {
+						"type": "string",
+						"format": "password"
+					}
+				},
+				"required": [
+					"username",
+					"firstname",
+					"lastname",
+					"email",
+					"password"
+				]
+			},
+			"LoginCredentials": {
+				"type": "object",
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email"
+					},
+					"password": {
+						"type": "string",
+						"format": "password"
+					}
+				},
+				"required": ["email", "password"]
+			},
+			"AuthResponse": {
+				"type": "object",
+				"properties": {
+					"token": {
+						"type": "string"
+					},
+					"user": {
+						"$ref": "#/components/schemas/User"
+					}
+				},
+				"required": ["token", "user"]
+			},
+			"UserUpdate": {
+				"type": "object",
+				"properties": {
+					"username": {
+						"type": "string"
+					},
+					"email": {
+						"type": "string",
+						"format": "email"
+					}
+				}
+			},
+			"PasswordResetRequest": {
+				"type": "object",
+				"properties": {
+					"email": {
+						"type": "string",
+						"format": "email"
+					}
+				},
+				"required": ["email"]
+			},
+			"ChangePasswordRequest": {
+				"type": "object",
+				"properties": {
+					"current_password": {
+						"type": "string",
+						"format": "password"
+					},
+					"new_password": {
+						"type": "string",
+						"format": "password"
+					}
+				},
+				"required": ["current_password", "new_password"]
+			},
+			"Error": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"type": "string",
+						"description": "A general error message"
+					},
+					"errors": {
+						"type": "object",
+						"description": "Detailed error information for each field",
+						"additionalProperties": {
+							"type": "array",
+							"items": {
+								"type": "object",
+								"properties": {
+									"field": {
+										"type": "string",
+										"description": "The name of the field that caused the error"
+									},
+									"code": {
+										"type": "string",
+										"description": "A specific error code"
+									},
+									"message": {
+										"type": "string",
+										"description": "A human-readable error message for this specific field"
+									}
+								},
+								"required": ["field", "code", "message"]
+							}
+						}
+					}
+				},
+				"required": ["message"]
+			},
+			"PaymentId": {
+				"description": "The unique identifier of a payment",
+				"type": "string"
+			},
+			"Payment": {
+				"type": "object",
+				"required": ["id", "amount", "currency", "status", "createdAt"],
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/PaymentId"
+					},
+					"amount": {
+						"type": "integer"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string"
+					}
+				}
+			},
+			"PaymentPost": {
+				"type": "object",
+				"required": ["amount", "currency", "status"],
+				"properties": {
+					"amount": {
+						"type": "integer"
+					},
+					"currency": {
+						"type": "string"
+					},
+					"status": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string"
+					}
+				}
+			},
+			"Notification": {
+				"type": "object",
+				"required": ["id", "message", "createdAt"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"message": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string"
+					}
+				}
+			},
+			"ActivityLog": {
+				"type": "object",
+				"required": ["id", "action", "createdAt"],
+				"properties": {
+					"id": {
+						"type": "string"
+					},
+					"action": {
+						"type": "string"
+					},
+					"createdAt": {
+						"type": "string"
+					}
+				}
+			},
+			"Provider": {
+				"type": "object",
+				"required": ["provider_id", "provider_name"],
+				"properties": {
+					"provider_id": {
+						"type": "string"
+					},
+					"provider_name": {
+						"type": "string"
+					}
+				}
+			},
+			"Error404": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"description": "Not found",
+						"type": "string"
+					},
+					"code": {
+						"type": "integer"
+					}
+				}
+			},
+			"Error401": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"description": "Authentication failure",
+						"type": "string"
+					},
+					"code": {
+						"type": "integer"
+					}
+				}
+			},
+			"Error400": {
+				"type": "object",
+				"properties": {
+					"message": {
+						"description": "Malformed request",
+						"type": "string"
+					},
+					"code": {
+						"type": "integer"
+					}
+				}
+			}
+		},
+		"responses": {
+			"BadRequest": {
+				"description": "Invalid input",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error400"
+						},
+						"example": {
+							"message": "Invalid input data",
+							"errors": {
+								"username": [
+									{
+										"field": "username",
+										"code": "invalid_characters",
+										"message": "Username contains invalid characters"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"Unauthorized": {
+				"description": "Unauthorized",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error401"
+						},
+						"example": {
+							"message": "Unauthorized",
+							"errors": {
+								"auth": [
+									{
+										"field": "auth",
+										"code": "invalid_token",
+										"message": "Invalid or expired authentication token"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"Conflict": {
+				"description": "Resource already exists",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						},
+						"example": {
+							"message": "Resource already exists",
+							"errors": {
+								"email": [
+									{
+										"field": "email",
+										"code": "already_exists",
+										"message": "A user with this email address already exists"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"NotFound": {
+				"description": "Resource not found",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error404"
+						},
+						"example": {
+							"message": "Resource not found",
+							"errors": {
+								"user": [
+									{
+										"field": "user",
+										"code": "not_found",
+										"message": "The requested user does not exist"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"InvalidLoginInput": {
+				"description": "Invalid login input",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						},
+						"example": {
+							"message": "Invalid login input",
+							"errors": {
+								"email": [
+									{
+										"field": "email",
+										"code": "invalid_format",
+										"message": "Please provide a valid email address"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"EmailNotFound": {
+				"description": "Email not found",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						},
+						"example": {
+							"message": "Email not found",
+							"errors": {
+								"email": [
+									{
+										"field": "email",
+										"code": "not_found",
+										"message": "No user account found with this email address"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"InvalidEmail": {
+				"description": "Invalid email format",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						},
+						"example": {
+							"message": "Invalid email format",
+							"errors": {
+								"email": [
+									{
+										"field": "email",
+										"code": "invalid_format",
+										"message": "Please provide a valid email address"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"InvalidCredentials": {
+				"description": "Invalid credentials",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						},
+						"example": {
+							"message": "Invalid credentials",
+							"errors": {
+								"auth": [
+									{
+										"field": "auth",
+										"code": "invalid_credentials",
+										"message": "The provided email or password is incorrect"
+									}
+								]
+							}
+						}
+					}
+				}
+			},
+			"UnprocessableEntity": {
+				"description": "Validation error",
+				"content": {
+					"application/json": {
+						"schema": {
+							"$ref": "#/components/schemas/Error"
+						},
+						"example": {
+							"message": "Validation failed",
+							"errors": {
+								"password": [
+									{
+										"field": "password",
+										"code": "too_short",
+										"message": "Password must be at least 8 characters long"
+									},
+									{
+										"field": "password",
+										"code": "missing_uppercase",
+										"message": "Password must contain at least one uppercase letter"
+									}
+								]
+							}
+						}
+					}
+				}
+			}
+		},
+		"securitySchemes": {
+			"BearerAuth": {
+				"type": "http",
+				"scheme": "bearer",
+				"bearerFormat": "JWT"
+			}
+		}
+	},
+	"externalDocs": {
+		"description": "Checkout our README file here",
+		"url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
+	}
 }
