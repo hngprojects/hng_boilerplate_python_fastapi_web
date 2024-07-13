@@ -1,3 +1,6 @@
+**Team Python5**
+We do hard things together
+
 **Documentation following OpenAPI specifications**
 https://abnurkan.github.io/HNG_STAGE3_API_TEST/
 
