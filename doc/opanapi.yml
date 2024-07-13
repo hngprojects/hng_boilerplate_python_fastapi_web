@@ -16,6 +16,7 @@ tags:
   - name: Organisation
   - name: Waitlist
   - name: Notification
+  - name: Superadmin
 
 paths:
   /api/v1/auth/register:
@@ -426,6 +427,210 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
+  /api/v1/superadmin/users:
+    get:
+      summary: Get all users
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      responses:
+        "200":
+          description: Lists all users successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/users/{user_id}:
+    delete:
+      summary: Deletes a user # there's another delete user route but that one is for a user that wants to delete his own account 
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Super admin deleted user successfully
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/organisations:
+    get:
+      summary: Get all organisations
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      responses:
+        "200":
+          description: Lists all organisations successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organisation"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/organisations/{organisation_id}:
+    delete:
+      summary:  Superadmin deletes an organisation
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      parameters:
+        - name: organisation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Organisation deleted successfully by superadmin
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/payments:
+    get:
+      summary: Get all payment logs
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      responses:
+        "200":
+          description: Payment logs fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PaymentLog"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/activity-log:
+    get:
+      summary: Get activity logs
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      responses:
+        "200":
+          description: Activity logs fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityLog"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/users/{user_id}/organisations:
+    get:
+      summary: Get all organisations for a user
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Organisations for the user fetched successfully by superadmin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Organisation"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/superadmin/organisations/{organisation_id}/users:
+    get:
+      summary: Get all users in an organisation
+      tags:
+        - Superadmin
+      security:
+        - OAuth2:
+            - superadmin  
+      parameters:
+        - name: organisation_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Users in the organisation fetched successfully by superadmin
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"              
+
   /api/v1/notifications:
     get:
       tags:
@@ -480,6 +685,21 @@ paths:
                              
 
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            superadmin: Grants access to superadmin operations
+
   schemas:
     Success:
       type: object
@@ -599,4 +819,30 @@ components:
           type: boolean
         created_at:
           type: string
-          format: date-time      
+          format: date-time
+
+    PaymentLog:
+      type: object
+      properties:
+        payment_id:
+          type: string
+        user_id:
+          type: string
+        amount:
+          type: number
+        status:
+          type: string
+
+    ActivityLog:
+      type: object
+      properties:
+        activity_id:
+          type: string
+        user_id:
+          type: string
+        action:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+            
