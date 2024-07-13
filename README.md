@@ -308,8 +308,17 @@ This project is a community forum application where users can join various commu
         "message": "Error message."
       }
       ```
-<a href="https://dbdiagram.io/d/66914a259939893daec898a0">
+### Database Schematic Diagram
+> click the image to access the diagram
+<a href="https://dbdiagram.io/d/Community-Forum-API-database-Design-66914a259939893daec898a0">
 <img width="989" alt="Screenshot 2024-07-13 at 1 06 10 AM" src="https://github.com/user-attachments/assets/d32a61cf-7112-4181-9cee-2e018e457c80">
 </a>
+
+### API Design (OPENAPI Doc)
+> click the image to access the OPENAPI Documentation
+<a href="https://app.swaggerhub.com/apis-docs/SUNDINOH_1/ForumAPI/1.0.0#/">
+<img width="1266" alt="Screenshot 2024-07-13 at 1 07 03 AM" src="https://github.com/user-attachments/assets/5c22be60-a0ef-4b56-aa30-4f41ffe3633a">
+</a>
+
 
 
