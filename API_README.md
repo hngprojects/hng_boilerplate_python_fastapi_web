@@ -1,6 +1,26 @@
-This documentation will explain the API's purpose, its main features, and requiremens.
-
 # PentaCoder User API Documentation
+
+View API design [https://openaiapi-victoribortechs-projects.vercel.app](here).
+
+## Table of Contents
+- [Introduction](#introduction)
+- [Team Members](#team-members)
+- [API Design](#api-design)
+- [Base URL](#base-url)
+- [Authentication](#authentication)
+- [Main Features](#main-features)
+- [Endpoints](#endpoints)
+  - [Authentication and Registration](#authentication-and-registration)
+  - [Profile Management](#profile-management)
+  - [Contact and Messaging](#contact-and-messaging)
+  - [Payments](#payments)
+  - [Organizations](#organizations)
+  - [Admin Functions](#admin-functions)
+- [Error Handling](#error-handling)
+- [Requirements](#requirements)
+- [Rate Limiting](#rate-limiting)
+- [Versioning](#versioning)
+- [Support](#support)
 
 ## Introduction
 This project is a user authentication and management API built using FastAPI. It includes endpoints for user signup, login, logout, and token refresh functionalities. The API is designed to be secure and efficient, making use of JWT tokens for authentication.
@@ -8,15 +28,15 @@ This project is a user authentication and management API built using FastAPI. It
 ## PentaCoders - API and Database Design
 ### Team Members
 - Victor Ibor(API Design Lead)
-- Myles Cyril (Database Design Lead)
+- Cyril Emmanuel (Database Design Lead)
 - Wisdom Ehirim (API Design Documentation)
-- Timi (Databse Design Documentation)
-- Adebola (General Documentation Review)
+- Egbetokun Timileun (Databse Design Documentation)
+- Atiba Adedolapo (General Documentation Review)
 
 ## API Design
 
 Version: 1.0.0
-Our OpenAPI specification Designs can be found [here](https://openaiapi-victoribortechs-projects.vercel.app)
+Our OpenAPI specification Designs can be found [https://openaiapi-victoribortechs-projects.vercel.app](here).
 
 ## Base URL
 
@@ -45,6 +65,7 @@ Authorization: Bearer <your_jwt_token>
 8. Organization Management
 9. Admin Functions
 
+Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app](here).
 ## Endpoints
 
 ### Authentication and Regisration
@@ -82,6 +103,8 @@ Authorization: Bearer <your_jwt_token>
 7. **GET /auth/refresh-access-token**
 - Refresh access token
 
+[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design).
+
 ### Profile Management
 
 1. **GET /profile**
@@ -92,6 +115,8 @@ Authorization: Bearer <your_jwt_token>
 
 3. **POST /profile/change-password**
 - Change user password (requires authentication)
+
+[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
 
 ### Contact and Messaging
 
@@ -104,6 +129,8 @@ Authorization: Bearer <your_jwt_token>
 3. **GET /messaging/templates**
 - List email templates (requires authentication)
 
+[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+
 ### Payments
 
 1. **POST /payments/create-checkout**
@@ -115,6 +142,8 @@ Authorization: Bearer <your_jwt_token>
 3. **GET /payments/{payment_id}**
 - Get details of a specific payment (requires authentication)
 
+[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+
 ### Organizations
 
 1. **GET /organisations**
@@ -122,6 +151,8 @@ Authorization: Bearer <your_jwt_token>
 
 2. **POST /organisations**
 - Create a new organization (requires authentication)
+
+[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
 
 ### Admin Functions
 
@@ -142,6 +173,8 @@ Authorization: Bearer <your_jwt_token>
 
 6. **GET /admin/activity-log**
 - Get activity log (admin only)
+
+[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
 
 ## Error Handling
 
