@@ -1067,6 +1067,57 @@ paths:
               schema:
                 $ref: "#/components/schemas/AuthenticationError"
 
+  /api/v1/users/export:
+    post:
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      summary: Export user data
+      operationId: exportUserData
+      description: |
+        Export user data in the specified format
+      responses:
+        "200":
+          description: User data export successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User data exported successfully"
+                  data:
+                    type: object
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - format
+              properties:
+                format:
+                  type: string
+                  enum: [pdf, csv, xml]
+                  default: pdf
+
 components:
   schemas:
     Success:
