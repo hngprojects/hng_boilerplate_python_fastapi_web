@@ -1,0 +1,1333 @@
+openapi: 3.0.0
+info:
+  title: Comprehensive SaaS Platform API
+  version: 2.0.0
+  description: API for a full-featured SaaS platform including authentication, payments, user management, and more.
+
+paths:
+  # Authentication
+  /auth/signup:
+    post:
+      summary: Create a new user account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignUpRequest'
+      responses:
+        '200':
+          description: Successful signup
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/login:
+    post:
+      summary: Log in a user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/social-login/{provider}:
+    post:
+      summary: Authenticate user via social login
+      parameters:
+        - in: path
+          name: provider
+          required: true
+          schema:
+            type: string
+            enum: [google, facebook, twitter]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialLoginRequest'
+      responses:
+        '200':
+          description: Successful social login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /auth/magic-link:
+    post:
+      summary: Send a magic link for passwordless authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MagicLinkRequest'
+      responses:
+        '200':
+          description: Magic link sent successfully
+
+  /auth/reset-password:
+    post:
+      summary: Reset user password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successfully
+
+  # User Management
+  /users:
+    get:
+      summary: List users (for admin)
+      tags:
+        - User Management
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+    post:
+      summary: Create a new user (for admin)
+      tags:
+        - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '200':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+  /users/{id}:
+    get:
+      summary: Get user details
+      tags:
+        - User Management
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    put:
+      summary: Update user details
+      tags:
+        - User Management
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    delete:
+      summary: Delete a user
+      tags:
+        - User Management
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted successfully
+
+  # Organization Management
+  /orgs:
+    get:
+      summary: List organizations
+      tags:
+        - Organization Management
+      responses:
+        '200':
+          description: A list of all organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListResponse'
+    post:
+      summary: Create a new organization
+      tags:
+        - Organization Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRequest'
+      responses:
+        '200':
+          description: Organization created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+
+  /orgs/{id}:
+    get:
+      summary: Get organization details
+      tags:
+        - Organization Management
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+    put:
+      summary: Update organization details
+      tags:
+        - Organization Management
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRequest'
+      responses:
+        '200':
+          description: Organization updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+    delete:
+      summary: Delete an organization
+      tags:
+        - Organization Management
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Organization deleted successfully
+
+  # Superadmin Interface
+  /admin/users:
+    get:
+      summary: List all users (admin)
+      tags:
+        - Superadmin Interface
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserListResponse'
+  /admin/users/{id}:
+    get:
+      summary: Get user details (admin)
+      tags:
+        - Superadmin Interface
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /admin/orgs:
+    get:
+      summary: List all organizations (admin)
+      tags:
+        - Superadmin Interface
+      responses:
+        '200':
+          description: List of all organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationListResponse'
+  /admin/orgs/{id}:
+    get:
+      summary: Get organization details (admin)
+      tags:
+        - Superadmin Interface
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationResponse'
+  /admin/payments:
+    get:
+      summary: List all payments (admin)
+      tags:
+        - Superadmin Interface
+      responses:
+        '200':
+          description: List of all payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+  /admin/activity-logs:
+    get:
+      summary: List all activity logs (admin)
+      tags:
+        - Superadmin Interface
+      responses:
+        '200':
+          description: List of all activity logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  # Settings and Profile
+  /settings:
+    get:
+      summary: Get settings
+      tags:
+        - Settings and Profile
+      responses:
+        '200':
+          description: Settings details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+    post:
+      summary: Create settings
+      tags:
+        - Settings and Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSettingsRequest'
+      responses:
+        '201':
+          description: Settings created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+  /settings/{id}:
+    put:
+      summary: Update settings
+      tags:
+        - Settings and Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSettingsRequest'
+      responses:
+        '200':
+          description: Settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SettingsResponse'
+    delete:
+      summary: Delete settings
+      tags:
+        - Settings and Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Settings deleted successfully
+  /profile/settings:
+    get:
+      summary: Get profile settings
+      tags:
+        - Settings and Profile
+      responses:
+        '200':
+          description: Profile settings details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileSettingsResponse'
+    put:
+      summary: Update profile settings
+      tags:
+        - Settings and Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileSettingsRequest'
+      responses:
+        '200':
+          description: Profile settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProfileSettingsResponse'
+
+  # Landing and Static Pages
+  /:
+    get:
+      summary: Get landing page
+      tags:
+        - Landing and Static Pages
+      responses:
+        '200':
+          description: Landing page content
+          content:
+            text/html:
+              schema:
+                type: string
+  /privacy-policy:
+    get:
+      summary: Get privacy policy page
+      tags:
+        - Landing and Static Pages
+      responses:
+        '200':
+          description: Privacy policy page content
+          content:
+            text/html:
+              schema:
+                type: string
+  /about-us:
+    get:
+      summary: Get about us page
+      tags:
+        - Landing and Static Pages
+      responses:
+        '200':
+          description: About us page content
+          content:
+            text/html:
+              schema:
+                type: string
+  /contact-us:
+    get:
+      summary: Get contact us page
+      tags:
+        - Landing and Static Pages
+      responses:
+        '200':
+          description: Contact us page content
+          content:
+            text/html:
+              schema:
+                type: string
+
+  # Payments
+  /payments/stripe:
+    post:
+      summary: Process a Stripe payment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StripePaymentRequest'
+      responses:
+        '200':
+          description: Payment processed successfully
+
+  /payments/flutterwave:
+    post:
+      summary: Process a Flutterwave payment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlutterwavePaymentRequest'
+      responses:
+        '200':
+          description: Payment processed successfully
+
+  /payments/lemonsqueezy:
+    post:
+      summary: Process a LemonSqueezy payment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LemonSqueezyPaymentRequest'
+      responses:
+        '200':
+          description: Payment processed successfully
+
+  # Messaging
+  /messages/email:
+    post:
+      summary: Send an email
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+      responses:
+        '200':
+          description: Email sent successfully
+
+  /messages/templates:
+    get:
+      summary: List email templates
+      responses:
+        '200':
+          description: A list of email templates
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplateListResponse'
+    post:
+      summary: Create a new email template
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEmailTemplateRequest'
+      responses:
+        '200':
+          description: Email template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplateResponse'
+
+  /messages/templates/{templateId}:
+    get:
+      summary: Get email template details
+      parameters:
+        - in: path
+          name: templateId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email template details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplateResponse'
+    put:
+      summary: Update email template
+      parameters:
+        - in: path
+          name: templateId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEmailTemplateRequest'
+      responses:
+        '200':
+          description: Email template updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplateResponse'
+    delete:
+      summary: Delete an email template
+      parameters:
+        - in: path
+          name: templateId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Email template deleted successfully
+
+  
+
+  # GDPR
+  /gdpr/consent:
+    post:
+      summary: Record user consent for GDPR
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentRequest'
+      responses:
+        '200':
+          description: Consent recorded successfully
+
+  # Dashboard Data
+  /dashboard:
+    get:
+      summary: Get dashboard data
+      responses:
+        '200':
+          description: Dashboard data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardDataResponse'
+
+  # Waitlist
+  /waitlist:
+    post:
+      summary: Join the waitlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WaitlistRequest'
+      responses:
+        '200':
+          description: Successfully joined the waitlist
+
+  # Invite System
+  /invites:
+    post:
+      summary: Create an invite
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInviteRequest'
+      responses:
+        '200':
+          description: Invite created successfully
+    get:
+      summary: List invites
+      responses:
+        '200':
+          description: A list of invites
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InviteListResponse'
+
+  /invites/{inviteId}/accept:
+    post:
+      summary: Accept an invite
+      parameters:
+        - in: path
+          name: inviteId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invite accepted successfully
+
+  # User Associated Data
+  /user-data:
+    get:
+      summary: List user associated data
+      responses:
+        '200':
+          description: A list of user associated data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataListResponse'
+    post:
+      summary: Create new user associated data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDataRequest'
+      responses:
+        '200':
+          description: User data created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataResponse'
+
+  /user-data/{dataId}:
+    get:
+      summary: Get single user data item
+      parameters:
+        - in: path
+          name: dataId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User data item
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataResponse'
+    put:
+      summary: Update user data item
+      parameters:
+        - in: path
+          name: dataId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserDataRequest'
+      responses:
+        '200':
+          description: User data item updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDataResponse'
+    delete:
+      summary: Delete user data item
+      parameters:
+        - in: path
+          name: dataId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User data item deleted successfully
+
+  # Search and Sort
+  /search:
+    get:
+      summary: Search across various data types
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+
+  # Analytics
+  /analytics/chart:
+    get:
+      summary: Get chart data for analytics
+      responses:
+        '200':
+          description: Chart data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChartDataResponse'
+
+  # Notifications
+  /notifications:
+    get:
+      summary: List user notifications
+      responses:
+        '200':
+          description: A list of notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationListResponse'
+    post:
+      summary: Create a new notification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationRequest'
+      responses:
+        '200':
+          description: Notification created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationResponse'
+
+  # Blog
+  /blog:
+    get:
+      summary: List blog posts
+      responses:
+        '200':
+          description: A list of blog posts
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostListResponse'
+    post:
+      summary: Create a new blog post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBlogPostRequest'
+      responses:
+        '200':
+          description: Blog post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+
+  /blog/{postId}:
+    get:
+      summary: Get blog post details
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blog post details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+    put:
+      summary: Update blog post
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBlogPostRequest'
+      responses:
+        '200':
+          description: Blog post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BlogPostResponse'
+    delete:
+      summary: Delete a blog post
+      parameters:
+        - in: path
+          name: postId
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Blog post deleted successfully
+
+  # Language and Region
+  /localization:
+    get:
+      summary: Get available languages and regions
+      responses:
+        '200':
+          description: Available languages and regions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalizationResponse'
+    put:
+      summary: Update user's language and region preferences
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocalizationRequest'
+      responses:
+        '200':
+          description: Localization preferences updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LocalizationResponse'
+
+components:
+  schemas:
+    # Authentication
+    SignUpRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    SocialLoginRequest:
+      type: object
+      properties:
+        token:
+          type: string
+    MagicLinkRequest:
+      type: object
+      properties:
+        email:
+          type: string
+    ResetPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        newPassword:
+          type: string
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+
+    # User Management
+    CreateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+    UpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+    UserListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+
+    # Organization Management
+    CreateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+    UpdateOrganizationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+    OrganizationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+    OrganizationListResponse:
+      type: object
+      properties:
+        organizations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganizationResponse'
+
+    # Payments
+    StripePaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        source:
+          type: string
+    FlutterwavePaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        source:
+          type: string
+    LemonSqueezyPaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        source:
+          type: string
+
+    # Messaging
+    EmailRequest:
+      type: object
+      properties:
+        to:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+    CreateEmailTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+    UpdateEmailTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+    EmailTemplateResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+    EmailTemplateListResponse:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            $ref: '#/components/schemas/EmailTemplateResponse'
+
+    # Settings
+    CreateSettingsRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    UpdateSettingsRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    SettingsResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+        value:
+          type: string
+
+    # Profile Settings
+    UpdateProfileSettingsRequest:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    ProfileSettingsResponse:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
+    
+    # Contact Form
+    ContactFormRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        message:
+          type: string
+
+    # GDPR
+    ConsentRequest:
+      type: object
+      properties:
+        consent:
+          type: string
+
+    # Dashboard Data
+    DashboardDataResponse:
+      type: object
+      properties:
+        data:
+          type: object
+
+    # Waitlist
+    WaitlistRequest:
+      type: object
+      properties:
+        email:
+          type: string
+
+    # Invite System
+    CreateInviteRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        role:
+          type: string
+    InviteListResponse:
+      type: object
+      properties:
+        invites:
+          type: array
+          items:
+            $ref: '#/components/schemas/InviteResponse'
+    InviteResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+
+    # User Associated Data
+    CreateUserDataRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        data:
+          type: object
+    UpdateUserDataRequest:
+      type: object
+      properties:
+        type:
+          type: string
+        data:
+          type: object
+    UserDataResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        data:
+          type: object
+    UserDataListResponse:
+      type: object
+      properties:
+        userData:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDataResponse'
+
+    # Search and Sort
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+
+    # Analytics
+    ChartDataResponse:
+      type: object
+      properties:
+        chartData:
+          type: object
+
+    # Notifications
+    CreateNotificationRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        message:
+          type: string
+    NotificationResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+    NotificationListResponse:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationResponse'
+
+    # Blog
+    CreateBlogPostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+    UpdateBlogPostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+    BlogPostResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        content:
+          type: string
+    BlogPostListResponse:
+      type: object
+      properties:
+        posts:
+          type: array
+          items:
+            $ref: '#/components/schemas/BlogPostResponse'
+
+    # Language and Region
+    LocalizationResponse:
+      type: object
+      properties:
+        languages:
+          type: array
+          items:
+            type: string
+        regions:
+          type: array
+          items:
+            type: string
+    UpdateLocalizationRequest:
+      type: object
+      properties:
+        language:
+          type: string
+        region:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
