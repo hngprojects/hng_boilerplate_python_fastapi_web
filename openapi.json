@@ -273,128 +273,47 @@
         }
       }
     },
-		"/api/organisations": {
-			"get": {
-				"summary": "Gets a list of all the organisations of the authenticated user",
-				"responses": {
-					"200": {
-						"description": "A JSON array of user organisations",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"status": {
-											"type": "string",
-											"description": "the request status"
-										},
-										"message": {
-											"type": "string",
-											"description": "message confirming all organisations were retrieved"
-										},
-										"data": {
-											"type": "array",
-											"items": {
-												"type": "object",
-												"properties": {
-													"orgId": {
-														"type": "string"
-													},
-													"name": {
-														"type": "string"
-													},
-													"description": {
-														"type": "string"
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					},
-					"401": {
-						"description": "User not authenticated",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"status": {
-											"type": "string"
-										},
-										"message": {
-											"type": "string"
-										},
-										"statusCode": {
-											"type" : "integer",
-											"format": "int32"
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			},
-			"post": {
-				"summary": "creates a organisation",
-				"description": "This endpoint creates a new organisation for the authenticated user",
-				"requestBody": {
-					"description": "A dictionary of the details of the organisation to be created",
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"name": {
-										"type": "string",
-										"description": "The name of the organisation to be created"
-									},
-									"description": {
-										"type": "string",
-										"description": "A description of the organisation to be created"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"201": {
-						"description": "Organisation created Successfully",
-						"content": {
-							"application/json": {
-								"schema": {
-									"type": "object",
-									"properties": {
-										"status": {
-											"type": "string"
-										},
-										"message": {
-											"type": "string"
-										},
-										"data": {
-											"type": "object",
-											"properties": {
-												"orgId": {
-													"type": "string"
-												},
-												"name": {
-													"type": "string"
-												},
-												"description": {
-													"type": "string"
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-					},
+    "/api/organisations": {
+      "get": {
+        "summary": "Gets a list of all the organisations of the authenticated user",
+        "responses": {
+          "200": {
+            "description": "A JSON array of user organisations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "the request status"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "message confirming all organisations were retrieved"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "orgId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "401": {
             "description": "User not authenticated",
             "content": {
@@ -409,14 +328,95 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
                 }
               }
             }
-					},
+          }
+        }
+      },
+      "post": {
+        "summary": "creates a organisation",
+        "description": "This endpoint creates a new organisation for the authenticated user",
+        "requestBody": {
+          "description": "A dictionary of the details of the organisation to be created",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "description": "The name of the organisation to be created"
+                  },
+                  "description": {
+                    "type": "string",
+                    "description": "A description of the organisation to be created"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Organisation created Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "orgId": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "User not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "format": "int32"
+                    }
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "Invalid syntax",
             "content": {
@@ -431,33 +431,33 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
                 }
               }
             }
-					}
-				}
-			}
-		},
-		"/api/organisations/{orgId}": {
-			"get": {
-				"summary": "gets a single organisation",
-				"description": "returns a single organisation from the organisations of the authenticated user",
-				"parameters": [
-					{
-						"name": "orgId",
-						"in": "path",
-						"description": "The ID of the organisation to get",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"responses": {
+          }
+        }
+      }
+    },
+    "/api/organisations/{orgId}": {
+      "get": {
+        "summary": "gets a single organisation",
+        "description": "returns a single organisation from the organisations of the authenticated user",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "description": "The ID of the organisation to get",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
           "200": {
             "description": "Organisation retrieved Successfully",
             "content": {
@@ -487,9 +487,9 @@
                     }
                   }
                 }
-							}
-						}
-					},
+              }
+            }
+          },
           "401": {
             "description": "User not authenticated",
             "content": {
@@ -504,7 +504,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -526,7 +526,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -534,40 +534,40 @@
               }
             }
           }
-				}
-			},
-			"post": {
-				"summary": "adds a user to the organisation",
-				"parameters": [
-					{
-						"name": "orgId",
-						"in": "path",
-						"description": "The id of the organisation to add user",
-						"required": true,
-						"schema": {
-							"type": "string"
-						}
-					}
-				],
-				"requestBody": {
-					"description": "The details of the user to be added to organisation",
-					"content": {
-						"application/json": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"userId": {
-										"type": "string",
-										"description": "The id of the user to be added"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
+        }
+      },
+      "post": {
+        "summary": "adds a user to the organisation",
+        "parameters": [
+          {
+            "name": "orgId",
+            "in": "path",
+            "description": "The id of the organisation to add user",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "The details of the user to be added to organisation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": {
+                    "type": "string",
+                    "description": "The id of the user to be added"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
             "description": "User added to organisation successfully",
             "content": {
               "application/json": {
@@ -580,11 +580,11 @@
                     "message": {
                       "type": "string"
                     }
-									}
-								}
-							}
-						}
-					},
+                  }
+                }
+              }
+            }
+          },
           "400": {
             "description": "Invalid syntax",
             "content": {
@@ -599,7 +599,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -621,7 +621,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -643,19 +643,19 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
                 }
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"summary": "deletes an organisation",
-				"description": "Deletes an organisation created by the authenticated user",
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "deletes an organisation",
+        "description": "Deletes an organisation created by the authenticated user",
         "parameters": [
           {
             "name": "orgId",
@@ -667,7 +667,7 @@
             }
           }
         ],
-				"responses": {
+        "responses": {
           "200": {
             "description": "Organisation deleted successfully",
             "content": {
@@ -700,7 +700,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -722,7 +722,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -730,13 +730,13 @@
               }
             }
           }
-				}
-			}
-		},
-		"/api/organisations/{orgId}/users": {
-			"get": {
-				"summary": "returns a list of all users in the organisation",
-				"description": "A JSON array of all user objects in the organisation",
+        }
+      }
+    },
+    "/api/organisations/{orgId}/users": {
+      "get": {
+        "summary": "returns a list of all users in the organisation",
+        "description": "A JSON array of all user objects in the organisation",
         "parameters": [
           {
             "name": "orgId",
@@ -748,7 +748,7 @@
             }
           }
         ],
-				"responses": {	
+        "responses": {
           "200": {
             "description": "A JSON array of all users in the organisation",
             "content": {
@@ -762,12 +762,12 @@
                     "message": {
                       "type": "string"
                     },
-										"organisationName": {
-											"type": "string"
-										},
-										"orgId": {
-											"type": "string"
-										},
+                    "organisationName": {
+                      "type": "string"
+                    },
+                    "orgId": {
+                      "type": "string"
+                    },
                     "users": {
                       "type": "array",
                       "items": {
@@ -782,12 +782,12 @@
                           "email": {
                             "type": "string"
                           },
-													"firstName": {
-														"type": "string"
-													},
-													"lastName": {
-														"type": "string"
-													}
+                          "firstName": {
+                            "type": "string"
+                          },
+                          "lastName": {
+                            "type": "string"
+                          }
                         }
                       }
                     }
@@ -810,7 +810,7 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
@@ -832,17 +832,190 @@
                       "type": "string"
                     },
                     "statusCode": {
-                      "type" : "integer",
+                      "type": "integer",
                       "format": "int32"
                     }
                   }
                 }
               }
             }
-					}
-				}
-			}
-		}
+          }
+        }
+      }
+    },
+    "/api/payments": {
+      "get": {
+        "summary": "Gets all payments made by user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All payments were returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Payment"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "Creates a payment record",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentPost"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment record created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/payments/{payment_id}": {
+      "parameters": [
+        {
+          "name": "payment_id",
+          "description": "The unique identifier of a payment record",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "$ref": "#/components/schemas/PaymentId"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Gets a Single Payment",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Single payment object was returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a payment record",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Payment record deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/payments-providers": {
+      "get": {
+        "summary": "Gets all payment providers available",
+        "responses": {
+          "200": {
+            "description": "All providers were returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Provider"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/payments-providers/{provider_id}": {
+      "parameters": [
+        {
+          "name": "provider_id",
+          "description": "The unique identifier of a payment provider",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "summary": "Gets a single payment provider",
+        "responses": {
+          "200": {
+            "description": "Single provider object was returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Provider"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    }
   },
   "components": {
     "schemas": {
@@ -1003,6 +1176,97 @@
           }
         },
         "required": ["message"]
+      },
+      "PaymentId": {
+        "description": "The unique identifier of a payment",
+        "type": "string"
+      },
+      "Payment": {
+        "type": "object",
+        "required": ["id", "amount", "currency", "status", "createdAt"],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/PaymentId"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "PaymentPost": {
+        "type": "object",
+        "required": ["amount", "currency", "status"],
+        "properties": {
+          "amount": {
+            "type": "integer"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        }
+      },
+      "Provider": {
+        "type": "object",
+        "required": ["provider_id", "provider_name"],
+        "properties": {
+          "provider_id": {
+            "type": "string"
+          },
+          "provider_name": {
+            "type": "string"
+          }
+        }
+      },
+      "Error404": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Not found",
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error401": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Authentication failure",
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
+      },
+      "Error400": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "description": "Malformed request",
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          }
+        }
       }
     },
     "responses": {
@@ -1011,7 +1275,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Error"
+              "$ref": "#/components/schemas/Error400"
             },
             "example": {
               "message": "Invalid input data",
@@ -1033,7 +1297,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Error"
+              "$ref": "#/components/schemas/Error401"
             },
             "example": {
               "message": "Unauthorized",
@@ -1077,7 +1341,7 @@
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/Error"
+              "$ref": "#/components/schemas/Error404"
             },
             "example": {
               "message": "Resource not found",
