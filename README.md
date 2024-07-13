@@ -1,3 +1,17 @@
+**API Documentation:**
+
+
+
+**Database Design:**
+https://imgur.com/a/90xhWlG
+
+**Contributors**
+jubriltayo
+
+
+
+
+
 # FASTAPI
 FastAPI boilerplate
 
