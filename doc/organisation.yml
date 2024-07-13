@@ -1,21 +1,41 @@
-/api/v1/organisation:
+openapi: 3.0.0 
+info: 
+  description: This API provides detail to our Saas boilerplate endpoints. 
+  version: "1.0.0" 
+  title: HNG stage-three backend task 
+  contact: 
+    email: dynamo@gmail.com 
+  license: 
+    name: Apache 2.0 
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html" 
+tags: 
+  - name: Authentication 
+  - name: User 
+  - name: Organisation 
+  - name: Waitlist 
+  - name: Notification 
+  - name: Blog
+  
+paths:
+  /api/v1/organisation:
     post:
-    tags: Organisation
-    description: Create a new organisation
-    requestBody:
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              name:
-                  type: string
-                  format: int32
-                  example: Meta
-              description:
-                  type: string
-                  format: int32
-                  example: description here
+      tags: 
+        - Organisation
+      description: Create a new organisation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                    type: string
+                    format: uuid
+                    example: Meta
+                description:
+                    type: string
+                    format: uuid
+                    example: company details here
               
       responses:
         "201":
@@ -25,105 +45,149 @@
               schema: 
                 type: object
                 items:
-                properties:
-                  OrgId:
-                    type: integer
-                    example: uuid
-                  name:
-                    type: string
-                    example: Meta
-                  description:
-                    type: string
-                    example: A tech company
+                  properties:
+                    orgId:
+                      type: integer
+                      example: uuid
+                    name:
+                      type: string
+                      example: Meta
+                    description:
+                      type: string
+                      example: A tech company
+                    message: 
+                      type: string
+                      example: Organisation created successfully
                     
         "400":
           description: Error creating organisation
           content:
             application/json:
-            schema:
-              $ 
-                  
+              schema: 
+                type: object
+                items: 
+                  properties: 
+                    orgId:
+                      type: string
+                      format: uuid
+                      example: 8-4-4-12
+                    name:
+                      type: string
+                      example: Meta
+                    description:
+                      type: string
+                      example: A tech company 
+                    message: 
+                      type: string
+                      example: Organisation created successfully          
               
   /api/v1/organisation/{orgId}/user:
     post:
-    tags:  Organisation
-    description: Adds user to an organisation
-    operationId: addUserToOrg
-    parameters: 
-      - name: orgId
-      - in: path
-      - type: integer
-      - required: true
-      - description: Organisation Id
+      description: Adds user to an organisation
+      tags:  
+        - Organisation
+      parameters: 
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
       
-    responses: 
-      "200":
-        description: User added to Organisation
-        content:
-          application/json:
-            schema:
-              type: object
-              items:
-                properties:
-                  userId:
-                    type: integer
-                    example: uuid
-                  userFirstName:
-                    type: string
-                    example: John
-                  userLastName:
-                    type: string
-                    example: Doe
-                  email:
-                    type: string
-                    example: John
-                  password:
-                    type: string
-                    example: Doe
-  
+        
+      responses: 
+        "201":
+          description: User added to Organisation
+          content:
+            application/json:
+              schema: 
+                type: object
+                items:
+                  properties:
+                    userId:
+                      type: integer
+                      format: uuid
+                      example: uuid
+                    userFirstName:
+                      type: string
+                      example: John
+                    userLastName:
+                      type: string
+                      example: Doe
+                    email:
+                      type: string
+                      example: email@email.com
+    
   
   /api/v1/organisation/{orgId}:
     put:
-    tags: Organisation
-    description: Update organisation
-    parameters: 
-      - name: orgId
-      - in: path
-      - type: integer
-      - required: true
+      tags: 
+      - Organisation
+      description: Update organisation
+      parameters: 
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
     
-    responses: 
-      "204": 
-        description: Organisation successfully updated
-        content:
-          application/json:
-            schema: 
-              items:
-              properties:
-                  orgId:
-                    type: uuid
-                    example: 8-4-4-4-12
-                  name:
-                    type: string
-                    example: Facebook
-                  description:
-                    type: string
-                    example: More than a tech company
-      "400":
-          description: Error updating organisation
+      responses: 
+        "204": 
+          description: Organisation successfully updated
           content:
             application/json:
-            schema: Unable to update organisation
+              schema: 
+                type: object
+                properties:
+                    orgId:
+                      type: string
+                      format: uuid
+                      example: 8-4-4-4-12
+                    name:
+                      type: string
+                      example: Facebook
+                    description:
+                      type: string
+                      example: More than a tech company
+        "400":
+            description: Error updating organisation
+            
       
     delete:
-    tags: Organisation
-    description: Delete Organisation
-    parameters:
-      - in: path
-      - name: orgId
-    responses:
+      tags: 
+      - Organisation
+      description: Delete Organisation
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
         "204":
           description: Organisation successfully deleted.
-          content:
-            application/json:
-              schema: Organisation deleted
+
+
+components:
+  schemas:
+    Organisation:
+      type: object
+      required:
+        - name
+        - organisation
+      properties:
+        name:
+          type: string
+          format: int32
+          example: Meta
+        description:
+          type: string
+          format: int32
+          example: description here
+        status:
+          type: string
+          format: int32
+          example: "Success"
+        message:
+          type: string
+          format: int64
+          example: "Organisation created successfully"
