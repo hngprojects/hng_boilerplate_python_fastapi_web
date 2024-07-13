@@ -592,6 +592,7 @@ The base URL for the API is: `https://virtserver.swaggerhub.com/SUNDINOH_1/Forum
   "username": "string",
   "password": "string"
 }
+```
 ### Database design image
 > click the image to access the database design.
 <a href="https://dbdiagram.io/d/Community-Forum-API-database-Design-66914a259939893daec898a0">
