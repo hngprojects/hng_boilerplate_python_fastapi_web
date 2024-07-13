@@ -1,0 +1,88 @@
+paths:
+  /api/v1/organisation:
+    post:
+      summary: Create a new organisation
+      operationId: createOrg
+      tags: 
+        - Organisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+          type: object
+          required:
+            - organisationName
+            - description
+          properties:
+            - organisationName:
+              type: string
+              format: int32
+              example: organisationName
+            - description:
+              type: string
+              format: int32
+              example: description here
+      responses:
+        "201":
+          description: Organisation created successfully
+          content:
+            application/json:
+            schema: "Write schema here"
+        "400":
+          description: Error creating organisation
+          content:
+            application/json:
+            schema:
+                  "Customize error here"
+                  
+              
+  /api/v1/organisation/{orgId}/user:
+    post:
+    tags:  Organisation
+    summary: Adds user to an organisation
+    operationId: addUserToOrg
+    parameters: 
+      - name: orgId
+      - in: path
+      - type: integer
+      - required: true
+      - description: Organisation Id
+    responses: 
+      "200":
+        description: User added to Organisation
+        content:
+          application/json:
+            schema:
+              "Create schema here"
+  
+       
+  /api/v1/organisation/{orgId}:
+    put:
+    tags: Organisation
+    summary: Update organisation
+    parameters: 
+      - name: orgId
+      - in: path
+      - type: integer
+      - required: true
+      - description: Organisation Id
+    responses: 
+      "200": 
+        description: Organisation successfully updated
+        content:
+          application/json:
+            schema: "Write schema here"
+      
+      
+    delete:
+    tags: Organisation
+    summary: Delete organisation
+    parameters:
+      - in: path
+      - name: orgId
+    responses:
+        "200":
+          description: Organisation successfully deleted.
+          content:
+            application/json:
+              schema: "Create schema here"
