@@ -914,6 +914,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/LocalizationResponse'
+                
+  #Email Templates
+  /email-templates:
+  get:
+    summary: Get all email templates
+    responses:
+      '200':
+      description: All email templates
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailTemplatesResponse'
+  post:
+    summary: Create a new email template
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailTemplateRequest'
+    responses:
+      '201':
+      description: Email template created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EmailTemplateResponse'
+
+  /email-templates/{id}:
+    put:
+      summary: Update an email template
+      parameters:
+        - name: id
+        in: path
+        description: ID of the email template to update
+        required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailTemplateRequest'
+      responses:
+        '200':
+        description: Email template updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailTemplateResponse'
+    delete:
+      summary: Delete an email template
+      parameters:
+        - name: id
+        in: path
+        description: ID of the email template to delete
+        required: true
+      responses:
+        '200':
+        description: Email template deleted successfully
+
+  #Activity Log
+  /activity-logs:
+    get:
+      summary: Get all activity logs
+      description: Get all activity logs
+      responses:
+        '200':
+        description: Activity logs retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityLogResponse'
+
+  #Push Notifications
+  /push-notifications:
+    get:
+      summary: Get all push notifications
+      description: Get all push notifications
+      responses:
+        '200':
+        description: Push notifications retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PushNotificationResponse'
+    post:
+      summary: Create a push notification
+      description: Create a push notification
+      requestBody:
+        content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PushNotificationRequest'
+      responses:
+      '200':
+      description: Push notification created successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PushNotificationResponse'
+
 
 components:
   schemas:
@@ -1324,6 +1423,46 @@ components:
           type: string
         region:
           type: string
+    
+    # Email Templates
+    EmailTemplatesResponse:
+      type: object
+      properties:
+        templates:
+          type: array
+          items:
+            type: string
+    EmailTemplateRequest:
+      type: object
+      properties:
+        template:
+        type: string
+
+    #Activity Log
+    ActivityLogResponse:
+      type: object
+      properties:
+        activityLog:
+          type: array
+          items:
+            type: string
+
+    #Push Notification
+    PushNotificationResponse:
+      type: object
+      properties:
+      pushNotification:
+        type: array
+        items:
+          type: string
+    PushNotificationRequest:
+      type: object
+      properties:
+      pushNotification:
+        type: string
+
+
+
 
   securitySchemes:
     bearerAuth:
