@@ -558,17 +558,6 @@ paths:
                   type: string
                   format: int64
                   example: Lorem ipsum dolor
-                created_at:
-                  type: string
-                  format: date
-                  example: 2024-07-13T10:29:39.572Z
-                updated_at:
-                  type: string
-                  format: date
-                  example: 2024-07-13T10:29:39.572Z
-                views:
-                  type: number
-                  example: 10
 
   /api/v1/posts/{post_id}:
     get:
@@ -578,7 +567,7 @@ paths:
       operationId: getBlog
       parameters:
         - name: post_id
-          description: The post id of the user to be retrieved
+          description: The id of the post to be retrieved
           in: path
           required: true
           schema:
@@ -608,7 +597,7 @@ paths:
       operationId: updatePost
       parameters:
         - name: post_id
-          description: The post id of the user to be retrieved
+          description: The id of the post to be updated
           in: path
           required: true
           schema:
@@ -651,17 +640,7 @@ paths:
                   type: string
                   format: int64
                   example: Lorem ipsum dolor
-                created_at:
-                  type: string
-                  format: date
-                  example: 2024-07-13T10:29:39.572Z
-                updated_at:
-                  type: string
-                  format: date
-                  example: 2024-07-13T10:29:39.572Z
-                views:
-                  type: number
-                  example: 10
+                
     delete:
       tags:
         - Blog
@@ -671,7 +650,7 @@ paths:
       operationId: deletePost
       parameters:
         - name: post_id
-          description: The post id of the user to be retrieved
+          description: The id of the post to be deleted
           in: path
           required: true
           schema:
