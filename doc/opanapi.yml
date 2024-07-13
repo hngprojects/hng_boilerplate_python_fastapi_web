@@ -80,7 +80,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - email
                 - password
               properties:
@@ -123,18 +123,18 @@ paths:
                 token:
                   type: string
       responses:
-        '200':
+        "200":
           description: Social authentication successful
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Success'
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ValidationError"        
+                $ref: "#/components/schemas/ValidationError"
 
   /api/v1/auth/magic-link:
     post:
@@ -151,18 +151,18 @@ paths:
                 email:
                   type: string
       responses:
-        '200':
+        "200":
           description: Magic Link Sent
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Success'
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ValidationError"        
+                $ref: "#/components/schemas/ValidationError"
 
   /api/v1/users/{user_id}:
     get:
@@ -237,7 +237,7 @@ paths:
       responses:
         "204":
           description: User deleted successfully
-        
+
   # forgot-password
   /api/v1/auth/forgot-password:
     post:
@@ -448,7 +448,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error" 
+                $ref: "#/components/schemas/Error"
 
   /api/v1/notifications/{notification_id}:
     put:
@@ -477,7 +477,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
-                             
 
 components:
   schemas:
@@ -599,4 +598,7 @@ components:
           type: boolean
         created_at:
           type: string
-          format: date-time      
+          format: date-time
+          example: "request processed successfully"
+        data:
+          type: object
