@@ -1,17 +1,25 @@
 {
-  "openapi": "3.1.0",
-  "info": {
-    "title": "HNG Boilerplate API Design",
-    "version": "1.0.0",
-    "description": "API for the HNG Boilerplate project"
-  },
-  "servers": [
-    {
-      "url": "http://127.0.0.1"
-    }
-  ],
-  "paths": {
-    "/auth/register": {
+	"openapi": "3.0.0",
+	"info": {
+		"title": "Backend-Benders API",
+		"description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
+		"contact": {
+			"name": "Backend Benders"
+		},
+		"licencse": {
+			"name": "Apache License",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0"
+		},
+		"version": "1.0.0"
+	},
+	"servers": [
+		{
+			"url": "http:localhost/",
+			"descrition": "The local server host"
+		}
+	],
+	"paths": {
+		"/auth/register": {
       "post": {
         "summary": "Register a new user",
         "tags": [
@@ -97,7 +105,10 @@
             "BearerAuth": []
           }
         ],
-        "parameters": [
+		-------add paths here--------
+	},
+	"components": {
+		"parameters": [
           {
             "name": "userId",
             "in": "path",
@@ -282,7 +293,15 @@
       }
     }
   },
-  "components": {
+		--------add components here-------
+	},
+	"externalDocs": {
+		"description": "Checkout our README file here",
+		"url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
+	}
+}
+
+ 
     "schemas": {
       "User": {
         "type": "object",
