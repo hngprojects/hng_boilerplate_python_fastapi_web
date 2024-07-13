@@ -1,3 +1,6 @@
+# no longer working with this. 
+#all new changes in openapi.yml
+
 openapi: 3.0.0
 
 info:
@@ -71,6 +74,52 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageResponse'
+
+  /api/v1/auth/social:
+    post:
+      summary:  User Social authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                token:
+                  type: string
+      responses:
+        '200':
+          description: Social authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SocialAuthResponse'
+
+  /api/v1/auth/magic-link:
+    post:
+      summary: Magic link authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Magic link sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MagicLinkResponse'
 
   /api/v1/auth/login:
     post:
