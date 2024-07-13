@@ -1,0 +1,11 @@
+Project DynamoApi {
+  Note: "stage-three backend task HNG"
+  database: "postgres"
+  members: '''
+    kariuki.w.agnes@gmail.com,
+    chukssomzzy@gmail.com,
+    davidifebueme@gmail.com,
+    codewitgabi222@gmail.com,
+    ikehfranklin06@gmail.com
+    '''
+}

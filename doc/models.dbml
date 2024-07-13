@@ -1,0 +1,126 @@
+Project DynamoApi {
+  Note: "stage-three backend task HNG"
+  database: "postgres"
+  members: '''
+    kariuki.w.agnes@gmail.com,
+    chukssomzzy@gmail.com,
+    davidifebueme@gmail.com,
+    codewitgabi222@gmail.com,
+    ikehfranklin06@gmail.com
+    '''
+}
+Table User {
+  id big_auto [pk, unique]
+  userId uuid [unique, default:`uuid.uuid4()`]
+  firstName char 
+  lastName char 
+  email_address email [unique]
+  password char 
+  is_active boolean [default:`True`]
+  date_created date_time 
+  last_updated date_time 
+  is_superadmin boolean [default:`False`]
+  referral_code char 
+  Note: '''User(id, userId, firstName, lastName, email_address, password, is_active, date_created, last_updated, is_superadmin, referral_code)'''
+}
+
+
+Table Organisation {
+  id big_auto [pk, unique]
+  orgId uuid [unique, default:`uuid.uuid4()`]
+  name char 
+  description text 
+  Note: '''Organisation(id, orgId, name, description)'''
+}
+
+
+Table api_organisation_users {
+  user_id auto [pk]
+  organisation_id auto [pk]
+}
+ref: Organisation.id > api_organisation_users.organisation_id
+ref: User.id > api_organisation_users.user_id
+
+
+Table WaitList {
+  id big_auto [pk, unique]
+  user one_to_one [unique]
+  joined_at date_time 
+  status char [default:`"waiting"`]
+  Note: '''WaitList(id, user, joined_at, status)'''
+}
+ref: WaitList.user - User.id
+
+
+Table Profile {
+  id big_auto [pk, unique]
+  user one_to_one [unique]
+  profile_picture image [null]
+  display_name char 
+  bio text 
+  date_of_birth date [null]
+  gender char [null]
+  Note: '''Profile(id, user, profile_picture, display_name, bio, date_of_birth, gender)'''
+}
+ref: Profile.user - User.id
+
+
+Table Setting {
+  id big_auto [pk, unique]
+  user one_to_one [unique]
+  dark_mode boolean [default:`False`]
+  Note: '''Setting(id, user, dark_mode)'''
+}
+ref: Setting.user - User.id
+
+
+Table Email {
+  id big_auto [pk, unique]
+  author foreign_key [null]
+  subject char 
+  body text 
+  date_created date_time 
+  last_updated date_time 
+  to_email email 
+  sent_at date_time 
+  status char 
+  Note: '''Email(id, author, subject, body, date_created, last_updated, to_email, sent_at, status)'''
+}
+ref: Email.author > User.id
+
+
+Table BlogPost {
+  id big_auto [pk, unique]
+  blog_id uuid [unique, default:`uuid.uuid4()`]
+  author foreign_key [null]
+  title char 
+  content text 
+  date_created date_time 
+  last_updated date_time 
+  views integer 
+  is_published boolean [default:`False`]
+  Note: '''BlogPost(id, blog_id, author, title, content, date_created, last_updated, views, is_published)'''
+}
+ref: BlogPost.author > User.id
+
+
+Table BlackListToken {
+  id big_auto [pk, unique]
+  created_by foreign_key 
+  token char 
+  date_created date_time 
+  Note: '''BlackListToken(id, created_by, token, date_created)'''
+}
+ref: BlackListToken.created_by > User.id
+
+
+Table Notification {
+  id big_auto [pk, unique]
+  notification_id uuid [unique, default:`uuid.uuid4()`]
+  message text 
+  read boolean [default:`False`]
+  date_created date_time 
+  Note: '''Notification(id, notification_id, message, read, date_created)'''
+}
+
+
