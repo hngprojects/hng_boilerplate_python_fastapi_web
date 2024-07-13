@@ -88,22 +88,22 @@ Our database is designed to support all the features of the SaaS platform effici
 
 1. Clone the repository:
    ```
-   git clone 
+   git clone https://github.com/dammycute/straw_hat_team.git
    ```
 
 2. Install dependencies:
    ```
-   [commands to install dependencies]
+   [with the commands to install dependencies]
    ```
 
 3. Set up the database:
    ```
-   [commands to set up and migrate the database]
+   [with the commands to set up and migrate the database]
    ```
 
 4. Start the server:
    ```
-   [command to start the server]
+   [with the command to start the server]
    ```
 
 5. Access the API documentation:
