@@ -17,6 +17,9 @@ tags:
   - name: Waitlist
   - name: Notification
   - name: Blog
+  - name: Payments
+  - name: Payment Methods
+  - name: Webhooks 
 
 paths:
   /api/v1/auth/register:
@@ -66,32 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    format: int32
-                    example: "success"
-                  message:
-                    type: string
-                    format: int64
-                    example: "User registered successfully"
-                  data:
-                    type: object
-                    required:
-                      - user
-                      - accessToken
-                    properties:
-                      accessToken:
-                        type: string
-                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
-                      user:
-                        $ref: "#/components/schemas/User"
-
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
@@ -128,31 +106,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    format: int32
-                    example: "success"
-                  message:
-                    type: string
-                    format: int64
-                    example: "Login successful"
-                  data:
-                    type: object
-                    required:
-                      - user
-                      - accessToken
-                    properties:
-                      accessToken:
-                        type: string
-                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
-                      user:
-                        $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
@@ -182,31 +136,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    format: int32
-                    example: "success"
-                  message:
-                    type: string
-                    format: int64
-                    example: "Social authentication successful"
-                  data:
-                    type: object
-                    required:
-                      - user
-                      - accessToken
-                    properties:
-                      accessToken:
-                        type: string
-                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
-                      user:
-                        $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
@@ -279,20 +209,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Magic link sent"
-                  data:
-                    type: object
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
@@ -320,31 +237,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User detail"
-                  data:
-                    type: object
-                    required:
-                      - user
-                    properties:
-                      user:
-                        $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
 
     put:
       summary: Update user details
@@ -375,31 +274,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User updated successfully"
-                  data:
-                    type: object
-                    required:
-                      - user
-                    properties:
-                      user:
-                        $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
 
     delete:
       summary: Delete user
@@ -437,20 +318,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "A link to reset your password has been sent to your email"
-                  data:
-                    type: object
+                $ref: "#/components/schemas/Success"
         "400":
           description: Invalid request
           content:
@@ -469,6 +337,7 @@ paths:
               properties:
                 email:
                   type: string
+                  format: int32
                   example: example@mail.com
 
   # reset-password
@@ -486,20 +355,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Your password has been successfully changed"
-                  data:
-                    type: object
+                $ref: "#/components/schemas/Success"
         "400":
           description: Invalid request
           content:
@@ -527,27 +383,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Fetched wailists"
-                  data:
-                    type: object
-                    required:
-                      - waitlists
-                    properties:
-                      waitlists:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Waitlist"
+                type: array
+                items:
+                  $ref: "#/components/schemas/Success"
     post:
       tags:
         - Waitlist
@@ -561,25 +399,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Fetched wailists"
-                  data:
-                    type: object
-                    required:
-                      - waitlist
-                    properties:
-                      waitlist:
-                        $ref: "#/components/schemas/Waitlist"
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
@@ -612,25 +432,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Fetched wailist"
-                  data:
-                    type: object
-                    required:
-                      - waitlist
-                    properties:
-                      waitlist:
-                        $ref: "#/components/schemas/Waitlist"
+                $ref: "#/components/schemas/Success"
 
   /api/v1/users/profile:
     get:
@@ -648,31 +450,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User profile"
-                  data:
-                    type: object
-                    required:
-                      - user
-                    properties:
-                      user:
-                        $ref: "#/components/schemas/User"
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
 
     put:
       tags:
@@ -707,32 +491,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User profile"
-                  data:
-                    type: object
-                    required:
-                      - user
-                    properties:
-                      user:
-                        $ref: "#/components/schemas/User"
-
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
 
   /api/v1/notifications:
     get:
@@ -758,7 +523,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
 
   /api/v1/notifications/{notification_id}:
     put:
@@ -782,20 +547,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User profile"
-                  data:
-                    $ref: "#/components/schemas/Notification"
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
@@ -818,25 +570,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User profile"
-                  data:
-                    type: object
-                    required:
-                      - posts
-                    properties:
-                      posts:
-                        $ref: "#/components/schemas/BlogPost"
+                $ref: "#/components/schemas/Success"
     post:
       tags:
         - Blog
@@ -852,52 +586,13 @@ paths:
           content:
             application/json:
               schema:
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Post created successfully"
-                  data:
-                    type: object
-                    required:
-                      - posts
-                    properties:
-                      posts:
-                        required:
-                          - title
-                          - content
-                        properties:
-                          title:
-                            type: string
-                            format: int64
-                            example: Example blog post
-                          content:
-                            type: string
-                            format: int64
-                            example: Lorem ipsum dolor
-                          created_at:
-                            type: string
-                            format: date
-                            example: 2024-07-13T10:29:39.572Z
-                          updated_at:
-                            type: string
-                            format: date
-                            example: 2024-07-13T10:29:39.572Z
-                          views:
-                            type: number
-                            example: 10
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
         "400":
           description: Bad request
           content:
@@ -921,16 +616,27 @@ paths:
                   type: string
                   format: int64
                   example: Lorem ipsum dolor
+                created_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                updated_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                views:
+                  type: number
+                  example: 10
 
   /api/v1/posts/{post_id}:
     get:
       tags:
         - Blog
-      summary: Get a single blog post
+      summary: Get a single blog
       operationId: getBlog
       parameters:
         - name: post_id
-          description: The id of the post to be retrieved
+          description: The post id of the user to be retrieved
           in: path
           required: true
           schema:
@@ -943,25 +649,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Post fetch"
-                  data:
-                    type: object
-                    required:
-                      - post
-                    properties:
-                      post:
-                        $ref: "#/components/schemas/BlogPost"
+                $ref: "#/components/schemas/Success"
         "400":
           description: Bad request
           content:
@@ -991,31 +679,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "Post updated successfully"
-                  data:
-                    type: object
-                    required:
-                      - post
-                    properties:
-                      post:
-                        $ref: "#/components/schemas/BlogPost"
+                $ref: "#/components/schemas/Success"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
+                $ref: "#/components/schemas/Error"
         "400":
           description: Bad request
           content:
@@ -1040,7 +710,17 @@ paths:
                   type: string
                   format: int64
                   example: Lorem ipsum dolor
-
+                created_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                updated_at:
+                  type: string
+                  format: date
+                  example: 2024-07-13T10:29:39.572Z
+                views:
+                  type: number
+                  example: 10
     delete:
       tags:
         - Blog
@@ -1065,61 +745,500 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthenticationError"
-
-  /api/v1/users/export:
+                $ref: "#/components/schemas/Error"
+  /payment_intents:
     post:
+      summary: Create Payment Intent
+      operationId: createPaymentIntent
       tags:
-        - User
-      security:
-        - BearerAuth: []
-      summary: Export user data
-      operationId: exportUserData
-      description: |
-        Export user data in the specified format
-      responses:
-        "200":
-          description: User data export successful
-          content:
-            application/json:
-              schema:
-                type: object
-                required:
-                  - status
-                  - message
-                  - data
-                properties:
-                  status:
-                    type: string
-                    example: "success"
-                  message:
-                    type: string
-                    example: "User data exported successfully"
-                  data:
-                    type: object
-
-        "401":
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ValidationError"
-
+        - Payments
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               required:
-                - format
+                - amount
+                - currency
+                - payment_method_types
               properties:
-                format:
+                amount:
+                  type: integer
+                  description: Amount in cents
+                currency:
                   type: string
-                  enum: [pdf, csv, xml]
-                  default: pdf
+                  example: "usd"
+                payment_method_types:
+                  type: array
+                  items:
+                    type: string
+                  example: ["card"]
+                user:
+                  type: string
+                  description: User ID (optional)
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /payment_intents/{paymentIntentId}/confirm:
+    post:
+      summary: Confirm Payment
+      operationId: confirmPayment
+      tags:
+        - Payments
+      parameters:
+        - name: paymentIntentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payment_method
+              properties:
+                payment_method:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /payment_intents/{paymentIntentId}:
+    get:
+      summary: Retrieve Payment Status
+      operationId: getPaymentStatus
+      tags:
+        - Payments
+      parameters:
+        - name: paymentIntentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentIntent'
+
+  /refunds:
+    post:
+      summary: Refund Payment
+      operationId: refundPayment
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - payment_intent
+              properties:
+                payment_intent:
+                  type: string
+                amount:
+                  type: integer
+                  description: Amount to refund.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Refund'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /payment_methods:
+    post:
+      summary: Create Payment Method
+      operationId: createPaymentMethod
+      tags:
+        - Payment Methods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+                - card
+              properties:
+                type:
+                  type: string
+                  enum: [card]
+                card:
+                  type: object
+                  properties:
+                    number:
+                      type: string
+                    exp_month:
+                      type: integer
+                    exp_year:
+                      type: integer
+                    cvc:
+                      type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethod'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /payment_methods/{paymentMethodId}/attach:
+    post:
+      summary: Attach Payment Method to User
+      operationId: attachPaymentMethod
+      tags:
+        - Payment Methods
+      parameters:
+        - name: paymentMethodId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentMethod'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /users/{userId}/payment_methods:
+    get:
+      summary: List Payment Methods for User
+      operationId: listPaymentMethods
+      tags:
+        - Payment Methods
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [card]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PaymentMethod'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /subscriptions:
+    post:
+      summary: Create Subscription
+      operationId: createSubscription
+      tags:
+        - Subscriptions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - items
+              properties:
+                user:
+                  type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      price:
+                        type: string
+                      quantity:
+                        type: integer
+                payment_behavior:
+                  type: string
+                  enum: [default_incomplete, error_if_incomplete]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /subscriptions/{subscriptionId}:
+    get:
+      summary: Retrieve Subscription Details
+      operationId: getSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+    patch:
+      summary: Update Subscription
+      operationId: updateSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionUpdate'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+    delete:
+      summary: Cancel Subscription
+      operationId: cancelSubscription
+      tags:
+        - Subscriptions
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: cancel_at_period_end
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /webhooks:
+    post:
+      summary: Handle Webhooks
+      operationId: handleWebhook
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful response
 
 components:
   schemas:
+    PaymentIntent:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: integer
+        currency:
+          type: string
+        status:
+          type: string
+        client_secret:
+          type: string
+
+    Refund:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: integer
+        status:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        email:
+          type: string
+        name:
+          type: string
+        phone:
+          type: string
+
+    PaymentMethod:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        card:
+          type: object
+          properties:
+            brand:
+              type: string
+            last4:
+              type: string
+            exp_month:
+              type: integer
+            exp_year:
+              type: integer
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        user:
+          type: string
+        status:
+          type: string
+        current_period_end:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              price:
+                type: object
+              quantity:
+                type: integer
+
+    SubscriptionUpdate:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              price:
+                type: string
+              quantity:
+                type: integer
+        payment_method:
+          type: string  
     Success:
       type: object
       required:
@@ -1151,23 +1270,6 @@ components:
         message:
           type: string
           format: int64
-        statusCode:
-          type: number
-          example: 400
-
-    BadRequestError:
-      type: object
-      required:
-        - status
-        - message
-        - statusCode
-      properties:
-        status:
-          type: string
-          example: Bad request
-        message:
-          type: string
-          example: Bad request
         statusCode:
           type: number
           example: 400
@@ -1285,6 +1387,7 @@ components:
         - firstName
         - lastName
         - email
+        - password
       properties:
         userId:
           type: string
@@ -1302,9 +1405,10 @@ components:
           type: string
           format: int32
           example: example@gmail.com
-        referral_code:
+        password:
           type: string
-          example: BNGHS0967
+          format: password
+          example: "@password123"
         is_active:
           type: boolean
           example: false
@@ -1330,7 +1434,7 @@ components:
         - content
       properties:
         author:
-          $ref: "#/components/schemas/User"
+          $ref: "#components/schemas/User"
         title:
           type: string
           format: int64
