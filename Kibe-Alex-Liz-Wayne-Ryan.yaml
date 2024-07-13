@@ -1,0 +1,1616 @@
+
+openapi: 3.0.1
+info:
+  title: Example API
+  description: API documentation for the Example project.
+  version: 1.0.0
+
+paths:
+  /users/:
+    post:
+      summary: Create User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User created successfully
+    get:
+      summary: List Users
+      responses:
+        '200':
+          description: A list of users
+
+  /users/{id}/:
+    get:
+      summary: Retrieve User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User retrieved successfully
+    put:
+      summary: Update User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: User updated successfully
+    delete:
+      summary: Delete User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted successfully
+
+  /user-authentication/:
+    post:
+      summary: Create Authentication Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                token:
+                  type: string
+                token_type:
+                  type: string
+                expiry_date:
+                  type: string
+                  format: date-time
+                used:
+                  type: boolean
+      responses:
+        '201':
+          description: Token created successfully
+    get:
+      summary: List Authentication Tokens
+      responses:
+        '200':
+          description: A list of authentication tokens
+
+  /user-authentication/{id}/:
+    get:
+      summary: Retrieve Authentication Token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Token retrieved successfully
+    put:
+      summary: Update Authentication Token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                token:
+                  type: string
+                token_type:
+                  type: string
+                expiry_date:
+                  type: string
+                  format: date-time
+                used:
+                  type: boolean
+      responses:
+        '200':
+          description: Token updated successfully
+    delete:
+      summary: Delete Authentication Token
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Token deleted successfully
+
+  /email-messages/:
+    post:
+      summary: Create Email Message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sender:
+                  type: string
+                recipient:
+                  type: string
+                subject:
+                  type: string
+                body:
+                  type: string
+                status:
+                  type: string
+                sent_date:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Email message created successfully
+    get:
+      summary: List Email Messages
+      responses:
+        '200':
+          description: A list of email messages
+
+  /email-messages/{id}/:
+    get:
+      summary: Retrieve Email Message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email message retrieved successfully
+    put:
+      summary: Update Email Message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sender:
+                  type: string
+                recipient:
+                  type: string
+                subject:
+                  type: string
+                body:
+                  type: string
+                status:
+                  type: string
+                sent_date:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Email message updated successfully
+    delete:
+      summary: Delete Email Message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Email message deleted successfully
+
+  /payment-transactions/:
+    post:
+      summary: Create Payment Transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                amount:
+                  type: number
+                  format: decimal
+                currency:
+                  type: string
+                payment_gateway:
+                  type: string
+                status:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Payment transaction created successfully
+    get:
+      summary: List Payment Transactions
+      responses:
+        '200':
+          description: A list of payment transactions
+
+  /payment-transactions/{id}/:
+    get:
+      summary: Retrieve Payment Transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment transaction retrieved successfully
+    put:
+      summary: Update Payment Transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                amount:
+                  type: number
+                  format: decimal
+                currency:
+                  type: string
+                payment_gateway:
+                  type: string
+                status:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Payment transaction updated successfully
+    delete:
+      summary: Delete Payment Transaction
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Payment transaction deleted successfully
+
+  /user-settings/:
+    post:
+      summary: Create User Setting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                setting_key:
+                  type: string
+                setting_value:
+                  type: string
+      responses:
+        '201':
+          description: User setting created successfully
+    get:
+      summary: List User Settings
+      responses:
+        '200':
+          description: A list of user settings
+
+  /user-settings/{id}/:
+    get:
+      summary: Retrieve User Setting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User setting retrieved successfully
+    put:
+      summary: Update User Setting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                setting_key:
+                  type: string
+                setting_value:
+                  type: string
+      responses:
+        '200':
+          description: User setting updated successfully
+    delete:
+      summary: Delete User Setting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User setting deleted successfully
+
+  /organization-settings/:
+    post:
+      summary: Create Organization Setting
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                org_id:
+                  type: integer
+                setting_key:
+                  type: string
+                setting_value:
+                  type: string
+      responses:
+        '201':
+          description: Organization setting created successfully
+    get:
+      summary: List Organization Settings
+      responses:
+        '200':
+          description: A list of organization settings
+
+  /organization-settings/{id}/:
+    get:
+      summary: Retrieve Organization Setting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization setting retrieved successfully
+    put:
+      summary: Update Organization Setting
+      parameters:
+        - name: id
+          in: path
+
+
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                org_id:
+                  type: integer
+                setting_key:
+                  type: string
+                setting_value:
+                  type: string
+      responses:
+        '200':
+          description: Organization setting updated successfully
+    delete:
+      summary: Delete Organization Setting
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Organization setting deleted successfully
+
+  /user-profile/:
+    post:
+      summary: Create User Profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                full_name:
+                  type: string
+                avatar_url:
+                  type: string
+                bio:
+                  type: string
+      responses:
+        '201':
+          description: User profile created successfully
+    get:
+      summary: List User Profiles
+      responses:
+        '200':
+          description: A list of user profiles
+
+  /user-profile/{id}/:
+    get:
+      summary: Retrieve User Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User profile retrieved successfully
+    put:
+      summary: Update User Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                full_name:
+                  type: string
+                avatar_url:
+                  type: string
+                bio:
+                  type: string
+      responses:
+        '200':
+          description: User profile updated successfully
+    delete:
+      summary: Delete User Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User profile deleted successfully
+
+  /organization-profile/:
+    post:
+      summary: Create Organization Profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                user_id:
+                  type: integer
+                logo_url:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '201':
+          description: Organization profile created successfully
+    get:
+      summary: List Organization Profiles
+      responses:
+        '200':
+          description: A list of organization profiles
+
+  /organization-profile/{id}/:
+    get:
+      summary: Retrieve Organization Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organization profile retrieved successfully
+    put:
+      summary: Update Organization Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                user_id:
+                  type: integer
+                logo_url:
+                  type: string
+                description:
+                  type: string
+      responses:
+        '200':
+          description: Organization profile updated successfully
+    delete:
+      summary: Delete Organization Profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Organization profile deleted successfully
+
+  /activity-log/:
+    post:
+      summary: Create Activity Log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                action:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Activity log created successfully
+    get:
+      summary: List Activity Logs
+      responses:
+        '200':
+          description: A list of activity logs
+
+  /activity-log/{id}/:
+    get:
+      summary: Retrieve Activity Log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Activity log retrieved successfully
+    put:
+      summary: Update Activity Log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                action:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Activity log updated successfully
+    delete:
+      summary: Delete Activity Log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Activity log deleted successfully
+
+  /superadmin-users/:
+    post:
+      summary: Create SuperAdmin User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: SuperAdmin user created successfully
+    get:
+      summary: List SuperAdmin Users
+      responses:
+        '200':
+          description: A list of superadmin users
+
+  /superadmin-users/{id}/:
+    get:
+      summary: Retrieve SuperAdmin User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SuperAdmin user retrieved successfully
+    put:
+      summary: Update SuperAdmin User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                username:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: SuperAdmin user updated successfully
+    delete:
+      summary: Delete SuperAdmin User
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: SuperAdmin user deleted successfully
+
+  /superadmin-activity-log/:
+    post:
+      summary: Create SuperAdmin Activity Log
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                action:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: SuperAdmin activity log created successfully
+    get:
+      summary: List SuperAdmin Activity Logs
+      responses:
+        '200':
+          description: A list of superadmin activity logs
+
+  /superadmin-activity-log/{id}/:
+    get:
+      summary: Retrieve SuperAdmin Activity Log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: SuperAdmin activity log retrieved successfully
+    put:
+      summary: Update SuperAdmin Activity Log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                action:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: SuperAdmin activity log updated successfully
+    delete:
+      summary: Delete SuperAdmin Activity Log
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: SuperAdmin activity log deleted successfully
+
+  /cookie-consents/:
+    post:
+      summary: Create Cookie Consent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                consent_given:
+                  type: boolean
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Cookie consent created successfully
+    get:
+      summary: List Cookie Consents
+      responses:
+        '200':
+          description: A list of cookie consents
+
+  /cookie-consents/{id}/:
+    get:
+      summary: Retrieve Cookie Consent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cookie consent retrieved successfully
+    put:
+      summary: Update Cookie Consent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                consent_given:
+                  type: boolean
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Cookie consent updated successfully
+    delete:
+      summary: Delete Cookie Consent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Cookie consent deleted successfully
+
+  /dashboard-widgets/:
+    post:
+      summary: Create Dashboard Widget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                widget_type:
+                  type: string
+                data:
+                  type: object
+      responses:
+        '201':
+          description: Dashboard widget created successfully
+    get:
+      summary: List Dashboard Widgets
+      responses:
+        '200':
+          description: A list of dashboard widgets
+
+  /dashboard-widgets/{id}/:
+    get:
+      summary: Retrieve Dashboard Widget
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Dashboard widget retrieved successfully
+    put:
+      summary: Update Dashboard Widget
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                widget_type:
+                  type: string
+                data:
+                  type: object
+      responses:
+        '200':
+          description: Dashboard widget updated successfully
+    delete:
+      summary: Delete Dashboard Widget
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Dashboard widget deleted successfully
+
+  /invites/:
+    post:
+      summary: Create Invite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inviter_id:
+                  type: integer
+                invitee_email:
+                  type: string
+                status:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Invite created successfully
+    get:
+      summary: List Invites
+      responses:
+        '200':
+          description: A list of invites
+
+  /invites/{id}/:
+    get:
+      summary: Retrieve Invite
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invite retrieved successfully
+    put:
+      summary: Update Invite
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                inviter_id:
+                  type: integer
+                invitee_email:
+                  type: string
+                status:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Invite updated successfully
+    delete:
+      summary: Delete Invite
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Invite deleted successfully
+
+  /user-data-exports/:
+    post:
+      summary: Create User Data Export
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                export_data:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: User data export created successfully
+    get:
+      summary: List User Data Exports
+      responses:
+        '200':
+          description: A list of user data exports
+
+  /user-data-exports/{id}/:
+    get:
+      summary: Retrieve User Data Export
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User data export retrieved successfully
+    put:
+      summary: Update User Data Export
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                export_data:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: User data export updated successfully
+    delete:
+      summary: Delete User Data Export
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User data export deleted successfully
+
+  /random-data/:
+    post:
+      summary: Create Random Data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                data_value:
+                  type: string
+      responses:
+        '201':
+          description: Random data created successfully
+    get:
+      summary: List Random Data
+      responses:
+        '200':
+          description: A list of random data
+
+  /random-data/{id}/:
+    get:
+      summary: Retrieve Random Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Random data retrieved successfully
+    put:
+      summary: Update Random Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                data_value:
+                  type: string
+      responses:
+        '200':
+          description: Random data updated successfully
+    delete:
+      summary: Delete Random Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Random data deleted successfully
+
+  /chart-data/:
+    post:
+      summary: Create Chart Data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                chart_type:
+                  type: string
+                data:
+                  type: object
+      responses:
+        '201':
+          description: Chart data created successfully
+    get:
+      summary: List Chart Data
+      responses:
+        '200':
+          description: A list of chart data
+
+  /chart-data/{id}/:
+    get:
+      summary: Retrieve Chart Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Chart data retrieved successfully
+    put:
+      summary: Update Chart Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                chart_type:
+                  type: string
+                data:
+                  type: object
+      responses:
+        '200':
+          description: Chart data updated successfully
+    delete:
+      summary: Delete Chart Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Chart data deleted successfully
+
+  /notifications/:
+    post:
+      summary: Create Notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                message:
+                  type: string
+                read_status:
+                  type: boolean
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Notification created successfully
+    get:
+      summary: List Notifications
+      responses:
+        '200':
+          description: A list of notifications
+
+  /notifications/{id}/:
+    get:
+      summary: Retrieve Notification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Notification retrieved successfully
+    put:
+      summary: Update Notification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                message:
+                  type: string
+                read_status:
+                  type: boolean
+                timestamp:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Notification updated successfully
+    delete:
+      summary: Delete Notification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Notification deleted successfully
+
+  /blog-posts/:
+    post:
+      summary: Create Blog Post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                author:
+                  type: string
+      responses:
+        '201':
+          description: Blog post created successfully
+    get:
+      summary: List Blog Posts
+      responses:
+        '200':
+          description: A list of blog posts
+
+  /blog-posts/{id}/:
+    get:
+      summary: Retrieve Blog Post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Blog post retrieved successfully
+    put:
+      summary: Update Blog Post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                author:
+                  type: string
+      responses:
+        '200':
+          description: Blog post updated successfully
+    delete:
+      summary: Delete Blog Post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Blog post deleted successfully
+
+  /user-language-preferences/:
+    post:
+      summary: Create User Language Preference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                language_code:
+                  type: string
+                region_code:
+                  type: string
+      responses:
+        '201':
+          description: User language preference created successfully
+    get:
+      summary: List User Language Preferences
+      responses:
+        '200':
+          description: A list of user language preferences
+
+  /user-language-preferences/{id}/:
+    get:
+      summary: Retrieve User Language Preference
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User language preference retrieved successfully
+    put:
+      summary: Update User Language Preference
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                language_code:
+                  type: string
+                region_code:
+                  type: string
+      responses:
+        '200':
+          description: User language preference updated successfully
+    delete:
+      summary: Delete User Language Preference
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User language preference deleted successfully
+
+  /email-templates/:
+    post:
+      summary: Create Email Template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_name:
+                  type: string
+                subject:
+                  type: string
+                body:
+                  type: string
+                created_by:
+                  type: string
+      responses:
+        '201':
+          description: Email template created successfully
+    get:
+      summary: List Email Templates
+      responses:
+        '200':
+          description: A list of email templates
+
+  /email-templates/{id}/:
+    get:
+      summary: Retrieve Email Template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email template retrieved successfully
+    put:
+      summary: Update Email Template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_name:
+                  type: string
+                subject:
+                  type: string
+                body:
+                  type: string
+                created_by:
+                  type: string
+      responses:
+        '200':
+          description: Email template updated successfully
+    delete:
+      summary: Delete Email Template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Email template deleted successfully
