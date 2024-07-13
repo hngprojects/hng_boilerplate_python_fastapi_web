@@ -1,10 +1,6 @@
-# Your Project API
+# HNG STAGE 3 BOILERPLATE
 
 Welcome to the documentation for Your Project API. This API provides endpoints for user authentication, message handling, payment processing, user management, organization management, and various other functionalities.
-
-## Base URL
-
-The base URL for the API is: `https://virtserver.swaggerhub.com/SUNDINOH_1/ForumAPI/1.0.0`
 
 ## Endpoints
 
