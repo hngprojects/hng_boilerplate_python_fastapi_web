@@ -1,6 +1,6 @@
 # PentaCoder User API Documentation
 
-View API design [https://openaiapi-victoribortechs-projects.vercel.app](here).
+View API design [here](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ## Table of Contents
 - [Introduction](#introduction)
@@ -36,7 +36,7 @@ This project is a user authentication and management API built using FastAPI. It
 ## API Design
 
 Version: 1.0.0
-Our OpenAPI specification Designs can be found [https://openaiapi-victoribortechs-projects.vercel.app](here).
+Our OpenAPI specification Designs can be found [here](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ## Base URL
 
@@ -65,7 +65,8 @@ Authorization: Bearer <your_jwt_token>
 8. Organization Management
 9. Admin Functions
 
-Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app](here).
+Check out the API design [here](https://openaiapi-victoribortechs-projects.vercel.app).
+
 ## Endpoints
 
 ### Authentication and Regisration
@@ -103,7 +104,7 @@ Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app]
 7. **GET /auth/refresh-access-token**
 - Refresh access token
 
-[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design).
+[Link to API design](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ### Profile Management
 
@@ -116,7 +117,7 @@ Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app]
 3. **POST /profile/change-password**
 - Change user password (requires authentication)
 
-[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+[Link to API design](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ### Contact and Messaging
 
@@ -129,7 +130,7 @@ Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app]
 3. **GET /messaging/templates**
 - List email templates (requires authentication)
 
-[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+[Link to API design](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ### Payments
 
@@ -142,7 +143,7 @@ Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app]
 3. **GET /payments/{payment_id}**
 - Get details of a specific payment (requires authentication)
 
-[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+[Link to API design](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ### Organizations
 
@@ -152,7 +153,7 @@ Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app]
 2. **POST /organisations**
 - Create a new organization (requires authentication)
 
-[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+[Link to API design](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ### Admin Functions
 
@@ -174,7 +175,7 @@ Check out the API design [https://openaiapi-victoribortechs-projects.vercel.app]
 6. **GET /admin/activity-log**
 - Get activity log (admin only)
 
-[https://openaiapi-victoribortechs-projects.vercel.app](Link to API design)
+[Link to API design](https://openaiapi-victoribortechs-projects.vercel.app).
 
 ## Error Handling
 
