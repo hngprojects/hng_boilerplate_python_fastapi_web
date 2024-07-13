@@ -12,8 +12,11 @@ info:
 
 tags:
   - name: Authentication
+  - name: User
   - name: Organisation
   - name: Waitlist
+  - name: Notification
+
 
 paths:
   /api/v1/auth/register:
@@ -78,7 +81,7 @@ paths:
           application/json:
             schema:
               type: object
-              required: 
+              required:
                 - email
                 - password
               properties:
@@ -104,14 +107,74 @@ paths:
               schema:
                 $ref: "#/components/schemas/ValidationError"
 
+  /api/v1/auth/social:
+    post:
+      summary: Social authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                provider:
+                  type: string
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Social authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
+
+  /api/v1/auth/magic-link:
+    post:
+      summary: Magic link authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        "200":
+          description: Magic Link Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationError"
 
   /api/v1/users/{user_id}:
     get:
       summary: Get a user's details
+      security:
+        - BearerAuth: []
       tags:
         - User
       parameters:
         - name: user_id
+          description: The user id of the user to be retrueved
           in: path
           required: true
           schema:
@@ -132,6 +195,8 @@ paths:
 
     put:
       summary: Update user details
+      security:
+        - BearerAuth: []
       tags:
         - User
       parameters:
@@ -167,6 +232,8 @@ paths:
 
     delete:
       summary: Delete user
+      security:
+        - BearerAuth: []
       tags:
         - User
       parameters:
@@ -178,7 +245,7 @@ paths:
       responses:
         "204":
           description: User deleted successfully
-        
+
   # forgot-password
   /api/v1/auth/forgot-password:
     post:
@@ -309,6 +376,124 @@ paths:
               schema:
                 $ref: "#/components/schemas/Success"
 
+  /api/v1/users/profile:
+    get:
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      summary: Get the profile of the authenticated user
+      operationId: getProfile
+      description: |
+        Returns the profile information of the authenticated user
+      responses:
+        "200":
+          description: User profile fetched successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      tags:
+        - User
+      security:
+        - BearerAuth: []
+      summary: Update the profile of the authenticated user
+      operationId: updateProfile
+      description: |
+        Update the profile information of the authenticated user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                email:
+                  type: string
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+      responses:
+        "200":
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/notifications:
+    get:
+      tags:
+        - Notification
+      security:
+        - BearerAuth: []
+      summary: Gets notifications for a particular authenticated user
+      operationId: getNotifications
+      description: |
+        Retrieve all notifications for the authenticated user
+      responses:
+        "200":
+          description: Notifications fetched successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /api/v1/notifications/{notification_id}:
+    put:
+      tags:
+        - Notification
+      security:
+        - BearerAuth: []
+      summary: Marks notification as read
+      operationId: markNotificationAsRead
+      description: |
+        Authorized user marks a specific notification id as read
+      parameters:
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notification marked as read
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Success"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
 components:
   schemas:
     Success:
@@ -417,3 +602,34 @@ components:
           type: string
           format: int32
           example: example@gmail.com
+
+    Notification:
+      type: object
+      properties:
+        notification_id:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+          example: "request processed successfully"
+        data:
+          type: object
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: Grants read access
+            write: Grants write access
+            admin: Grants access to admin operations
