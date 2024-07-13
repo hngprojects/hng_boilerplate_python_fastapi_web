@@ -1,12 +1,15 @@
-**API Documentation:**
+
+**Documentation following OpenAPI specifications**
+https://abnurkan.github.io/HNG_STAGE3_API_TEST/
 
 
-
-**Database Design:**
+**Database Design**
 https://imgur.com/a/90xhWlG
 
 **Contributors**
-jubriltayo
+* jubriltayo
+* abnurkan
+* algamawiy
 
 
 
