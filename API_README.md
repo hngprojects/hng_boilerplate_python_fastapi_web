@@ -30,7 +30,7 @@ This project is a user authentication and management API built using FastAPI. It
 - Victor Ibor(API Design Lead)
 - Cyril Emmanuel (Database Design Lead)
 - Wisdom Ehirim (API Design Documentation)
-- Egbetokun Timileun (Databse Design Documentation)
+- Egbetokun Timilehin (Databse Design Documentation)
 - Atiba Adedolapo (General Documentation Review)
 
 ## API Design
