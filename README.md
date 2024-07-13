@@ -1023,8 +1023,8 @@ This operation does not require authentication
 
 # Authors
 
-- Ukeme Edet - https://github.com/Nifilat
-- Oluwanifemi Latunde - https://github.com/Nifilat
-- Trevor Job - https://github.com/Nifilat
-- Murithador Arowolo - https://github.com/Arnthorny
-- Anthony Ebo - https://github.com/Arnthorny
+- Ukeme Edet - [Github](https://github.com/Ukeme-Edet)
+- Oluwanifemi Latunde - [Github](https://github.com/Nifilat)
+- Trevor Job - [Github](https://github.com/trevorjob)
+- Murithador Arowolo - [Github](https://github.com/Armolas)
+- Anthony Ebo - [Github](https://github.com/Arnthorny)
