@@ -1,31 +1,655 @@
 {
-	"openapi": "3.0.0",
-	"info": {
-		"title": "Backend-Benders API",
-		"description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
-		"contact": {
-			"name": "Backend Benders"
-		},
-		"licencse": {
-			"name": "Apache License",
-			"url": "http://www.apache.org/licenses/LICENSE-2.0"
-		},
-		"version": "1.0.0"
-	},
-	"servers": [
-		{
-			"url": "http:localhost/",
-			"descrition": "The local server host"
-		}
-	],
-	"paths": {
-		-------add paths here--------
-	},
-	"components": {
-		--------add components here-------
-	},
-	"externalDocs": {
-		"description": "Checkout our README file here",
-		"url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
-	}
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Backend-Benders API",
+    "description": "This API serves as a foundational platform for web services, providing robust endpoints for essential functionalities such as authentication, user management, notifications, and payment processing.",
+    "contact": {
+      "name": "Backend Benders"
+    },
+    "licencse": {
+      "name": "Apache License",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http:localhost/",
+      "descrition": "The local server host"
+    }
+  ],
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Register a new user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegistration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Log in a user",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginCredentials"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/InvalidCredentials"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidLoginInput"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}": {
+      "get": {
+        "summary": "Get a single user",
+        "tags": ["Users"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        }
+      }
+    },
+    "/api/profile": {
+      "get": {
+        "summary": "Get authenticated user's profile",
+        "tags": ["Profile"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update authenticated user's profile",
+        "tags": ["Profile"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile successfully updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "summary": "Request password reset",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordResetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset email sent"
+          },
+          "404": {
+            "$ref": "#/components/responses/EmailNotFound"
+          },
+          "422": {
+            "$ref": "#/components/responses/InvalidEmail"
+          }
+        }
+      }
+    },
+    "/auth/change-password": {
+      "put": {
+        "summary": "Change authenticated user's password",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password successfully changed"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/UnprocessableEntity"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "summary": "Log out the authenticated user",
+        "tags": ["Authentication"],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully logged out"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "firstname",
+          "lastname",
+          "email",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "UserRegistration": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["username", "firstname", "lastname", "email", "password"]
+      },
+      "LoginCredentials": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        },
+        "required": ["token", "user"]
+      },
+      "UserUpdate": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "PasswordResetRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": ["email"]
+      },
+      "ChangePasswordRequest": {
+        "type": "object",
+        "properties": {
+          "current_password": {
+            "type": "string",
+            "format": "password"
+          },
+          "new_password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["current_password", "new_password"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "A general error message"
+          },
+          "errors": {
+            "type": "object",
+            "description": "Detailed error information for each field",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field": {
+                    "type": "string",
+                    "description": "The name of the field that caused the error"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "A specific error code"
+                  },
+                  "message": {
+                    "type": "string",
+                    "description": "A human-readable error message for this specific field"
+                  }
+                },
+                "required": ["field", "code", "message"]
+              }
+            }
+          }
+        },
+        "required": ["message"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Invalid input",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Invalid input data",
+              "errors": {
+                "username": [
+                  {
+                    "field": "username",
+                    "code": "invalid_characters",
+                    "message": "Username contains invalid characters"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "Unauthorized",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Unauthorized",
+              "errors": {
+                "auth": [
+                  {
+                    "field": "auth",
+                    "code": "invalid_token",
+                    "message": "Invalid or expired authentication token"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "Resource already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Resource already exists",
+              "errors": {
+                "email": [
+                  {
+                    "field": "email",
+                    "code": "already_exists",
+                    "message": "A user with this email address already exists"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Resource not found",
+              "errors": {
+                "user": [
+                  {
+                    "field": "user",
+                    "code": "not_found",
+                    "message": "The requested user does not exist"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "InvalidLoginInput": {
+        "description": "Invalid login input",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Invalid login input",
+              "errors": {
+                "email": [
+                  {
+                    "field": "email",
+                    "code": "invalid_format",
+                    "message": "Please provide a valid email address"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "EmailNotFound": {
+        "description": "Email not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Email not found",
+              "errors": {
+                "email": [
+                  {
+                    "field": "email",
+                    "code": "not_found",
+                    "message": "No user account found with this email address"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "InvalidEmail": {
+        "description": "Invalid email format",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Invalid email format",
+              "errors": {
+                "email": [
+                  {
+                    "field": "email",
+                    "code": "invalid_format",
+                    "message": "Please provide a valid email address"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "InvalidCredentials": {
+        "description": "Invalid credentials",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Invalid credentials",
+              "errors": {
+                "auth": [
+                  {
+                    "field": "auth",
+                    "code": "invalid_credentials",
+                    "message": "The provided email or password is incorrect"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "UnprocessableEntity": {
+        "description": "Validation error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "message": "Validation failed",
+              "errors": {
+                "password": [
+                  {
+                    "field": "password",
+                    "code": "too_short",
+                    "message": "Password must be at least 8 characters long"
+                  },
+                  {
+                    "field": "password",
+                    "code": "missing_uppercase",
+                    "message": "Password must contain at least one uppercase letter"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Checkout our README file here",
+    "url": "https://github.com/Arnthorny/hng_boilerplate_python_fastapi_web/blob/main/README.md"
+  }
 }
