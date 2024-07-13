@@ -16,6 +16,7 @@ tags:
   - name: Organisation
   - name: Waitlist
   - name: Notification
+  - name: Blog
 
 paths:
   /api/v1/auth/register:
@@ -65,7 +66,32 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    format: int32
+                    example: "success"
+                  message:
+                    type: string
+                    format: int64
+                    example: "User registered successfully"
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
+                      user:
+                        $ref: "#/components/schemas/User"
+
         "400":
           description: Bad request
           content:
@@ -102,7 +128,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    format: int32
+                    example: "success"
+                  message:
+                    type: string
+                    format: int64
+                    example: "Login successful"
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
+                      user:
+                        $ref: "#/components/schemas/User"
         "400":
           description: Bad request
           content:
@@ -132,7 +182,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    format: int32
+                    example: "success"
+                  message:
+                    type: string
+                    format: int64
+                    example: "Social authentication successful"
+                  data:
+                    type: object
+                    required:
+                      - user
+                      - accessToken
+                    properties:
+                      accessToken:
+                        type: string
+                        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2NjhmZmJjYTk5ZmJiYWYxZTYyMzQ4NjMiLCJ1c2VybmFtZSI6ImNvZGV3aXRnYWJpIiwiZW1haWwiOiJjb2Rld2l0Z2FiaUBnbWFpbC5jb20iLCJjcmVhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJ1cGRhdGVkQXQiOiIyMDI0LTA3LTExVDE1OjM1OjM4LjY3MloiLCJpYXQiOjE3MjA4NzAwNzAsImV4cCI6MTcyMTQ3NDg3MH0.yFW5LIA3qJ5d_GaR3Ipw9MzzMp3K1mUOpdxAHAACpRs
+                      user:
+                        $ref: "#/components/schemas/User"
         "400":
           description: Bad request
           content:
@@ -160,7 +234,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Magic link sent"
+                  data:
+                    type: object
         "400":
           description: Bad request
           content:
@@ -188,13 +275,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User detail"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
 
     put:
       summary: Update user details
@@ -225,13 +330,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User updated successfully"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
 
     delete:
       summary: Delete user
@@ -248,7 +371,12 @@ paths:
       responses:
         "204":
           description: User deleted successfully
-
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationError"
   # forgot-password
   /api/v1/auth/forgot-password:
     post:
@@ -264,13 +392,27 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "A link to reset your password has been sent to your email"
+                  data:
+                    type: object
         "400":
           description: Invalid request
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ValidationError"
+
       requestBody:
         required: true
         content:
@@ -282,7 +424,6 @@ paths:
               properties:
                 email:
                   type: string
-                  format: int32
                   example: example@mail.com
 
   # reset-password
@@ -300,7 +441,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Your password has been successfully changed"
+                  data:
+                    type: object
         "400":
           description: Invalid request
           content:
@@ -395,13 +549,31 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
 
     put:
       tags:
@@ -427,19 +599,41 @@ paths:
                   type: string
                 lastName:
                   type: string
+                phone:
+                  type: string
+
       responses:
         "200":
           description: User profile updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    type: object
+                    required:
+                      - user
+                    properties:
+                      user:
+                        $ref: "#/components/schemas/User"
+
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
 
   /api/v1/notifications:
     get:
@@ -465,7 +659,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
 
   /api/v1/notifications/{notification_id}:
     put:
@@ -489,7 +683,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    $ref: "#/components/schemas/Notification"
         "401":
           description: Unauthorized
           content:
@@ -512,7 +719,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "User profile"
+                  data:
+                    type: object
+                    required:
+                      - posts
+                    properties:
+                      posts:
+                        $ref: "#/components/schemas/BlogPost"
     post:
       tags:
         - Blog
@@ -528,13 +753,52 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Post created successfully"
+                  data:
+                    type: object
+                    required:
+                      - posts
+                    properties:
+                      posts:
+                        required:
+                          - title
+                          - content
+                        properties:
+                          title:
+                            type: string
+                            format: int64
+                            example: Example blog post
+                          content:
+                            type: string
+                            format: int64
+                            example: Lorem ipsum dolor
+                          created_at:
+                            type: string
+                            format: date
+                            example: 2024-07-13T10:29:39.572Z
+                          updated_at:
+                            type: string
+                            format: date
+                            example: 2024-07-13T10:29:39.572Z
+                          views:
+                            type: number
+                            example: 10
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
         "400":
           description: Bad request
           content:
@@ -563,7 +827,7 @@ paths:
     get:
       tags:
         - Blog
-      summary: Get a single blog
+      summary: Get a single blog post
       operationId: getBlog
       parameters:
         - name: post_id
@@ -580,7 +844,25 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Post fetch"
+                  data:
+                    type: object
+                    required:
+                      - post
+                    properties:
+                      post:
+                        $ref: "#/components/schemas/BlogPost"
         "400":
           description: Bad request
           content:
@@ -610,19 +892,38 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Success"
+                type: object
+                required:
+                  - status
+                  - message
+                  - data
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  message:
+                    type: string
+                    example: "Post updated successfully"
+                  data:
+                    type: object
+                    required:
+                      - post
+                    properties:
+                      post:
+                        $ref: "#/components/schemas/BlogPost"
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
         "400":
           description: Bad request
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ValidationError"
+
       requestBody:
         content:
           application/json:
@@ -640,7 +941,7 @@ paths:
                   type: string
                   format: int64
                   example: Lorem ipsum dolor
-                
+
     delete:
       tags:
         - Blog
@@ -665,7 +966,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: "#/components/schemas/AuthenticationError"
 
 components:
   schemas:
@@ -703,6 +1004,40 @@ components:
         statusCode:
           type: number
           example: 400
+
+    BadRequestError:
+      type: object
+      required:
+        - status
+        - message
+        - statusCode
+      properties:
+        status:
+          type: string
+          example: Bad request
+        message:
+          type: string
+          example: Bad request
+        statusCode:
+          type: number
+          example: 400
+
+    AuthenticationError:
+      type: object
+      required:
+        - status
+        - message
+        - statusCode
+      properties:
+        status:
+          type: string
+          example: "Bad request"
+        message:
+          type: string
+          example: "Client error"
+        statusCode:
+          type: number
+          example: 401
 
     ValidationError:
       type: object
@@ -789,7 +1124,7 @@ components:
         created_at:
           type: string
           format: date-time
-          example: "request processed successfully"
+          example: 2024-07-13T12:14:29.692Z
         data:
           type: object
 
@@ -800,7 +1135,6 @@ components:
         - firstName
         - lastName
         - email
-        - password
       properties:
         userId:
           type: string
@@ -818,10 +1152,9 @@ components:
           type: string
           format: int32
           example: example@gmail.com
-        password:
+        referral_code:
           type: string
-          format: password
-          example: "@password123"
+          example: BNGHS0967
         is_active:
           type: boolean
           example: false
