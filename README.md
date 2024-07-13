@@ -88,7 +88,7 @@ Our database is designed to support all the features of the SaaS platform effici
 
 1. Clone the repository:
    ```
-   git clone [your-repo-url]
+   git clone 
    ```
 
 2. Install dependencies:
