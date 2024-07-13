@@ -5,16 +5,18 @@ This documentation will explain the API's purpose, its main features, and requir
 ## Introduction
 This project is a user authentication and management API built using FastAPI. It includes endpoints for user signup, login, logout, and token refresh functionalities. The API is designed to be secure and efficient, making use of JWT tokens for authentication.
 
-## Team
-- Victor
-- Myles
-- Wisdom
-- Timi
-- Adebola
+## PentaCoders - API and Database Design
+### Team Members
+- Victor Ibor(API Design Lead)
+- Myles Cyril (Database Design Lead)
+- Wisdom Ehirim (API Design Documentation)
+- Timi (Databse Design Documentation)
+- Adebola (General Documentation Review)
 
 ## API Design
 
-1.0.0
+Version: 1.0.0
+Our OpenAPI specification Designs can be found [here](https://openaiapi-victoribortechs-projects.vercel.app)
 
 ## Base URL
 
@@ -22,6 +24,8 @@ All API requests should be made to:
 ```
 https://api.pentacoder.com/v1
 ```
+N/B: The base url is a sample base url and not a functional url.
+
 ## Authentication
 
 Most endpoints in this API require authentication. The API uses JSON Web Tokens (JWT) fornauthentication. To authenticate, iclude the JWT token in the Authorization header of your requests:
@@ -49,9 +53,11 @@ Authorization: Bearer <your_jwt_token>
 - **Request Body**:
   ```json
   {
+    "first_name": "John",
+    "last_name": "Doe",
     "email": "user@example.com",
-    "password": "string",
-    "name": "John Doe"
+    "password": "string"
+    
   }
   ```
 2. **POST /auth/login**
