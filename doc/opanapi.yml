@@ -606,6 +606,13 @@ paths:
         - BearerAuth: []
       summary: Update a blog post
       operationId: updatePost
+      parameters:
+        - name: post_id
+          description: The post id of the user to be retrieved
+          in: path
+          required: true
+          schema:
+            type: string
       description: |
         Update the blog post with the given `post_id`
       responses:
@@ -662,6 +669,13 @@ paths:
         - BearerAuth: []
       summary: Delete blog post
       operationId: deletePost
+      parameters:
+        - name: post_id
+          description: The post id of the user to be retrieved
+          in: path
+          required: true
+          schema:
+            type: string
       description: |
         Delete blog post with the provided `post_id`
       responses:
@@ -854,7 +868,7 @@ components:
         - content
       properties:
         author:
-          $ref: "#components/schemas/User"
+          $ref: "#/components/schemas/User"
         title:
           type: string
           format: int64
