@@ -20,3 +20,4 @@ FastAPI boilerplate
  python main.py
 ```
 
+![DB Diagram](./images/_HNG%20boilerplate.png)
