@@ -1,0 +1,129 @@
+/api/v1/organisation:
+    post:
+    tags: Organisation
+    description: Create a new organisation
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                  type: string
+                  format: int32
+                  example: Meta
+              description:
+                  type: string
+                  format: int32
+                  example: description here
+              
+      responses:
+        "201":
+          description: Organisation created successfully
+          content:
+            application/json:
+              schema: 
+                type: object
+                items:
+                properties:
+                  OrgId:
+                    type: integer
+                    example: uuid
+                  name:
+                    type: string
+                    example: Meta
+                  description:
+                    type: string
+                    example: A tech company
+                    
+        "400":
+          description: Error creating organisation
+          content:
+            application/json:
+            schema:
+              $ 
+                  
+              
+  /api/v1/organisation/{orgId}/user:
+    post:
+    tags:  Organisation
+    description: Adds user to an organisation
+    operationId: addUserToOrg
+    parameters: 
+      - name: orgId
+      - in: path
+      - type: integer
+      - required: true
+      - description: Organisation Id
+      
+    responses: 
+      "200":
+        description: User added to Organisation
+        content:
+          application/json:
+            schema:
+              type: object
+              items:
+                properties:
+                  userId:
+                    type: integer
+                    example: uuid
+                  userFirstName:
+                    type: string
+                    example: John
+                  userLastName:
+                    type: string
+                    example: Doe
+                  email:
+                    type: string
+                    example: John
+                  password:
+                    type: string
+                    example: Doe
+  
+  
+  /api/v1/organisation/{orgId}:
+    put:
+    tags: Organisation
+    description: Update organisation
+    parameters: 
+      - name: orgId
+      - in: path
+      - type: integer
+      - required: true
+    
+    responses: 
+      "204": 
+        description: Organisation successfully updated
+        content:
+          application/json:
+            schema: 
+              items:
+              properties:
+                  orgId:
+                    type: uuid
+                    example: 8-4-4-4-12
+                  name:
+                    type: string
+                    example: Facebook
+                  description:
+                    type: string
+                    example: More than a tech company
+      "400":
+          description: Error updating organisation
+          content:
+            application/json:
+            schema: Unable to update organisation
+      
+    delete:
+    tags: Organisation
+    description: Delete Organisation
+    parameters:
+      - in: path
+      - name: orgId
+    responses:
+        "204":
+          description: Organisation successfully deleted.
+          content:
+            application/json:
+              schema: Organisation deleted
