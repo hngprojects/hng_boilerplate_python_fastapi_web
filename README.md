@@ -11,7 +11,6 @@ includes: []
 search: false
 highlight_theme: darkula
 headingLevel: 2
-
 ---
 
 <!-- Generator: Widdershins v4.0.1 -->
@@ -24,11 +23,11 @@ API Boilerplate for HNG Task
 
 Base URLs:
 
-* <a href="http://127.0.0.1">http://127.0.0.1</a>
+- <a href="http://127.0.0.1">http://127.0.0.1</a>
 
 # Authentication
 
-- HTTP Authentication, scheme: bearer 
+- HTTP Authentication, scheme: bearer
 
 <h1 id="hng-boilerplate-api-default">Default</h1>
 
@@ -77,23 +76,23 @@ print(r.json())
 
 <h3 id="gets-all-payments-made-by-user-responses">Responses</h3>
 
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|All payments were returned|Inline|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Request requires authentication|[Error401](#schemaerror401)|
+| Status | Meaning                                                         | Description                     | Schema                      |
+| ------ | --------------------------------------------------------------- | ------------------------------- | --------------------------- |
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)         | All payments were returned      | Inline                      |
+| 401    | [Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1) | Request requires authentication | [Error401](#schemaerror401) |
 
 <h3 id="gets-all-payments-made-by-user-responseschema">Response Schema</h3>
 
 Status Code **200**
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|*anonymous*|[[Payment](#schemapayment)]|false|none|none|
-|» id|[PaymentId](#schemapaymentid)|true|none|The unique identifier of a payment|
-|» amount|integer|true|none|none|
-|» currency|string|true|none|none|
-|» status|string|true|none|none|
-|» createdAt|string|true|none|none|
+| Name        | Type                          | Required | Restrictions | Description                        |
+| ----------- | ----------------------------- | -------- | ------------ | ---------------------------------- |
+| _anonymous_ | [[Payment](#schemapayment)]   | false    | none         | none                               |
+| » id        | [PaymentId](#schemapaymentid) | true     | none         | The unique identifier of a payment |
+| » amount    | integer                       | true     | none         | none                               |
+| » currency  | string                        | true     | none         | none                               |
+| » status    | string                        | true     | none         | none                               |
+| » createdAt | string                        | true     | none         | none                               |
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -142,9 +141,9 @@ print(r.json())
 
 <h3 id="creates-a-payment-record-parameters">Parameters</h3>
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|body|body|[PaymentPost](#schemapaymentpost)|true|none|
+| Name | In   | Type                              | Required | Description |
+| ---- | ---- | --------------------------------- | -------- | ----------- |
+| body | body | [PaymentPost](#schemapaymentpost) | true     | none        |
 
 > Example responses
 
@@ -162,11 +161,11 @@ print(r.json())
 
 <h3 id="creates-a-payment-record-responses">Responses</h3>
 
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|201|[Created](https://tools.ietf.org/html/rfc7231#section-6.3.2)|Payment record created successfully|[Payment](#schemapayment)|
-|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Request malformed|[Error400](#schemaerror400)|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Request requires authentication|[Error401](#schemaerror401)|
+| Status | Meaning                                                          | Description                         | Schema                      |
+| ------ | ---------------------------------------------------------------- | ----------------------------------- | --------------------------- |
+| 201    | [Created](https://tools.ietf.org/html/rfc7231#section-6.3.2)     | Payment record created successfully | [Payment](#schemapayment)   |
+| 400    | [Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1) | Request malformed                   | [Error400](#schemaerror400) |
+| 401    | [Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)  | Request requires authentication     | [Error401](#schemaerror401) |
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -202,9 +201,9 @@ print(r.json())
 
 <h3 id="gets-a-single-payment-parameters">Parameters</h3>
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|payment_id|path|[PaymentId](#schemapaymentid)|true|The unique identifier of a payment record|
+| Name       | In   | Type                          | Required | Description                               |
+| ---------- | ---- | ----------------------------- | -------- | ----------------------------------------- |
+| payment_id | path | [PaymentId](#schemapaymentid) | true     | The unique identifier of a payment record |
 
 > Example responses
 
@@ -222,11 +221,11 @@ print(r.json())
 
 <h3 id="gets-a-single-payment-responses">Responses</h3>
 
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Single payment object was returned|[Payment](#schemapayment)|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Request requires authentication|[Error401](#schemaerror401)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Required resource not found|[Error404](#schemaerror404)|
+| Status | Meaning                                                         | Description                        | Schema                      |
+| ------ | --------------------------------------------------------------- | ---------------------------------- | --------------------------- |
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)         | Single payment object was returned | [Payment](#schemapayment)   |
+| 401    | [Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1) | Request requires authentication    | [Error401](#schemaerror401) |
+| 404    | [Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)  | Required resource not found        | [Error404](#schemaerror404) |
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -262,9 +261,9 @@ print(r.json())
 
 <h3 id="delete-a-payment-record-parameters">Parameters</h3>
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|payment_id|path|[PaymentId](#schemapaymentid)|true|The unique identifier of a payment record|
+| Name       | In   | Type                          | Required | Description                               |
+| ---------- | ---- | ----------------------------- | -------- | ----------------------------------------- |
+| payment_id | path | [PaymentId](#schemapaymentid) | true     | The unique identifier of a payment record |
 
 > Example responses
 
@@ -279,11 +278,11 @@ print(r.json())
 
 <h3 id="delete-a-payment-record-responses">Responses</h3>
 
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|204|[No Content](https://tools.ietf.org/html/rfc7231#section-6.3.5)|Payment record deleted successfully|None|
-|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Request requires authentication|[Error401](#schemaerror401)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Required resource not found|[Error404](#schemaerror404)|
+| Status | Meaning                                                         | Description                         | Schema                      |
+| ------ | --------------------------------------------------------------- | ----------------------------------- | --------------------------- |
+| 204    | [No Content](https://tools.ietf.org/html/rfc7231#section-6.3.5) | Payment record deleted successfully | None                        |
+| 401    | [Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1) | Request requires authentication     | [Error401](#schemaerror401) |
+| 404    | [Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)  | Required resource not found         | [Error404](#schemaerror404) |
 
 <aside class="warning">
 To perform this operation, you must be authenticated by means of one of the following methods:
@@ -330,19 +329,19 @@ print(r.json())
 
 <h3 id="gets-all-payment-providers-available-responses">Responses</h3>
 
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|All providers were returned|Inline|
+| Status | Meaning                                                 | Description                 | Schema |
+| ------ | ------------------------------------------------------- | --------------------------- | ------ |
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1) | All providers were returned | Inline |
 
 <h3 id="gets-all-payment-providers-available-responseschema">Response Schema</h3>
 
 Status Code **200**
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|*anonymous*|[[Provider](#schemaprovider)]|false|none|none|
-|» provider_id|string|true|none|none|
-|» provider_name|string|true|none|none|
+| Name            | Type                          | Required | Restrictions | Description |
+| --------------- | ----------------------------- | -------- | ------------ | ----------- |
+| _anonymous_     | [[Provider](#schemaprovider)] | false    | none         | none        |
+| » provider_id   | string                        | true     | none         | none        |
+| » provider_name | string                        | true     | none         | none        |
 
 <aside class="success">
 This operation does not require authentication
@@ -375,9 +374,9 @@ print(r.json())
 
 <h3 id="gets-a-single-payment-provider-parameters">Parameters</h3>
 
-|Name|In|Type|Required|Description|
-|---|---|---|---|---|
-|provider_id|path|string|true|The unique identifier of a payment provider|
+| Name        | In   | Type   | Required | Description                                 |
+| ----------- | ---- | ------ | -------- | ------------------------------------------- |
+| provider_id | path | string | true     | The unique identifier of a payment provider |
 
 > Example responses
 
@@ -392,10 +391,10 @@ print(r.json())
 
 <h3 id="gets-a-single-payment-provider-responses">Responses</h3>
 
-|Status|Meaning|Description|Schema|
-|---|---|---|---|
-|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Single provider object was returned|[Provider](#schemaprovider)|
-|404|[Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4)|Required resource not found|[Error404](#schemaerror404)|
+| Status | Meaning                                                        | Description                         | Schema                      |
+| ------ | -------------------------------------------------------------- | ----------------------------------- | --------------------------- |
+| 200    | [OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)        | Single provider object was returned | [Provider](#schemaprovider) |
+| 404    | [Not Found](https://tools.ietf.org/html/rfc7231#section-6.5.4) | Required resource not found         | [Error404](#schemaerror404) |
 
 <aside class="success">
 This operation does not require authentication
@@ -412,16 +411,15 @@ This operation does not require authentication
 
 ```json
 "string"
-
 ```
 
 The unique identifier of a payment
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|*anonymous*|string|false|none|The unique identifier of a payment|
+| Name        | Type   | Required | Restrictions | Description                        |
+| ----------- | ------ | -------- | ------------ | ---------------------------------- |
+| _anonymous_ | string | false    | none         | The unique identifier of a payment |
 
 <h2 id="tocS_Payment">Payment</h2>
 <!-- backwards compatibility -->
@@ -438,18 +436,17 @@ The unique identifier of a payment
   "status": "string",
   "createdAt": "string"
 }
-
 ```
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|id|[PaymentId](#schemapaymentid)|true|none|The unique identifier of a payment|
-|amount|integer|true|none|none|
-|currency|string|true|none|none|
-|status|string|true|none|none|
-|createdAt|string|true|none|none|
+| Name      | Type                          | Required | Restrictions | Description                        |
+| --------- | ----------------------------- | -------- | ------------ | ---------------------------------- |
+| id        | [PaymentId](#schemapaymentid) | true     | none         | The unique identifier of a payment |
+| amount    | integer                       | true     | none         | none                               |
+| currency  | string                        | true     | none         | none                               |
+| status    | string                        | true     | none         | none                               |
+| createdAt | string                        | true     | none         | none                               |
 
 <h2 id="tocS_PaymentPost">PaymentPost</h2>
 <!-- backwards compatibility -->
@@ -465,17 +462,16 @@ The unique identifier of a payment
   "status": "string",
   "createdAt": "string"
 }
-
 ```
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|amount|integer|true|none|none|
-|currency|string|true|none|none|
-|status|string|true|none|none|
-|createdAt|string|false|none|none|
+| Name      | Type    | Required | Restrictions | Description |
+| --------- | ------- | -------- | ------------ | ----------- |
+| amount    | integer | true     | none         | none        |
+| currency  | string  | true     | none         | none        |
+| status    | string  | true     | none         | none        |
+| createdAt | string  | false    | none         | none        |
 
 <h2 id="tocS_Provider">Provider</h2>
 <!-- backwards compatibility -->
@@ -489,15 +485,14 @@ The unique identifier of a payment
   "provider_id": "string",
   "provider_name": "string"
 }
-
 ```
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|provider_id|string|true|none|none|
-|provider_name|string|true|none|none|
+| Name          | Type   | Required | Restrictions | Description |
+| ------------- | ------ | -------- | ------------ | ----------- |
+| provider_id   | string | true     | none         | none        |
+| provider_name | string | true     | none         | none        |
 
 <h2 id="tocS_Error404">Error404</h2>
 <!-- backwards compatibility -->
@@ -511,15 +506,14 @@ The unique identifier of a payment
   "message": "string",
   "code": 0
 }
-
 ```
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|message|string|false|none|Not found|
-|code|integer|false|none|none|
+| Name    | Type    | Required | Restrictions | Description |
+| ------- | ------- | -------- | ------------ | ----------- |
+| message | string  | false    | none         | Not found   |
+| code    | integer | false    | none         | none        |
 
 <h2 id="tocS_Error401">Error401</h2>
 <!-- backwards compatibility -->
@@ -533,15 +527,14 @@ The unique identifier of a payment
   "message": "string",
   "code": 0
 }
-
 ```
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|message|string|false|none|Authentication failure|
-|code|integer|false|none|none|
+| Name    | Type    | Required | Restrictions | Description            |
+| ------- | ------- | -------- | ------------ | ---------------------- |
+| message | string  | false    | none         | Authentication failure |
+| code    | integer | false    | none         | none                   |
 
 <h2 id="tocS_Error400">Error400</h2>
 <!-- backwards compatibility -->
@@ -555,13 +548,19 @@ The unique identifier of a payment
   "message": "string",
   "code": 0
 }
-
 ```
 
 ### Properties
 
-|Name|Type|Required|Restrictions|Description|
-|---|---|---|---|---|
-|message|string|false|none|Malformed request|
-|code|integer|false|none|none|
+| Name    | Type    | Required | Restrictions | Description       |
+| ------- | ------- | -------- | ------------ | ----------------- |
+| message | string  | false    | none         | Malformed request |
+| code    | integer | false    | none         | none              |
 
+## Database Design
+
+![Database Design](./hng_database_design.png)
+
+## Database Documentation
+
+For more detailed information on the database schema and relationships, please refer to the [Database Documentation](https://dbdocs.io/Trevor%20job/hng_database_docs).
