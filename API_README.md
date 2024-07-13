@@ -19,7 +19,27 @@ This project is a user authentication and management API built using FastAPI. It
 ## Base URL
 
 All API requests should be made to:
+```
+https://api.pentacoder.com/v1
+```
+## Authentication
 
+Most endpoints in this API require authentication. The API uses JSON Web Tokens (JWT) fornauthentication. To authenticate, iclude the JWT token in the Authorization header of your requests:
+
+```
+Authorization: Bearer <your_jwt_token>
+```
+## Main Features
+
+1. User Registration and Authentication
+2. Social Authentication
+3. Passwordless Authentication (Magic Link)
+4. Profile Management
+5. Contact Form Submission
+6. Email Messaging
+7. Payment Processing
+8. Organization Management
+9. Admin Functions
 
 ## Endpoints
 
