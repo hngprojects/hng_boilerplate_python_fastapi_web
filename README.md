@@ -1,4 +1,4 @@
-**Team Gamma**
+# Team Gamma
 We do hard things together
 
 **Documentation following OpenAPI specifications**
