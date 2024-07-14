@@ -19,18 +19,20 @@ Openapi Yaml file is at the root of the folder
 
 Group Gamma Comprehensive API and Database Design
 
-**I. Introduction**
+# I. Introduction
 
 This document outlines the API and database design for a comprehensive SaaS platform. The platform includes features such as user authentication, organization management, payments, messaging, and various user-centric functionalities.
 
 API Documentation: OpenAPI 3.0.0
 
-**II. API Design**
+# II. API Design
 Our API is designed using OpenAPI 3.0.0 specification. It provides a comprehensive set of endpoints to interact with various features of the SaaS platform.
 Key Endpoints:
 
 **API AND DATABASE DESIGN**
+
  API Design
+ 
 1. Authentication
 - POST /auth/signup - User registration.
 - POST /auth/login - User login.
@@ -130,13 +132,15 @@ Payments
 
 
 
-**III. Database Design**
+# III. Database Design
 
 Our database is designed to support all the features of the SaaS platform efficiently. It includes tables for users, organizations, roles, payments, content management, and more.
 Key Tables:
 
 **DATABASE DESIGN**
+
 Tables
+
 1- Users:
   - id (Primary Key, Integer)
   - username (String, Not Null, Unique)
@@ -280,28 +284,35 @@ Tables
 - Organisations (1) ⟷ (0..*) Payments
 
 **Full SQL Schema**
+
 Entity Relationship Diagram:
 
-[Link to your ERD image or diagram]
+[Link to your ERD image or diagram](https://imgur.com/a/90xhWlG)
 
-IV. Implementation Details
+# IV. Implementation Details
 Architecture: [e.g., Microservices, Monolithic]
 Authentication: JWT-based authentication for API endpoints
 Background Jobs: [e.g., Celery for asynchronous tasks]
 Caching: [e.g., Redis for caching frequently accessed data]
 
 V. Setup and Usage
+
 Clone the repository:
+
 ```git clone https://github.com/jubriltayo/hng_boilerplate_python_fastapi_web.git```
 
 Create a virtual environment.
+
     ```python3 -m venv .venv```
 
 Activate virtual environment.
+
     ```source /path/to/venv/bin/activate```
 
-Install project dependencies ```pip install -r requirements.txt```
+Install project dependencies  ```pip install -r requirements.txt```
+
 Create a .env file by copying the .env.sample file cp .env.sample .env
+
 Set up the database:
  ```alembic init alembic```
 
@@ -313,10 +324,10 @@ Start server.
 ```python main.py```
 
 Access the API documentation:
-[URL or command to access API documentation]
+[URL or command to access API documentation](https://abnurkan.github.io/HNG_STAGE3_API_TEST/)
 
 
-VI. Contributing
+# VI. Contributing
 We welcome contributions to improve the API and database design. Please follow these steps to contribute:
 Fork the repository
 Create a new branch (git checkout -b AmazingFeature)
