@@ -1,4 +1,7 @@
 # Team Gamma
+
+**Group Gamma Comprehensive API and Database Design**
+
 We do hard things together
 
 **Documentation following OpenAPI specifications**
@@ -17,21 +20,20 @@ Openapi Yaml file is at the root of the folder
 * [Dricy](https://github.com/Dricy)
 
 
-Group Gamma Comprehensive API and Database Design
 
 # I. Introduction
 
-This document outlines the API and database design for a comprehensive SaaS platform. The platform includes features such as user authentication, organization management, payments, messaging, and various user-centric functionalities.
+The overall aim of this document is to create a robust, scalable, and user-friendly platform that can be used by organizations and individual users alike. By integrating essential features like authentication, user management, content management, and payment processing, the system aims to streamline operations, enhance user engagement, and provide a seamless experience across various functionalities. This document is designed to be a comprehensive solution for businesses looking to manage their operations efficiently while maintaining high security and user satisfaction.
 
 API Documentation: OpenAPI 3.0.0
 
 # II. API Design
-Our API is designed using OpenAPI 3.0.0 specification. It provides a comprehensive set of endpoints to interact with various features of the SaaS platform.
-Key Endpoints:
+Our API is designed using OpenAPI 3.0.0 specification. It provides a comprehensive set of endpoints to interact with various features of the Software as a service platform.
+
 
 **API AND DATABASE DESIGN**
 
- API Design
+ Key API Endpoints  Design
  
 1. Authentication
 - POST /auth/signup - User registration.
@@ -301,26 +303,26 @@ Clone the repository:
 
 ```git clone https://github.com/jubriltayo/hng_boilerplate_python_fastapi_web.git```
 
-Create a virtual environment.
+1. Create a virtual environment.
 
     ```python3 -m venv .venv```
 
-Activate virtual environment.
+2. Activate virtual environment.
 
     ```source /path/to/venv/bin/activate```
 
-Install project dependencies  ```pip install -r requirements.txt```
+3. Install project dependencies  ```pip install -r requirements.txt```
 
-Create a .env file by copying the .env.sample file cp .env.sample .env
+4. Create a .env file by copying the .env.sample file cp .env.sample .env
 
-Set up the database:
+5. Set up the database:
  ```alembic init alembic```
 
  ```alembic revision --autogenerate -m "Initial migration"```
 
 ```alembic upgrade head```
 
-Start server.
+6. Start server.
 ```python main.py```
 
 Access the API documentation:
