@@ -4,9 +4,10 @@ We do hard things together
 **Documentation following OpenAPI specifications**
 https://abnurkan.github.io/HNG_STAGE3_API_TEST/
 
-
 **Database Design**
 https://imgur.com/a/90xhWlG
+
+Openapi Yaml file is at the root of the folder
 
 **Contributors**
 * [jubriltayo](https://github.com/jubriltayo)
