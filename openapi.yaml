@@ -1,0 +1,1930 @@
+openapi: 3.0.0
+info:
+  title: HNG - Task 3 - OpenAPI 3.0
+  description: This is an HNG Boilertemplate based on the OpenAPI 3.0 specification
+  contact:
+    name: HNG - Group Gamma
+    url: http://hostingsite.com
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local server
+tags:
+  - name: user-authentication
+  - name: messaging
+  - name: payments
+  - name: users
+  - name: organisations
+  - name: admin
+  - name: settings
+  - name: update settings
+  - name: profile
+  - name: contact us
+  - name: get contact us info
+  - name: about us info    
+  - name: cookies policy
+  - name: accept cookies policy    
+  - name: dashboard
+  - name: Waitlist
+  - name: marketing
+  - name: invite
+  - name: export    
+  - name: random-data    
+  - name: get-random-data-by-id
+  - name: update-random-data
+  - name: delete-random-data    
+  - name: Chart-Data    
+  - name: Edit Content
+  - name: notification
+  - name: blog
+  - name: update-blog
+  - name: delete-blog
+  - name: send-invite    
+  - name: languages-region
+  - name: Email-Template
+
+
+components:
+  schemas:
+    CreateUser:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "Ali"
+        lastName:
+          type: string
+          example: "Abubakar"
+        email:
+          type: string
+          format: email
+          example: "tayo@example.com"
+        password:
+          type: string
+          format: password
+          example: "defaultpassword"
+      required:
+        - email
+        - password
+    ShowUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        email:
+          type: string
+          format: email
+          example: "abdulaziz@example.com"
+        message:
+          type: string
+          example: "User created successfully"
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "a@example.com"
+        password:
+          type: string
+          format: password
+          example: "strongpassword123"
+      required:
+        - email
+        - password
+    Token:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        tokenType:
+          type: string
+          example: "bearer"
+        message:
+          type: string
+          example: "User logged in successfully"
+    SocialAuth:
+      type: object
+      properties:
+        provider:
+          type: string
+          example: "google"
+        token:
+          type: string
+          example: "social_provider_token"
+      required:
+        - provider
+        - token
+    MagicLink:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "@example.com"
+      required:
+        - email
+    ChangePassword:
+      type: object
+      properties:
+        email:
+          type: string
+          example: "johndoe"
+        old_password:
+          type: string
+          format: password
+          example: "oldpassword123"
+        new_password:
+          type: string
+          format: password
+          example: "newpassword123"
+      required:
+        - email
+        - old_password
+        - new_password
+    ChangePasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Password changed successfully"
+    ForgotPassword:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "abubakar@example.com"
+      required:
+        - email
+    ResetPassword:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "reset_token"
+        new_password:
+          type: string
+          format: password
+          example: "newpassword"
+      required:
+        - token
+        - new_password
+    ResetPasswordResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Password reset successfully"
+
+    EmailRequest:
+      type: object
+      properties:
+        recipient: 
+          type: string
+          format: email
+          example: "user@example.com"
+        subject:
+          type: string
+          example: "Welcome to HNG"
+        body:
+          type: string
+          example: "Hello, welcome to HNG."
+      required:
+        - recipient
+        - subject
+        - body
+    PaymentRequest:
+      type: object
+      properties:
+        amount: 
+          type: number
+          format: float
+          example: 100.50
+        currency:
+          type: string
+          example: "USD"
+        source:
+          type: string
+          example: "tok_visa"
+      required:
+        - amount
+        - currency
+        - source
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "payment_id"
+        status:
+          type: string
+          example: "success"
+        amount:
+          type: number
+          format: float
+          example: 100.50
+        currency:
+          type: string
+          example: "USD"
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username:
+          type: string
+          example: "johndoe"
+        email:
+          type: string
+          format: email
+          example: "boy@example.com"
+    UserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+        password:
+          type: string
+          format: password
+          example: "strongpassword123"
+      required:
+        - email
+        - password
+    Organisation:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "My Organisation"
+    OrganisationRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "My Organisation"
+      required:
+        - name
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "payment_id"
+        status:
+          type: string
+          example: "success"
+        amount:
+          type: number
+          format: float
+          example: 100.50
+        currency:
+          type: string
+          example: "USD"
+    ActivityLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        activity:
+          type: string
+          example: "User login"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-07-10T14:48:00.000Z"
+    Settings:
+      type: object
+      properties:
+        theme:
+          type: string
+          example: "dark"
+        notifications:
+          type: boolean
+          example: true
+    Profile:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "aminu@example.com"
+        bio:
+          type: string
+          example: "Software developer"
+    User-profile:
+      type: object
+      properties:
+        id:
+          type: integer
+        username:
+          type: string
+        email:
+          type: string
+    contact-us:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        message:
+          type: string
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string
+    RandomData:
+      type: object
+      properties:
+        id:
+          type: integer
+        data:
+          type: object
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+        data:
+          type: object
+    EmailTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+        data:
+          type: object
+      
+
+paths:
+  /auth/signup:
+    post:
+      tags: 
+        - user-authentication
+      summary: User registration
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ShowUser'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid input data"
+  /auth/login:
+    post:
+      tags: 
+        - user-authentication
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+      responses:
+        '200':
+          description: User logged in successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+  /auth/social:
+    post:
+      tags: 
+        - user-authentication
+      summary: Social authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SocialAuth'
+      responses:
+        '200':
+          description: User authenticated via social provider successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '400':
+          description: Invalid social authentication data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid social authentication data"
+  /auth/magic-link:
+    post:
+      tags: 
+        - user-authentication
+      summary: Magic link authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MagicLink'
+      responses:
+        '200':
+          description: Magic link sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Magic link sent successfully"
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid request data"
+  /auth/change-password:
+    post:
+      tags: 
+        - user-authentication
+      summary: Change password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChangePasswordResponse'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid request data"
+  /auth/forgot-password:
+    post:
+      tags: 
+        - user-authentication
+      summary: Request password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPassword'
+      responses:
+        '200':
+          description: Password reset token sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Password reset token sent successfully"
+        '400':
+          description: "Invalid credentials"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid credentials"
+  /auth/reset-password:
+    post:
+      tags: 
+        - user-authentication
+      summary: Reset password using token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPassword'
+      responses:
+        '200':
+          description: Password reset successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResetPasswordResponse'
+        '400':
+          description: Invalid token or request data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid token or request data"
+  /messages/email:
+    post:
+      tags: 
+        - messaging
+      summary: Send email using default templates
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailRequest'
+      responses:
+        '200':
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Email sent successfully"
+        '400':
+          description: Invalid email request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid email request"
+  /payments/flutterwave:
+    post:
+      tags:
+        - payments
+      summary: Process Flutterwave payment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Invalid payment request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid payment request"
+  /users:
+    get:
+      tags: 
+        - users
+      summary: Retrieve a list of users
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      tags: 
+        - users
+      summary: Add a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid user request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid user request"
+  /users/{id}:
+    get:
+      tags: 
+        - users
+      summary: Retrieve a specific user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+    put:
+      tags: 
+        - users
+      summary: Update a specific user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid user request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid user request"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+    delete:
+      tags: 
+        - users
+      summary: Delete a specific user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User deleted successfully"
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "User not found"
+  /organisations:
+    get:
+      tags: 
+        - organisations
+      summary: Retrieve a list of organisations
+      responses:
+        '200':
+          description: List of organisations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organisation'
+    post:
+      tags: 
+        - organisations
+      summary: Add a new organisation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationRequest'
+      responses:
+        '201':
+          description: Organisation created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '400':
+          description: Invalid organisation request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid organisation request"
+  /organisations/{id}:
+    get:
+      tags: 
+        - organisations
+      summary: Retrieve a specific organisation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organisation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '404':
+          description: Organisation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Organisation not found"
+    put:
+      tags: 
+        - organisations
+      summary: Update a specific organisation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationRequest'
+      responses:
+        '200':
+          description: Organisation updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '400':
+          description: Invalid organisation request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid organisation request"
+        '404':
+          description: Organisation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Organisation not found"
+    delete:
+      tags: 
+        - organisations
+      summary: Delete a specific organisation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Organisation deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Organisation deleted successfully"
+        '404':
+          description: Organisation not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Organisation not found"
+  /admin/users:
+    get:
+      tags: 
+        - admin
+      summary: Retrieve a list of all users
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+  /admin/organisations:
+    get:
+      tags: 
+        - admin
+      summary: Retrieve a list of all organisations
+      responses:
+        '200':
+          description: List of all organisations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organisation'
+  /admin/payments:
+    get:
+      tags: 
+        - admin
+      summary: Retrieve a list of all payments
+      responses:
+        '200':
+          description: List of all payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+  /admin/activity-log:
+    get:
+      tags: 
+        - admin
+      summary: Retrieve activity log
+      responses:
+        '200':
+          description: Activity log
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityLog'
+  /settings:
+    get:
+      tags: 
+        - settings
+      summary: Retrieve user settings
+      responses:
+        '200':
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+    put:
+      tags: 
+        - settings
+      summary: Update user settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Settings'
+      responses:
+        '200':
+          description: User settings updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+        '400':
+          description: Invalid settings request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid settings request"
+  /profile:
+    get:
+      tags: 
+        - profile
+      summary: Retrieve user profile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+    put:
+      tags: 
+        - profile
+      summary: Update user profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Profile'
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          description: Invalid profile request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid profile request"  
+  
+  /contact:
+    post:
+      tags:
+        - Contact Us
+      summary: create contact us info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Contact message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Failed to send message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: retrieve contact us information
+      responses:
+        '200':
+          description: contact us information
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/contact-us'
+
+
+  /about-us:
+    post:
+      tags:
+        - about us
+      summary: publish about us info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Contact message sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Failed to send message
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'               
+  
+  /cookies:
+    get:
+      tags:
+        - cookies policy
+      summary: get cookies policy
+
+      responses:
+        '200':
+          description: Cookie policy retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /cookies/accept:
+    post:
+      tags:
+        - cookies policy
+      summary: accept cookies policy  
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accepted:
+                  type: boolean
+      responses:
+        '200':
+          description: Cookie policy accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /dashboard:
+    get:
+      tags:
+        - dashboard
+      summary: Get Dashboard Data
+
+      responses:
+        '200':
+          description: Dashboard data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+
+  /waitlist:
+    post:
+      tags:
+        - Waitlist
+      summary: Join Waitlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Joined waitlist successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /marketing:
+    get:
+      tags:
+        - marketing
+      summary: Get marketing Data
+      responses:
+        '200':
+          description: Marketing content retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    type: string
+
+  /invite:
+    post:
+      tags:
+        - invite
+      summary: sent invitation link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                message:
+                  type: string
+      responses:
+        '200':
+          description: Invite sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Failed to send invite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-data/export:
+    get:
+      tags:
+        - export
+      summary: Export User Data
+      responses:
+        '200':
+          description: User data export successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  file_url:
+                    type: string
+        '404':
+          description: Data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /random-data:
+    get:
+      tags:
+        - get-random-data
+      summary: Get All Random Data   
+      responses:
+        '200':
+          description: Random data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RandomData'
+
+    post:
+      tags:
+        - random-data
+      summary: Create Random Data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+      responses:
+        '201':
+          description: Random data created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RandomData'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /random-data/{id}:
+    get:
+      tags:
+        - random-data
+      summary: Get Random Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Random data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RandomData'
+        '404':
+          description: Random data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - random-data
+      summary: update specific Random Data
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+      responses:
+        '200':
+          description: Random data updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Random data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - random-data
+      summary: Delete specific Random Data
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Random data deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Random data not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /charts:
+    get:
+      tags:
+        - Chart-Data
+      summary: Get Chart Data
+      responses:
+        '200':
+          description: Chart data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+
+  /content/edit:
+    post:
+      tags:
+        - Chart-Data
+      summary: Edit Content
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Content edited successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /notifications:
+    post:
+      tags:
+        - notification
+      summary: Create a New notification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                notification_id:
+                  type: integer
+      responses:
+        '201':
+          description: notification created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags:
+        - notification
+      summary: Get Notifications
+      responses:
+        '200':
+          description: Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+                  
+  /notifications{id}:
+    get:
+      tags:
+        - notification
+      summary: get all notification
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Notification retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+    put:
+      tags:
+        - notification
+      summary: Update Notification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Notification updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - notification
+      summary: Delete Notification
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: notification deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  
+  /blogs:
+    get:
+      tags:
+        - blog
+      summary: Get All Blog Posts
+      responses:
+        '200':
+          description: Blog posts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageResponse'
+
+    post:
+      tags:
+        - blog
+      summary: Create a New Blog Post
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                author_id:
+                  type: integer
+      responses:
+        '201':
+          description: Blog post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /blogs/{id}:
+    get:
+      tags:
+        - blog
+      summary: Get Blog Post by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Blog post retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Blog post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - blog
+      summary: update specific Blog Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+      responses:
+        '200':
+          description: Blog post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Blog post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - blog
+      summary: delete specific Blog Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Blog post deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Blog post not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /invites:
+    post:
+      tags:
+        - send-invite
+      summary: Send Invite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Invite sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '500':
+          description: Failed to send invite
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /languages-region:
+    get:
+      tags:
+        - languages-region
+      summary: Get Language and Region Settings
+
+      responses:
+        '200':
+          description: Language and region settings retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  language:
+                    type: string
+                  region:
+                    type: string
+  
+  /languages-region{id}: 
+    put:
+      tags:
+        - languages-region
+      summary: Update language and region
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                language:
+                  type: string
+                region:
+                  type: string
+      responses:
+        '200':
+          description: language and region updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: language and region not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /emails/templates:
+    post:
+      tags:
+        - Email-Template
+      summary: Create Email Template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+                creator_id:
+                  type: integer
+      responses:
+        '201':
+          description: Email template created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplate'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      tags:
+        - Email-Template
+      summary: Get Email Templates
+      responses:
+        '200':
+          description: Email templates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MessageResponse'
+                  
+  /emails/templates/{id}:
+    get:
+      tags:
+        - Email-Template
+      summary: retrieve specific email template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email template retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailTemplate'
+        '404':
+          description: Email template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Email-Template
+      summary: Update Email Template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+      responses:
+        '200':
+          description: Email template updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Email template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Email-Template
+      summary: Delete Email Template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Email template deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '404':
+          description: Email template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  
+  
+  
+  
