@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ dev, main ]
+  pull_request:
+    branches: [ dev, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+          virtual-environment: venv
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Copy .env.dev
+        run: cp .env.dev .env
+
+      - name: Run migrations
+        run: |
+          activate
+          alembic upgrade head
+
+      - name: Run tests
+        run: |
+          activate
+          pytest
