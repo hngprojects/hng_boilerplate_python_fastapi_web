@@ -12,15 +12,17 @@ from sqlalchemy import (
         func,
         )
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from api.v1.models.base import Base
+from uuid_extensions import uuid7
 
 
 class Profile(Base):
     __tablename__ = 'profiles'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     bio = Column(Text, nullable=True)
     phone_number = Column(String(50), nullable=True)
     avatar_url = Column(String(100), nullable=True)

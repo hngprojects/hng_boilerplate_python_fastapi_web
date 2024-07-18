@@ -16,8 +16,11 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organisation_association
+from api.v1.models.base import Base, user_organization_association
 import bcrypt
+from uuid_extensions import uuid7
+from sqlalchemy.dialects.postgresql import UUID
+
 
 def hash_password(password: str) -> bytes:
     """ Hashes the user password for security
@@ -30,7 +33,7 @@ def hash_password(password: str) -> bytes:
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
@@ -40,9 +43,9 @@ class User(Base):
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     profile = relationship("Profile", uselist=False)
-    organisations = relationship(
-            "Organisation",
-            secondary=user_organisation_association,
+    organizations = relationship(
+            "Organization",
+            secondary=user_organization_association,
             back_populates="users"
             )
 

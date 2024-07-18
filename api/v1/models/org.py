@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" The Organisation model
+""" The Organization model
 """
 from sqlalchemy import (
         Column,
@@ -14,13 +14,15 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organisation_association
+from api.v1.models.base import Base, user_organization_association
+from sqlalchemy.dialects.postgresql import UUID
+from uuid_extensions import uuid7
 
 
-class Organisation(Base):
-    __tablename__ = 'organisations'
+class Organization(Base):
+    __tablename__ = 'organizations'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     name = Column(String(50), unique=True, nullable=False)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime, server_default=func.now())
@@ -28,8 +30,8 @@ class Organisation(Base):
 
     users = relationship(
             "User",
-            secondary=user_organisation_association,
-            back_populates="organisations"
+            secondary=user_organization_association,
+            back_populates="organizations"
             )
 
     def __str__(self):

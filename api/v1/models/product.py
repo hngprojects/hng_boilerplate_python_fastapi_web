@@ -12,12 +12,14 @@ from sqlalchemy import (
         )
 from datetime import datetime
 from api.v1.models.base import Base
+from sqlalchemy.dialects.postgresql import UUID
+from uuid_extensions import uuid7
 
 
 class Product(Base):
     __tablename__ = 'products'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)

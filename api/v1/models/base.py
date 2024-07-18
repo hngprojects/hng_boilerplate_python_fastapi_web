@@ -10,11 +10,12 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
+from sqlalchemy.dialects.postgresql import UUID
 
 
 Base = declarative_base()
 
-user_organisation_association = Table('user_organisation', Base.metadata,
-        Column('user_id', Integer, ForeignKey('users.id'), primary_key=True),
-        Column('organisation_id', Integer, ForeignKey('organisations.id'), primary_key=True)
+user_organization_association = Table('user_organization', Base.metadata,
+        Column('user_id', UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True),
+        Column('organization_id', UUID(as_uuid=True), ForeignKey('organizations.id'), primary_key=True)
         )

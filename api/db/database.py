@@ -11,12 +11,12 @@ from api.v1.models.base import Base
 
 def get_db_engine():
 
-    DB_TYPE = config("DB_TYPE", "")
-    DB_NAME = config("DB_NAME", "")
+    DB_TYPE = config("DB_TYPE", "postgresql")
+    DB_NAME = config("DB_NAME", "hng_fast_api")
     DB_USER = config("DB_USER", "")
     DB_PASSWORD = config("DB_PASSWORD", "")
-    DB_HOST = config("DB_HOST", "")
-    DB_PORT = config("DB_PORT", "")
+    DB_HOST = config("DB_HOST", "localhost")
+    DB_PORT = config("DB_PORT", "5432")
     MYSQL_DRIVER = config("MYSQL_DRIVER", "")
     DATABASE_URL = ""
 
