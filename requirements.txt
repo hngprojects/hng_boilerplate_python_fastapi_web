@@ -11,3 +11,4 @@ bcrypt
 passlib
 pymysql
 uuid7
+psycopg2-binary
