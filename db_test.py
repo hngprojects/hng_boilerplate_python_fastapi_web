@@ -6,6 +6,9 @@ from api.v1.models.user import User
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
+from api.v1.models.invitation import Invitation
+from api.v1.models.role import Role
+from api.v1.models.permission import Permission
 
 create_database()
 db = next(get_db())
@@ -16,11 +19,15 @@ user_3 = User(email="test2@mail", username="testuser2", password="testpass2", fi
 
 db.add_all([user_1, user_2, user_3])
 
-org_1 = Organization(name="Python Org", description="An organization for python develoers")
+org_1 = Organization(name= "Python Org", description="An organization for python develoers")
 org_2 = Organization(name="Django Org", description="An organization of django devs")
 org_3 = Organization(name="FastAPI Devs", description="An organization of Fast API devs")
+print(org_1.id)
+
+# user_role = Role()
 
 db.add_all([org_1, org_2, org_3])
+
 
 org_1.users.extend([user_1, user_2, user_3])
 org_2.users.extend([user_1, user_3])

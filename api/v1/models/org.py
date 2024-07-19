@@ -18,7 +18,6 @@ from api.v1.models.base import Base, user_organization_association
 from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 
-
 class Organization(Base):
     __tablename__ = 'organizations'
 
@@ -33,6 +32,8 @@ class Organization(Base):
             secondary=user_organization_association,
             back_populates="organizations"
             )
+    roles = relationship('Role', back_populates='organization')
+    invitations = relationship("Invitation", back_populates="organization", cascade="all, delete-orphan")
 
     def __str__(self):
         return self.name

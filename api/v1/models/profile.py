@@ -22,7 +22,7 @@ class Profile(Base):
     __tablename__ = 'profiles'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), unique=True, nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id',  ondelete='CASCADE'), unique=True, nullable=False)
     bio = Column(Text, nullable=True)
     phone_number = Column(String(50), nullable=True)
     avatar_url = Column(String(100), nullable=True)

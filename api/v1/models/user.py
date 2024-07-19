@@ -1,22 +1,12 @@
 #!/usr/bin/env python3
 """ User data model
 """
-from sqlalchemy import (
-        create_engine,
-        Column,
-        Integer,
-        String,
-        Text,
-        Date,
-        ForeignKey,
-        Numeric,
-        DateTime,
-        func,
-        Table
-        )
+from sqlalchemy import (create_engine, Column, Integer, String, Text,
+                        Date, ForeignKey, Numeric, DateTime, func, Table )
+
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
+from api.v1.models.base import Base, user_organization_association, user_role_association
 import bcrypt
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
@@ -42,12 +32,10 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-    profile = relationship("Profile", uselist=False, back_populates="user")
-    organizations = relationship(
-            "Organization",
-            secondary=user_organization_association,
-            back_populates="users"
-            )
+    profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
+    organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
+    roles = relationship('Role', secondary=user_role_association, back_populates='users')
+    invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
 
     def __init__(self, **kwargs):
         """ Initializes a user instance
