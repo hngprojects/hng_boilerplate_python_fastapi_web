@@ -11,6 +11,7 @@ from api.v1.models.user import User
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
+from api.v1.models.subscription import Subscription
 
 
 def get_db_engine():
