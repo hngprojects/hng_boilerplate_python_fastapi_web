@@ -49,3 +49,9 @@ class User(BaseModel, Base):
     def __str__(self):
         return self.email
 
+class WaitlistUser(BaseModel, Base):
+    __tablename__ = 'waitlist_users'
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
+    email = Column(String(100), unique=True, nullable=False)
+    full_name = Column(String(100), nullable=False)
