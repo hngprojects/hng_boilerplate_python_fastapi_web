@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import create_database
+from api.v1.routes import roles
 # from api.v1.routes.auth import app as auth
 
 
@@ -34,7 +35,7 @@ app.add_middleware(
 
 # app.include_router(auth, tags=["Auth"])
 # app.include_router(users, tags=["Users"])
-
+app.include_router(roles.router, prefix="/api/v1")
 
 
 @app.get("/", tags=["Home"])
