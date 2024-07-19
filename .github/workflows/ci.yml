@@ -32,10 +32,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r requirgdements.txt
 
-      - name: Copy env file
-        run: cp .env.sample .env
+      # - name: Copy env file
+      #   run: cp .env.sample .env
 
       # - name: Copy env file for main
       #   if: github.ref == 'refs/heads/main'
