@@ -32,7 +32,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirgdements.txt
+          pip install -r requirements.txt
 
       # - name: Copy env file
       #   run: cp .env.sample .env
