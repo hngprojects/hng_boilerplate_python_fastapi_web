@@ -38,4 +38,5 @@ users = db.query(Organization).first().users
 for user in users:
     print(user.password)
 print(profile_1.user_id)
+print(profile_1.user)
 
