@@ -34,17 +34,16 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Copy env file for dev
-        if: github.ref == 'refs/heads/dev'
-        run: cp .env.development .env
+      - name: Copy env file
+        run: cp .env.sample .env
 
-      - name: Copy env file for main
-        if: github.ref == 'refs/heads/main'
-        run: cp .env.production .env
+      # - name: Copy env file for main
+      #   if: github.ref == 'refs/heads/main'
+      #   run: cp .env.production .env
       
-      - name: Copy env file for staging
-        if: github.ref == 'refs/heads/staging'
-        run: cp .env.staging .env
+      # - name: Copy env file for staging
+      #   if: github.ref == 'refs/heads/staging'
+      #   run: cp .env.staging .env
 
       # - name: Run migrations
       #   run: |
