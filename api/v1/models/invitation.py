@@ -16,6 +16,3 @@ class Invitation(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_valid = Column(Boolean, default=True)
-
-    user = relationship("User", back_populates="invitations")
-    organization = relationship("Organization", back_populates="invitations")

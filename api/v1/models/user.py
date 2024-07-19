@@ -2,7 +2,7 @@
 """ User data model
 """
 from sqlalchemy import (create_engine, Column, Integer, String, Text,
-                        Date, ForeignKey, Numeric, DateTime, func, Table )
+                        Date, ForeignKey, Numeric, DateTime, func, Table, Boolean )
 
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -29,14 +29,14 @@ class User(Base):
     password = Column(String(255), nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
+    is_admin = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
-    invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
-
+    
     def __init__(self, **kwargs):
         """ Initializes a user instance
         """
