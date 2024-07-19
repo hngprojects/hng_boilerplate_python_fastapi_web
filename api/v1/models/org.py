@@ -14,7 +14,8 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organization_association, BaseModel
+from api.v1.models.base import Base, user_organization_association
+from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 

@@ -11,7 +11,8 @@ from sqlalchemy import (
         func,
         )
 from datetime import datetime
-from api.v1.models.base import Base, BaseModel
+from api.v1.models.base import Base
+from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 

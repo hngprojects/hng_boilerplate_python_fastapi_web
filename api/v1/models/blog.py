@@ -14,7 +14,8 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, BaseModel
+from api.v1.models.base import Base
+from api.v1.models.base_model import BaseModel
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 
