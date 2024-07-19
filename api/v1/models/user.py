@@ -16,21 +16,12 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
-import bcrypt
+from api.v1.models.base import Base, user_organization_association, BaseModel
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
 
 
-def hash_password(password: str) -> bytes:
-    """ Hashes the user password for security
-    """
-    salt = bcrypt.gensalt()
-
-    hash_pw = bcrypt.hashpw(password.encode(), salt)
-    return hash_pw
-
-class User(Base):
+class User(BaseModel, Base):
     __tablename__ = 'users'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
@@ -49,15 +40,11 @@ class User(Base):
             back_populates="users"
             )
 
-    def __init__(self, **kwargs):
-        """ Initializes a user instance
-        """
-        keys = ['username', 'email', 'password', 'first_name', 'last_name']
-        for key, value in kwargs.items():
-            if key in keys:
-                if key == 'password':
-                    value = hash_password(value)
-                setattr(self, key, value)
+    def to_dict(self):
+        obj_dict = super().to_dict()
+        obj_dict.pop("password")
+        return obj_dict
+
 
     def __str__(self):
         return self.email

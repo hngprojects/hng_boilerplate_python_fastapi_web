@@ -7,6 +7,10 @@ from sqlalchemy.orm import sessionmaker
 from decouple import config
 from contextlib import contextmanager
 from api.v1.models.base import Base
+from api.v1.models.user import User
+from api.v1.models.org import Organization
+from api.v1.models.profile import Profile
+from api.v1.models.product import Product
 
 
 def get_db_engine():
@@ -49,3 +53,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+create_database()
+db = next(get_db())
