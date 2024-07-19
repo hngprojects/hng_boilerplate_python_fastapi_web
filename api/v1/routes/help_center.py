@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Query, HTTPException
 from fastapi import Depends
 
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from api.core import responses
@@ -9,10 +8,16 @@ from api.db.database import get_db
 from api.v1.models.articles import Article
 from api.v1.schemas.articles import ArticleResponse, SearchResponse
 
+from fastapi_limiter.depends import RateLimiter
+
 app = APIRouter()
 
 
-@app.get("/api/v1/topics/search", response_model=SearchResponse)
+@app.get(
+    "/api/v1/topics/search",
+    response_model=SearchResponse,
+    dependencies=[Depends(RateLimiter(times=2, seconds=10))],
+)
 async def search_articles(
     title: str = Query(..., min_length=1), db: Session = Depends(get_db)
 ):
@@ -35,31 +40,8 @@ async def search_articles(
         )
     except HTTPException as exc:
         if exc.status_code == 404:
-            return JSONResponse(
-                status_code=404,
-                content={"success": False, "message": responses.NOT_FOUND, "status_code": 404},
-            )
+            raise HTTPException(status_code=exc.status_code, detail=responses.NOT_FOUND)
         elif exc.status_code == 429:
-            return JSONResponse(
-                status_code=429,
-                content={
-                    "success": False,
-                    "message": responses.TOO_MANY_REQUEST,
-                    "status_code": 429,
-                },
-            )
-        elif exc.status_code == 500:
-            return JSONResponse(
-                status_code=500,
-                content={"success": False, "message": responses.SERVER_ERROR, "status_code": 500},
-            )
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={
-                "success": False,
-                "message": exc.detail,
-                "status_code": exc.status_code,
-            },
-        )
+            raise HTTPException(status_code=exc.status_code, detail=responses.TOO_MANY_REQUEST)
     except Exception as e:
         raise HTTPException(status_code=500, detail=responses.SERVER_ERROR)
