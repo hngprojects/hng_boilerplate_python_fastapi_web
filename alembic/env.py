@@ -6,6 +6,8 @@ from decouple import config as decouple_config
 from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
+from api.v1.models.auth import AuthUser
+from api.v1.models.oauth import OAuthUser
 from api.v1.models.product import Product
 from api.v1.models.base import Base
 from api.v1.models.subscription import Subscription
