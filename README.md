@@ -64,6 +64,10 @@ from api.v1.models.user import User
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
+from api.v1.models.invitation import Invitation
+from api.v1.models.role import Role
+from api.v1.models.permission import Permission
+from api.v1.models.base import Base
 
 create_database()
 db = next(get_db())
