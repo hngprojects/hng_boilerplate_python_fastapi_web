@@ -9,15 +9,11 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from api.v1.models.newsletter import NEWSLETTER
 from api.v1.schemas.newsletter_schema import EMAILSCHEMA
-from api.db.database import get_db
-from api.db.database import create_database, get_db
-from api.v1.models.user import User
-from api.v1.models.org import Organization
-from api.v1.models.profile import Profile
-from api.v1.models.product import Product
+from api.db.database import get_db, Base, engine
 
-create_database()
 
+Base.metadata.create_all(bind=engine)
+print('creating table')
 
 class CustomException(HTTPException):
     """
