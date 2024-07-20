@@ -7,6 +7,7 @@ from starlette.requests import Request
 from api.db.database import create_database
 from api.db.mongo import create_nosql_db
 from api.v1.routes.auth import app as auth
+from api.v1.routes import contact_us
 
 
 @asynccontextmanager
@@ -39,6 +40,7 @@ app.add_middleware(
 
 app.include_router(auth, tags=["Auth"])
 # app.include_router(users, tags=["Users"])
+app.include_router(contact_us.router, tags=["Contact"])
 
 
 
