@@ -1,4 +1,4 @@
-name: Dev Branch Deployment
+name: Staging Branch Deployment
 
 on:
   workflow_run:
