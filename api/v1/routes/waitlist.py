@@ -1,12 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
 from typing import Dict
-from api.v1.models.waitlist import WaitlistUser
+from api.v1.models.user import WaitlistUser
 from api.v1.schemas.waitlist import WaitlistUserCreate
-# from api.v1.services.email import send_confirmation_email
 from api.utils.rate_limiter import rate_limit
-from api.core.database import get_db
+from api.db.database import get_db
 
 router = APIRouter()
 
@@ -15,9 +14,10 @@ class WaitlistResponse(BaseModel):
     message: str
 
 
-@router.post("/api/v1/waitlist", response_model=WaitlistResponse, status_code=201)
+@router.post("/waitlist", response_model=WaitlistResponse, status_code=201)
 @rate_limit(max_calls=5, time_frame=60)
 async def signup_waitlist(
+    request: Request,
     user: WaitlistUserCreate,
     db: Session = Depends(get_db)
 ):
@@ -32,8 +32,5 @@ async def signup_waitlist(
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-
-    # Send confirmation email
-    # await send_confirmation_email(user.email, user.full_name)
 
     return {"message": "You are all signed up!"}
