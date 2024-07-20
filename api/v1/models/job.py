@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-""" The Profile model
+""" The Job Model Class
 """
 from sqlalchemy import (
         Column,
@@ -8,26 +8,31 @@ from sqlalchemy import (
         Text,
         Date,
         ForeignKey,
+        Numeric,
         DateTime,
         func,
         )
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from api.v1.models.base import Base
 from api.v1.models.base_model import BaseModel
 from uuid_extensions import uuid7
+from sqlalchemy.dialects.postgresql import UUID
 
 
-class Profile(BaseModel, Base):
-    __tablename__ = 'profiles'
-
+class Job(BaseModel, Base):
+    __tablename__ = 'jobs'
+    
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), unique=True, nullable=False)
-    bio = Column(Text, nullable=True)
-    phone_number = Column(String(50), nullable=True)
-    avatar_url = Column(String(100), nullable=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=False)
+    location = Column(String(255))
+    salary = Column(Numeric(10, 2))
+    job_type = Column(String(50))
+    company_name = Column(String(255))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
-    user = relationship("User", back_populates="profile")
+    
+    # Define relationship with User
+    user = relationship("User", backref="jobs")
