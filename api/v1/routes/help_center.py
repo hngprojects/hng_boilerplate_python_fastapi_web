@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from api.core import responses
 from api.db.database import get_db
-from api.v1.models.articles import Article
-from api.v1.schemas.articles import ArticleResponse, SearchResponse
+from api.v1.models.article import Article
+from api.v1.schemas.article import ArticleResponse, SearchResponse
 
 from fastapi_limiter.depends import RateLimiter
 
