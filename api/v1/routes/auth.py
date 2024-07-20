@@ -25,7 +25,7 @@ router = APIRouter()
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=Token,status_code=status.HTTP_200_OK)
 def login_for_access_token(login_request: LoginRequest, db: Session = Depends(get_db)):
     user = authenticate_user(db, login_request.username, login_request.password)
     if not user:
@@ -75,23 +75,6 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_user)
     return db_user
-    # user_response = UserResponse.from_orm(db_user)
-    # user = user_response.dict()
-    # return {
-    #         "statusCode": 201,
-    #         "message": "User regisitration successful",
-    #         "data" : {
-    #                 "token": access_token,
-    #                 "user": {
-    #                 "id": user.id,
-    #                 "first_name": user.first_name,
-    #                 "last_name": user.last_name,
-    #                 "email": user.email,
-    #                 "created_at": user.create_at
-    #             },
-    #         }
-    #     }
-
     
 
 # Protected route example: test route
@@ -103,3 +86,4 @@ def read_admin_data(current_admin: User = Depends(get_current_admin)):
 @router.get("/test")
 def test(user: User = Depends(get_current_user)):
     return {f"message": "Hello, welcome {user.username}"}
+
