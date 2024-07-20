@@ -34,7 +34,7 @@ class OAuthUser(Base):
 
     def __init__(self, **kwargs):
         """Initializes a user instance"""
-        keys = ["oauth_provider", "oauth_id", "user_id"]
+        keys = ["oauth_provider", "oauth_id", "user_id", "email"]
         for key, value in kwargs.items():
             if key in keys:
                 setattr(self, key, value)
