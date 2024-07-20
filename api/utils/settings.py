@@ -1,5 +1,28 @@
+from pydantic_settings import BaseSettings
 from decouple import config
+from pathlib import Path
 
-# MONGO_URI = config("MONGO_URI")
-# MONGO_DB_NAME = config("MONGO_DB_NAME")
-REDIS_URL = config("REDIS_URL")
+
+# Use this to build paths inside the project
+BASE_DIR = Path(__file__).resolve().parent
+
+
+class Settings(BaseSettings):
+    """ Class to hold application's config values."""
+
+    # API_V1_STR: str = "/api/v1"
+    # APP_NAME: str = "TicketHub"
+    # JWT_SECRET_KEY: str = config("JWT_SECRET_KEY")
+    # ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
+
+    # Database configurations
+    DB_HOST: str = config("DB_HOST")
+    DB_PORT: int = config("DB_PORT", cast=int)
+    DB_USER: str = config("DB_USER")
+    DB_PASSWORD: str = config("DB_PASSWORD")
+    DB_NAME: str = config("DB_NAME")
+    DB_TYPE: str = config("DB_TYPE")
+    REDIS_URL: str = config("REDIS_URL")
+
+
+settings = Settings()

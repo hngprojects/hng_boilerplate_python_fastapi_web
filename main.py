@@ -15,10 +15,12 @@ from api.utils.exceptions import rate_limit_callback, http_exception_handler
 
 from fastapi_limiter import FastAPILimiter
 
+from api.db.database import Base, engine
+
+Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    create_database()
     # create_nosql_db()
     redis_connection = redis.from_url(REDIS_URL, encoding="utf8")
     await FastAPILimiter.init(
@@ -32,9 +34,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.exception_handlers.setdefault(HTTPException, http_exception_handler)
-
-
-# create_nosql_db()
     
 
 origins = [

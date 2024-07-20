@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [main, staging, dev, devops-main]
+  pull_request:
+    branches: [main, staging, dev, devops-main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: 'username'
+          POSTGRES_PASSWORD: "password"
+          POSTGRES_DB: "test"
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          virtual-environment: venv
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Copy env file
+        run: cp .env.sample .env
+
+      - name: Run app
+        run: |
+          python3 main.py &
+          pid=$!
+          sleep 10
+          if ps -p $pid > /dev/null; then
+            echo "main.py started successfully"
+            kill $pid
+          else
+            echo "main.py failed to start"
+            exit 1
+          fi
+
+
+      # - name: Run migrations
+      #   run: |
+      #     activate
+      #     alembic upgrade head
+
+      # - name: Run tests
+      #   run: |
+      #     activate
+      #     pytest
