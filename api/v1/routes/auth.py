@@ -9,7 +9,9 @@ from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.user import UserCreate
 from api.db.database import get_db
-from api.utils.auth import authenticate_user, create_access_token, get_current_admin, get_current_user
+from api.utils.auth import authenticate_user, create_access_token, get_current_admin, get_current_user,hash_password,get_user
+
+
 
 router = APIRouter()
 
@@ -29,7 +31,7 @@ def login_for_access_token(login_request: LoginRequest, db: Session = Depends(ge
         data={"username": user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
-
+  
 @router.post("/register", response_model=UserCreate)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
@@ -44,16 +46,27 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered",
         )
+    
+    password_hashed = hash_password(user.password)
+
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"username": user.username}, expires_delta=access_token_expires
+    )
+
     db_user = User(
         username=user.username,
         email=user.email,
+        password = password_hashed,
         first_name=user.first_name,
         last_name=user.last_name,
         is_active=True
     )
+    
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
     return db_user
 
 # Protected route example: test route
