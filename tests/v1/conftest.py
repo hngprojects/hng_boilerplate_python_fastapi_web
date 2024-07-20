@@ -10,8 +10,8 @@ import json
 
 from api.db.database import get_db
 from api.db.database import Base
-from api.v1.services.auth import User
-from api.v1.models.auth import User as UserModel
+# from api.v1.services.auth import User
+# from api.v1.models.auth import User as UserModel
 
 
 DB_TYPE = config("DB_TYPE")
