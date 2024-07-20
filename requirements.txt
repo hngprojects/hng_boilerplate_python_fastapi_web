@@ -12,4 +12,7 @@ passlib
 pymysql
 uuid7
 psycopg2-binary
+pydantic_settings
 motor
+requests
+pyjwt
