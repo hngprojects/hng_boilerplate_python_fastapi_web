@@ -1,23 +1,52 @@
-from pydantic import BaseModel, EmailStr
-from typing import Dict
 from datetime import datetime
-import uuid
+from pydantic import BaseModel, Field, EmailStr, field_validator
+from typing import Optional
+from uuid_extensions import uuid7
+from uuid import UUID
+import re
 
+class UserBase(BaseModel):
+    id: UUID
+    first_name: str
+    last_name: str
+    email: str
+    created_at: datetime
 
 class UserCreate(BaseModel):
     username: str
-    email: str
     password: str
-    first_name: str | None = None
-    last_name: str | None = None
+    first_name: str
+    last_name: str
+    email: EmailStr
 
-# class UserResponse(BaseModel):
-#     id: uuid
-#     email: str
-#     first_name: str 
-#     last_name: str 
-#     created_at: datetime
+    @field_validator('password')
+    def password_validator(cls, value):
+        if len(value) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        if not re.search(r'[A-Z]', value):
+            raise ValueError('Password must contain at least one uppercase letter')
+        if not re.search(r'[a-z]', value):
+            raise ValueError('Password must contain at least one lowercase letter')
+        if not re.search(r'[0-9]', value):
+            raise ValueError('Password must contain at least one digit')
+        if not re.search(r'[@$!%*?&#]', value):
+            raise ValueError('Password must contain at least one special character')
+        return value
 
-#     class Config:
-#         orm_mode = True
-#         #from_attributes = True
+class SuccessResponseData(BaseModel):
+    token: str
+    user: UserBase
+
+class SuccessResponse(BaseModel):
+    statusCode: int = Field(201, example=201)
+    message: str
+    data: SuccessResponseData
+
+class ErrorResponse(BaseModel):
+    message: str
+    error: str
+    statusCode: int
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
