@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from api.db.database import Base, engine
+from api.v1.routes.auth import router as auth
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,7 +33,7 @@ app.add_middleware(
 )
 
 
-# app.include_router(auth, tags=["Auth"])
+app.include_router(auth, tags=["Auth"],prefix="/api/auth/v1")
 # app.include_router(users, tags=["Users"])
 
 

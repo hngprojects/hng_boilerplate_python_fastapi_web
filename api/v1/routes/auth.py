@@ -8,9 +8,17 @@ from ..models.profile import Profile
 from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserCreate
+from api.utils import json_response
 from api.db.database import get_db
 from api.utils.auth import authenticate_user, create_access_token, get_current_admin, get_current_user,hash_password,get_user
 
+
+from api.v1.models.org import Organization
+
+from api.v1.models.product import Product
+
+
+db = next(get_db())
 
 
 router = APIRouter()
@@ -32,7 +40,7 @@ def login_for_access_token(login_request: LoginRequest, db: Session = Depends(ge
     )
     return {"access_token": access_token, "token_type": "bearer"}
   
-@router.post("/register", response_model=UserCreate)
+@router.post("/register", response_model=UserCreate, status_code=status.HTTP_201_CREATED)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:
@@ -66,8 +74,25 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-
     return db_user
+    # user_response = UserResponse.from_orm(db_user)
+    # user = user_response.dict()
+    # return {
+    #         "statusCode": 201,
+    #         "message": "User regisitration successful",
+    #         "data" : {
+    #                 "token": access_token,
+    #                 "user": {
+    #                 "id": user.id,
+    #                 "first_name": user.first_name,
+    #                 "last_name": user.last_name,
+    #                 "email": user.email,
+    #                 "created_at": user.create_at
+    #             },
+    #         }
+    #     }
+
+    
 
 # Protected route example: test route
 @router.get("/admin")
