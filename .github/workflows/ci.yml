@@ -38,7 +38,14 @@ jobs:
         run: cp .env.sample .env
 
       - name: Run app
-        run: python3 main.py
+        run: |
+          python3 main.py
+          if [ $? -eq 0 ]; then
+            echo "main.py started successfully"
+          else
+            echo "main.py failed to start"
+            exit 1
+          fi
 
       # - name: Run migrations
       #   run: |
