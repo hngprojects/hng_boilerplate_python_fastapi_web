@@ -45,7 +45,6 @@ GRANT ALL PRIVILEGES ON DATABASE hng_fast_api TO user;
 
 **Migrate the database**
 ```bash
-alembic revision --autogenerate -m "Initial migrate"
 alembic upgrade head
 ```
 
@@ -76,10 +75,19 @@ example
 db.add(User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe"))
 ```
 
+## Note
+ Dont run alembic revision --autogenerate -m "Migration messge", as this may cause conflict with migrating to the database.
+ 
+- after cloning, open **.env** set your database details properly
+- open alembic.ini and update your database url in **DATABASE_URL** field
+- run **alembic upgrade head** to migrate the currently exising migration to your database.
 
-**Adding tables and columns to models**
-
-After creating new tables, or adding new models. Make sure to run alembic revision --autogenerate -m "Migration messge"
+## Addition of tables
+- you are free to include your table to the already existing database
+- make sure to link the relationship properly.
+- test it locally to make sure it is working.
+- you can generate your migration files and test it locally.
+- when pushing, gitignore the migration file **alembic** and **alembic.ini** so that it wont cause conflict.
 
 ### Endpoint Created
 - POST /api/auth/v1/login
