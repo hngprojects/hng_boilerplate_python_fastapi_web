@@ -10,3 +10,6 @@ python-dotenv
 bcrypt
 passlib
 pymysql
+uuid7
+psycopg2-binary
+motor
