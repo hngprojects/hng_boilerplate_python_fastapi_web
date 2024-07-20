@@ -38,14 +38,18 @@ jobs:
         run: cp .env.sample .env
 
       - name: Run app
-        run: | 
-          nohup python3 main.py
-          if [ $? -eq 0 ]; then
+        run: |
+          python3 main.py &
+          pid=$!
+          sleep 10
+          if ps -p $pid > /dev/null; then
             echo "main.py started successfully"
+            kill $pid
           else
             echo "main.py failed to start"
             exit 1
           fi
+
 
       # - name: Run migrations
       #   run: |
