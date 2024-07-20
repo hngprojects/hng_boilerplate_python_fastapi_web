@@ -23,7 +23,12 @@ DB_PORT = config("DB_PORT")
 MYSQL_DRIVER = config("MYSQL_DRIVER")
 DATABASE_URL = ""
 
-SQLALCHEMY_DATABASE_URL = f'{DB_TYPE}+{MYSQL_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}_test'
+if DB_TYPE == "mysql":
+    SQLALCHEMY_DATABASE_URL = f'mysql+{MYSQL_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}_test'
+elif DB_TYPE == "postgresql":
+    SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}_test"
+else:
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./database_test.db"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 

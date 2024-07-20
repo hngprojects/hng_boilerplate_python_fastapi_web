@@ -6,7 +6,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from api.db.database import Base
-from api.v1.models.auth import User, BlackListToken
+# from api.v1.models.auth import User, BlackListToken
 
 #from db.database import DATABASE_URL 
 DATABASE_URL=config('DB_URL')
