@@ -2,7 +2,7 @@ import time
 import pytest
 from api.core import responses
 from api.db.database import Base
-from api.v1.models.articles import Article
+from api.v1.models.article import Article
 from tests.database import TestingSessionLocal, engine
 
 

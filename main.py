@@ -6,10 +6,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
-from api.db.database import create_database
 # from api.db.mongo import create_nosql_db
 # from api.v1.routes.auth import app as auth
-from api.utils.settings import REDIS_URL
+from api.utils.settings import settings
 from api.v1.routes.help_center import app as help_center
 from api.utils.exceptions import rate_limit_callback, http_exception_handler
 
@@ -22,7 +21,7 @@ Base.metadata.create_all(bind=engine)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # create_nosql_db()
-    redis_connection = redis.from_url(REDIS_URL, encoding="utf8")
+    redis_connection = redis.from_url(settings.REDIS_URL, encoding="utf8")
     await FastAPILimiter.init(
         redis=redis_connection,
         http_callback=rate_limit_callback,
