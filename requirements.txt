@@ -3,7 +3,9 @@ annotated-types==0.7.0
 anyio==4.4.0
 bcrypt==4.1.3
 certifi==2024.7.4
+cffi==1.16.0
 click==8.1.7
+cryptography==42.0.8
 dnspython==2.6.1
 ecdsa==0.19.0
 email_validator==2.2.0
@@ -25,9 +27,11 @@ packaging==24.1
 passlib==1.7.4
 pluggy==1.5.0
 pyasn1==0.6.0
+pycparser==2.22
 pydantic==2.8.2
 pydantic_core==2.20.1
 Pygments==2.18.0
+PyJWT==2.8.0
 PyMySQL==1.1.1
 pytest==8.2.2
 python-decouple==3.8
@@ -44,6 +48,7 @@ SQLAlchemy==2.0.31
 starlette==0.37.2
 typer==0.12.3
 typing_extensions==4.12.2
+uuid6==2024.7.10
 uuid7==0.1.0
 uvicorn==0.30.1
 uvloop==0.19.0

@@ -33,7 +33,6 @@ class Organization(Base):
             back_populates="organizations"
             )
     roles = relationship('Role', back_populates='organization')
-    invitations = relationship("Invitation", back_populates="organization", cascade="all, delete-orphan")
 
     def __str__(self):
         return self.name

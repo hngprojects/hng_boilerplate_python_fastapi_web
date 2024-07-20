@@ -80,3 +80,8 @@ db.add(User(email="test@mail", username="testuser", password="testpass", first_n
 **Adding tables and columns to models**
 
 After creating new tables, or adding new models. Make sure to run alembic revision --autogenerate -m "Migration messge"
+
+### Endpoint Created
+- POST /api/auth/v1/login
+- POST /api/auth/v1/register
+- POST /api/v1/roles

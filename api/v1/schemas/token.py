@@ -1,6 +1,6 @@
-from pydantic import BaseModel
 from typing import List, Optional
 from api.v1.models.user import User
+from pydantic import BaseModel, EmailStr
 
 # Pydantic models for request and response
 class Token(BaseModel):
@@ -10,5 +10,8 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-class UserInDB(User):
-    hashed_password: str
+from pydantic import BaseModel
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str

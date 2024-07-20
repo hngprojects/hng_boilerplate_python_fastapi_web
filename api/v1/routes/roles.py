@@ -7,7 +7,7 @@ from api.db.database import get_db
 from api.v1.models.permission import Permission
 from api.v1.models.org import Organization
 from api.v1.models.user import User
-from app.dependencies.auth import get_current_admin
+from api.utils.auth import get_current_admin
 
 router = APIRouter()
 

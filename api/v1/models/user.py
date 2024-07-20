@@ -12,13 +12,10 @@ from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
 
 
-def hash_password(password: str) -> bytes:
-    """ Hashes the user password for security
-    """
+def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
-
-    hash_pw = bcrypt.hashpw(password.encode(), salt)
-    return hash_pw
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed_password.decode('utf-8')
 
 class User(Base):
     __tablename__ = 'users'
@@ -30,6 +27,7 @@ class User(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     is_admin = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
