@@ -1,47 +1,43 @@
 #!/usr/bin/env python3
 """ The database module
 """
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from decouple import config
-from contextlib import contextmanager
-from api.v1.models.base import Base
+from sqlalchemy import create_engine
+from api.utils.settings import settings, BASE_DIR
 
 
-def get_db_engine():
+DB_HOST = settings.DB_HOST
+DB_PORT = settings.DB_PORT
+DB_USER = settings.DB_USER
+DB_PASSWORD = settings.DB_PASSWORD
+DB_NAME = settings.DB_NAME
+DB_TYPE = settings.DB_TYPE
 
-    DB_TYPE = config("DB_TYPE", "postgresql")
-    DB_NAME = config("DB_NAME", "hng_fast_api")
-    DB_USER = config("DB_USER", "")
-    DB_PASSWORD = config("DB_PASSWORD", "")
-    DB_HOST = config("DB_HOST", "localhost")
-    DB_PORT = config("DB_PORT", "5432")
-    MYSQL_DRIVER = config("MYSQL_DRIVER", "")
-    DATABASE_URL = ""
 
-    if DB_TYPE == "mysql":
-        DATABASE_URL = f'mysql+{MYSQL_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+def get_db_engine(test_mode: bool = False):
+    DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    
+    if DB_TYPE == "sqlite" or test_mode:
+        BASE_PATH = f"sqlite:///{BASE_DIR}"
+        DATABASE_URL = BASE_PATH + "/"
+        
+        if test_mode:
+            DATABASE_URL = BASE_PATH + "test.db"
+            
+            return create_engine(
+                DATABASE_URL, connect_args={"check_same_thread": False}
+            )
     elif DB_TYPE == "postgresql":
         DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    else:
-        DATABASE_URL = "sqlite:///./database.db"
+        
+    return create_engine(DATABASE_URL)
+        
+engine = get_db_engine()
 
-    if DB_TYPE == "sqlite":
-        db_engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-    else:
-        db_engine = create_engine(DATABASE_URL, pool_size=32, max_overflow=64)
-    
-    return db_engine
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-db_engine = get_db_engine()
-
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=db_engine)
-
-
-def create_database():
-    return Base.metadata.create_all(bind=db_engine)
+Base = declarative_base()
 
 def get_db():
     db = SessionLocal()
@@ -49,3 +45,5 @@ def get_db():
         yield db
     finally:
         db.close()
+
+

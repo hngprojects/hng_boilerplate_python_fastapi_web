@@ -1,25 +1,10 @@
 #!/usr/bin/env python3
-""" Base
+""" This is the Base Model Class
 """
 from sqlalchemy import (
         Column,
-        Integer,
-        ForeignKey,
-        Table,
         DateTime,
         func
-        )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from datetime import datetime
-from sqlalchemy.dialects.postgresql import UUID
-
-
-Base = declarative_base()
-
-user_organization_association = Table('user_organization', Base.metadata,
-        Column('user_id', UUID(as_uuid=True), ForeignKey('users.id'), primary_key=True),
-        Column('organization_id', UUID(as_uuid=True), ForeignKey('organizations.id'), primary_key=True)
         )
 
 class BaseModel():
@@ -44,15 +29,15 @@ class BaseModel():
 
     @classmethod
     def get_all(cls):
+        from api.db.database import db
         """ returns all instance of the class in the db
         """
-        from api.db.database import db
         return db.query(cls).all()
 
     @classmethod
     def get_by_id(cls, id):
+        from api.db.database import db
         """ returns a single object from the db
         """
-        from api.db.database import db
         obj = db.query(cls).filter_by(id=id).first()
         return obj

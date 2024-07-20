@@ -1,8 +1,8 @@
-"""initial migration
+"""Initial migration
 
-Revision ID: 5a2dc9cc9735
+Revision ID: 61f79886b26a
 Revises: 
-Create Date: 2024-07-19 00:08:59.055052
+Create Date: 2024-07-19 21:55:31.151038
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5a2dc9cc9735'
+revision: str = '61f79886b26a'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,8 +24,8 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -34,7 +34,8 @@ def upgrade() -> None:
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('price', sa.Numeric(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
@@ -44,8 +45,8 @@ def upgrade() -> None:
     sa.Column('password', sa.String(length=255), nullable=False),
     sa.Column('first_name', sa.String(length=50), nullable=True),
     sa.Column('last_name', sa.String(length=50), nullable=True),
-    sa.Column('created_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('now()'), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -56,10 +57,11 @@ def upgrade() -> None:
     sa.Column('bio', sa.Text(), nullable=True),
     sa.Column('phone_number', sa.String(length=50), nullable=True),
     sa.Column('avatar_url', sa.String(length=100), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('user_organization',
     sa.Column('user_id', sa.UUID(), nullable=False),

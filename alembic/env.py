@@ -3,11 +3,15 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from decouple import config as decouple_config
-from api.v1.models.user import User
+from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
 from api.v1.models.base import Base
+from api.v1.models.subscription import Subscription
+from api.v1.models.blog import Blog
+from api.v1.models.job import Job
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -18,7 +22,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-database_url = decouple_config('DATABASE_URL')
+database_url = decouple_config('DB_URL')
 
 # Set the SQLAlchemy URL dynamically
 config.set_main_option('sqlalchemy.url', database_url)
