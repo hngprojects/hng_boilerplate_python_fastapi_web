@@ -17,6 +17,11 @@ from api.v1.models.testimonial import Testimonial
 class User(BaseModel, Base):
     __tablename__ = "users"
 
+    # ---- Add Back support for routes that are using the old db schema for user authentication ----
+    username = Column(String(50), unique=True, nullable=True)
+    email = Column(String(100), unique=True, nullable=True)
+    password = Column(String(255), nullable=False)
+    # ----------------------------------------------
     first_name = Column(String(50))
     last_name = Column(String(50))
     is_active = Column(Boolean, default=True)
