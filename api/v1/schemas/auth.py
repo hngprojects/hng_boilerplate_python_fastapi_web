@@ -46,3 +46,7 @@ class ErrorResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class loginCredentials(BaseModel):
+    username: str
+    password: str
