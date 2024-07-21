@@ -4,7 +4,7 @@ from main import app
 from unittest.mock import MagicMock, patch
 import uuid
 from api.db.database import Base, get_db, SessionLocal
-from api.v1.services.waitlist_email import send_confirmation_email
+from api.v1.services.email.waitlist_email import send_confirmation_email
 
 client = TestClient(app)
 
