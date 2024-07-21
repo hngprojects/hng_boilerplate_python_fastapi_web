@@ -43,7 +43,9 @@ def test_user_deactivation(db):
     user = User(
         username="testuser",
         email="testuser@gmail.com",
-        password=hash_password("testpassword"),
+        password=hash_password("Testpassword@123"),
+		first_name='Test',
+		last_name='User',
         is_active=True,
         is_admin=False
     )
@@ -54,7 +56,7 @@ def test_user_deactivation(db):
 
     login =  client.post('/api/v1/auth/login', json={
         "username": "testuser",
-        "password": "testpassword"
+        "password": "Testpassword@123"
     })
     access_token = login.json()['access_token']
 
