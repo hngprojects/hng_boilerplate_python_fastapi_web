@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
+from typing import Annotated, List
 from sqlalchemy.orm import Session
 from api.v1.schemas.role import RoleCreate, ResponseModel
 from api.db.database import get_db
@@ -14,13 +14,13 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
-from api.utils.dependencies import get_current_admin
-from api.v1.schemas.permission import PermissionCreate, PermissionResponse
+from api.utils.dependencies import get_current_admin, get_current_user
+from api.v1.schemas.permission import PermissionCreate, PermissionResponse, PermissionList
 
 
-permission = APIRouter(prefix="/api/v1", tags=["Permission"])
+permission = APIRouter(prefix="/permissions", tags=["Permission"])
 
-@permission.post("/permissions", response_model=PermissionResponse)
+@permission.post("/", response_model=PermissionResponse)
 def create_permission(current_admin: Annotated[User, Depends(get_current_admin)], permission: PermissionCreate, db: Session = Depends(get_db)):
     db_permission = Permission(name=permission.name)
     db.add(db_permission)
@@ -35,7 +35,12 @@ def create_permission(current_admin: Annotated[User, Depends(get_current_admin)]
     return response
 
 # Endpoint to get all permissions
-@permission.get("/permissions", response_model=List[PermissionResponse])
-def get_permissions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@permission.get("/", response_model=PermissionList)
+def get_permissions(current_user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
     permissions = db.query(Permission).all()
-    return permissions
+    perm = PermissionList(
+        permissions=permissions,
+        status_code=200,
+        message="Successfully retrieved Permissions"
+    )
+    return perm
