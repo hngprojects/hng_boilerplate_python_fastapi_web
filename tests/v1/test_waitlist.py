@@ -3,13 +3,13 @@ from fastapi.testclient import TestClient
 from main import app
 from unittest.mock import MagicMock, patch
 import uuid
-from api.db.database import Base, get_db, SessionLocal, engine
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
+from api.db.database import Base
 
-
+# Load environment variables from .env file
 load_dotenv()
 
 client = TestClient(app)
@@ -20,7 +20,8 @@ def test_db():
 
     db_url = os.getenv("DB_URL", "sqlite:///./test.db")
 
-    test_engine = create_engine(db_url)
+    test_engine = create_engine(db_url, connect_args={
+                                "check_same_thread": False} if "sqlite" in db_url else {})
 
     Base.metadata.create_all(bind=test_engine)
 
@@ -31,8 +32,9 @@ def test_db():
     try:
         yield session
     finally:
-        session.close()
+        # Drop all tables in the test database
         Base.metadata.drop_all(bind=test_engine)
+        session.close()
 
 
 @pytest.fixture(scope="function")
@@ -89,7 +91,7 @@ def test_signup_with_empty_name(client_with_mocks):
 
 
 def test_rate_limiting(client_with_mocks, mocker):
-
+    # Mock rate_limit decorator
     mocker.patch('api.utils.rate_limiter.rate_limit', return_value=MagicMock())
 
     for _ in range(5):
