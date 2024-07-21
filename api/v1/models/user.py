@@ -33,6 +33,9 @@ class User(BaseModel, Base):
     last_name = Column(String(50))
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
+    is_2fa_enabled = Column(Boolean, server_default=text('false'))
+    secret_key = Column(String(255))
+    backup_codes = Column(Text)
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
