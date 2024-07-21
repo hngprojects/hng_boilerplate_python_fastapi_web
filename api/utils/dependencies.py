@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import jwt
@@ -40,5 +41,18 @@ def get_current_admin(db: Session = Depends(get_db), token: str = Depends(oauth2
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to access this resource",
+        )
+    return user
+
+def get_current_active_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    user = get_current_user(db, token)
+    if not user.is_admin or user.is_active:
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "status_code": 401,
+                "message": "Unauthorized",
+                "error": "Bad Request"
+            }
         )
     return user
