@@ -39,8 +39,11 @@ class User(BaseModel, Base):
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
 
     def to_dict(self):
-        obj_dict = super().to_dict()
-        obj_dict.pop("password")
+        obj_dict = {}
+        obj_dict["username"] = self.username
+        obj_dict["email"] = self.email
+        obj_dict["first_name"] = self.first_name
+        obj_dict["last_name"] = self.last_name
         return obj_dict
 
 

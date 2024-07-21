@@ -7,7 +7,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 from api.v1.models.user import User
 import os
-from jose import JWTError
+from jose import JWTError, ExpiredSignatureError
 import bcrypt
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
@@ -28,6 +28,8 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
             raise credentials_exception
         token_data = TokenData(username=username)
     except JWTError:
+        raise credentials_exception
+    except Exception:
         raise credentials_exception
     user = db.query(User).filter(User.username == token_data.username).first()
     if user is None:
