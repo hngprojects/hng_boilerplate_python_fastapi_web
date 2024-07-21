@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from unittest.mock import MagicMock
-from api.utils.auth import hash_password
+# from api.utils.auth import hash_password
 from api.v1.models.user import User
 from api.db.database import get_db
 
@@ -28,7 +28,7 @@ def create_user(db_session_mock):
     user = User(
         username="testuser",
         email="testuser@gmail.com",
-        password=hash_password("Testpassword@123"),
+        password="Testpassword@123",
 		first_name='Test',
 		last_name='User',
         is_active=True,
@@ -90,7 +90,7 @@ def test_iser_inactive(db_session_mock):
     user = User(
         username="testuser1",
         email="testuser1@gmail.com",
-        password=hash_password("Testpassword@123"),
+        password="Testpassword@123",
 		first_name='Test',
 		last_name='User',
         is_active=False,
