@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-""" The Organization model
+"""
+The Organization model
 """
 from sqlalchemy import (
         Column,
@@ -20,13 +21,36 @@ from uuid_extensions import uuid7
 
 
 class Organization(Base):
+    """
+    Class defination for organization model
+    """
     __tablename__ = 'organizations'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    name = Column(String(50), unique=True, nullable=False)
+    slug = Column(String(255), unique=True, nullable=True)
+    name = Column(String(255), nullable=False)
+    owner_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False
+        )
+    email = Column(String(255), nullable=False)
+    industry = Column(String(255), nullable=False)
+    type = Column(String(255), nullable=False)
+    country = Column(String(255), nullable=False)
+    address = Column(String(255), nullable=False)
+    state = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+        )
+    owner = relationship(
+        "User",
+        back_populates="user_orgs"
+    )
 
     users = relationship(
             "User",
