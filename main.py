@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
+from api.db.database import create_database
+from api.v1.routes.testimonial import route as testimonial
 
 from api.v1.routes.newsletter_router import router as newsletter
 from api.v1.routes.newsletter_router import (
@@ -40,6 +42,10 @@ app.add_exception_handler(CustomException, custom_exception_handler) # Newslette
 app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(auth)
+#app.include_router(auth, tags=["Auth"])
+#app.include_router(users, tags=["Users"])
+
+app.include_router(testimonial, tags=["testimonial"])
 
 
 

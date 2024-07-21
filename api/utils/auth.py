@@ -1,20 +1,19 @@
-from fastapi import FastAPI, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, status, Security
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import jwt
 from typing import Optional
 from datetime import datetime, timedelta
 from api.v1.models.user import User
 import os
-from jose import JWTError
+from jose import JWTError, jwt
 import bcrypt
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
 from .config import SECRET_KEY, ALGORITHM
 
-# Initialize OAuth2PasswordBearer
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+# Initialize HTTPBearer
+bearer_scheme = HTTPBearer()
 
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
@@ -44,3 +43,23 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+def get_current_user(db: Session = Depends(get_db), credentials: HTTPAuthorizationCredentials = Security(bearer_scheme)):
+    token = credentials.credentials
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
+    user = get_user(db, username=token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
