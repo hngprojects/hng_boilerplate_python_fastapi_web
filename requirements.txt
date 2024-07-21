@@ -36,7 +36,7 @@ PyJWT==2.8.0
 PyMySQL==1.1.1
 pytest==8.2.2
 pytest-asyncio==0.23.8
-python-decouple==3.8
+python-decouple==3.1
 python-dotenv==1.0.1
 python-jose==3.3.0
 python-multipart==0.0.9
