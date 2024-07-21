@@ -44,6 +44,7 @@ app.include_router(invite)
 
 
 
+
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
     return {
