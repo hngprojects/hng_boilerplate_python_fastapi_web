@@ -30,7 +30,7 @@ user_organization_association = Table(
 class Organization(BaseModel, Base):
     __tablename__ = "organizations"
 
-    name = Column(String(50), unique=True, nullable=False)
+    name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
 
     users = relationship(

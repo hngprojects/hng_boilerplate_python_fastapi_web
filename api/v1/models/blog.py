@@ -13,12 +13,18 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from api.db.database import Base
 from api.v1.models.base_model import BaseModel
+from uuid_extensions import uuid7
 
 
 class Blog(BaseModel, Base):
     __tablename__ = "blogs"
 
-    author_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    author_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False,
+        default=uuid7
+    )
     title = Column(String(100), nullable=False)
     content = Column(Text)
     image_url = Column(String(100), nullable=True)

@@ -12,12 +12,13 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from api.db.database import Base
 from api.v1.models.base_model import BaseModel
+from uuid_extensions import uuid7
 
 
 class Job(BaseModel, Base):
     __tablename__ = "jobs"
-
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False, default=uuid7)
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     location = Column(String(255))
