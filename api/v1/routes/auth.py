@@ -91,7 +91,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         first_name=db_user.first_name,
         last_name=db_user.last_name,
         email=db_user.email,
-        created_at=datetime.utcnow()
+        created_at=datetime.now()
     )
     data = SuccessResponseData(
         token=access_token,
