@@ -14,7 +14,7 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
-
+from api.v1.models.plans import SubscriptionPlan
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
