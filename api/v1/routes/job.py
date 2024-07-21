@@ -9,7 +9,6 @@ from api.v1.models.user import User
 from api.v1.schemas.job import JobCreate, JobResponseSchema
 from api.v1.schemas.job import JobUpdate, JobResponse
 from fastapi import APIRouter, Depends, HTTPException, status
-from api.utils.json_response import JsonResponseDict
 
 
 job = APIRouter(
@@ -48,7 +47,7 @@ async def create_job(
 
 @job.patch(
     "/{id}",
-    response_model=JsonResponseDict,
+    response_model=JobResponse,
     summary="Update job post",
     description="This endpoint allows a user to update an existing job post by providing updated job details."
 )
@@ -66,7 +65,7 @@ async def update_job_post(
     if str(current_user.id) != str(db_job_post.user_id) and not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this job post")
 
-    for key, value in job_update.dict(exclude_unset=True).items():
+    for key, value in job_update.model_dump(exclude_unset=True).items():
         setattr(db_job_post, key, value)
 
     db.add(db_job_post)
