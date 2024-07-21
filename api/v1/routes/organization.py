@@ -7,13 +7,13 @@ from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.schemas.organization_schemas import Org_request, Response, Data
-from api.v1.services.auth_utils import get_current_user
+from api.utils.dependencies import get_current_user
 from api.v1.models.user import User
 
-app = APIRouter(prefix="/api/v1")
+org = APIRouter(prefix="/api/v1", tags=["Organizations"])
 
 
-@app.post(
+@org.post(
         "/organisations",
         response_model=Response,
         status_code=status.HTTP_201_CREATED
