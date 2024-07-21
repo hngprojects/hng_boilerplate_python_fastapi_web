@@ -23,6 +23,7 @@ from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
 
 
+
 class User(BaseModel, Base):
     __tablename__ = 'users'
 

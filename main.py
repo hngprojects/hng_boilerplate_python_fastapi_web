@@ -11,6 +11,7 @@ from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
 )
+from api.v1.routes.testimonials import router as testimonial
 
 from api.v1.routes.auth import auth
 from api.v1.routes.roles import role
@@ -38,6 +39,7 @@ app.add_middleware(
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.include_router(newsletter, tags=["Newsletter"])
+app.include_router(testimonial)
 
 app.include_router(auth)
 

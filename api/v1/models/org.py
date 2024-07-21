@@ -20,6 +20,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 
 
+
 class Organization(BaseModel, Base):
     __tablename__ = 'organizations'
 
