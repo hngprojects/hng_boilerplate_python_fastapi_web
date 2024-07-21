@@ -7,14 +7,19 @@ from starlette.requests import Request
 from api.v1.routes import auth_facebook
 
 from api.db.database import Base, engine
-from api.v1.routes.auth import auth
+
+from api.v1.routes.newsletter_router import (
+    CustomException,
+    custom_exception_handler
+)
+
+from api.v1.routes import api_version_one
 
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-
 
 app = FastAPI(lifespan=lifespan)
 
@@ -31,10 +36,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 
-app.include_router(auth)
-# app.include_router(users, tags=["Users"])
 app.include_router(auth_facebook.router, prefix="/api/v1", tags=["Facebook Login"])
+app.include_router(api_version_one)
 
 
 
