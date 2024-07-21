@@ -15,6 +15,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
+# from api.v1.models.user import User
+from api.v1.models.preference import OrgPreference
 from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
@@ -28,12 +30,12 @@ class Organization(BaseModel, Base):
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
     users = relationship(
             "User",
             secondary=user_organization_association,
             back_populates="organizations"
             )
+    orgpreferences = relationship("OrgPreference", back_populates="organization") #required
 
     def __str__(self):
         return self.name

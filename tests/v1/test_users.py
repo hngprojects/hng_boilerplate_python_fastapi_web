@@ -1,7 +1,10 @@
 import pytest
 from jose import jwt
 from decouple import config
-from api.v1.schemas.auth import User, ShowUser, Token, TokenData
+from api.v1.models.user import User
+from api.v1.models.user import ShowUser
+from api.utils.oauth2 import Token, TokenData
+
 import json
 
 

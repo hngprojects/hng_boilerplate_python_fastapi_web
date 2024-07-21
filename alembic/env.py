@@ -11,6 +11,8 @@ from api.v1.models.base import Base
 from api.v1.models.subscription import Subscription
 from api.v1.models.blog import Blog
 from api.v1.models.job import Job
+from api.v1.models.preference import OrgPreference
+
 
 
 # this is the Alembic Config object, which provides
