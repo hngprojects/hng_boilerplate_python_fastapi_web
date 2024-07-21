@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """ Populates the database with seed data
 """
-from api.db.database import create_database, get_db
+from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
 
-create_database()
+# create_database()
 db = next(get_db())
 
 user_1 = User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe")

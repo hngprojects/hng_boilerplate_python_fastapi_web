@@ -2,10 +2,14 @@ import uvicorn
 from contextlib import asynccontextmanager
 from typing import Union
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from api.db.database import Base, engine
+from api.v1.routes.products import product_router
+
+from exceptions import validation_exception_handler
 
 Base.metadata.create_all(bind=engine)
 
@@ -13,8 +17,9 @@ Base.metadata.create_all(bind=engine)
 async def lifespan(app: FastAPI):
     yield
 
+version = 'v1'
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, version=version)
 
     
 
@@ -31,6 +36,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(product_router, prefix=f"/api/{version}/products", tags=['products'])
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 # app.include_router(auth, tags=["Auth"])
 # app.include_router(users, tags=["Users"])
