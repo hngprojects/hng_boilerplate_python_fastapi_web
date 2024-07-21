@@ -37,10 +37,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(product_router, prefix=f"/api/{version}/products", tags=['products'])
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
 app.include_router(auth)
+app.include_router(product_router)
 # app.include_router(users, tags=["Users"])
 
 
