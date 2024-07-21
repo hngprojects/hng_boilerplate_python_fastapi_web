@@ -18,12 +18,8 @@ product_router = APIRouter(prefix="/api/v1/products", tags=["auth"])
 async def get_product(product_id: UUID, current_user: TokenData = Depends(get_current_user)) -> ProductSchema:
     product = db.query(Product).get(product_id)
     if product is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="product no found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found"
+        )
     return product
-
-
-@product_router.get("/", response_model=List[ProductSchema])
-async def get_all_products():
-    products = db.query(Product).all()
-    return products
-    
