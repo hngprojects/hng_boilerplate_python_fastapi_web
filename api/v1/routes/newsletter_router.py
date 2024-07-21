@@ -13,7 +13,6 @@ from api.db.database import get_db, Base, engine
 
 
 Base.metadata.create_all(bind=engine)
-print('creating table')
 
 class CustomException(HTTPException):
     """
