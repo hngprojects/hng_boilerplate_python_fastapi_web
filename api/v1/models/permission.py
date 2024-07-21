@@ -10,6 +10,7 @@ class Permission(BaseModel, Base):
     __tablename__ = 'permissions'
 
     name = Column(String, index=True, nullable=False)
+    description = Column(String, nullable=False)
 
     roles = relationship('Role', secondary=role_permission_association, back_populates='permissions')
 

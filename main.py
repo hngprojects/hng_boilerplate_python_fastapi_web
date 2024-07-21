@@ -7,7 +7,7 @@ from starlette.requests import Request
 
 from api.db.database import Base, engine
 
-from api.v1.routes.newsletter_router import router as newsletter
+from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.permission_router import router as Permission
 
 from api.v1.routes.newsletter_router import (
@@ -16,7 +16,6 @@ from api.v1.routes.newsletter_router import (
 )
 
 from api.v1.routes import api_version_one
-from api.v1.routes.permission import Permission
 
 Base.metadata.create_all(bind=engine)
 
@@ -43,7 +42,6 @@ app.add_exception_handler(CustomException, custom_exception_handler) # Newslette
 
 app.include_router(api_version_one)
 
-app.include_router(auth)
 app.include_router(Permission, tags=["Permissions"])
 # app.include_router(users, tags=["Users"])
 
