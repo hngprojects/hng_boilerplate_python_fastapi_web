@@ -1,11 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
-from ...main import app
-from api.db.database import get_db
 from datetime import datetime
-from api.v1.schemas.testimonial import TestimonialResponse
-from api.v1.models.testimonials import Testimonial
+from ...main import app
+from ...api.db.database import get_db, get_db_engine, Base
 
 client = TestClient(app)
 
@@ -23,10 +21,6 @@ def override_get_db(mocker, db_session_mock):
 def test_update_testimonial_with_id(db_session_mock, testimonial_id):
 
 
-    db_session_mock.query(Testimonial).filter(Testimonial.id == testimonial_id).first.return_value = None
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-
     testimonial_data = {
         "content_data" : "I love testimonials"
     }
@@ -42,10 +36,10 @@ def test_update_testimonial_with_id(db_session_mock, testimonial_id):
                'updated_at' : 'cureent_time'
           }
     }
+ 
 
 
-if __name__ == "__main__":
-    pytest.main()
+
 
  
   
