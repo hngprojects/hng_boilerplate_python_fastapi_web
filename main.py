@@ -1,6 +1,8 @@
 import uvicorn
 from contextlib import asynccontextmanager
 from typing import Union
+from decouple import config
+from starlette.middleware.sessions import SessionMiddleware  # required by oauth2
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -17,11 +19,15 @@ from api.v1.routes.roles import role
 
 Base.metadata.create_all(bind=engine)
 
+SECRET_KEY = config("SECRET_KEY")
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY) 
 
 origins = [
     "http://localhost:3000",
