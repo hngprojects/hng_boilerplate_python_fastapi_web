@@ -7,8 +7,10 @@ from starlette.requests import Request
 
 from api.db.database import Base, engine
 from api.v1.routes.auth import auth
+from api.v1.routes.job import job
 
 Base.metadata.create_all(bind=engine)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -17,7 +19,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-    
 
 origins = [
     "http://localhost:3000",
@@ -34,8 +35,8 @@ app.add_middleware(
 
 
 app.include_router(auth)
+app.include_router(job)
 # app.include_router(users, tags=["Users"])
-
 
 
 @app.get("/", tags=["Home"])
