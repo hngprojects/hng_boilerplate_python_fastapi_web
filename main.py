@@ -12,6 +12,7 @@ from api.v1.routes.newsletter_router import (
 )
 
 from api.v1.routes import api_version_one
+# from api.v1.routes.
 
 Base.metadata.create_all(bind=engine)
 

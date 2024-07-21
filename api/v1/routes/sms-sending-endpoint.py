@@ -2,12 +2,12 @@ from twilio.rest import Client
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Depends, HTTPException
 from pydantic import BaseModel
-
+from fastapi import APIRouter
 from hng_boilerplate_python_fastapi_web.main import app
 
-
+router = APIRouter()
 def send_sms(recipient_number, content):
-    account_sid = 'ACaaad000fe19df6daf0b7fcd3a0681664'
+    account_sid ="ACaaad000fe19df6daf0b7fcd3a0681664"
     auth_token = '24dc299349cb1f9f48f58cecae868fd2'
     client = Client(account_sid, auth_token)
     original_string = str(recipient_number)
@@ -48,7 +48,7 @@ class SMSRequest(BaseModel):
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
-    if token != "fake-super-secret-token":  # Replace with your actual token validation logic
+    if token != "fake-super-secret-token":
         raise HTTPException(status_code=401, detail="Invalid token")
     return {"username": "authorized_user"}
 
