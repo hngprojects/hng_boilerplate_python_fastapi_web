@@ -8,35 +8,33 @@ from api.db.database import Base, get_db
 from api.v1.models.user import User
 from api.v1.models.base import Base
 
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 
-test_db_name = 'test_fastapi_db'
-test_db_pw = 'postgres' 
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:{test_db_pw}@localhost:5432/{test_db_name}"
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+Base.metadata.create_all(bind=engine)
+
 def override_get_db():
-	db = TestingSessionLocal()
-	try:
-		yield db
-	finally:
-		db.close()
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
 
 app.dependency_overrides[get_db] = override_get_db
-
-# Create tables in the test database
-Base.metadata.create_all(bind=engine)
 
 client = TestClient(app)
 
 @pytest.fixture(scope="module")
-def db():
-	db = TestingSessionLocal()
-	yield db
-	db.close()
+def test_db():
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
+    yield
+    Base.metadata.drop_all(bind=engine)
 
 
-def test_user_deactivation(db):
+def test_user_deactivation(test_db):
     '''Test for user deactivation'''
 
     # Add user to database
@@ -49,9 +47,9 @@ def test_user_deactivation(db):
         is_active=True,
         is_admin=False
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
 
 
     login =  client.post('/api/v1/auth/login', json={
