@@ -42,3 +42,5 @@ def create_role(current_admin: Annotated[User, Depends(get_current_admin)], role
     db.refresh(new_role)
 
     return ResponseModel(message="Role created successfully", status_code=201)
+
+
