@@ -17,6 +17,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
+from api.v1.models.org import Organization
+from api.v1.models.profile import Profile
 import bcrypt
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
@@ -30,7 +32,10 @@ def hash_password(password: str) -> bytes:
     hash_pw = bcrypt.hashpw(password.encode(), salt)
     return hash_pw
 
+
 class User(Base):
+    """
+    class defination for user model"""
     __tablename__ = 'users'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
@@ -40,8 +45,13 @@ class User(Base):
     first_name = Column(String(50))
     last_name = Column(String(50))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        onupdate=func.now()
+        )
 
+    user_orgs = relationship("Organization", back_populates="owner")
     profile = relationship("Profile", uselist=False, back_populates="user")
     organizations = relationship(
             "Organization",
@@ -56,9 +66,8 @@ class User(Base):
         for key, value in kwargs.items():
             if key in keys:
                 if key == 'password':
-                    value = hash_password(value)
+                    value = hash_password(value).decode()
                 setattr(self, key, value)
 
     def __str__(self):
         return self.email
-
