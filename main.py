@@ -7,14 +7,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from api.utils.settings import settings
-from api.v1.routes.help_center import router as help_center
 from api.utils.exceptions import rate_limit_callback, http_exception_handler
 
 from fastapi_limiter import FastAPILimiter
 
 from api.db.database import Base, engine
+from api.v1.routes.help_center import router as help_center
 from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes import api_version_one
+from api.v1.routes.auth import auth
+from api.v1.routes.user import user
+from api.v1.routes.roles import role
 
 Base.metadata.create_all(bind=engine)
 
@@ -46,10 +49,11 @@ app.add_middleware(
 )
 
 app.include_router(newsletter, tags=["Newsletter"])
-# app.include_router(auth, tags=["Auth"])
+app.include_router(auth, tags=["Auth"])
 app.include_router(help_center, tags=["Help Centers"])
 app.include_router(api_version_one)
-
+app.include_router(newsletter, tags=["Newsletter"])
+app.include_router(user)
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
