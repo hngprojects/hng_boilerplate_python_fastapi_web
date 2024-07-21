@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from typing import Optional
 import uuid
 from api.db.database import get_db
-from ..schemas.customer import CustomerResponse
+from ..schemas.customer import CustomerDeleteResponse
 from api.v1.models.customer import Customer
 from api.v1.models.user import User
 from api.utils.dependencies import get_current_admin
@@ -22,7 +22,7 @@ class DatabaseException(HTTPException):
     def __init__(self, detail: str = "Database error occurred"):
         super().__init__(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=detail)
 
-@customer_router.delete('/customers/{customer_id}', response_model=CustomerResponse)
+@customer_router.delete('/customers/{customer_id}', response_model=CustomerDeleteResponse)
 async def delete_customer(
     customer_id: uuid.UUID,
     db: Session = Depends(get_db),
@@ -44,7 +44,10 @@ async def delete_customer(
         db.commit()
         db.refresh(db_customer)
 
-        return db_customer
+        return {
+            "status": "success",
+            "message": "Customer soft deleted successfully",
+        }
 
     except CustomerNotFoundException as e:
         raise e

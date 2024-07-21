@@ -77,6 +77,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         password = password_hashed,
         first_name=user.first_name,
         last_name=user.last_name,
+        is_admin=user.is_admin,
         is_active=True
     )
     try: 
