@@ -1,11 +1,10 @@
 import uvicorn
 from contextlib import asynccontextmanager
-from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
-
+from api.v1.routes.sms_sending_endpoint import router as sms_router
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
@@ -37,8 +36,7 @@ app.add_middleware(
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 
 app.include_router(api_version_one)
-
-
+app.include_router(sms_router)
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
@@ -46,7 +44,6 @@ async def get_root(request: Request) -> dict:
         "message": "Welcome to API",
         "URL": "",
     }
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)
