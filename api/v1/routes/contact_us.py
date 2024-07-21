@@ -26,11 +26,11 @@ logger = logging.getLogger(__name__)
 
 
 class ContactForm(BaseModel):
-    name: constr(strip_whitespace=True, min_length=1)
-    email: EmailStr
-    message: constr(strip_whitespace=True, min_length=1)
+    name: constr(strip_whitespace=True, min_length=1, max_length=50)
+    email: EmailStr = constr(max_length=100)
+    message: constr(strip_whitespace=True, min_length=1, max_length=1000)
 
-    
+
 @router.post("/api/v1/contact")
 async def contact_us(form: ContactForm, email_service: EmailService = Depends()):
     logger.info(f"Received contact form submission: {form}")
