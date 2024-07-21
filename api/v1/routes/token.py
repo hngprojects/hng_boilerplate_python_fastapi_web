@@ -22,8 +22,9 @@ from api.utils.auth import authenticate_user, create_access_token,hash_password,
 from api.utils.dependencies import get_current_admin, get_current_user
 from api.utils.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
-token = APIRouter(prefix='/api/v1/auth', tags=["Token"])
-@token.post("/token", response_model=Token)
+token = APIRouter(prefix='/token', tags=["Token"])
+
+@token.post("/", response_model=Token)
 def login_for_access_token(credentials: loginCredentials, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == credentials.username).first()
     if not user or not verify_password(credentials.password, user.hashed_password):

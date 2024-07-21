@@ -21,7 +21,7 @@ class UserCreate(BaseModel):
 
     @field_validator('password')
     def password_validator(cls, value):
-        if len(value) < 8:
+        if len(value) < 3:
             raise ValueError('Password must be at least 3 characters long')
         if not re.search(r'[a-z]', value):
             raise ValueError('Password must contain at least one lowercase letter')

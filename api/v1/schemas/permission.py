@@ -16,9 +16,12 @@ class PermissionResponse(BaseModel):
     message: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PermissionList(BaseModel):
-    permissions = List[Permission]
+    permissions: List[Permission]
     status_code: int
     message: str
+
+    class Config:
+        from_attributes = True
