@@ -1,9 +1,9 @@
+from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from api.v1.models.blog import Blog
 from api.db.database import get_db
-from api.utils.json_response import JsonResponseDict
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -13,7 +13,7 @@ def list_blog(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
-):
+) -> dict[str, Any]:
     try:
         offset = (page - 1) * page_size
         query = (
@@ -44,16 +44,12 @@ def list_blog(
             }
             results.append(blog_dict)
 
-        return JsonResponseDict(
-            message="Blog Posts fetched successfully",
-            data={
-                "count": total_count,
-                "next": next_page,
-                "previous": prev_page,
-                "results": results,
-            },
-            status_code=status.HTTP_200_OK,
-        )
+        return {
+            "count": total_count,
+            "next": next_page,
+            "previous": prev_page,
+            "results": results,
+        }
 
     except SQLAlchemyError as e:
         raise HTTPException(
