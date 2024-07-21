@@ -20,7 +20,7 @@ class User(BaseModel, Base):
     # ---- Add Back support for routes that are using the old db schema for user authentication ----
     username = Column(String(50), unique=True, nullable=True)
     email = Column(String(100), unique=True, nullable=True)
-    password = Column(String(255), nullable=False)
+    password = Column(String(255), nullable=True)
     # ----------------------------------------------
     first_name = Column(String(50))
     last_name = Column(String(50))
