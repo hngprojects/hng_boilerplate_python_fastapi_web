@@ -13,6 +13,8 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
+from api.v1.models.testimonials import Testimonial
+from datetime import datetime
 
 # Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)
@@ -104,6 +106,17 @@ blog_3 = Blog(
 
 db.add_all([blog_1, blog_2, blog_3])
 
+testimonials = [
+    Testimonial(client_name="Jane Smith", client_designation="Freelance Designer", testimonial="Excellent service and support!", rating=5, date=datetime.now()),
+    Testimonial(client_name="John Doe", client_designation="Developer", testimonial="Great experience!", rating=4, date=datetime.now()),
+    Testimonial(client_name="Alice Johnson", client_designation="Manager", testimonial="Very helpful!", rating=5, date=datetime.now()),
+    Testimonial(client_name="Bob Brown", client_designation="CEO", testimonial="Highly recommend!", rating=5, date=datetime.now()),
+    Testimonial(client_name="Charlie Davis", client_designation="CTO", testimonial="Professional service!", rating=4, date=datetime.now()),
+    Testimonial(client_name="Dana Lee", client_designation="CFO", testimonial="Excellent support!", rating=5, date=datetime.now()),
+
+]
+
+db.add_all(testimonials)
 db.commit()
 users = db.query(Organization).first().users
 print("Seed data succesfully")
