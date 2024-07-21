@@ -5,7 +5,6 @@ Handles 400, 401 and 500 HTTP errors
 
 from fastapi import Request, HTTPException, status
 from fastapi.responses import JSONResponse
-from api.utils.json_response import JsonResponseDict
 from pydantic import BaseModel
 from typing import Type
 from fastapi.exceptions import RequestValidationError
