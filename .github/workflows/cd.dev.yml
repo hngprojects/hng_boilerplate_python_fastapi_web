@@ -28,8 +28,6 @@ jobs:
             pip install -r requirements.txt
             alembic upgrade head
 
-            
-
   on-failure:
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'failure' }}
