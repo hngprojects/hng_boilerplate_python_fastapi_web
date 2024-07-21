@@ -51,13 +51,13 @@ def mock_google_oauth2():
                 yield mock_authorize_redirect, mock_authorize_token_userinfo
 
 def test_login(client, mock_google_oauth2):
-    response = client.get("/api/v1/auth/login/google")
+    response = client.get("/auth/login/google")
     print("response: ", response)
     assert response.status_code == 200
     assert response.url == "http://testserver/api/v1/auth/login/google"
 
 def test_auth(client, mock_google_oauth2):
-    response = client.get("/api/v1/auth/callback/google?code=fake-code")
+    response = client.get("/auth/callback/google?code=fake-code")
     assert response.status_code == 201
     data = response.json()
     print('data: ', data)
