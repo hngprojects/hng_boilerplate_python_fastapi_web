@@ -34,6 +34,8 @@ app.add_middleware(
 
 # app.include_router(auth, tags=["Auth"])
 # app.include_router(users, tags=["Users"])
+app.include_router(products.router, tags=["Products"])
+
 
 
 
@@ -43,7 +45,7 @@ async def get_root(request: Request) -> dict:
         "message": "Welcome to API",
         "URL": "",
     }
-
+         
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)
