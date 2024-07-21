@@ -21,9 +21,15 @@ from sqlalchemy.dialects.postgresql import UUID
 
 
 class Job(BaseModel, Base):
+
     __tablename__ = "jobs"
 
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+
+    __tablename__ = 'jobs'
+    
+    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False, default=uuid7)
+
     title = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     location = Column(String(255))
