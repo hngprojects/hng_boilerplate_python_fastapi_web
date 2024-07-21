@@ -111,8 +111,3 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
 
-#protected route
-@auth.get("/test")
-def test(user: Annotated[User, Depends(get_current_user)]):
-    return {f"message": "Hello, welcome {user.username}"}
-
