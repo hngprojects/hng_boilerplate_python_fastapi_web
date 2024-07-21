@@ -181,12 +181,14 @@ async def google_oauth2_callback(request: Request,
     new_user: object = create_user_from_google_info(google_response, db)
 
     expire_at = config('ACCESS_TOKEN_EXPIRE_MINUTES')
+    expires_at = timedelta(minutes=int(expire_at))
     # generate access token for the user to access the resource
-    access_token: str = create_access_token({"username": new_user.username}, int(expire_at))
+    access_token: str = create_access_token({"username": new_user.username}, expires_at)
 
     expire_at = config('JWT_REFRESH_EXPIRY')
+    expires_at = timedelta(minutes=int(expire_at)*60)
     # generate refresh token for the user
-    refresh_token: str = create_access_token({"username": new_user.username}, int(expire_at) * 60)
+    refresh_token: str = create_access_token({"username": new_user.username}, expires_at)
 
     return JsonResponseDict(
         message="Authentication successful",
