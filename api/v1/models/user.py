@@ -40,7 +40,6 @@ class User(BaseModel, Base):
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
 
-    auth_user = relationship("AuthUser", uselist=False, back_populates="user")
     oauth_user = relationship("OAuthUser", uselist=False, back_populates="user")
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
