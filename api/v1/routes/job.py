@@ -12,9 +12,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from api.utils.json_response import JsonResponseDict
 
 
-
-
-
 job = APIRouter(
     prefix="/api/v1/jobs",
     tags=["todos"],
@@ -49,12 +46,17 @@ async def create_job(
 
 # update a job post
 
-@job.patch("/jobs/{id}", response_model=JobResponse)
+@job.patch(
+    "/{id}",
+    response_model=JsonResponseDict,
+    summary="Update job post",
+    description="This endpoint allows a user to update an existing job post by providing updated job details."
+)
 async def update_job_post(
     id: str,
+    current_user: Annotated[User, Depends(get_current_user)],  # Ensure user is authenticated
     job_update: JobUpdate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)  # Ensure user is authenticated
 ):
     db_job_post = db.query(Job).filter(Job.id == id).first()
     if not db_job_post:
@@ -71,8 +73,8 @@ async def update_job_post(
     db.commit()
     db.refresh(db_job_post)
 
-    return JsonResponseDict(
-        message="Job details updated successfully",
-        data=db_job_post,
-        status_code=status.HTTP_200_OK
-    )
+    return {
+        "message": "Job details updated successfully",
+        "data": db_job_post,
+        "status_code": status.HTTP_200_OK
+    }
