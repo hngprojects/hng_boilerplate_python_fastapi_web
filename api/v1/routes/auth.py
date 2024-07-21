@@ -76,13 +76,3 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
     return db_user
     
-
-# Protected route example: test route
-@router.get("/admin")
-def read_admin_data(current_admin: User = Depends(get_current_admin)):
-    return {"message": "Hello, admin!"}
-
-#protected route
-@router.get("/test")
-def test(user: User = Depends(get_current_user)):
-    return {f"message": "Hello, welcome {user.username}"}
