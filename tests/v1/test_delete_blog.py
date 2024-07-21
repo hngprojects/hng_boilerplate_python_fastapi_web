@@ -59,3 +59,19 @@ def test_delete_blog_invalid_uuid():
     response = client.delete(f"/api/v1/blogs/{invalid_id}")
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid Id"}
+
+def test_delete_blog_server_error(db_session_mock):
+    def mock_commit():
+        raise Exception("Server error")
+
+    blog_id = str(uuid.uuid4())
+    create_blog(db_session_mock, blog_id, False)
+    db_session_mock.query.return_value.filter.return_value.first.return_value = db_session_mock.query.return_value.filter_by.return_value.first.return_value
+    
+    # Mock commit method to raise an exception
+    db_session_mock.commit.side_effect = mock_commit
+
+    response = client.delete(f"/api/v1/blogs/{blog_id}")
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Internal server error"}
+    
