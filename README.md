@@ -65,6 +65,26 @@ python3 seed.py
 
 After creating new tables, or adding new models. Make sure to run alembic revision --autogenerate -m "Migration messge"
 
+After creating new tables, or adding new models. Make sure you import the new model properly in th 'api/v1/models/__init__.py file
+
+After importing it in the init file, you need not import it in the /alembic/env.py file anymore
+
+
+**Adding new routes**
+
+To add a new route, confirm if a file relating to that route is not already created. If it is add the route in that file using the already declared router
+
+If the there is no file relating to the route in the 'api/v1/routes/' directory create a new one following the naming convention
+
+After creating the new route file, declare the router and add the prefix as well as the tag
+
+The prefix should not include the base prefix ('/api/v1') as it is already includedin the base `api_version_one` router
+
+After creating the router, import it in the 'api/v1/routes/__init__.py' file and include the router in the `api_version_one` router using
+```python
+api_version_one.include_router(<router_name>)
+```
+
 ## TEST THE ENDPOINT
 - run the following code
 ```
