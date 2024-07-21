@@ -5,7 +5,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
+
+
+
+
 from api.db.database import Base, engine
+
+
+
+
 from api.v1.routes.auth import auth
 from api.v1.routes.subscription import subscription as sub
 
