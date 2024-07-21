@@ -11,6 +11,7 @@ from main import app
 
 from sqlalchemy.ext.declarative import declarative_base
 from api.v1.models.user import User
+from api.v1.models.job import Job
 from dotenv import load_dotenv
 from api.utils.auth import create_access_token, hash_password
 import pytest
@@ -26,7 +27,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 Base.metadata.create_all(bind=engine)
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def session():
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
@@ -37,7 +38,7 @@ def session():
         db.close()
 
 
-@pytest.fixture()
+@pytest.fixture(scope="function")
 def client(session):
     def override_get_db():
         try:
@@ -52,7 +53,7 @@ def client(session):
 # client = TestClient(app)
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 def setup(request, session):
     print("\nSetting up resources...")
     db = session
@@ -75,6 +76,7 @@ def setup(request, session):
     )
 
     def finalizer():
+        db.query(Job).delete()
         db.query(User).delete()
         db.commit()
         db.close()
@@ -90,18 +92,17 @@ def setup(request, session):
 
 
 def test_create_job(client: TestClient, setup: dict[str, str]):
-    pass
-    # headers = {"authorization": f"Bearer {setup['token']}"}
+    headers = {"authorization": f"Bearer {setup['token']}"}
 
-    # data = {
-    #     "title": "first job",
-    #     "description": "This is my first job",
-    #     "location": "Sokoto",
-    #     "job_type": "Frontend developer",
-    #     "salary": 50000,
-    #     "company_name": "Dev endgine technology",
-    # }
+    data = {
+        "title": "first job",
+        "description": "This is my first job",
+        "location": "Sokoto",
+        "job_type": "Frontend developer",
+        "salary": 50000,
+        "company_name": "Dev endgine technology",
+    }
 
-    # response = client.post("/api/v1/jobs", headers=headers, json=data)
+    response = client.post("/api/v1/jobs", headers=headers, json=data)
 
-    # assert response.status_code == 201
+    assert response.status_code == 201
