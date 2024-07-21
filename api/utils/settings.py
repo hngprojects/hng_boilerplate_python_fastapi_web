@@ -22,6 +22,15 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = config("DB_PASSWORD")
     DB_NAME: str = config("DB_NAME")
     DB_TYPE: str = config("DB_TYPE")
+    
+
+
+    class Config:
+        env_file = BASE_DIR / ".env"
 
 
 settings = Settings()
+
+
+# Print to verify
+print(f"Loaded DB_HOST: {settings.DB_HOST}")

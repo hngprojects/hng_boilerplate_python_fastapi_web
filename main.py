@@ -7,6 +7,9 @@ from starlette.requests import Request
 
 from api.db.database import Base, engine
 
+from api.v1.routes.newsletter_router import router as newsletter
+from api.v1.routes.permission_router import router as Permission
+
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler

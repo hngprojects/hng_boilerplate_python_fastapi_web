@@ -20,6 +20,7 @@ Base.metadata.create_all(bind=engine)
 
 db = next(get_db())
 
+# Create users
 user_1 = User(
     email="test@mail",
     username="testuser",
@@ -41,35 +42,34 @@ user_3 = User(
     first_name="Bob",
     last_name="Dwayne",
 )
-
 db.add_all([user_1, user_2, user_3])
 
+# Create organizations
 org_1 = Organization(
-    name="Python Org", description="An organization for python develoers"
+    name="Python Org", description="An organization for python developers"
 )
 org_2 = Organization(name="Django Org", description="An organization of django devs")
 org_3 = Organization(
     name="FastAPI Devs", description="An organization of Fast API devs"
 )
-
-# user_role = Role()
-
 db.add_all([org_1, org_2, org_3])
 
-
+# Assign users to organizations
 org_1.users.extend([user_1, user_2, user_3])
 org_2.users.extend([user_1, user_3])
 org_3.users.extend([user_2, user_1])
 
+# Create products
 product_1 = Product(name="bed", price=400000)
 product_2 = Product(name="shoe", price=150000)
+db.add_all([product_1, product_2])
 
+# Create profiles
 profile_1 = Profile(bio="My name is John Doe", phone_number="09022112233")
 user_1.profile = profile_1
 
-db.add_all([product_1, product_2])
-
-db.commit()  # commit now to ensure user is saved so as to be used when creating a blog
+# Commit initial data
+db.commit()
 
 # Create blog posts
 blog_1 = Blog(
@@ -81,7 +81,6 @@ blog_1 = Blog(
     is_deleted=False,
     excerpt="This is an excerpt from my first blog.",
 )
-
 blog_2 = Blog(
     author_id=user_2.id,
     title="Jane's Blog",
@@ -91,7 +90,6 @@ blog_2 = Blog(
     is_deleted=False,
     excerpt="This is an excerpt from Jane's blog.",
 )
-
 blog_3 = Blog(
     author_id=user_3.id,
     title="Bob's Adventures",
@@ -101,9 +99,36 @@ blog_3 = Blog(
     is_deleted=False,
     excerpt="This is an excerpt from Bob's adventures.",
 )
-
 db.add_all([blog_1, blog_2, blog_3])
 
+# Create permissions
+permission_1 = Permission(name="update_profile", description="Allows the user to update their profile information")
+permission_2 = Permission(name="delete_user", description="Allows the user to delete their account")
+permission_3 = Permission(name="view_analytics", description="Allows the user to view analytics data")
+db.add_all([permission_1, permission_2, permission_3])
+
+# Create roles
+role_1 = Role(role_name="admin", permissions=[permission_1, permission_2, permission_3])
+role_2 = Role(role_name="user", permissions=[permission_1])
+db.add_all([role_1, role_2])
+
+# Assign roles to users
+user_1.roles.append(role_1)  # Admin role
+user_2.roles.append(role_2)  # User role
+user_3.roles.append(role_2)  # User role
+
+# Commit all changes
 db.commit()
+
+# Print some details
 users = db.query(Organization).first().users
-print("Seed data succesfully")
+for user in users:
+    print(user.password)
+print(profile_1.user_id)
+print(profile_1.user)
+
+permissions = db.query(Permission).all()
+for permission in permissions:
+    print(permission.name, permission.description)
+
+print("Seed data successfully populated.")
