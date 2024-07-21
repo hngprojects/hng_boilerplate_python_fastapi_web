@@ -4,6 +4,7 @@ from main import app
 from api.core import responses
 from api.db.database import Base, get_db
 from api.v1.models.article import Article
+from fastapi.testclient import TestClient
 from tests.database import TestingSessionLocal, engine
 
 
@@ -16,6 +17,8 @@ def override_get_db():
         db.close()
 
 app.dependency_overrides[get_db] = override_get_db
+
+client = TestClient(app)
 
 
 payload = [
@@ -44,7 +47,7 @@ def setup_database():
     Base.metadata.drop_all(bind=engine)
 
 
-def test_rate_limiting(client):
+def test_rate_limiting():
     title = "Test Article"
     for _ in range(2):
         response = client.get(f"/api/v1/topics/search?title={title}")
@@ -65,7 +68,7 @@ def test_rate_limiting(client):
     assert response.status_code == 200
 
 
-def test_query_param_response(client):
+def test_query_param_response():
     title = "Test Article 1"
     response = client.get(f"/api/v1/topics/search?title={title}")
     assert response.status_code == 200
@@ -79,7 +82,7 @@ def test_query_param_response(client):
     assert article["title"] == payload[0].get("title")
 
 
-def test_no_article_found(client):
+def test_no_article_found():
     title = "Nonexistent Article"
     response = client.get(f"/api/v1/topics/search?title={title}")
     assert response.status_code == 404
