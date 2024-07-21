@@ -19,6 +19,9 @@ def test_db(mocker):
     mock_drop_all = mocker.patch(
         'api.db.database.Base.metadata.drop_all', autospec=True)
 
+    mock_create_all(bind=mock_engine)
+    mock_drop_all(bind=mock_engine)
+
     mock_create_all.return_value = None
     mock_drop_all.return_value = None
 
@@ -47,7 +50,7 @@ def client_with_mocks(test_db):
 #     yield mock_send_message
 
 
-def test_signup_waitlist(client_with_mocks, mock_email_config, mocker):
+def test_signup_waitlist(client_with_mocks, mocker):
     # Mock rate_limit decorator
     mocker.patch('api.utils.rate_limiter.rate_limit', return_value=MagicMock())
 
