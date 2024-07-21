@@ -1,6 +1,8 @@
 from fastapi import Depends, HTTPException, APIRouter, Request
 from sqlalchemy.orm import Session
 
+from api.core.dependencies.email import mail_service
+
 from ..models.user import User
 from api.v1.schemas.user import DeactivateUserSchema
 from api.db.database import get_db
@@ -21,7 +23,14 @@ async def deactivate_account(request: Request, schema: DeactivateUserSchema, db:
 
     user.is_active = False
 
+    # Send aail to user
+    mail_service.send_mail(
+        to=user.email, 
+        subject='Account deactivation', 
+        body=f'Hello, {user.first_name},\n\nYour account has been deactivated successfully'
+    )
+
     # Commit changes to deactivate the user
     db.commit()
 
-    return {"status_code": 200, "message": "Account deactivated successfully"}
+    return {"status_code": 200, "message": "Account deactivated successfully. Check email for confirmation"}
