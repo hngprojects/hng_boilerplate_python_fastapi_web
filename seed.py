@@ -68,7 +68,53 @@ profile_1 = Profile(bio="My name is John Doe", phone_number="09022112233")
 user_1.profile = profile_1
 
 db.add_all([product_1, product_2])
+# Define jobs associated with the specific user_id
+db.commit()
+job_1 = Job(
+    user_id=user_1.id,
+    title="Software Engineer",
+    description="Develop and maintain software applications.",
+    location="New York, NY",
+    salary=120000.00,
+    job_type="Full-time",
+    company_name="Tech Innovations Inc.",
+)
 
+job_2 = Job(
+    user_id=user_1.id,
+    title="Data Scientist",
+    description="Analyze and interpret complex data to help companies make decisions.",
+    location="San Francisco, CA",
+    salary=135000.00,
+    job_type="Full-time",
+    company_name="Data Experts LLC",
+)
+
+job_3 = Job(
+    user_id=user_1.id,
+    title="Product Manager",
+    description="Oversee the development and marketing of products.",
+    location="Austin, TX",
+    salary=110000.00,
+    job_type="Full-time",
+    company_name="Product Masters Co.",
+)
+
+job_4 = Job(
+    user_id=user_1.id,
+    title="UX Designer",
+    description="Design user-friendly interfaces for web and mobile applications.",
+    location="Seattle, WA",
+    salary=105000.00,
+    job_type="Contract",
+    company_name="Design Solutions Ltd.",
+)
+
+# Add and commit jobs
+db.add(job_1)
+db.add(job_2)
+db.add(job_3)
+db.add(job_4)
 db.commit()  # commit now to ensure user is saved so as to be used when creating a blog
 
 # Create blog posts
