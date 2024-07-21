@@ -14,9 +14,9 @@ from api.db.database import get_db, Base, engine
 # Base.metadata.create_all(bind=engine)
 
 
-router = APIRouter()
+newsletter = APIRouter(prefix='/pages', tags=['Newsletter'])
 
-@router.post('/api/v1/pages/newsletter', tags=['Newsletter'])
+@newsletter.post('/newsletter')
 async def sub_newsletter(request: EMAILSCHEMA, db: Session = Depends(get_db)):
     """
     Newsletter subscription endpoint
