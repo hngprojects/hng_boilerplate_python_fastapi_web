@@ -4,7 +4,6 @@ from api.v1.routes.roles import role
 from api.v1.routes.blog import blogs
 from api.v1.routes.plans import plans
 from api.v1.routes.blog import blogs
-from api.v1.routes.blog import blogs
 from api.v1.routes.newsletter_router import newsletter
 
 api_version_one = APIRouter(prefix="/api/v1")
