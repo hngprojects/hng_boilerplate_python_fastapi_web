@@ -5,6 +5,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
+from api.v1.api import api_router
+
 from api.db.database import Base, engine
 
 Base.metadata.create_all(bind=engine)
@@ -23,6 +25,7 @@ origins = [
     "http://localhost:3001",
 ]
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -35,7 +38,8 @@ app.add_middleware(
 # app.include_router(auth, tags=["Auth"])
 # app.include_router(users, tags=["Users"])
 
-
+# Include the API router
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
