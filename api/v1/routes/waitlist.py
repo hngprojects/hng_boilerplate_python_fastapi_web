@@ -1,10 +1,8 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
-from typing import Dict
 from api.v1.models.user import WaitlistUser
 from api.v1.schemas.waitlist import WaitlistUserCreate
-from api.utils.rate_limiter import rate_limit
 from api.db.database import get_db
 from api.v1.services.waitlist_email import send_confirmation_email
 
@@ -22,7 +20,6 @@ async def signup_waitlist(
     user: WaitlistUserCreate,
     db: Session = Depends(get_db)
 ):
-
     existing_user = db.query(WaitlistUser).filter(
         WaitlistUser.email == user.email).first()
     if existing_user:

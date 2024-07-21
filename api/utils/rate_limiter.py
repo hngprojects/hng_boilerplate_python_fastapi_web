@@ -1,5 +1,4 @@
 from fastapi import HTTPException, Request
-from starlette.requests import Request
 import time
 from functools import wraps
 
@@ -34,7 +33,8 @@ def rate_limit(max_calls: int, time_frame: int):
             key = f"{request.client.host}:{func.__name__}"
             if not rate_limiter.is_allowed(key):
                 raise HTTPException(
-                    status_code=429, detail="Too many requests")
+                    status_code=429, detail="Too many requests"
+                )
             return await func(request, *args, **kwargs)
         return wrapper
     return decorator
