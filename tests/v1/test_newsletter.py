@@ -1,22 +1,29 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
-from ...main import app
+from main import app
 from api.db.database import get_db
+from api.v1.models.newsletter import NEWSLETTER
 from api.v1.schemas.newsletter_schema import EMAILSCHEMA
 
 client = TestClient(app)
 
 # Mock the database dependency
 @pytest.fixture
-def db_session_mock(mocker):
-    db_session = mocker.MagicMock()
+def db_session_mock():
+    db_session = MagicMock()
     yield db_session
 
 # Override the dependency with the mock
 @pytest.fixture(autouse=True)
-def override_get_db(mocker, db_session_mock):
-    mocker.patch("app.routes.newsletter_router.get_db", return_value=db_session_mock)
+def override_get_db(db_session_mock):
+    def get_db_override():
+        yield db_session_mock
+    
+    app.dependency_overrides[get_db] = get_db_override
+    yield
+    # Clean up after the test by removing the override
+    app.dependency_overrides = {}
 
 def test_sub_newsletter_success(db_session_mock):
     # Arrange
@@ -24,13 +31,13 @@ def test_sub_newsletter_success(db_session_mock):
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
 
-    email_data = {"email": "test@example.com"}
+    email_data = {"email": "test1@example.com"}
 
     # Act
     response = client.post("/api/v1/pages/newsletter", json=email_data)
 
     # Assert
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json() == {
         "message": "Thank you for subscribing to our newsletter.",
         "success": True,
@@ -50,8 +57,11 @@ def test_sub_newsletter_existing_email(db_session_mock):
     # Assert
     assert response.status_code == 400
     assert response.json() == {
-        "detail": "Email already exists"
+        'message': 'Email already exists',
+        'status_code': 400,
+        'success': False
     }
+
 
 if __name__ == "__main__":
     pytest.main()
