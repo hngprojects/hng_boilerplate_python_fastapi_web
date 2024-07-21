@@ -25,6 +25,7 @@ class Subscription(BaseModel, Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     plan = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True)
+    plan_id = Column(Integer)
     start_date = Column(DateTime(timezone=True), server_default=func.now())
     end_date = Column(DateTime(timezone=True))
     user = relationship("User", backref="subscriptions")
