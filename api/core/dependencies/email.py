@@ -1,5 +1,5 @@
 import smtplib
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from fastapi import HTTPException
 from api.utils.settings import settings
@@ -8,7 +8,7 @@ from api.utils.settings import settings
 class MailService:
     '''Class to send different emails for different services'''
 
-    def send_mail(self, to: str | List[str], subject: str, body: str):
+    def send_mail(self, to: Union[str, List[str]], subject: str, body: str):
         '''Function to send email to a user either as a regular test or as html file'''
 
         try:
