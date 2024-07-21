@@ -4,7 +4,7 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-
+from api.v1.routes.customer import customer_router
 from api.db.database import Base, engine
 from api.v1.routes.auth import auth
 
@@ -35,7 +35,7 @@ app.add_middleware(
 
 app.include_router(auth)
 # app.include_router(users, tags=["Users"])
-
+app.include_router(customer_router)
 
 
 @app.get("/", tags=["Home"])
