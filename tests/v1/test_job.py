@@ -8,8 +8,8 @@ from api.db.database import Base, get_db
 from api.v1.models.user import User
 from api.v1.models.base import Base
 
-test_db_name = "hng_test"  # put your test db name
-test_db_pw = "codewitgabi"  # put your test db pw
+test_db_name = ""  # put your test db name
+test_db_pw = ""  # put your test db pw
 SQLALCHEMY_DATABASE_URL = (
     f"postgresql+psycopg2://postgres:{test_db_pw}@localhost:5432/{test_db_name}"
 )
