@@ -13,3 +13,5 @@ pymysql
 uuid7
 psycopg2-binary
 pydantic_settings
+email_validator
+pytest-mock
