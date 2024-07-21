@@ -16,4 +16,4 @@ class Oauth2_data(Base):
     refresh_token = Column(String(255), nullable=True)
     id_token = Column(String(255), nullable=True)
     created_at  = Column(DateTime(timezone=True), server_default=func.now())
-    upated_at  = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at  = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
