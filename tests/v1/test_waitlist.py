@@ -7,44 +7,54 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
-from api.db.database import get_db, get_db_engine, Base
+from decouple import config
+from api.v1.models.user import WaitlistUser  # Ensure this import is correct
+from api.v1.models.base import Base  # Ensure this import is correct
+from api.db.database import get_db
 
-
+# Load environment variables
 load_dotenv()
 
-
-db_url = os.getenv("DB_URL", "sqlite:///./test.db")
-test_engine = create_engine(db_url, connect_args={
-                            "check_same_thread": False} if "sqlite" in db_url else {})
+# Database setup for testing
+SQLALCHEMY_DATABASE_URL = config('DB_URL')
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=test_engine)
+    autocommit=False, autoflush=False, bind=engine)
+
+# Create all tables including WaitlistUser
+Base.metadata.create_all(bind=engine)
+
+print(f"Tables created: {Base.metadata.tables.keys()}")
 
 
-Base.metadata.create_all(bind=test_engine)
-
-
-@pytest.fixture(scope="function")
-def test_db():
-
-    session = TestingSessionLocal()
+def override_get_db():
+    db = TestingSessionLocal()
     try:
-        yield session
+        yield db
     finally:
+        db.close()
 
-        Base.metadata.drop_all(bind=test_engine)
-        session.close()
+
+app.dependency_overrides[get_db] = override_get_db
+
+client = TestClient(app)
+
+
+@pytest.fixture(scope="module")
+def test_db():
+    db = TestingSessionLocal()
+    yield db
+    db.close()
 
 
 @pytest.fixture(scope="function")
-def client_with_mocks(test_db):
-    # Patch the get_db dependency to use the test_db session
-    with patch('api.db.database.get_db', lambda: test_db):
-        with TestClient(app) as client:
+def client_with_mocks(mocker, test_db):
+    with patch('api.db.database.get_db', return_value=test_db):
+        with patch('api.utils.rate_limiter.rate_limit', return_value=MagicMock()):
             yield client
 
 
 def test_signup_waitlist(client_with_mocks, mocker):
-    mocker.patch('api.utils.rate_limiter.rate_limit', return_value=MagicMock())
     email = f"test{uuid.uuid4()}@example.com"
     response = client_with_mocks.post(
         "/api/v1/waitlist", json={"email": email, "full_name": "Test User"})
@@ -77,8 +87,6 @@ def test_signup_with_empty_name(client_with_mocks):
 
 
 def test_rate_limiting(client_with_mocks, mocker):
-    # Mock rate_limit decorator
-    mocker.patch('api.utils.rate_limiter.rate_limit', return_value=MagicMock())
     for _ in range(5):
         client_with_mocks.post(
             "/api/v1/waitlist", json={"email": f"test{_}@example.com", "full_name": "Test User"})
