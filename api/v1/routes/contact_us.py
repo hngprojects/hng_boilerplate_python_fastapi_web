@@ -4,12 +4,9 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr, constr
 from fastapi.responses import JSONResponse
 
-# Assuming the email service is defined in services.email_service
-from services.email_service import EmailService
-
 router = APIRouter()
 
-# Loggin setup
+# Logging setup
 log_folder = 'logs'
 if not os.path.exists(log_folder):
     os.makedirs(log_folder)
@@ -30,6 +27,15 @@ class ContactForm(BaseModel):
     email: EmailStr = constr(max_length=100)
     message: constr(strip_whitespace=True, min_length=1, max_length=1000)
 
+# Try to import EmailService and handle the case where it doesn't exist
+try:
+    from services.email_service import EmailService
+except ImportError:
+    class EmailService:
+        def send_email(self, name: str, email: str, message: str) -> bool:
+            logger.warning("EmailService is not implemented. Mocked method called.")
+            return False
+
 
 @router.post("/api/v1/contact")
 async def contact_us(form: ContactForm, email_service: EmailService = Depends()):
@@ -39,4 +45,4 @@ async def contact_us(form: ContactForm, email_service: EmailService = Depends())
         return JSONResponse(status_code=200, content={"message": "Inquiry sent successfully", "status": 200})
     else:
         logger.error(f"Failed to send inquiry for {form.email}")
-        raise HTTPException(status_code=500, detail="Failed to send inquiry")
+        raise HTTPException(status_code=500, detail="Failed to send inquiry")                                                                                                             
