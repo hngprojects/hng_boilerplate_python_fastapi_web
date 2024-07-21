@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from fastapi import APIRouter
 from hng_boilerplate_python_fastapi_web.main import app
 
-router = APIRouter()
+router = APIRouter(prefix='/api/', tags=['auth'])
 def send_sms(recipient_number, content):
     account_sid ="ACaaad000fe19df6daf0b7fcd3a0681664"
     auth_token = '24dc299349cb1f9f48f58cecae868fd2'
