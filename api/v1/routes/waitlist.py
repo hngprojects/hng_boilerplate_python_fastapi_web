@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr
 from api.v1.models.user import WaitlistUser
 from api.v1.schemas.waitlist import WaitlistUserCreate
 from api.db.database import get_db
-from api.v1.services.waitlist_email import send_confirmation_email
+from api.v1.services.email.waitlist_email import send_confirmation_email
 
 router = APIRouter()
 
