@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional, Annotated
+from typing import Optional
 from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
@@ -108,6 +108,5 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 
 # Protected route example: test route
 @auth.get("/admin")
-def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
+def read_admin_data(current_admin: User=Depends(get_current_admin)):
     return {"message": "Hello, admin!"}
-
