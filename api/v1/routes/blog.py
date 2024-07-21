@@ -6,7 +6,7 @@ from api.v1.models.blog import Blog
 from api.db.database import get_db
 import logging
 
-blog = APIRouter(prefix="/api/v1/blogs", tags=["Blog"])
+blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

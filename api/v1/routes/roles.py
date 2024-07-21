@@ -16,9 +16,9 @@ from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from api.utils.dependencies import get_current_admin
 
-role = APIRouter(prefix="/api/v1", tags=["Roles"])
+role = APIRouter(prefix="/roles", tags=["Roles"])
 
-@role.post("/roles", response_model=ResponseModel, status_code=status.HTTP_201_CREATED)
+@role.post("/", response_model=ResponseModel, status_code=status.HTTP_201_CREATED)
 def create_role(current_admin: Annotated[User, Depends(get_current_admin)], role: RoleCreate, db: Session = Depends(get_db)):
     db_role = db.query(Role).filter(Role.role_name == role.role_name).first()
     if db_role:
