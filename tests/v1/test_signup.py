@@ -4,7 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from main import app
 from api.utils.auth import hash_password
-from api.db.database import Base, get_db
+from api.db.database import get_db
+from api.v1.models.base import Base
 from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile

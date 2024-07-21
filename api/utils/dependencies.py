@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from api.v1.models.user import User
 import os
 from jose import JWTError
-from jwt.exceptions import DecodeError, InvalidSignatureError
+from jwt.exceptions import DecodeError, ExpiredSignatureError, InvalidSignatureError
 import bcrypt
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
@@ -28,7 +28,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         if username is None:
             raise credentials_exception
         token_data = TokenData(username=username)
-    except (JWTError, DecodeError, InvalidSignatureError):
+    except (JWTError, DecodeError, ExpiredSignatureError,  InvalidSignatureError):
         raise credentials_exception
     user = db.query(User).filter(User.username == token_data.username).first()
     if user is None:

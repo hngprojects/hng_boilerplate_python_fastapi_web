@@ -5,7 +5,8 @@ from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from api.db.database import Base, engine
+from api.db.database import engine
+from api.v1.models.base import Base
 
 from api.v1.routes.newsletter_router import (
     CustomException,
