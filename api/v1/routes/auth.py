@@ -1,5 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from authlib.integrations.base_client import OAuthError
+from authlib.oauth2.rfc6749 import OAuth2Token
+from starlette.responses import Response, JSONResponse
+from starlette.requests import Request
+from api.utils.config import oauth
+from decouple import config
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, Annotated
@@ -18,7 +24,10 @@ from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
 from api.db.database import get_db
-from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
+from api.utils.auth import (authenticate_user,
+                            create_access_token,
+                            hash_password, create_user_from_google_info,
+                            get_user)
 from api.utils.dependencies import get_current_admin, get_current_user
 
 
@@ -110,3 +119,74 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
 
+
+@auth.get("/login/google")
+async def google_oauth2(request: Request) -> Response:
+    """
+    Allows users to login using their google accounts.
+
+    Args:
+        request: request object
+
+    Returns:
+        Reponse: A redirect to google authorization server for authorization
+    """
+    redirect_url = "http://127.0.0.1:7001/api/v1/auth/callback/google"
+
+    state =  await oauth.google.authorize_redirect(request, redirect_url)
+    return state
+
+
+@auth.get('/callback/google')
+async def google_oauth2_callback(request: Request,
+                                 db: Annotated[Session, Depends(get_db)]) -> Response:
+    """
+    Handles request from google after user has authenticated or
+    fails to authenticate with google account.
+
+    Args:
+        request: request object
+
+    Returns:
+        response: access and refresh tokens, HttpException if not authenticated, 
+    """
+    try:
+        # get the user access token and information from google authorization/resource server
+        google_response: OAuth2Token = await oauth.google.authorize_access_token(request)
+
+        if 'id_token' not in google_response:
+            raise HTTPException(status_code=400, detail="Authentication Failed")
+
+    except OAuthError as exc:
+        print(exc)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Authentication Failed")
+
+    # check if the user's email is verified by google
+    if google_response and 'userinfo' in google_response:
+        email_verified = google_response.get('userinfo').get('email_verified')
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Authentication Failed")
+
+    # if google has not verified the user email
+    if not email_verified:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Authentication Failed")
+
+
+    # add the user to the database
+    new_user: object = create_user_from_google_info(google_response, db)
+
+    expire_at = config('ACCESS_TOKEN_EXPIRE_MINUTES')
+    # generate access token for the user to access the resource
+    access_token: str = create_access_token({"username": new_user.username}, expire_at)
+
+    expire_at = config('JWT_REFRESH_EXPIRY')
+    # generate refresh token for the user
+    refresh_token: str = create_access_token({"username": new_user.username}, expire_at * 60)
+
+    return JSONResponse(content={"access_token": access_token,
+                                 "refresh_token": refresh_token,
+                                 "token_type": "Bearer"},
+                                 status_code=201)
