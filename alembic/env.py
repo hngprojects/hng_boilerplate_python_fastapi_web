@@ -4,6 +4,7 @@ from sqlalchemy import pool
 from alembic import context
 from decouple import config as decouple_config
 from api.v1.models import *
+from api.v1.models.testimonial import Testimonial
 from api.v1.models.base import Base
 
 

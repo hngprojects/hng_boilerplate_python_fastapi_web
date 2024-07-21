@@ -14,6 +14,7 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
+from api.v1.models.testimonial import Testimonial
 from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate

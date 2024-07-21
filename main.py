@@ -11,6 +11,13 @@ from api.v1.routes.newsletter_router import (
     custom_exception_handler
 )
 
+from api.v1.routes.testimonial import router as testimonial_router
+from api.v1.routes.exception_handler import (
+        http_exception_handler,
+        validation_exception_handler,
+        internal_server_error_handler
+        )
+
 from api.v1.routes import api_version_one
 
 Base.metadata.create_all(bind=engine)
@@ -20,6 +27,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(testimonial_router)
 
 origins = [
     "http://localhost:3000",
