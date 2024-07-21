@@ -89,3 +89,7 @@ Run the following code below first to update the datebase
 **alembic upgrade head**
 then, run this again.
 **alembic revision --autogenerate -m 'your migration message'**
+
+## update 
+please make sure to test your endpoint or model before pushing.
+push your alembic migrations.
