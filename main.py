@@ -35,7 +35,7 @@ app.add_middleware(
 
 
 app.include_router(auth)
-role.include_router(role)
+
 
 
 
