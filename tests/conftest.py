@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import warnings
 
-
+DB_URL = os.getenv("DB_URL")
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -32,11 +32,8 @@ from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 
-test_db_name = 'py_test' # put your test db name
-test_db_pw = 'root' # put your test db pw
-
 # Test Database URL (use an in-memory SQLite database for tests)
-SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:{test_db_pw}@localhost:5432/{test_db_name}"
+SQLALCHEMY_DATABASE_URL = DB_URL
 # SQLALCHEMY_DATABASE_URL = "sqlite://"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
