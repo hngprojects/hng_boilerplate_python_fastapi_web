@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from api.v1.models.base import Base
 from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
+from uuid_extensions import uuid7
 
 
 class Blog(BaseModel, Base):
@@ -15,6 +16,7 @@ class Blog(BaseModel, Base):
         UUID(as_uuid=True),
         ForeignKey("users.id"),
         nullable=False,
+        default=uuid7
     )
     title = Column(String(100), nullable=False)
     content = Column(Text)
