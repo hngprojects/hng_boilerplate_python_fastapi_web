@@ -1,8 +1,10 @@
 import uvicorn
 from contextlib import asynccontextmanager
 from typing import Union
-from fastapi import FastAPI
+from fastapi import FastAPI, status, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from starlette.requests import Request
 from api.db.database import Base, engine
 
@@ -38,7 +40,40 @@ app.add_exception_handler(CustomException, custom_exception_handler) # Newslette
 
 app.include_router(api_version_one)
 
+@app.exception_handler(RequestValidationError)
+async def custom_request_validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "errors": [
+                {
+                    "field": str(err["loc"][-1]),
+                    "message": err["msg"]
+                }
+                for err in exc.errors()
+                ]
+                }
+            )
 
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        status_text = "Unauthorized"
+        msg = "User not authenticated"
+    elif exc.status_code == status.HTTP_400_BAD_REQUEST:
+        status_text = "Bad Request"
+        msg = "Client error"
+    else:
+        status_text = "Error"
+        msg = exc.detail
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "status": status_text,
+            "message": msg,
+            "status_code": exc.status_code,
+        }
+    )
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
