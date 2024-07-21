@@ -19,7 +19,7 @@ from api.v1.routes.roles import role
 
 Base.metadata.create_all(bind=engine)
 
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = config("SECRET_KEY", default="qazxswedcvfrtgbnhyujmi")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -27,7 +27,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY) 
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 
 origins = [
     "http://localhost:3000",
