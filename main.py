@@ -6,16 +6,21 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
 
+from api.v1.routes.newsletter_router import router as newsletter
+from api.v1.routes.newsletter_router import (
+    CustomException,
+    custom_exception_handler
+)
+
+from api.v1.routes.auth import auth
+
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
 
-
 app = FastAPI(lifespan=lifespan)
-
-    
 
 origins = [
     "http://localhost:3000",
@@ -30,11 +35,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
+app.include_router(newsletter, tags=["Newsletter"])
 
-# app.include_router(auth, tags=["Auth"])
+app.include_router(auth)
 # app.include_router(users, tags=["Users"])
 #app.include_router(contact_us.router, tags=["Contact"])
-
 
 
 @app.get("/", tags=["Home"])
