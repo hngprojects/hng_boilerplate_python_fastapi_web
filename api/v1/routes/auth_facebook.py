@@ -18,18 +18,11 @@ from api.v1.services.facebook import validate_facebook_token, create_db_user, cr
 
 from api.v1.schemas.facebook import userToken
 
-# don't remove the following imports
-from api.v1.models.user import User
-from api.v1.models.oauth import OAuthUser
-from api.v1.models.profile import Profile
-from api.v1.models.org import Organization
-# -------------------------------
+from api.v1.models import *
 
+fb_auth = APIRouter(prefix="/auth", tags=["auth"])
 
-router = APIRouter()
-
-
-@router.post("/auth/facebook-login")
+@fb_auth.post("/facebook-login")
 async def facebook_login(request: userToken, db: Annotated[Session, Depends(get_db)]):
     is_new = False
     try:
