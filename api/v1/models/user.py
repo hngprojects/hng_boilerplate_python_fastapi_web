@@ -7,6 +7,7 @@ from sqlalchemy import (
         Integer,
         String,
         Text,
+        text,
         Date,
         ForeignKey,
         Numeric,
@@ -30,7 +31,8 @@ class User(BaseModel, Base):
     password = Column(String(255), nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, server_default=text('true'))
+    is_admin = Column(Boolean, server_default=text('false'))
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
@@ -47,6 +49,6 @@ class User(BaseModel, Base):
 
 class WaitlistUser(BaseModel, Base):
     __tablename__ = 'waitlist_users'
-    
+
     email = Column(String(100), unique=True, nullable=False)
     full_name = Column(String(100), nullable=False)
