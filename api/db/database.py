@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ The database module
 """
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 from api.utils.settings import settings, BASE_DIR
@@ -13,6 +13,7 @@ DB_USER = settings.DB_USER
 DB_PASSWORD = settings.DB_PASSWORD
 DB_NAME = settings.DB_NAME
 DB_TYPE = settings.DB_TYPE
+DB_DRIVER = settings.DB_DRIVER
 
 
 def get_db_engine(test_mode: bool = False):
@@ -28,8 +29,11 @@ def get_db_engine(test_mode: bool = False):
             return create_engine(
                 DATABASE_URL, connect_args={"check_same_thread": False}
             )
-    elif DB_TYPE == "postgresql":
-        DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    else:
+        if DB_DRIVER:
+            DATABASE_URL = f"{DB_TYPE}+{DB_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+        else:
+            DATABASE_URL = f"{DB_TYPE}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
         
     return create_engine(DATABASE_URL)
         

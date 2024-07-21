@@ -2,59 +2,46 @@
 """ User data model
 """
 from sqlalchemy import (
-        create_engine,
-        Column,
-        Integer,
-        String,
-        Text,
-        Date,
-        ForeignKey,
-        Numeric,
-        DateTime,
-        func,
-        Table,
-        Boolean
-        )
+    Column,
+    String,
+    Boolean,
+    text,
+)
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
 from api.v1.models.base_model import BaseModel
-from uuid_extensions import uuid7
-from sqlalchemy.dialects.postgresql import UUID
+from api.db.database import Base
 
 
 class User(BaseModel, Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
     first_name = Column(String(50))
     last_name = Column(String(50))
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    is_admin = Column(Boolean, server_default=text("false"))
 
     profile = relationship("Profile", uselist=False, back_populates="user")
-    organizations = relationship(
-            "Organization",
-            secondary=user_organization_association,
-            back_populates="users"
-            )
+    auth_user = relationship("AuthUser", uselist=False, back_populates="user")
+    oauth_user = relationship("OAuthUser", uselist=False, back_populates="user")
+    testimonials = relationship("Testimonial", back_populates="user")
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
 
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
         return obj_dict
 
-
     def __str__(self):
-        return self.email
+        return f"{self.first_name} {self.last_name}"
+
 
 class WaitlistUser(BaseModel, Base):
-    __tablename__ = 'waitlist_users'
+    __tablename__ = "waitlist_users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     email = Column(String(100), unique=True, nullable=False)
     full_name = Column(String(100), nullable=False)
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)

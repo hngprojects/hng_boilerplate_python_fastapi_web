@@ -22,6 +22,7 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = config("DB_PASSWORD")
     DB_NAME: str = config("DB_NAME")
     DB_TYPE: str = config("DB_TYPE")
+    DB_DRIVER: str = config("DB_DRIVER")
 
 
 settings = Settings()

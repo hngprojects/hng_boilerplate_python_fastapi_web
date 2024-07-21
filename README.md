@@ -1,82 +1,83 @@
 # FASTAPI
+
 FastAPI boilerplate
+
+## Dependencies
+
+This project require the following depencies.
+
+-   python 3.8 or later
+-   postgresql, optional: [mysql, mongodb, sqlite]
+-   FastApi
 
 ## Setup
 
-1. Create a virtual environment.
- ```sh
+1. Create a virtual environment and activate it.
+
+    ```sh
     python3 -m venv .venv
- ```
-2. Activate virtual environment.
+    source .venv/bin/activate
+    ```
+
+2. Install project dependencies
+
+    ```sh
+    pip install -r requirements.txt
+    ```
+
+3. Create a .env file by copying the .env.sample file
+
+    ```sh
+    cp .env.sample .env
+    ```
+
+4. Setup database.
+
+    ```sh
+    cat setup_database.sql | sudo -u postgres psql
+    ```
+
+5. Create tables
+
+    ```sh
+    alembic upgrade head
+    ```
+
+6. Seed some data.
+    ```sh
+    python3 -m seed.py
+    ```
+
+## Features
+
+1. feature 1
+2. feature 2
+
+## Contribute
+
+1. Fork the repository
+2. Clone the forked repository
+3. Create a new branch please keep the name short and descriptive.
+4. please follow this format for naming branches
+
+    ```
+    feature/feature_name-issue_id` or `bug/bug_name-issue_id
+    for example:
+    feature/auth_login-12 or bug/missing_module-124
+    ```
+
+5. Make your changes and commit them:
+    - Provide a detailed commit message.
+    - Your pull request should be descriptive and provide a summary of the changes made.
+    - Your pull should contain a reference to the issue you are assigned to.
+    - Your pull request should pass all new and existing tests.
+    - Make sure your code is well formatted.
+
+## Database Migrations
+
+if you make changes to the database models, you need to run the following commands.
+
 ```sh
-    source /path/to/venv/bin/activate`
-```
-3. Install project dependencies `pip install -r requirements.txt`
-4. Create a .env file by copying the .env.sample file
-`cp .env.sample .env`
-
-5. Start server.
- ```sh
- python main.py
-```
-
-## **DATABASE TEST SETUP**
-
-To set up the database, follow the following steps:
-
-**Cloning**
-- clone the repository using `git clone https://github.com/hngprojects/hng_boilerplate_python_fastapi_web`
-- `cd` into the directory hng_boilerplate_python_fastapi_web
-- switch branch using `git checkout Muritadhor`
-
-**Environment Setup**
-- run `pip install -r requrements.txt` to install dependencies
-- create a `.env` file in the root directory and copy the content of `.env.sample` and update it accordingly
-
-**Create your local database**
-```bash
-sudo -u root psql
-```
-```sql
-CREATE USER user WITH PASSWORD 'password';
-CREATE DATABASE hng_fast_api;
-GRANT ALL PRIVILEGES ON DATABASE hng_fast_api TO user;
-```
-
-**Migrate the database**
-```bash
-alembic revision --autogenerate -m "Initial migrate"
+alembic revision --autogenerate -m "Migration message"
 alembic upgrade head
 ```
-
-**create dummy data**
-```bash
-python3 db_test.py
-```
-This should run without any errors
-
-**Using the database in your route files:**
-
-make sure to add the following to your file
-
-```python
-from api.db.database import create_database, get_db
-from api.v1.models.user import User
-from api.v1.models.org import Organization
-from api.v1.models.profile import Profile
-from api.v1.models.product import Product
-
-create_database()
-db = next(get_db())
-```
-Then use the db for your queries
-
-example
-```python
-db.add(User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe"))
-```
-
-
-**Adding tables and columns to models**
-
-After creating new tables, or adding new models. Make sure to run alembic revision --autogenerate -m "Migration messge"
