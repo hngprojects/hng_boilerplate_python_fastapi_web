@@ -72,3 +72,20 @@ python -m unittest tests/v1/test_login.py
 python -m unittest tests/v1/test_signup.py
 ```
 
+## Issues
+if you encounter the following Error, when you run the code below
+
+**alembic revision --autogenerate -m 'your migration message'**
+
+```
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+ERROR [alembic.util.messaging] Target database is not up to date.
+  FAILED: Target database is not up to date.
+```
+
+## Solutions
+Run the following code below first to update the datebase
+**alembic upgrade head**
+then, run this again.
+**alembic revision --autogenerate -m 'your migration message'**
