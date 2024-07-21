@@ -1,15 +1,11 @@
-from typing import Any, Dict
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from api.v1.models.blog import Blog
 from api.db.database import get_db
-import logging
+from api.utils.json_response import JsonResponseDict
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 @blog.get("", status_code=status.HTTP_200_OK)
@@ -17,7 +13,7 @@ def list_blog(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
-) -> Dict[str, Any]:
+) -> JsonResponseDict:
     try:
         offset = (page - 1) * page_size
         query = (
@@ -48,21 +44,23 @@ def list_blog(
             }
             results.append(blog_dict)
 
-        return {
-            "count": total_count,
-            "next": next_page,
-            "previous": prev_page,
-            "results": results,
-        }
+        return JsonResponseDict(
+            message="Blog Posts fetched successfully",
+            data={
+                "count": total_count,
+                "next": next_page,
+                "previous": prev_page,
+                "results": results,
+            },
+            status_code=status.HTTP_200_OK,
+        )
 
     except SQLAlchemyError as e:
-        logger.error(f"Database error occurred: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Database error occurred.",
         )
     except Exception as e:
-        logger.error(f"Unexpected error occurred: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error.",
