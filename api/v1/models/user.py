@@ -7,16 +7,19 @@ from sqlalchemy import (
         Integer,
         String,
         Text,
+        text,
         Date,
         ForeignKey,
         Numeric,
         DateTime,
         func,
-        Table
+        Table,
+        Boolean
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
+from api.v1.models.base import Base, user_organization_association, user_role_association
+from api.v1.models.base_model import BaseModel
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 import bcrypt
@@ -33,12 +36,9 @@ def hash_password(password: str) -> bytes:
     return hash_pw
 
 
-class User(Base):
-    """
-    class defination for user model"""
+class User(BaseModel, Base):
     __tablename__ = 'users'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
@@ -50,6 +50,8 @@ class User(Base):
         server_default=func.now(),
         onupdate=func.now()
         )
+    is_active = Column(Boolean, server_default=text('true'))
+    is_admin = Column(Boolean, server_default=text('false'))
 
     user_orgs = relationship("Organization", back_populates="owner")
     profile = relationship("Profile", uselist=False, back_populates="user")
@@ -58,6 +60,7 @@ class User(Base):
             secondary=user_organization_association,
             back_populates="users"
             )
+    roles = relationship('Role', secondary=user_role_association, back_populates='users')
 
     def __init__(self, **kwargs):
         """ Initializes a user instance
@@ -71,3 +74,15 @@ class User(Base):
 
     def __str__(self):
         return self.email
+
+
+    def to_dict(self):
+        obj_dict = super().to_dict()
+        obj_dict.pop("password")
+        return obj_dict
+
+class WaitlistUser(BaseModel, Base):
+    __tablename__ = 'waitlist_users'
+
+    email = Column(String(100), unique=True, nullable=False)
+    full_name = Column(String(100), nullable=False)

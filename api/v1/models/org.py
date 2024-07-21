@@ -16,6 +16,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
+from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 
@@ -57,6 +58,8 @@ class Organization(Base):
             secondary=user_organization_association,
             back_populates="organizations"
             )
+    roles = relationship('Role', back_populates='organization')
+
 
     def __str__(self):
         return self.name
