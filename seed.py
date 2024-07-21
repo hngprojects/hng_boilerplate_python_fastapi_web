@@ -6,6 +6,7 @@ from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
+from api.v1.models.invitation import Invitation
 from api.v1.models.base import Base
 from api.v1.models.subscription import Subscription
 from api.v1.models.blog import Blog
@@ -105,5 +106,13 @@ blog_3 = Blog(
 db.add_all([blog_1, blog_2, blog_3])
 
 db.commit()
+
+invite_1 = Invitation(user_id=user_1.id, organization_id=org_1.id)
+invite_2 = Invitation(user_id=user_2.id, organization_id=org_2.id)
+
+db.add_all([invite_1, invite_2])
+db.commit()
+
+
 users = db.query(Organization).first().users
 print("Seed data succesfully")

@@ -11,9 +11,14 @@ from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
 )
+from api.v1.routes.deactivate_invite_link_router import (
+    CustomInviteDeactivateException,
+    custom_invite_deactivate_exception_handler
+)
 
 from api.v1.routes.auth import auth
 from api.v1.routes.roles import role
+from api.v1.routes.deactivate_invite_link_router import router as deactivate_invite_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -37,7 +42,10 @@ app.add_middleware(
 )
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
+app.add_exception_handler(CustomInviteDeactivateException, custom_invite_deactivate_exception_handler) # Deactivate Invite link endpoint
+
 app.include_router(newsletter, tags=["Newsletter"])
+app.include_router(deactivate_invite_router, tags=["org"])
 
 app.include_router(auth)
 
