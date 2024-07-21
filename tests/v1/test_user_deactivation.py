@@ -54,7 +54,7 @@ def test_user_deactivation(test_db):
     test_db.refresh(user)
 
 
-    login =  client.post('/api/v1/auth/login', json={
+    login =  client.post('/auth/login', json={
         "username": "testuser",
         "password": "Testpassword@123"
     })
