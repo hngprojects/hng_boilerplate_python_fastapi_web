@@ -11,6 +11,8 @@ from api.utils.dependencies import get_current_user
 from api.v1.schemas.auth import UserBase
 from api.v1.schemas.invitation import DeactivateInviteBody
 from api.utils.json_response import JsonResponseDict
+from uuid import UUID
+from datetime import datetime
 
 db = next(get_db())
 
@@ -18,18 +20,19 @@ class CustomInviteDeactivateException(HTTPException):
     """
     Custom error handling
     """
-    def __init__(self, detail: dict):
-        super().__init__(detail=detail)
+    def __init__(self, detail: dict, status_code: int):
+        super().__init__(detail=detail, status_code=status_code)
         self.message = detail.get("message")
         self.error = detail.get("error")
-        self.status_code = detail.get("status_code")
+        self.status_code = status_code
 
-async def custom_invite_deactivate_exception_handler(request: Request, exc: CustomInviteDeactivateException):
+def custom_invite_deactivate_exception_handler(request: Request, exc: CustomInviteDeactivateException):
     content={
             "message": exc.message,
             "error": exc.error,
             "status_code": exc.status_code
         }
+    print(content['status_code'])
     return JsonResponseDict(**content)
 
 
@@ -40,19 +43,29 @@ router = APIRouter()
     responses={400: {"message": "Validation error"},
                403: {"message": "Forbidden"}}
 )
-async def deactivate_invite_link(
+def deactivate_invite_link(
     item: DeactivateInviteBody, user: UserBase = Depends(get_current_user)
 ):
-
-    link = item.invitation_link
-    invitation = db.query(Invitation).where(Invitation.id == link).first()
     error_format: dict = {
         "message": "Validation error",
         "error": "",
         "status_code": 400
     }
+    try:
+        link_data_arr: list = item.invitation_link.split('_')
+        if len(link_data_arr) != 2:
+            raise ValueError
+        link_id = link_data_arr[1].strip()
+        if link_data_arr[0] != 'invite' or link_id == '':
+            raise ValueError
+        
+        invitation = db.query(Invitation).where(Invitation.id == UUID(link_id)).first()
 
-    if not invitation or not invitation.is_valid:
+        print(f'Link: {link_id}, {invitation.id}, {invitation.id}')
+    except(IndexError, ValueError):
+        invitation = None
+    
+    if not invitation or invitation.expires_at < datetime.now() or not invitation.is_valid:
         error_format['error'] = "Invalid or expired invitation link"
         raise CustomInviteDeactivateException(
             status_code=400,
