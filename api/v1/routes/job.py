@@ -9,6 +9,7 @@ from api.v1.models.user import User
 from api.v1.schemas.job import JobCreate, JobResponseSchema
 from api.v1.schemas.job import JobUpdate, JobResponse
 from fastapi import APIRouter, Depends, HTTPException, status
+from utils.json_response import JsonResponseDict
 
 
 job = APIRouter(
@@ -47,7 +48,7 @@ async def create_job(
 
 @job.patch(
     "/{id}",
-    response_model=JobResponse,
+    response_model=JsonResponseDict,
     summary="Update job post",
     description="This endpoint allows a user to update an existing job post by providing updated job details."
 )
