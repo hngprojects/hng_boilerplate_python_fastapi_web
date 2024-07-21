@@ -35,7 +35,7 @@ app.add_middleware(
 
 
 app.include_router(auth)
-app.include_router(job)
+#app.include_router(job)
 # app.include_router(users, tags=["Users"])
 
 
