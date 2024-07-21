@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from ...main import app
 from api.db.database import get_db
 from api.v1.schemas.newsletter_schema import EMAILSCHEMA
+from api.v1.models.newsletter import NEWSLETTER
 
 client = TestClient(app)
 
