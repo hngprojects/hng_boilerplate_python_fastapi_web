@@ -18,6 +18,7 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    is_admin: Optional[bool] = False
 
     @field_validator('password')
     def password_validator(cls, value):

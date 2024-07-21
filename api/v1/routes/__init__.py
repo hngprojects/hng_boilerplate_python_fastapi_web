@@ -5,6 +5,7 @@ from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.permission import permission
 from api.v1.routes.token import token
 from api.v1.routes.orgs import org
+from api.v1.routes.super_admin import super_admin
 
 api_version_one = APIRouter(prefix="/api/v1")
 

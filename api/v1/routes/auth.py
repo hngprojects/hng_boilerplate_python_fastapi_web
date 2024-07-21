@@ -71,14 +71,15 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     access_token = create_access_token(
         data={"username": user.username}, expires_delta=access_token_expires
     )
-
+    
     db_user = User(
         username=user.username,
         email=user.email,
         password = password_hashed,
         first_name=user.first_name,
         last_name=user.last_name,
-        is_active=True
+        is_active=True,
+        is_admin = user.is_admin
     )
     try: 
         db.add(db_user)

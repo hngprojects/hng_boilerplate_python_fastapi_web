@@ -20,7 +20,7 @@ from api.v1.schemas.permission import PermissionCreate, PermissionResponse, Perm
 
 permission = APIRouter(prefix="/permissions", tags=["Permission"])
 
-@permission.post("/", response_model=PermissionResponse)
+@permission.post("/", response_model=PermissionResponse, status_code=status.HTTP_201_CREATED)
 def create_permission(current_admin: Annotated[User, Depends(get_current_admin)], permission: PermissionCreate, db: Session = Depends(get_db)):
     db_permission = Permission(name=permission.name)
     db.add(db_permission)
@@ -35,7 +35,7 @@ def create_permission(current_admin: Annotated[User, Depends(get_current_admin)]
     return response
 
 # Endpoint to get all permissions
-@permission.get("/", response_model=PermissionList)
+@permission.get("/", response_model=PermissionList, status_code=status.HTTP_200_OK)
 def get_permissions(current_user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
     permissions = db.query(Permission).all()
     permissions_list = [PermissionModel(id=perm.id, name=perm.name) for perm in permissions]

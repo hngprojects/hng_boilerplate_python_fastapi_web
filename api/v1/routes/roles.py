@@ -14,7 +14,7 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
-from api.utils.dependencies import get_current_admin
+from api.utils.dependencies import get_current_admin, get_current_user
 
 role = APIRouter(prefix="/roles", tags=["Roles"])
 
@@ -27,16 +27,22 @@ def create_role(current_admin: Annotated[User, Depends(get_current_admin)], role
     db_organization = db.query(Organization).filter(Organization.id == role.organization_id).first()
     if not db_organization:
         raise HTTPException(status_code=400, detail="Organization does not exist")
+    if role.permission_ids is not None:
+        permissions = db.query(Permission).filter(Permission.name.in_(role.permission_ids)).all()
+        if len(permissions) != len(role.permission_ids):
+            raise HTTPException(status_code=400, detail="Some permissions do not exist")
 
-    permissions = db.query(Permission).filter(Permission.name.in_(role.permission_ids)).all()
-    if len(permissions) != len(role.permission_ids):
-        raise HTTPException(status_code=400, detail="Some permissions do not exist")
-
-    new_role = Role(
-        role_name=role.role_name,
-        organization_id=role.organization_id,
-        permissions=permissions
-    )
+    if role.permission_ids:
+        new_role = Role(
+            role_name=role.role_name,
+            organization_id=role.organization_id,
+            permissions=permissions
+        )
+    else:
+         new_role = Role(
+            role_name=role.role_name,
+            organization_id=role.organization_id
+        )       
     db.add(new_role)
     db.commit()
     db.refresh(new_role)

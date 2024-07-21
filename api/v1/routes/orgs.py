@@ -20,7 +20,7 @@ from api.v1.schemas.orgs import OrganizationCreate, OrganizationResponse
 org = APIRouter(prefix="/organizations", tags=["Organizations"])
 
 
-@org.post("/", response_model=OrganizationResponse)
+@org.post("/", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED)
 def create_organization(
     current_user: Annotated[User, Depends(get_current_user)],
     organization: OrganizationCreate,

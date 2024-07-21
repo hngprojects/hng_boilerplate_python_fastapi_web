@@ -4,8 +4,9 @@ from uuid import UUID
 
 class RoleCreate(BaseModel):
     role_name: str
+    org_user: Optional[str] = None
     organization_id: UUID
-    permission_ids: List[str]
+    permission_ids: Optional[List[str]] = None
 
 class ResponseModel(BaseModel):
     id: UUID
