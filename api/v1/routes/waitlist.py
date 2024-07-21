@@ -21,6 +21,10 @@ async def signup_waitlist(
     user: WaitlistUserCreate,
     db: Session = Depends(get_db)
 ):
+
+    if not user.full_name:
+        raise HTTPException(status_code=422, detail="Full name is required")
+
     existing_user = db.query(WaitlistUser).filter(
         WaitlistUser.email == user.email).first()
     if existing_user:
