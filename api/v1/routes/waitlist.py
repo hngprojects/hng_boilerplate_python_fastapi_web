@@ -22,18 +22,17 @@ async def signup_waitlist(
     user: WaitlistUserCreate,
     db: Session = Depends(get_db)
 ):
-    # Check if email already exists
+
     existing_user = db.query(WaitlistUser).filter(
         WaitlistUser.email == user.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    # Create new user
     db_user = WaitlistUser(email=user.email, full_name=user.full_name)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
 
-    await send_confirmation_email(signup.email, signup.full_name)
+    await send_confirmation_email(user.email, user.full_name)
 
     return {"message": "You are all signed up!"}
