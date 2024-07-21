@@ -9,6 +9,8 @@ from api.db.database import Base, get_db
 from api.v1.models.user import User
 from api.v1.models.base import Base
 
+# 
+
 SQLALCHEMY_DATABASE_URL = config('DB_URL')
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
