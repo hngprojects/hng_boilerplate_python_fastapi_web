@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 """
-Testimonial route to create a testimonial
+Testimonial CRUD routes
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Annotated
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-from api.v1.schemas.testimonial import (
-    TestimonialCreate,
-    TestimonialResponse,
-    SuccessResponse,
-)
 from api.db.database import get_db
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
@@ -21,41 +16,11 @@ from uuid import UUID
 router = APIRouter(prefix="/api/v1/testimonials", tags=["testimonials"])
 
 
-@router.post("/", response_model=SuccessResponse)
-def create_testimonial(
-    testimonial: TestimonialCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
-    db: Session = Depends(get_db),
-):
-    db_testimonial = Testimonial(
-        firstname=testimonial.firstname,
-        lastname=testimonial.lastname,
-        content=testimonial.content,
-        user_id=current_user.id,
-    )
-    db.add(db_testimonial)
-    db.commit()
-    db.refresh(db_testimonial)
-
-    response_data = TestimonialResponse(
-        id=db_testimonial.id,
-        firstname=db_testimonial.firstname,
-        lastname=db_testimonial.lastname,
-        content=db_testimonial.content,
-        created_at=db_testimonial.created_at,
-        updated_at=db_testimonial.updated_at,
-    )
-
-    return SuccessResponse(
-        status="success", message="Testimonial created successfully", data=response_data
-    )
-
-
 @router.delete("/{testimonial_id}", response_model=dict)
 def delete_testimonial(
     testimonial_id: UUID,
-    current_user: Annotated[User, Depends(get_current_user)],
-    # current_user: Annotated[User, Depends(get_current_admin)],
+    # current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_current_admin)],
     db: Session = Depends(get_db),
 ):
     # retrieve the testimonial by ID
@@ -73,6 +38,7 @@ def delete_testimonial(
     db.delete(testimonial)
     db.commit()
 
+    # return a success response
     return JSONResponse(
         content={
             "success": True,
