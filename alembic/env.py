@@ -6,7 +6,6 @@ from decouple import config as decouple_config
 from api.v1.models import *
 from api.v1.models.base import Base
 
-
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -16,10 +15,10 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-database_url = decouple_config('DB_URL')
+database_url = decouple_config("DB_URL")
 
 # Set the SQLAlchemy URL dynamically
-config.set_main_option('sqlalchemy.url', database_url)
+config.set_main_option("sqlalchemy.url", database_url)
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
@@ -70,9 +69,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
