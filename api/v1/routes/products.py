@@ -4,7 +4,7 @@ from typing import Optional
 from ..schemas.category import CategoryList, Category
 from ..services import category as category_service
 from ...db.database import get_db
-from api.utils.json_response import JsonResponseDict
+# from api.utils.json_response import JsonResponseDict
 
 # from ..auth.jwt import get_current_user
 
