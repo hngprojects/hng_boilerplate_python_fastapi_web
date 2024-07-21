@@ -4,6 +4,7 @@
 from sqlalchemy import (
     Column,
     String,
+    Boolean,
     Text,
     ForeignKey,
     ARRAY,
@@ -22,8 +23,11 @@ class Blog(BaseModel, Base):
     content = Column(Text)
     image_url = Column(String(100), nullable=True)
     tags = Column(ARRAY(String(20)), nullable=True)
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    excerpt = Column(String(500), nullable=True)
 
     author = relationship("User", backref="blogs")
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+    author = relationship("User", backref="blogs")

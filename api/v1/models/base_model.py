@@ -2,6 +2,7 @@
 """ This is the Base Model Class
 """
 from uuid_extensions import uuid7
+from fastapi import Depends
 from sqlalchemy import (
     Column,
     DateTime,
@@ -14,8 +15,7 @@ class BaseModel:
     """This model creates helper methods for all models"""
 
     __abstract__ = True
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid7)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -40,13 +40,16 @@ class BaseModel:
     def get_all(cls):
         from api.db.database import db
 
+        from api.db.database import get_db
+        db = Depends(get_db)
         """ returns all instance of the class in the db
         """
         return db.query(cls).all()
 
     @classmethod
     def get_by_id(cls, id):
-        from api.db.database import db
+        from api.db.database import get_db
+        db = Depends(get_db)
 
         """ returns a single object from the db
         """

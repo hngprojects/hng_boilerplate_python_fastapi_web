@@ -41,13 +41,16 @@ engine = get_db_engine()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+db_session = scoped_session(SessionLocal)
+
 Base = declarative_base()
 
+def create_database():
+    return Base.metadata.create_all(bind=engine)
+
 def get_db():
-    db = SessionLocal()
+    db = db_session()
     try:
         yield db
     finally:
         db.close()
-
-
