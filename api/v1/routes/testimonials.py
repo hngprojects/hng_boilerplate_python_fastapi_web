@@ -26,7 +26,7 @@ Base.metadata.create_all(bind=engine)
 
 db_dependency = Annotated[Session , Depends(get_db)]
 
-router = APIRouter(prefix="/api/v1", tags=["testimonials"])
+router = APIRouter(prefix="/testimonials", tags=["testimonials"])
 
 class CustomException(HTTPException):
     """
@@ -49,7 +49,7 @@ async def custom_exception_handler(request: Request, exc: CustomException):
     )
 
 
-@router.post('/testimonials', response_model = SuccessResponse)
+@router.post('', response_model = SuccessResponse)
 def create_testimonial(testimonial: TestimonialCreate, db: db_dependency, current_user: dict = Depends(get_current_user)):
     db_testimonial = Testimonial(
         firstname=testimonial.firstname,
@@ -76,11 +76,15 @@ def create_testimonial(testimonial: TestimonialCreate, db: db_dependency, curren
         data=response_data
     )
 
-@router.put('/testimonials/{testimonial_id}', response_model=UpdateTestimonialResponse)
-def update_testimonial(testimonial_id : str, request : UpdateTestimonial , db : db_dependency ):
-    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+@router.put('/{testimonial_id}', response_model=UpdateTestimonialResponse)
+def update_testimonial(testimonial_id : str, request : UpdateTestimonial , db : db_dependency, current_user: dict = Depends(get_current_user) ):
+    try:
+       testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
+    except :
+        testimonial = None
+    
+    if testimonial is None:
 
-    if not testimonial:
         raise CustomException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=   {
@@ -89,9 +93,19 @@ def update_testimonial(testimonial_id : str, request : UpdateTestimonial , db : 
                      "status_code": 400
                      }
                     )
+    
+    if current_user.id != testimonial.user_id :
+        raise CustomException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                    "status":  "Forbidden",
+                     "message":  "Only owners of testimonial can update",
+                      "status_code": 403
+             }
+        )
+
     testimonial.content = request.content
     db.commit()
-    
     response_text = BaseTestimonialResponse(
         user_id=testimonial.user_id,
         content=testimonial.content,

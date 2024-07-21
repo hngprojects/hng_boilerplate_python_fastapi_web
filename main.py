@@ -10,7 +10,8 @@ from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
 )
-from api.v1.routes.testimonials import router as testimonial
+
+
 
 from api.v1.routes import api_version_one
 
