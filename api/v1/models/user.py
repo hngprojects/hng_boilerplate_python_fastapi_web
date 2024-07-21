@@ -28,11 +28,14 @@ class User(BaseModel, Base):
 
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    password = Column(String(255), nullable=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
+
+
+    oauth2_data_id = Column(UUID(as_uuid=True), ForeignKey("oauth2_data.id", ondelete="SET NULL"), nullable=True)  # tokens from oauth provider
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
