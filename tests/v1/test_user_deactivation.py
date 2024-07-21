@@ -91,7 +91,7 @@ def test_user_deactivation(test_db):
 
     user_already_deactivated = client.patch('/api/v1/users/accounts/deactivate', json={
         "reason": "No longer need the account",
-        "confirmation": False
+        "confirmation": True
     }, headers={'Authorization': f'Bearer {access_token}'})
     assert user_already_deactivated.status_code == 400
     assert user_already_deactivated.json()['detail'] == 'User is inactive'
