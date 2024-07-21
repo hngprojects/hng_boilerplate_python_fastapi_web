@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from api.utils.settings import settings
-from api.v1.routes.help_center import app as help_center
+from api.v1.routes.help_center import router as help_center
 from api.utils.exceptions import rate_limit_callback, http_exception_handler
 
 from fastapi_limiter import FastAPILimiter

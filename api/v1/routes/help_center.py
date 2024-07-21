@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, Query, HTTPException
 from fastapi import Depends
 
@@ -10,16 +11,19 @@ from api.v1.schemas.article import ArticleResponse, SearchResponse
 
 from fastapi_limiter.depends import RateLimiter
 
-app = APIRouter()
+router = APIRouter()
 
 
-@app.get(
-    "/api/v1/topics/search",
+url_prefix = "/api/v1/topics/search"
+
+
+@router.get(
+    url_prefix,
     response_model=SearchResponse,
     dependencies=[Depends(RateLimiter(times=2, seconds=10))],
 )
 async def search_articles(
-    title: str = Query(..., min_length=1), db: Session = Depends(get_db)
+    title: Annotated[str | None, Query(min_length=1)] = None, db: Session = Depends(get_db)
 ):
     try:
         articles = db.query(Article).filter(Article.title.ilike(f"%{title}%")).all()
@@ -42,6 +46,8 @@ async def search_articles(
         if exc.status_code == 404:
             raise HTTPException(status_code=exc.status_code, detail=responses.NOT_FOUND)
         elif exc.status_code == 429:
-            raise HTTPException(status_code=exc.status_code, detail=responses.TOO_MANY_REQUEST)
+            raise HTTPException(
+                status_code=exc.status_code, detail=responses.TOO_MANY_REQUEST
+            )
     except Exception as e:
         raise HTTPException(status_code=500, detail=responses.SERVER_ERROR)

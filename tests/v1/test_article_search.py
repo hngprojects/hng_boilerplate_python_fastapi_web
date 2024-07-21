@@ -1,9 +1,21 @@
 import time
 import pytest
+from main import app
 from api.core import responses
-from api.db.database import Base
+from api.db.database import Base, get_db
 from api.v1.models.article import Article
 from tests.database import TestingSessionLocal, engine
+
+
+# Override the get_db dependency to use the in-memory database
+def override_get_db():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
+
+app.dependency_overrides[get_db] = override_get_db
 
 
 payload = [
@@ -15,6 +27,8 @@ payload = [
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_database():
+    # Create the database tables
+    Base.metadata.create_all(bind=engine)
     # Create test data
     db = TestingSessionLocal()
     db.add_all([

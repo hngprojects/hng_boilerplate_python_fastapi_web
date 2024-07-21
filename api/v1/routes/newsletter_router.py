@@ -11,7 +11,7 @@ from api.v1.schemas.newsletter_schema import EMAILSCHEMA
 from api.db.database import get_db, Base, engine
 
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 
 router = APIRouter()
