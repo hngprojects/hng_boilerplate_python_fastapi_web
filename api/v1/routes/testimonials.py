@@ -49,32 +49,7 @@ async def custom_exception_handler(request: Request, exc: CustomException):
     )
 
 
-@router.post('', response_model = SuccessResponse)
-def create_testimonial(testimonial: TestimonialCreate, db: db_dependency, current_user: dict = Depends(get_current_user)):
-    db_testimonial = Testimonial(
-        firstname=testimonial.firstname,
-        lastname=testimonial.lastname,
-        content=testimonial.content,
-        user_id=current_user.id
-    )
-    db.add(db_testimonial)
-    db.commit()
-    db.refresh(db_testimonial)
-    
-    response_data = TestimonialResponse(
-        id=db_testimonial.id,
-        firstname=db_testimonial.firstname,
-        lastname=db_testimonial.lastname,
-        content=db_testimonial.content,
-        created_at=db_testimonial.created_at,
-        updated_at=db_testimonial.updated_at
-    )
-    
-    return SuccessResponse(
-        status="success",
-        message="Testimonial created successfully",
-        data=response_data
-    )
+
 
 @router.put('/{testimonial_id}', response_model=UpdateTestimonialResponse)
 def update_testimonial(testimonial_id : str, request : UpdateTestimonial , db : db_dependency, current_user: dict = Depends(get_current_user) ):
