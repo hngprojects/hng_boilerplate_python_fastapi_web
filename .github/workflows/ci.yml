@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main, staging, dev]
+    branches: [main, staging, dev, devops-main]
   pull_request:
-    branches: [main, staging, dev]
+    branches: [main, staging, dev, devops-main]
 
 jobs:
   build-and-test:
@@ -14,9 +14,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: 
-          POSTGRES_PASSWORD: 
-          POSTGRES_DB: 
+          POSTGRES_USER: 'username'
+          POSTGRES_PASSWORD: "password"
+          POSTGRES_DB: "test"
         ports:
           - 5432:5432
 
@@ -34,16 +34,22 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      # - name: Copy env file
-      #   run: cp .env.sample .env
+      - name: Copy env file
+        run: cp .env.sample .env
 
-      # - name: Copy env file for main
-      #   if: github.ref == 'refs/heads/main'
-      #   run: cp .env.production .env
-      
-      # - name: Copy env file for staging
-      #   if: github.ref == 'refs/heads/staging'
-      #   run: cp .env.staging .env
+      - name: Run app
+        run: |
+          python3 main.py &
+          pid=$!
+          sleep 10
+          if ps -p $pid > /dev/null; then
+            echo "main.py started successfully"
+            kill $pid
+          else
+            echo "main.py failed to start"
+            exit 1
+          fi
+
 
       # - name: Run migrations
       #   run: |
