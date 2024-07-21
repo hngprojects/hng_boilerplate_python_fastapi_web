@@ -30,6 +30,7 @@ class User(BaseModel, Base):
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)
     first_name = Column(String(50))
+    phone_number = Column(String(25), nullable=True)
     last_name = Column(String(50))
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))

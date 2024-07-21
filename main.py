@@ -7,6 +7,7 @@ from starlette.requests import Request
 
 from api.db.database import Base, engine
 from api.v1.routes.auth import auth
+from api.v1.routes.customers import customers
 
 Base.metadata.create_all(bind=engine)
 
@@ -34,7 +35,7 @@ app.add_middleware(
 
 
 app.include_router(auth)
-# app.include_router(users, tags=["Users"])
+app.include_router(customers)
 
 
 
