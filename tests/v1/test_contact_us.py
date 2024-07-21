@@ -2,9 +2,6 @@ from fastapi.testclient import TestClient
 import pytest
 from main import app
 
-# Assuming the email service is defined in services.email_service
-from services.email_service import EmailService
-
 client = TestClient(app)
 
 
