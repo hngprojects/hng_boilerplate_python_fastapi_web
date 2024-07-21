@@ -23,7 +23,6 @@ from sqlalchemy.orm import relationship
 class Product(BaseModel, Base):
     __tablename__ = 'products'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)
