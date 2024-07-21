@@ -14,6 +14,7 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
+from datetime import datetime, timedelta
 
 # Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)
@@ -107,8 +108,9 @@ db.add_all([blog_1, blog_2, blog_3])
 
 db.commit()
 
-invite_1 = Invitation(user_id=user_1.id, organization_id=org_1.id)
-invite_2 = Invitation(user_id=user_2.id, organization_id=org_2.id)
+expiry = datetime.now() + timedelta(hours=24)
+invite_1 = Invitation(user_id=user_1.id, organization_id=org_1.id, expires_at=expiry)
+invite_2 = Invitation(user_id=user_2.id, organization_id=org_2.id, expires_at=expiry)
 
 db.add_all([invite_1, invite_2])
 db.commit()
