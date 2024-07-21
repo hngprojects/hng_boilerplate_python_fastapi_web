@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.schemas.customer import SuccessResponse
-from api.utils.dependencies import get_current_active_admin
+from api.utils.dependencies import get_current_admin
 from typing import Annotated
 from api.utils.json_response import JsonResponseDict
 
@@ -14,7 +14,7 @@ customers = APIRouter(prefix="/api/v1/customers", tags=["customers"])
 
 @customers.get("", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
 def get_customers(
-    current_user: Annotated[User, Depends(get_current_active_admin)], 
+    current_user: Annotated[User, Depends(get_current_admin)], 
     limit: Annotated[int, Query(ge=1, description="Number of customers per page")] = 10,
     page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
     db: Session = Depends(get_db)
@@ -26,6 +26,16 @@ def get_customers(
         - limit: Number of customers per page (default: 10, minimum: 1)
         - page: Page number (starts from 1)
     """
+    if current_user.is_active == False:
+        print(current_user.username)
+        return JSONResponse(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            content={
+                "status_code": 401,
+                "message": "Forbidden",
+                "error": "User is not an admin"
+            }
+        )
     # Calculating offset value from page number and limit given
     offset_value = (page - 1) * limit
 

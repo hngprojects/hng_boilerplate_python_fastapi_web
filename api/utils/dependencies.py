@@ -44,15 +44,3 @@ def get_current_admin(db: Session = Depends(get_db), token: str = Depends(oauth2
         )
     return user
 
-def get_current_active_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    user = get_current_user(db, token)
-    if not user.is_admin or user.is_active:
-        return JSONResponse(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            content={
-                "status_code": 401,
-                "message": "Unauthorized",
-                "error": "Bad Request"
-            }
-        )
-    return user

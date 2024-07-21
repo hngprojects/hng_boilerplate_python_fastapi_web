@@ -83,5 +83,5 @@ After creating new tables, or adding new models. Make sure to run alembic revisi
 ```
 python -m unittest tests/v1/test_login.py
 python -m unittest tests/v1/test_signup.py
-python -m unittest tests/v1/test_list_customers.py
+ PYTHONPATH=. pytest tests/v1/test_list_customers.py
 ```
