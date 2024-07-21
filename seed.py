@@ -6,13 +6,7 @@ from api.v1.models.user import User
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
-from api.v1.models.auth import AuthUser, OAuthUser
-from api.v1.models.role import Role
-from api.v1.models.permission import Permission
 from api.v1.models.blog import Blog
-from api.v1.models.testimonial import Testimonial
-from api.v1.models.subscription import Subscription
-from api.v1.models.invitation import Invitation
 
 payload = {
     "users": [

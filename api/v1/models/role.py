@@ -9,6 +9,7 @@ from sqlalchemy.orm import relationship
 from api.db.database import Base
 from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
+from api.v1.models.permission import Permission
 
 user_role_association = Table(
     "user_role",

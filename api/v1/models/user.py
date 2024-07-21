@@ -10,6 +10,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseModel
 from api.db.database import Base
+from api.v1.models.auth import AuthUser, OAuthUser
+from api.v1.models.testimonial import Testimonial
 
 
 class User(BaseModel, Base):

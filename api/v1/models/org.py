@@ -12,6 +12,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from api.db.database import Base
 from api.v1.models.base_model import BaseModel
+from api.v1.models.role import Role
 
 user_organization_association = Table(
     "user_organization",

@@ -9,15 +9,15 @@ from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
-from api.v1.models.base import Base
+from api.db.database import Base
 from api.v1.models.subscription import Subscription
 from api.v1.models.blog import Blog
 from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
-test_db_name = '' # put your test db name
-test_db_pw = '' # put your test db pw
+test_db_name = 'hng_fast_api_test' # put your test db name
+test_db_pw = 'postgres' # put your test db pw
 SQLALCHEMY_DATABASE_URL = f"postgresql+psycopg2://postgres:{test_db_pw}@localhost:5432/{test_db_name}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
