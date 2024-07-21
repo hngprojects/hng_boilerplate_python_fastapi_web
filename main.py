@@ -13,7 +13,7 @@ from api.utils.exceptions import rate_limit_callback, http_exception_handler
 from fastapi_limiter import FastAPILimiter
 
 from api.db.database import Base, engine
-from api.v1.routes.newsletter_router import router as newsletter
+from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes import api_version_one
 
 Base.metadata.create_all(bind=engine)
@@ -46,7 +46,7 @@ app.add_middleware(
 )
 
 app.include_router(newsletter, tags=["Newsletter"])
-app.include_router(auth, tags=["Auth"])
+# app.include_router(auth, tags=["Auth"])
 app.include_router(help_center, tags=["Help Centers"])
 app.include_router(api_version_one)
 
