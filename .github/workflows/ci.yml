@@ -3,8 +3,14 @@ name: CI
 on:
   push:
     branches: [main, staging, dev, devops-main]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
   pull_request:
     branches: [main, staging, dev, devops-main]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
 
 jobs:
   build-and-test:
@@ -14,7 +20,7 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: 'username'
+          POSTGRES_USER: "username"
           POSTGRES_PASSWORD: "password"
           POSTGRES_DB: "test"
         ports:
@@ -27,8 +33,15 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-          virtual-environment: venv
+          python-version: "3.10"
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
       - name: Install dependencies
         run: |
@@ -50,13 +63,10 @@ jobs:
             exit 1
           fi
 
+      - name: Run migrations
+        run: |
+          alembic upgrade head
 
-      # - name: Run migrations
-      #   run: |
-      #     activate
-      #     alembic upgrade head
-
-      # - name: Run tests
-      #   run: |
-      #     activate
-      #     pytest
+      - name: Run tests
+        run: |
+          PYTHONPATH=. pytest
