@@ -7,6 +7,7 @@ from sqlalchemy import (
         ForeignKey,
         Table,
         DateTime,
+        String,
         func
         )
 from sqlalchemy.ext.declarative import declarative_base
@@ -20,7 +21,9 @@ Base = declarative_base()
 
 user_organization_association = Table('user_organization', Base.metadata,
         Column('user_id', UUID(as_uuid=True), ForeignKey('users.id',  ondelete='CASCADE'), primary_key=True),
-        Column('organization_id', UUID(as_uuid=True), ForeignKey('organizations.id',  ondelete='CASCADE'), primary_key=True)
+        Column('organization_id', UUID(as_uuid=True), ForeignKey('organizations.id',  ondelete='CASCADE'), primary_key=True),
+        Column('status', String(20), nullable=False, default="member")
+        
         )
 
 user_role_association = Table('user_role', Base.metadata,
