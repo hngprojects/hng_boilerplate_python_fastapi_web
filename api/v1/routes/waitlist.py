@@ -6,6 +6,7 @@ from api.v1.models.user import WaitlistUser
 from api.v1.schemas.waitlist import WaitlistUserCreate
 from api.utils.rate_limiter import rate_limit
 from api.db.database import get_db
+from api.v1.services.waitlist_email import send_confirmation_email
 
 router = APIRouter()
 
@@ -32,5 +33,7 @@ async def signup_waitlist(
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
+    await send_confirmation_email(signup.email, signup.full_name)
 
     return {"message": "You are all signed up!"}
