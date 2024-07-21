@@ -17,6 +17,74 @@ from api.v1.models.base import user_organization_association as UserOrganization
 from api.v1.models.base import user_role_association as UserRole
 from api.v1.models.base import role_permission_association as RolePermission
 
+payload = {
+    "users": [
+        {
+            "username": "johndoe",
+            "email": "john@doe.com",
+            "first_name": "John",
+            "last_name": "Doe",
+            "password": "password",
+        },
+        {
+            "username": "janeboyle",
+            "email": "jane@boyle.com",
+            "first_name": "Jane",
+            "last_name": "Boyle",
+            "password": "password",
+        },
+        {
+            "username": "bobdwayne",
+            "email": "bob@dwayn.com",
+            "first_name": "Bob",
+            "last_name": "Dwayne",
+            "password": "password",
+        },
+    ],
+    "organizations": [
+        {
+            "name": "Python Org",
+            "description": "An organization for python develoers",
+        },
+        {
+            "name": "Django Org",
+            "description": "An organization of django devs",
+        },
+        {
+            "name": "FastAPI Devs",
+            "description": "An organization of Fast API devs",
+        },
+    ],
+    "products": [
+        {
+            "name": "bed",
+            "price": 400000,
+        },
+        {
+            "name": "shoe",
+            "price": 150000,
+        },
+        {
+            "name": "bag",
+            "price": 50000,
+        },
+    ],
+    "profiles": [
+        {
+            "bio": "My name is John Doe",
+            "phone_number": "09022112233",
+        },
+        {
+            "bio": "My name is Jane Boyle",
+            "phone_number": "09022112233",
+        },
+        {
+            "bio": "My name is Bob Dwayne",
+            "phone_number": "09022112233",
+        },
+    ],
+}
+
 create_database()
 db = next(get_db())
 
@@ -65,6 +133,12 @@ user_3 = User(
 db.add_all([user_1, user_2, user_3])
 db.commit()
 
+orgs = db.query(Organization).all()
+for org in orgs:
+    for p in payload["organizations"]:
+        if org.name in p["name"]:
+            db.delete(org)
+    db.commit()
 # Add sample roles
 role_1 = Role(id=uuid7(), role_name="Admin", organization_id=org_1.id)
 role_2 = Role(id=uuid7(), role_name="Member", organization_id=org_1.id)
