@@ -13,7 +13,7 @@ def list_blog(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
-) -> JsonResponseDict:
+):
     try:
         offset = (page - 1) * page_size
         query = (
