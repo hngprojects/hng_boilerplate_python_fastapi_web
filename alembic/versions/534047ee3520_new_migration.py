@@ -160,7 +160,8 @@ def upgrade() -> None:
     sa.Column('organization_id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('user_id', 'organization_id')
+    sa.PrimaryKeyConstraint('user_id', 'organization_id'),
+    sa.Column('status', sa.String(length=20), nullable=False)
     )
     op.create_table('role_permission',
     sa.Column('role_id', sa.UUID(), nullable=False),
@@ -208,4 +209,5 @@ def downgrade() -> None:
     op.drop_table('permissions')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
     op.drop_table('organizations')
+    op.drop_column('user_organization', 'status')
     # ### end Alembic commands ###

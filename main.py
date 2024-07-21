@@ -12,7 +12,7 @@ from api.v1.routes.newsletter_router import (
 )
 
 from api.v1.routes import api_version_one
-
+from api.v1.routes import members
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
@@ -37,7 +37,7 @@ app.add_middleware(
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 
 app.include_router(api_version_one)
-
+app.include_router(members.router, prefix="/api/v1") 
 
 
 @app.get("/", tags=["Home"])
