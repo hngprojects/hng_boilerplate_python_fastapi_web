@@ -13,7 +13,7 @@ from api.v1.models.user import User
 from api.utils.dependencies import get_current_user, get_current_admin
 from uuid import UUID
 
-router = APIRouter(prefix="/api/v1/testimonials", tags=["testimonials"])
+router = APIRouter(prefix="/testimonials", tags=["testimonials"])
 
 
 @router.delete("/{testimonial_id}", response_model=dict)
