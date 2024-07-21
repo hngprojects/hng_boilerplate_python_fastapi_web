@@ -10,6 +10,10 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+class TokenResponse(BaseModel):
+    message: str
+    data: dict
+
 from pydantic import BaseModel
 
 class LoginRequest(BaseModel):

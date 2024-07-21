@@ -15,11 +15,12 @@ from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from datetime import datetime, timedelta
-from api.v1.schemas.token import Token, LoginRequest
-from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
+from api.v1.schemas.token import Token, LoginRequest, TokenResponse
+from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate, ErrorResponse
 from api.db.database import get_db
 from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
 from api.utils.dependencies import get_current_admin, get_current_user
+from fastapi.responses import JSONResponse
 
 
 from api.v1.models.org import Organization
@@ -33,6 +34,7 @@ db = next(get_db())
 auth = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
+JWT_REFRESH_EXPIRY = 5
 
 @auth.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
 def login_for_access_token(login_request: LoginRequest, db: Session = Depends(get_db)):
@@ -104,6 +106,47 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     )
     return response
     
+
+@auth.post("/login", response_model=TokenResponse)
+def login_for_user_info(login_request: LoginRequest, db: Session = Depends(get_db)):
+    user = authenticate_user(db, login_request.username, login_request.password)
+    if not user:
+        error_response = ErrorResponse(
+            message="Login failed",
+            error="Incorrect username or password",
+            statusCode=status.HTTP_401_UNAUTHORIZED,
+        )
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content=error_response.dict()
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = timedelta(days=JWT_REFRESH_EXPIRY)    
+    access_token = create_access_token(
+        data={"username": user.username}, expires_delta=access_token_expires
+    )
+    refresh_token = create_access_token(
+        data={"username": user.username}, expires_delta=refresh_token_expires
+    )
+
+    return {
+         "message": "Login successful",
+        "data": {
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": [role.role_name for role in user.roles],
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "is_active": user.is_active,
+                "is_admin": user.is_admin,
+                "created_at": user.created_at,
+                "updated_at": user.updated_at
+            },
+            "access_token": access_token,
+            "refresh_token": refresh_token
+        }
+    }
 
 # Protected route example: test route
 @auth.get("/admin")
