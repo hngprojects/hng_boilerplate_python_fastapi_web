@@ -15,6 +15,7 @@ from api.v1.routes import api_version_one
 
 Base.metadata.create_all(bind=engine)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
@@ -34,10 +35,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
+# Newsletter custom exception registration
+app.add_exception_handler(CustomException, custom_exception_handler)
 
 app.include_router(api_version_one)
-
 
 
 @app.get("/", tags=["Home"])
