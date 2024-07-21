@@ -27,13 +27,13 @@ token = APIRouter(prefix='/token', tags=["Token"])
 @token.post("/", response_model=Token)
 def login_for_access_token(credentials: loginCredentials, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == credentials.username).first()
-    if not user or not verify_password(credentials.password, user.hashed_password):
+    if not user or not verify_password(credentials.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=float(ACCESS_TOKEN_EXPIRE_MINUTES))
     access_token = create_access_token(
         data={"username": user.username}, expires_delta=access_token_expires
     )

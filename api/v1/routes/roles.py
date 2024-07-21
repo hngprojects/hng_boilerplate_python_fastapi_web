@@ -22,15 +22,15 @@ role = APIRouter(prefix="/roles", tags=["Roles"])
 def create_role(current_admin: Annotated[User, Depends(get_current_admin)], role: RoleCreate, db: Session = Depends(get_db)):
     db_role = db.query(Role).filter(Role.role_name == role.role_name).first()
     if db_role:
-        raise HTTPException(status_code=400, message="Role already exists")
+        raise HTTPException(status_code=400, detail="Role already exists")
 
     db_organization = db.query(Organization).filter(Organization.id == role.organization_id).first()
     if not db_organization:
-        raise HTTPException(status_code=400, message="Organization does not exist")
+        raise HTTPException(status_code=400, detail="Organization does not exist")
 
-    permissions = db.query(Permission).filter(Permission.id.in_(role.permission_ids)).all()
+    permissions = db.query(Permission).filter(Permission.name.in_(role.permission_ids)).all()
     if len(permissions) != len(role.permission_ids):
-        raise HTTPException(status_code=400, message="Some permissions do not exist")
+        raise HTTPException(status_code=400, detail="Some permissions do not exist")
 
     new_role = Role(
         role_name=role.role_name,
@@ -41,4 +41,7 @@ def create_role(current_admin: Annotated[User, Depends(get_current_admin)], role
     db.commit()
     db.refresh(new_role)
 
-    return ResponseModel(message="Role created successfully", status_code=201)
+    return ResponseModel(message="Role created successfully",
+                         status_code=201,
+                         id=new_role.id,
+                         role=new_role.role_name)

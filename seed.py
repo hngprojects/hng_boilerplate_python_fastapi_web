@@ -13,6 +13,7 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
+from api.utils.auth import hash_password
 
 # Drop all tables and recreate them
 Base.metadata.drop_all(bind=engine)
@@ -41,8 +42,17 @@ user_3 = User(
     first_name="Bob",
     last_name="Dwayne",
 )
+admin = User(
+    email="admin@mail",
+    username="admin",
+    password=hash_password("admin12345"),
+    first_name="mba",
+    last_name="kama",
+    is_admin = True,
+    is_active = True
+)
 
-db.add_all([user_1, user_2, user_3])
+db.add_all([user_1, user_2, user_3, admin])
 
 org_1 = Organization(
     name="Python Org", description="An organization for python develoers"

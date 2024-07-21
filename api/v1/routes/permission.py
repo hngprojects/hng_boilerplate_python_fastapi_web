@@ -15,7 +15,7 @@ from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from api.utils.dependencies import get_current_admin, get_current_user
-from api.v1.schemas.permission import PermissionCreate, PermissionResponse, PermissionList
+from api.v1.schemas.permission import PermissionCreate, PermissionResponse, PermissionList, PermissionModel
 
 
 permission = APIRouter(prefix="/permissions", tags=["Permission"])
@@ -38,9 +38,11 @@ def create_permission(current_admin: Annotated[User, Depends(get_current_admin)]
 @permission.get("/", response_model=PermissionList)
 def get_permissions(current_user: Annotated[User, Depends(get_current_user)], db: Session = Depends(get_db)):
     permissions = db.query(Permission).all()
-    perm = PermissionList(
-        permissions=permissions,
-        status_code=200,
-        message="Successfully retrieved Permissions"
-    )
+    permissions_list = [PermissionModel(id=perm.id, name=perm.name) for perm in permissions]
+    perms = {
+        "permissions": permissions_list,
+        "status_code": 200,
+        "message": "Successfully retrieved Permissions"
+    }
+    perm = PermissionList(**perms)
     return perm
