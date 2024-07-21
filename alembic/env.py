@@ -3,7 +3,6 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from decouple import config as decouple_config
-from api.v1.models.oauth import OAuthUser
 from api.v1.models import *
 from api.v1.models.base import Base
 

@@ -4,7 +4,6 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from api.v1.routes import auth_facebook
 
 from api.db.database import Base, engine
 
@@ -38,7 +37,6 @@ app.add_middleware(
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 
-app.include_router(auth_facebook.router, prefix="/api/v1", tags=["Facebook Login"])
 app.include_router(api_version_one)
 
 
