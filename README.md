@@ -48,7 +48,6 @@ after cloning the database, dont run
 `alembic revision --autogenerate -m 'initial migration'`
 but run
 `alembic upgrade head`
-
 if you make changes to any table locally, then run the below command.
 ```bash
 alembic revision --autogenerate -m 'initial migration'
