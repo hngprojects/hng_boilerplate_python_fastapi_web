@@ -81,3 +81,21 @@ if you make changes to the database models, you need to run the following comman
 alembic revision --autogenerate -m "Migration message"
 alembic upgrade head
 ```
+
+## Test
+
+-   Ensure Dependencies: Make sure all necessary dependencies are installed.
+    you can ensure this by running
+
+    ```sh
+    pip install -r requirements.txt  # inside the virtual environment.
+    ```
+
+-   Make sure you are in the root folder.
+-   Run Tests: use the following command to run all the test
+
+    ```sh
+    python -m pytest
+    ```
+
+-   Make sure all your tests are placed in the tests/v1 folder.

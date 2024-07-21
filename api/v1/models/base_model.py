@@ -38,8 +38,6 @@ class BaseModel:
 
     @classmethod
     def get_all(cls):
-        from api.db.database import db
-
         from api.db.database import get_db
         db = Depends(get_db)
         """ returns all instance of the class in the db

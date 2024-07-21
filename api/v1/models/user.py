@@ -32,7 +32,6 @@ class User(BaseModel, Base):
 
     def to_dict(self):
         obj_dict = super().to_dict()
-        obj_dict.pop("password")
         return obj_dict
 
     def __str__(self):

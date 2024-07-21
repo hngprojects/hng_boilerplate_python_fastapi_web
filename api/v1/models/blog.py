@@ -30,4 +30,3 @@ class Blog(BaseModel, Base):
     
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-    author = relationship("User", backref="blogs")
