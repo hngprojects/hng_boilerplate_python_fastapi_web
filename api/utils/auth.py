@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-import jwt
+from jose import jwt
 from typing import Optional
 from datetime import datetime, timedelta
 from api.v1.models.user import User
