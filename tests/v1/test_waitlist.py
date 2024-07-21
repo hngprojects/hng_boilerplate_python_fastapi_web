@@ -4,13 +4,13 @@ from main import app
 from unittest.mock import MagicMock, patch
 import uuid
 from api.db.database import Base, get_db, SessionLocal
+from api.v1.services.waitlist_email import send_confirmation_email
 
 client = TestClient(app)
 
 
 @pytest.fixture(scope="function")
 def test_db(mocker):
-
     mock_engine = MagicMock()  # Mock the database engine
     mocker.patch('api.db.database.get_db_engine', return_value=mock_engine)
 
@@ -36,20 +36,21 @@ def client_with_mocks(test_db):
     with patch('api.db.database.get_db', return_value=test_db):
         yield client
 
-# Mock email configuration
-
 
 @pytest.fixture(scope="function", autouse=True)
 def mock_email_config(mocker):
     mocker.patch(
         'api.v1.services.waitlist_email.ConnectionConfig', autospec=True)
+    mocker.patch('api.v1.services.waitlist_email.FastMail', autospec=True)
+    mock_send_message = mocker.patch(
+        'api.v1.services.waitlist_email.FastMail.send_message', autospec=True)
+    yield mock_send_message
 
 
-def test_signup_waitlist(client_with_mocks, mocker):
-
+def test_signup_waitlist(client_with_mocks, mock_email_config, mocker):
+    # Mock rate_limit decorator
     mocker.patch('api.v1.routes.waitlist.rate_limit', return_value=MagicMock())
 
-    # Use a unique email address for each test
     email = f"test{uuid.uuid4()}@example.com"
 
     response = client_with_mocks.post(
@@ -59,6 +60,12 @@ def test_signup_waitlist(client_with_mocks, mocker):
 
     assert response.status_code == 201
     assert response.json() == {"message": "You are all signed up!"}
+
+    # Verify that the send_confirmation_email function was called
+    mock_email_config.assert_called_once_with(
+        email=email,
+        name="Test User"
+    )
 
 
 def test_duplicate_email(client_with_mocks):
@@ -94,7 +101,7 @@ def test_signup_with_empty_name(client_with_mocks):
 
 
 def test_rate_limiting(client_with_mocks, mocker):
-
+    # Mock rate_limit decorator
     mocker.patch('api.v1.routes.waitlist.rate_limit', return_value=MagicMock())
 
     for _ in range(5):
