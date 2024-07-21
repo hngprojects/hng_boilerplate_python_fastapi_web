@@ -8,6 +8,9 @@ on:
       - ".github/workflows/**"
   pull_request:
     branches: [main, staging, dev, devops-main]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
 
 jobs:
   build-and-test:
