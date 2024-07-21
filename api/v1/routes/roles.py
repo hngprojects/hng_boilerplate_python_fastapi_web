@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Annotated
+from typing_extensions import Annotated
 from sqlalchemy.orm import Session
 from api.v1.schemas.role import RoleCreate, ResponseModel
 from api.db.database import get_db
