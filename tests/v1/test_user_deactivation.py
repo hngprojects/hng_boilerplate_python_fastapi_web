@@ -72,7 +72,7 @@ def test_user_deactivation(test_db):
         "confirmation": False
     }, headers={'Authorization': f'Bearer {access_token}'})
     assert confirmation_false.status_code == 400
-    assert user_already_deactivated.json()['detail'] == 'Confirmation required to deactivate account'
+    assert confirmation_false.json()['detail'] == 'Confirmation required to deactivate account'
 
 
     unauthorized = client.patch('/api/v1/users/accounts/deactivate', json={
