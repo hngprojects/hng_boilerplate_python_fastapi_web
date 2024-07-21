@@ -1,13 +1,27 @@
 import logging
-from fastapi import APIRouter, HTTPException
+import os
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr, constr
 from fastapi.responses import JSONResponse
-import requests
 
+# Assuming the email service is defined in services.email_service
+from services.email_service import EmailService
 
 router = APIRouter()
 
-logging.basicConfig(level=logging.INFO)
+# Loggin setup
+log_folder = 'logs'
+if not os.path.exists(log_folder):
+    os.makedirs(log_folder)
+
+log_filename = os.path.join(log_folder, 'contact_us.log')
+logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_filename),
+        ]
+)
 logger = logging.getLogger(__name__)
 
 
@@ -16,31 +30,11 @@ class ContactForm(BaseModel):
     email: EmailStr
     message: constr(strip_whitespace=True, min_length=1)
 
-def send_email_via_service(name: str, email: str, message: str) -> bool:
-    url = "http://localhost:8000/api/v1/send-mail"
-    headers = {
-            "accept": "application/json",
-            "content-type": "application/json"
-    }
-    data = {
-            "template_id": 1,
-            "recipient": email,
-            "variables": {
-                "name": name,
-                "message": message
-            }
-    }
-
-    response = requests.post(url, json=data, headers=headers)
-    if response.status_code != 200:
-        logger.error(f"Failed to send email: {response.status_code}, {response.text}")
-    return response.status_code == 200
-
-
+    
 @router.post("/api/v1/contact")
-async def contact_us(form: ContactForm):
+async def contact_us(form: ContactForm, email_service: EmailService = Depends()):
     logger.info(f"Received contact form submission: {form}")
-    if send_email_via_service(form.name, form.email, form.message):
+    if email_service.send_email(form.name, form.email, form.message):
         logger.info(f"Email sent successfully for {form.email}")
         return JSONResponse(status_code=200, content={"message": "Inquiry sent successfully", "status": 200})
     else:
