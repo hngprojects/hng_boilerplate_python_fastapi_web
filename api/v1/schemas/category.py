@@ -16,6 +16,16 @@ class Category(CategoryBase):
     class Config:
         orm_mode = True
 
+    @classmethod
+    def from_orm(cls, orm_category):
+        return cls(
+            id=orm_category.id,
+            name=orm_category.name,
+            description=orm_category.description,
+            slug=orm_category.slug,
+            parent_id=orm_category.parent_id
+        )
+
 class CategoryList(BaseModel):
     status_code: int = 200
     categories: List[Category]
