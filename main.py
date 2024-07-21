@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
 from api.db.database import Base, engine
+from api.v1.routes.auth import auth
 from api.v1.routes.products import product_router
 
 from exceptions import validation_exception_handler
@@ -39,7 +40,7 @@ app.add_middleware(
 app.include_router(product_router, prefix=f"/api/{version}/products", tags=['products'])
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
-# app.include_router(auth, tags=["Auth"])
+app.include_router(auth)
 # app.include_router(users, tags=["Users"])
 
 
