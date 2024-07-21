@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch
 from httpx import AsyncClient
 from main import app
-from api.v1.routes.auth import oauth
+from api.utils.config import oauth
 
 
 return_value = {
