@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from api.v1.models.blog import Blog
 from api.db.database import get_db
 
-blog = APIRouter(prefix="/blogs", tags=["Blog"])
+blog = APIRouter(prefix="/api/v1/blogs", tags=["Blog"])
 
 
 @blog.get("", status_code=status.HTTP_200_OK)
