@@ -30,12 +30,12 @@ from api.v1.models.product import Product
 db = next(get_db())
 
 
-auth = APIRouter(prefix="/auth", tags=["auth"])
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+router = APIRouter(prefix="/auth", tags=["auth"])
 
-@auth.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
 def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, login_request.username, login_request.password)
     if not user:
@@ -50,7 +50,7 @@ def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(),
     )
     return Token(access_token=access_token, token_type="bearer")
   
-@auth.post("/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:

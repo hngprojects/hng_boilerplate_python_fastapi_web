@@ -61,8 +61,9 @@ async def get_root(request: Request) -> dict:
     }
 
 
-from api.v1.routes import preferences, users,auth,org
-app.include_router(auth.router)
+from api.v1.routes import preferences, users,org,auth
+
+#app.include_router(auth.router)
 app.include_router(users.router, tags=["users"])
 app.include_router(org.router)
 app.include_router(preferences.router, tags=["preferences"])
