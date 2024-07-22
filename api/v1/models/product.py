@@ -23,3 +23,5 @@ class Product(BaseModel, Base):
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=datetime.utcnow)
+
