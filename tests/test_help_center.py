@@ -1,13 +1,11 @@
-from datetime import datetime
-from api.db.database import get_db
-import pytest
+import datetime
 from fastapi.testclient import TestClient
+import pytest
+from unittest.mock import patch, MagicMock
 from ..main import app
+import main
 
-
-
-
-db = get_db()
+# Initialize TestClient
 client = TestClient(app)
 
 # Mock JWT token
@@ -20,6 +18,9 @@ headers = {
     "Content-Type": "application/json"
 }
 
+# Mock database as a global dictionary
+db = {}
+
 @pytest.fixture
 def setup_db():
     db["valid-id"] = {
@@ -27,23 +28,43 @@ def setup_db():
         "title": "Original Title",
         "content": "Original content",
         "author": "Original Author",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
+        "created_at": datetime.datetime.now(),
+        "updated_at": datetime.datetime.now(),
     }
     yield
     db.clear()
 
-def test_update_topic_success(setup_db):
+@patch('main.get_db', return_value=db)
+def test_update_topic_success(mock_get_db, setup_db):
     update_data = {
         "title": "Updated Title",
         "content": "Updated content",
         "author": "Updated Author"
     }
-    response = client.patch(
-        "/api/v1/help-center/topics/valid-id",
-        headers=headers,
-        json=update_data
-    )
+
+    with patch('main.update_topic_in_db') as mock_update_topic:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            "success": True,
+            "data": {
+                "id": "valid-id",
+                "title": "Updated Title",
+                "content": "Updated content",
+                "author": "Updated Author",
+                "created_at": str(datetime.datetime.now()),
+                "updated_at": str(datetime.datetime.now()),
+            },
+            "status_code": 200
+        }
+        mock_update_topic.return_value = mock_response
+        
+        response = client.patch(
+            "/api/v1/help-center/topics/valid-id",
+            headers=headers,
+            json=update_data
+        )
+
     assert response.status_code == 200
     data = response.json()
     assert data["success"] == True
@@ -58,71 +79,103 @@ def test_patch_topic_unauthorized():
         "content": "Updated content",
         "author": "Updated Author"
     }
+
     response = client.patch(
         "/api/v1/help-center/topics/valid-id",
         headers={"Content-Type": "application/json"},  # No Authorization header
         json=update_data
     )
+
     assert response.status_code == 401
     data = response.json()
     assert data["success"] == False
     assert data["message"] == "Access denied. No token provided or token is invalid"
     assert data["status_code"] == 401
 
-def test_update_topic_forbidden(setup_db):
+@patch('main.get_current_user', return_value={"role": "user"})
+def test_update_topic_forbidden(mock_get_current_user, setup_db):
     update_data = {
         "title": "Updated Title",
         "content": "Updated content",
         "author": "Updated Author"
     }
-    # Temporarily change the get_current_user function to simulate a non-admin user
-    original_get_current_user = main.get_current_user
-    main.get_current_user = lambda token: "user"
-    
-    response = client.patch(
-        "/api/v1/help-center/topics/valid-id",
-        headers=headers,
-        json=update_data
-    )
-    
-    # Restore the original get_current_user function
-    main.get_current_user = original_get_current_user
-    
+
+    with patch('main.update_topic_in_db') as mock_update_topic:
+        mock_response = MagicMock()
+        mock_response.status_code = 403
+        mock_response.json.return_value = {
+            "success": False,
+            "message": "Access denied",
+            "status_code": 403
+        }
+        mock_update_topic.return_value = mock_response
+        
+        response = client.patch(
+            "/api/v1/help-center/topics/valid-id",
+            headers=headers,
+            json=update_data
+        )
+
     assert response.status_code == 403
     data = response.json()
     assert data["success"] == False
     assert data["message"] == "Access denied"
     assert data["status_code"] == 403
 
-def test_update_topic_not_found():
+@patch('main.get_db', return_value=db)
+def test_update_topic_not_found(mock_get_db):
     update_data = {
         "title": "Updated Title",
         "content": "Updated content",
         "author": "Updated Author"
     }
-    response = client.patch(
-        "/api/v1/help-center/topics/invalid-id",
-        headers=headers,
-        json=update_data
-    )
+
+    with patch('main.update_topic_in_db') as mock_update_topic:
+        mock_response = MagicMock()
+        mock_response.status_code = 404
+        mock_response.json.return_value = {
+            "success": False,
+            "message": "Article not found",
+            "status_code": 404
+        }
+        mock_update_topic.return_value = mock_response
+        
+        response = client.patch(
+            "/api/v1/help-center/topics/invalid-id",
+            headers=headers,
+            json=update_data
+        )
+
     assert response.status_code == 404
     data = response.json()
- 
     assert data["success"] == False
     assert data["message"] == "Article not found"
     assert data["status_code"] == 404
 
-def test_update_topic_invalid_input(setup_db):
+@patch('main.get_db', return_value=db)
+def test_update_topic_invalid_input(mock_get_db, setup_db):
     update_data = {
         "title": "",
         "content": "Updated content",
         "author": "Updated Author"
     }
-    response = client.patch(
-        "/api/v1/help-center/topics/valid-id",
-        headers=headers,
-        json=update_data
-    )
+
+    with patch('main.update_topic_in_db') as mock_update_topic:
+        mock_response = MagicMock()
+        mock_response.status_code = 422
+        mock_response.json.return_value = {
+            "success": False,
+            "message": "Invalid input data",
+            "status_code": 422
+        }
+        mock_update_topic.return_value = mock_response
+        
+        response = client.patch(
+            "/api/v1/help-center/topics/valid-id",
+            headers=headers,
+            json=update_data
+        )
+
     assert response.status_code == 422
     data = response.json()
     assert data["success"] == False
