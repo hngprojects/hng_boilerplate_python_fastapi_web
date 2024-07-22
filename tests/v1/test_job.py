@@ -67,7 +67,7 @@ def create_job(test_db, user_id):
         description="Test job description",
         location="Test location",
         salary="1000",
-        job_type='Test Job Type',
+        job_type="Test Job Type",
         company_name="Test Company Name",
     )
     test_db.add(job)
@@ -87,11 +87,19 @@ def test_get_job_by_id_success(test_db):
     # Assert the response
     assert response.status_code == 200
     assert response.json() == {
-        "id": job.id,
-        "title": job.title,
-        "description": job.description,
-        "location": job.location,
-        "salary": job.salary,
+        "statusCode": 200,
+        "message": "Job retrieval successful",
+        "data": {
+            "id": job.id,
+            "title": job.title,
+            "description": job.description,
+            "location": job.location,
+            "salary": job.salary,
+            "job_type ": job.job_type,
+            "company_name ": job.company_name,
+            "created_at ": job.created_at,
+            "updated_at ": job.updated_at,
+        },
     }
 
 
@@ -101,7 +109,7 @@ def test_get_job_by_id_not_found(test_db):
 
     # Assert the response
     assert response.status_code == 404
-    assert response.json() == {"detail": "Job not found"}
+    assert response.json() == {"detail": "not found"}
 
 
 if __name__ == "__main__":
