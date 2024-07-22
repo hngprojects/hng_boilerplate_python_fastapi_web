@@ -13,7 +13,8 @@ from api.db.database import get_db
 from api.utils.dependencies import get_current_user
 
 
-user = APIRouter(prefix='/api/v1/users', tags=['Users'])
+user = APIRouter(prefix='/users', tags=['Users'])
+
 
 @user.patch('/accounts/deactivate', status_code=200)
 async def deactivate_account(request: Request, schema: DeactivateUserSchema, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
