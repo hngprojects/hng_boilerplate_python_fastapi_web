@@ -34,9 +34,9 @@ async def custom_exception_handler(request: Request, exc: CustomException):
         }
     )
 
-newsletter = APIRouter(prefix='/pages', tags=['Newsletter'])
+router = APIRouter()
 
-@newsletter.post('/newsletter')
+@router.post('/api/v1/pages/newsletter', tags=['Newsletter'])
 async def sub_newsletter(request: EMAILSCHEMA, db: Session = Depends(get_db)):
     """
     Newsletter subscription endpoint
