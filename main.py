@@ -8,6 +8,9 @@ from starlette.requests import Request
 from api.db.database import Base, engine
 from api.v1.routes.auth import auth
 
+# Product route import
+from api.v1.routes.product_create import product_create
+
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
@@ -34,6 +37,10 @@ app.add_middleware(
 
 
 app.include_router(auth)
+
+# Product router
+app.include_router(product_create)
+
 # app.include_router(users, tags=["Users"])
 
 
