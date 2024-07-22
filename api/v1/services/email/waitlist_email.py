@@ -1,19 +1,8 @@
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
-from api.utils.settings import settings
-
-conf = ConnectionConfig(
-    MAIL_USERNAME=settings.MAIL_USERNAME,
-    MAIL_PASSWORD=settings.MAIL_PASSWORD,
-    MAIL_FROM=settings.MAIL_FROM,
-    MAIL_PORT=settings.MAIL_PORT,
-    MAIL_SERVER=settings.MAIL_SERVER,
-    MAIL_STARTTLS=False,
-    MAIL_SSL_TLS=True,
-    USE_CREDENTIALS=True
-)
+from pydantic import EmailStr
+from api.core.dependencies.email import mail_service
 
 
-async def send_confirmation_email(email: str, full_name: str):
+async def send_confirmation_email(email: EmailStr, full_name: str):
     html = f"""
     <html>
     <body>
@@ -24,17 +13,4 @@ async def send_confirmation_email(email: str, full_name: str):
     </body>
     </html>
     """
-
-    message = MessageSchema(
-        subject="Welcome to our Waitlist!",
-        recipients=[email],
-        body=html,
-        subtype="html"
-    )
-
-    fm = FastMail(conf)
-    try:
-        await fm.send_message(message)
-        print("Email sent successfully")
-    except Exception as e:
-        print(f"Failed to send email: {e}")
+    mail_service.send_mail(email, "Welcome to our Waitlist!", html)
