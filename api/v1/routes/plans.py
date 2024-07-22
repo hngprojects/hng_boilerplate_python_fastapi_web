@@ -7,9 +7,9 @@ from api.db.database import get_db
 from api.utils.dependencies import get_current_admin
 from api.v1.models.user import User
 
-plans = APIRouter(prefix="/api/v1", tags=["Plans"])
+plans = APIRouter(prefix="/api/v1/plans", tags=["Plans"])
 
-@plans.post("/plans", response_model=SubscriptionPlanResponse, status_code=status.HTTP_201_CREATED)
+@plans.post("/", response_model=SubscriptionPlanResponse, status_code=status.HTTP_201_CREATED)
 def create_subscription_plan(plan: CreateSubscriptionPlan, db: Annotated[Session, Depends(get_db)], current_admin: Annotated[User, Depends(get_current_admin)]):
     # Check to see if the plan already exist
     db_plan = db.query(SubscriptionPlan).filter(SubscriptionPlan.name == plan.name).first()
