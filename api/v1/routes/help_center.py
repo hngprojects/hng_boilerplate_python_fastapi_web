@@ -20,7 +20,6 @@ url_prefix = "/api/v1/topics/search"
 @router.get(
     url_prefix,
     response_model=SearchResponse,
-    dependencies=[Depends(RateLimiter(times=2, seconds=10))],
 )
 async def search_articles(
     title: Annotated[str | None, Query(min_length=1)] = None, db: Session = Depends(get_db)

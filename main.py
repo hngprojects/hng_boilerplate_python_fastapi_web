@@ -1,17 +1,15 @@
 import uvicorn
-import redis.asyncio as redis
 from contextlib import asynccontextmanager
 from typing import Union
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
-from api.utils.settings import settings
-from api.utils.exceptions import rate_limit_callback, http_exception_handler
-
 from fastapi_limiter import FastAPILimiter
 
 from api.db.database import Base, engine
+from api.utils.middlewares import RateLimitMiddleware
+from api.utils.exceptions import http_exception_handler
 from api.v1.routes.help_center import router as help_center
 from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes import api_version_one
@@ -23,11 +21,6 @@ Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis_connection = redis.from_url(settings.REDIS_URL, encoding="utf8")
-    await FastAPILimiter.init(
-        redis=redis_connection,
-        http_callback=rate_limit_callback,
-    )
     yield
 
 
@@ -39,6 +32,10 @@ origins = [
     "http://localhost:3000",
     "http://localhost:3001",
 ]
+
+
+# Add the rate limiting middleware with custom RATE_LIMIT and TIME_WINDOW
+app.add_middleware(RateLimitMiddleware, rate_limit=1, time_window=1)
 
 app.add_middleware(
     CORSMiddleware,
