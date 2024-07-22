@@ -15,42 +15,51 @@ def db():
     yield db_session
     db_session.close()
 
-# Create a test admin user
 def create_test_admin_user(db: Session):
     admin_user = User(
         username="testadmin",
         email="testadmin@example.com",
         password=hash_password("testpassword"),
         is_active=True,
-        is_admin=True  
+        is_admin=True
     )
     db.add(admin_user)
     db.commit()
     db.refresh(admin_user)
     return admin_user
 
-# Generate token for the test admin user
-def get_admin_token():
+def create_test_user(db: Session):
+    test_user = User(
+        username="testuser",
+        email="testuser@email.com",
+        password=hash_password("userpassword"),
+        is_active=True,
+        is_admin=False
+    )
+    db.add(test_user)
+    db.commit()
+    db.refresh(test_user)
+    return test_user
+
+def get_token(username: str, password: str):
     response = client.post(
         "/auth/login",
-        data={
-            "username": "testadmin",
-            "password": "testpassword"
-        }
+        data={"username": username, "password": password}
     )
     assert response.status_code == 200
     token = response.json()["access_token"]
     return token
 
-
 @pytest.fixture(scope="module", autouse=True)
 def setup_admin_user(db: Session):
     create_test_admin_user(db)
 
-# Test creating a subscription plan
+@pytest.fixture(scope="module", autouse=True)
+def setup_test_user(db: Session):
+    create_test_user(db)
+
 def test_create_subscription_plan(db: Session):
-    token = get_admin_token()
-    
+    token = get_token("testadmin", "testpassword")
     response = client.post(
         "/api/v1/plans",
         headers={"Authorization": f"Bearer {token}"},
@@ -64,11 +73,9 @@ def test_create_subscription_plan(db: Session):
     )
     assert response.status_code == 201
 
-# Test creating a subscription plan with a duplicate name
 def test_create_subscription_plan_duplicate_name(db: Session):
-    token = get_admin_token()
+    token = get_token("testadmin", "testpassword")
     
-    # Create the first plan
     response = client.post(
         "/api/v1/plans",
         headers={"Authorization": f"Bearer {token}"},
@@ -82,7 +89,6 @@ def test_create_subscription_plan_duplicate_name(db: Session):
     )
     assert response.status_code == 201
 
-    # Try to create a plan with the same name
     response = client.post(
         "/api/v1/plans",
         headers={"Authorization": f"Bearer {token}"},
@@ -97,43 +103,11 @@ def test_create_subscription_plan_duplicate_name(db: Session):
     assert response.status_code == 400
     assert response.json() == {"detail": "Subscription plan already exists."}
 
-# Create a test user
-def create_test_user(db: Session):
-    test_user = User(
-        username="testuser",
-        email="testuser@email.com",
-        password=hash_password("userpassword"),
-        is_active=True,
-        is_admin=False
-    )
-    db.add(test_user)
-    db.commit()
-    db.refresh(test_user)
-    return test_user
-
-# Generate token for the test user
-def get_user_token():
-    response = client.post(
-        "/auth/login",
-        data={
-            "username": "testuser",
-            "password": "userpassword"
-        }
-    )
-    assert response.status_code == 200
-    user_token = response.json()["access_token"]
-    return user_token
-
-
-@pytest.fixture(scope="module", autouse=True)
-def setup_test_user(db: Session):
-    create_test_user(db)
-    
-# Test unauthorized plan creation
 def test_create_subscription_plan_unauthorized(db: Session):
+    token = get_token("testuser", "userpassword")
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer {user_token}"},
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Unauthorized Plan",
             "description": "This should not be created.",
