@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from decouple import config
 from fastapi.testclient import TestClient
 from main import app
 from api.v1.models.base import Base
@@ -12,9 +13,11 @@ from api.utils.dependencies import get_current_admin
 import pytest
 
 # Setup test database
-SQLALCHEMY_DATABASE_URL = "postgresql+psycopg2://test_user:test_password@localhost/test_db"
+SQLALCHEMY_DATABASE_URL = config('DB_URL')
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base.metadata.create_all(bind=engine)
 
 # Override get_db dependency for testing
 def override_get_db():
