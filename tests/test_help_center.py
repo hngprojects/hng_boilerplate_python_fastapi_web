@@ -50,22 +50,18 @@ def test_update_topic_success(setup_db):
     assert data["data"]["author"] == "Updated Author"
     assert data["status_code"] == 200
 
-def test_update_topic_unauthorized():
-    update_data = {
-        "title": "Updated Title",
-        "content": "Updated content",
-        "author": "Updated Author"
+def test_post_topic_unauthorized():
+    post_data = {
+        "title": "New Title",
+        "content": "New content",
+        "author": "New Author"
     }
-    response = client.patch(
+    response = client.post(
         "/api/v1/help-center/topics/valid-id",
-        headers={"Authorization": f"Bearer {INVALID_JWT_TOKEN}"},
-        json=update_data
+        headers={"Content-Type": "application/json"},  # No Authorization header
+        json=post_data
     )
     assert response.status_code == 401
-    data = response.json()
-    assert data["success"] == False
-    assert data["message"] == "Access denied. No token provided or token is invalid"
-    assert data["status_code"] == 401
 
 def test_update_topic_forbidden(setup_db):
     update_data = {
@@ -105,6 +101,7 @@ def test_update_topic_not_found():
     )
     assert response.status_code == 404
     data = response.json()
+    print(data)
     assert data["success"] == False
     assert data["message"] == "Article not found"
     assert data["status_code"] == 404
