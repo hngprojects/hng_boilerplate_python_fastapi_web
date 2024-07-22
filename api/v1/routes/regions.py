@@ -56,7 +56,7 @@ def create_region(
     status_code=status.HTTP_200_OK,
 )
 async def get_regions(
-    db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)
+    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     regions = db.query(Region).all()
     return regions
