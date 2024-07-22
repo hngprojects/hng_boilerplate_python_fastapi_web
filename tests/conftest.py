@@ -6,8 +6,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import warnings
 
-# DB_URL = os.getenv("DB_URL")
-
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 # Append the project root directory to the PYTHONPATH
