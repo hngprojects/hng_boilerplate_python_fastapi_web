@@ -18,13 +18,13 @@ from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
 from api.db.database import get_db
-from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
-from api.utils.dependencies import get_current_admin, get_current_user
+from api.utils.auth import authenticate_user, create_access_token,hash_password
+from api.utils.dependencies import get_current_admin
 from api.v1.models.org import Organization
 from api.v1.models.product import Product
 
 
-from fastapi import APIRouter,Depends,status,HTTPException,Response
+from fastapi import APIRouter,Depends,status,HTTPException
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
 from api.v1.schemas import schemas
