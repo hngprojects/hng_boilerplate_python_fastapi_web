@@ -1,7 +1,10 @@
+from api.db.database import get_db
 import pytest
 from fastapi.testclient import TestClient
-from main import app, db
+from ..main import app
 
+
+db = get_db()
 client = TestClient(app)
 
 # Mock JWT token
