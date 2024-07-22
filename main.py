@@ -19,6 +19,7 @@ from api.v1.routes.roles import role
 from api.v1.routes import api_version_one
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
+from api.v1.routes.plans import plans
 
 Base.metadata.create_all(bind=engine)
 
@@ -52,6 +53,7 @@ app.include_router(testimonial, tags=["testimonial"])
 app.include_router(api_version_one)
 
 app.include_router(user)
+app.include_router(plans)
 # app.include_router(users, tags=["Users"])
 
 
