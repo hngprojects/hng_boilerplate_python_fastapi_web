@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
+from fastapi import FastAPI, Depends, HTTPException, status, APIRouter, Header
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -16,12 +16,14 @@ from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
-from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
+from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate, ResetPasswordRequest, ResetPasswordTokenData
 from api.db.database import get_db
 from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
 from api.utils.dependencies import get_current_admin, get_current_user
-
-
+from api.utils.json_response import JsonResponseDict
+from api.utils.config import SECRET_KEY, ALGORITHM
+from jose import JWTError
+import jwt
 from api.v1.models.org import Organization
 
 from api.v1.models.product import Product
@@ -110,3 +112,37 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
 
+
+
+@auth.post("/reset-password")
+async def password_reset(request: ResetPasswordRequest, x_reset_token: Annotated[str | None, Header()] = None, db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    if not x_reset_token:
+        raise credentials_exception    
+    try:
+        payload = jwt.decode(x_reset_token, SECRET_KEY, algorithms=[ALGORITHM])
+        email = payload.get("email", None)
+        if email is None:
+            raise credentials_exception
+        token_data = ResetPasswordTokenData(email=email)
+    except JWTError:
+        return JsonResponseDict(
+            message="Invalid input or token",
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    user = db.query(User).filter(User.email == token_data.email).first()
+    if user is None:
+        raise credentials_exception
+    password_hashed = hash_password(request.new_password)
+    user.password = password_hashed
+    db.commit()
+    db.refresh(user)
+    db.close()
+    return JsonResponseDict(
+        message="Password updated successfully.",
+        status_code=status.HTTP_200_OK
+    ) 

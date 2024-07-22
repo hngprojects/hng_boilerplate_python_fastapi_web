@@ -46,3 +46,20 @@ class ErrorResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+    
+
+class ResetPasswordRequest(BaseModel):
+    new_password: str
+    
+    @field_validator('new_password')
+    def password_validator(cls, value):
+        if len(value) < 8:
+            raise ValueError('Password must be at least 3 characters long')
+        if not re.search(r'[a-z]', value):
+            raise ValueError('Password must contain at least one lowercase letter')
+        if not re.search(r'[0-9]', value):
+            raise ValueError('Password must contain at least one digit')
+        return value
+    
+class ResetPasswordTokenData(BaseModel):
+    email: Optional[str] = None

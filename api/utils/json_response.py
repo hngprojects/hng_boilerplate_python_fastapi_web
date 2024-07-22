@@ -15,6 +15,7 @@ class JsonResponseDict(JSONResponse):
         self.message = message
         self.data = data
         self.error = error
+        self.status_code = status_code
         super().__init__(content=jsonable_encoder(self.response()), status_code=status_code)
 
     def __repr__(self):
@@ -40,13 +41,13 @@ class JsonResponseDict(JSONResponse):
         if self.status_code >= 300:
             return {
                 "message": self.message,
-                "data": self.data,
+                "error": self.error,
                 "status_code": self.status_code
             }
         else:
             return {
                 "message": self.message,
-                "error": self.error,
+                "data": self.data,
                 "status_code": self.status_code
             }
 
