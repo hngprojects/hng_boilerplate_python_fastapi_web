@@ -4,16 +4,16 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from api.v1.models.blog import Blog
 from api.db.database import get_db
+from api.utils.json_response import JsonResponseDict  # Import JsonResponseDict
 
 blog = APIRouter(prefix="/api/v1/blogs", tags=["Blog"])
 
-
-@blog.get("", status_code=status.HTTP_200_OK)
+@blog.get("", response_model=dict, status_code=status.HTTP_200_OK)
 def list_blog(
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     db: Session = Depends(get_db),
-) -> dict[str, Any]:
+) -> JsonResponseDict:  # Use JsonResponseDict as the return type
     try:
         offset = (page - 1) * page_size
         query = (
@@ -44,20 +44,26 @@ def list_blog(
             }
             results.append(blog_dict)
 
-        return {
-            "count": total_count,
-            "next": next_page,
-            "previous": prev_page,
-            "results": results,
-        }
+        return JsonResponseDict(
+            message="Blogs retrieved successfully",
+            data={
+                "count": total_count,
+                "next": next_page,
+                "previous": prev_page,
+                "results": results,
+            },
+            status_code=status.HTTP_200_OK
+        )
 
     except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Database error occurred.",
+        return JsonResponseDict(
+            message="Database error occurred.",
+            error=str(e),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error.",
+        return JsonResponseDict(
+            message="Internal server error.",
+            error=str(e),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

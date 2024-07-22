@@ -47,11 +47,11 @@ def test_successful_retrieval_of_paginated_blog_posts(db_session_mock):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["count"] == 2
-    assert data["next"] == "/api/v1/blogs?page=2&page_size=1"
-    assert data["previous"] is None
-    assert len(data["results"]) == 1
-    assert data["results"][0]["title"] == "My First Blog"
+    assert data["data"]["count"] == 2
+    assert data["data"]["next"] == "/api/v1/blogs?page=2&page_size=1"
+    assert data["data"]["previous"] is None
+    assert len(data["data"]["results"]) == 1
+    assert data["data"]["results"][0]["title"] == "My First Blog"
 
 
 def test_no_blog_posts_present(db_session_mock):
@@ -62,10 +62,10 @@ def test_no_blog_posts_present(db_session_mock):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["count"] == 0
-    assert data["next"] is None
-    assert data["previous"] is None
-    assert len(data["results"]) == 0
+    assert data["data"]["count"] == 0
+    assert data["data"]["next"] is None
+    assert data["data"]["previous"] is None
+    assert len(data["data"]["results"]) == 0
 
 
 def test_internal_server_error(mocker):
@@ -77,7 +77,7 @@ def test_internal_server_error(mocker):
 
     assert response.status_code == 500
     data = response.json()
-    assert data["detail"] == "Internal server error."
+    assert data["message"] == "Internal server error."
 
 
 def test_invalid_page_or_page_size_parameters():
@@ -99,6 +99,7 @@ def test_invalid_method():
 
     assert response.status_code == 405
     data = response.json()
+    assert "detail" in data
     assert data["detail"] == "Method Not Allowed"
 
 
@@ -119,7 +120,7 @@ def test_soft_deleted_blog_post_access_control(db_session_mock):
 
     assert response.status_code == 200
     data = response.json()
-    assert data["count"] == 0
-    assert data["next"] is None
-    assert data["previous"] is None
-    assert len(data["results"]) == 0
+    assert data["data"]["count"] == 0
+    assert data["data"]["next"] is None
+    assert data["data"]["previous"] is None
+    assert len(data["data"]["results"]) == 0
