@@ -1,6 +1,5 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
 from datetime import datetime
 from main import app
 from api.db.database import get_db, get_db_engine, Base
