@@ -22,11 +22,11 @@ from typing import Annotated
 from api.utils.dependencies import get_current_user
 
 
-Base.metadata.create_all(bind=engine)
+
 
 db_dependency = Annotated[Session , Depends(get_db)]
 
-testimonial_router = APIRouter(prefix="/testimonials", tags=["testimonials"])
+testimonial_router = APIRouter(prefix="/api/v1/testimonials", tags=["testimonials"])
 
 class CustomException(HTTPException):
     """
@@ -41,7 +41,7 @@ class CustomException(HTTPException):
 async def custom_exception_handler(request: Request, exc: CustomException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={
+        message={
             "message": exc.message,
             "success": exc.success,
             "status_code": exc.status_code

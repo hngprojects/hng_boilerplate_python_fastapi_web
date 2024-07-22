@@ -11,6 +11,7 @@ from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
 )
+from api.v1.routes.testimonials import testimonial_router
 
 from api.v1.routes.auth import auth
 from api.v1.routes.user import user
@@ -42,6 +43,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(auth)
 app.include_router(user)
+app.include_router(testimonial_router)
 # app.include_router(users, tags=["Users"])
 
 
