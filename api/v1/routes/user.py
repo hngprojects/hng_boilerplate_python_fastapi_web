@@ -8,12 +8,15 @@ from api.utils.auth import create_access_token
 
 from api.utils.config import SECRET_KEY, ALGORITHM
 from ..models.user import User
-from api.v1.schemas.user import DeactivateUserSchema
+from api.v1.schemas.user import DeactivateUserSchema, SuccessResponse, RecoveryEmail
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user
 
 
 user = APIRouter(prefix='/api/v1/users', tags=['Users'])
+
+def get_user_by_current(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(User).filter(User.id == current_user.id).first()
 
 @user.patch('/accounts/deactivate', status_code=200)
 async def deactivate_account(request: Request, schema: DeactivateUserSchema, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
@@ -79,3 +82,22 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
     db.commit()
 
     return {"status_code": 200, "message": "Account reactivated successfully. Check email for confirmation"}
+
+
+@user.post('/accounts/add-recovery-email', response_model=SuccessResponse, status_code=status.HTTP_200_OK)
+def add_recovery_email(data: RecoveryEmail, db: Session = Depends(get_db), current_user: User= Depends(get_current_user)):
+    user = get_user_by_current(db, current_user)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    if user.recovery_email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Recovery email already exists"
+        )
+
+    user.recovery_email = data.email
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return SuccessResponse(message="Recovery Email successfully added", status_code=200)

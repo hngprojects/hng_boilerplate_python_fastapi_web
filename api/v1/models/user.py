@@ -34,6 +34,9 @@ class User(BaseModel, Base):
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
 
+    recovery_email = Column(String(100), nullable=True)
+
+
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
