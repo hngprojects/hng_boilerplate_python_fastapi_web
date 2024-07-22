@@ -2,11 +2,11 @@ import datetime
 from uuid_extensions import uuid7
 from api.db.database import create_database, get_db
 from api.utils.auth import hash_password
+from api.v1.models.base import Base
 from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
-from api.v1.models.base import Base
 from api.v1.models.subscription import Subscription
 from api.v1.models.blog import Blog
 from api.v1.models.job import Job

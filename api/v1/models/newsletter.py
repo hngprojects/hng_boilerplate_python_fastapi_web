@@ -1,7 +1,7 @@
 from sqlalchemy import Column, String, DateTime
 from uuid import uuid4
 from datetime import datetime
-from api.db.database import Base
+from api.v1.models.base import Base
 
 
 class NEWSLETTER(Base):

@@ -15,13 +15,14 @@ from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from datetime import datetime, timedelta
+from api.utils.auth import hash_password
 
 create_database()
 db = next(get_db())
 
-user_1 = User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe")
-user_2 = User(email="test1@mail", username="testuser1", password="testpass1", first_name="Jane", last_name="Boyle")
-user_3 = User(email="test2@mail", username="testuser2", password="testpass2", first_name="Bob", last_name="Dwayne")
+user_1 = User(email="test@mail", username="testuser", password=hash_password("testpass"), first_name="John", last_name="Doe")
+user_2 = User(email="test1@mail", username="testuser1", password=hash_password("testpass1"), first_name="Jane", last_name="Boyle")
+user_3 = User(email="test2@mail", username="testuser2", password=hash_password("testpass2"), first_name="Bob", last_name="Dwayne")
 
 db.add_all([user_1, user_2, user_3])
 
