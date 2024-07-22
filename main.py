@@ -18,7 +18,6 @@ from api.v1.routes.newsletter_router import (
     custom_exception_handler
 )
 
-from api.v1.routes.auth import auth
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
 
@@ -48,10 +47,6 @@ app.add_middleware(
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.include_router(newsletter, tags=["Newsletter"])
 
-app.include_router(auth)
-app.include_router(user)
-# app.include_router(users, tags=["Users"])
-
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
@@ -61,9 +56,9 @@ async def get_root(request: Request) -> dict:
     }
 
 
-from api.v1.routes import preferences, users,org,auth
+from api.v1.routes import preferences, users,org,login
 
-app.include_router(auth.router)
+app.include_router(login.router)
 app.include_router(users.router, tags=["users"])
 app.include_router(org.router)
 app.include_router(preferences.router, tags=["preferences"])
