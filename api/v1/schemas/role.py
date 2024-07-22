@@ -9,3 +9,5 @@ class RoleCreate(BaseModel):
 class ResponseModel(BaseModel):
     message: str
     status_code: int
+    
+
