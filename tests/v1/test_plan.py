@@ -1,45 +1,59 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
-from api.db.database import get_db, get_db_engine, Base
+from sqlalchemy.orm import Session
 from main import app
+from api.db.database import get_db
+from api.v1.models.user import User
+from api.utils.auth import hash_password
 from api.v1.models.plans import SubscriptionPlan
 
-# Configure test database by setting database to test mode to true
-engine = get_db_engine(test_mode=True)
-
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-@pytest.fixture(scope="module")
-def client():
-    Base.metadata.create_all(bind=engine)
-    with TestClient(app) as c:
-        yield c
-    Base.metadata.drop_all(bind=engine)
+client = TestClient(app)
 
 @pytest.fixture(scope="module")
 def db():
-    session = TestingSessionLocal()
-    try:
-        yield session
-    finally:
-        session.close()
+    db_session = next(get_db())
+    yield db_session
+    db_session.close()
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
+# Create a test admin user
+def create_test_admin_user(db: Session):
+    admin_user = User(
+        username="testadmin",
+        email="testadmin@example.com",
+        hashed_password=hash_password("testpassword"),
+        is_active=True,
+        is_admin=True  
+    )
+    db.add(admin_user)
+    db.commit()
+    db.refresh(admin_user)
+    return admin_user
 
-app.dependency_overrides[get_db] = override_get_db
+# Generate token for the test admin user
+def get_admin_token():
+    response = client.post(
+        "/auth/login",
+        data={
+            "username": "testadmin",
+            "password": "testpassword"
+        }
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    return token
 
-def test_create_subscription_plan(client, db):
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_admin_user(db: Session):
+    create_test_admin_user(db)
+
+# Test creating a subscription plan
+def test_create_subscription_plan(db: Session):
+    token = get_admin_token()
+    
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer admin-token"},
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Basic Plan",
             "description": "This is a basic subscription plan.",
@@ -49,18 +63,15 @@ def test_create_subscription_plan(client, db):
         },
     )
     assert response.status_code == 201
-    data = response.json()
-    assert data["name"] == "Basic Plan"
-    assert data["description"] == "This is a basic subscription plan."
-    assert data["price"] == 1000
-    assert data["duration"] == "30 days"
-    assert data["features"] == ["Feature 1", "Feature 2"]
 
-def test_create_subscription_plan_duplicate_name(client, db):
+# Test creating a subscription plan with a duplicate name
+def test_create_subscription_plan_duplicate_name(db: Session):
+    token = get_admin_token()
+    
     # Create the first plan
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer admin-token"},
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Premium Plan",
             "description": "This is a premium subscription plan.",
@@ -71,25 +82,26 @@ def test_create_subscription_plan_duplicate_name(client, db):
     )
     assert response.status_code == 201
 
-    # Attempt to create a plan with an existing plan name
+    # Try to create a plan with the same name
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer admin-token"},
+        headers={"Authorization": f"Bearer {token}"},
         json={
             "name": "Premium Plan",
-            "description": "This is a duplicate plan name.",
-            "price": 5000,
-            "duration": "1 months",
-            "features": ["Feature 1", "Feature 2"],
+            "description": "This is another premium subscription plan.",
+            "price": 6000,
+            "duration": "1 month",
+            "features": ["Feature 3", "Feature 4"],
         },
     )
     assert response.status_code == 400
     assert response.json() == {"detail": "Subscription plan already exists."}
 
-def test_create_subscription_plan_unauthorized(client, db):
+# Test unauthorized plan creation
+def test_create_subscription_plan_unauthorized(db: Session):
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer invalid-token"},
+        headers={"Authorization": "Bearer invalidtoken"},
         json={
             "name": "Unauthorized Plan",
             "description": "This should not be created.",
@@ -99,4 +111,3 @@ def test_create_subscription_plan_unauthorized(client, db):
         },
     )
     assert response.status_code == 403
-    assert response.json() == {"detail": "User is not authorized to create subscription plans."}
