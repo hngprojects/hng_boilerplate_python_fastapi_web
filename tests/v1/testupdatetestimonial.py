@@ -7,24 +7,22 @@ from api.db.database import get_db, get_db_engine, Base
 
 client = TestClient(app)
 
-# Mock the database dependency
-@pytest.fixture
-def db_session_mock(mocker):
-    db_session = mocker.MagicMock()
-    yield db_session
+# 
 
-# Override the dependency with the mock
-@pytest.fixture(autouse=True)
-def override_get_db(mocker, db_session_mock):
-    mocker.patch("app.routes.testimonial.get_db", return_value=db_session_mock)
-
-def test_update_testimonial_with_id(db_session_mock, testimonial_id):
-
-
+def test_update_testimonial_with_id(testimonial_id):
+    login =  client.post('/auth/login', data={
+        "username": "testuser",
+        "password": "Testpassword@123"
+    })
+    access_token = login.json()['access_token']
+  
+    headers = {
+        'Authorization' : f'Bearer {access_token}'
+    }
     testimonial_data = {
         "content_data" : "I love testimonials"
     }
-    response = client.put(f'/api/v1/testimonials/{testimonial_id}', json=testimonial_data)
+    response = client.put(f'/api/v1/testimonials/{testimonial_id}', json=testimonial_data, headers=headers)
 
     assert response.status_code == 200
     assert response.json() == {
@@ -36,6 +34,32 @@ def test_update_testimonial_with_id(db_session_mock, testimonial_id):
                'updated_at' : 'cureent_time'
           }
     }
+
+
+    not_owner =  client.post('/auth/login', data={
+        "username": "anothertestuser",
+        "password": "anotherTestpassword@123"
+    })
+    
+    headers = {
+        'Authorization' : f'Bearer {access_token}'
+    }
+    testimonial_data = {
+        "content_data" : "I love testimonials"
+    }
+
+
+
+    not_authorized = client.put(f'/api/v1/testimonials/{testimonial_id}', json=testimonial_data, headers=headers)
+
+    assert response.status_code == 401
+    assert response.json() == {
+        "status":  "Forbidden",
+        "message":  "Only owners of testimonial can update",
+        "status_code": 403
+    }
+
+    
  
 
 
