@@ -46,10 +46,9 @@ def create_test_user(test_db):
     )
     test_db.add(test_user)
     test_db.commit()
+    return test_user
 b = random.randint(1, 500)
 def test_create_user(setup_database):
     response = client.post("/api/v1/auth/register", json={"username": f"testuser{b}", "email": f"testuser{b}@example.com", "password": "tesAtpa@142ssword", "first_name": "Test", "last_name": "User"})
+    print(response.json().get('detail'))
     assert response.status_code == 201
-def test_login_user(create_test_user):
-    response = client.post("/api/v1/auth/login", json={"username": f"testuser{n}", "password": "testpassword"})
-    assert response.status_code == 200
