@@ -113,6 +113,26 @@ def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
 
 
+def reset_password_request(password, token, db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    email = payload.get("email", None)
+    if email is None:
+        raise credentials_exception
+    token_data = ResetPasswordTokenData(email=email)
+    user = db.query(User).filter(User.email == token_data.email).first()
+    if user is None:
+        raise credentials_exception
+    password_hashed = hash_password(password)
+    user.password = password_hashed
+    db.commit()
+    db.refresh(user)
+    db.close()
+    return True
 
 @auth.post("/reset-password")
 async def password_reset(request: ResetPasswordRequest, x_reset_token: Annotated[str | None, Header()] = None, db: Session = Depends(get_db)):
@@ -124,24 +144,15 @@ async def password_reset(request: ResetPasswordRequest, x_reset_token: Annotated
     if not x_reset_token:
         raise credentials_exception    
     try:
-        payload = jwt.decode(x_reset_token, SECRET_KEY, algorithms=[ALGORITHM])
-        email = payload.get("email", None)
-        if email is None:
-            raise credentials_exception
-        token_data = ResetPasswordTokenData(email=email)
+        reset_password_request(
+            password=request.new_password,
+            token=x_reset_token
+        )
     except JWTError:
         return JsonResponseDict(
             message="Invalid input or token",
             status_code=status.HTTP_400_BAD_REQUEST
         )
-    user = db.query(User).filter(User.email == token_data.email).first()
-    if user is None:
-        raise credentials_exception
-    password_hashed = hash_password(request.new_password)
-    user.password = password_hashed
-    db.commit()
-    db.refresh(user)
-    db.close()
     return JsonResponseDict(
         message="Password updated successfully.",
         status_code=status.HTTP_200_OK
