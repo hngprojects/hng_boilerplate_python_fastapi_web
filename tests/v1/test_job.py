@@ -1,36 +1,29 @@
-import os
-# import sys
+# import sys, os
+
 
 # sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-from datetime import timedelta
+
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from api.db.database import Base, get_db
+from decouple import config
 from main import app
-
-from sqlalchemy.ext.declarative import declarative_base
+from api.db.database import Base, get_db
+from api.utils.auth import hash_password
 from api.v1.models.user import User
+from api.v1.models.base import Base
 from api.v1.models.job import Job
-from dotenv import load_dotenv
-from api.utils.auth import create_access_token, hash_password
-import pytest
 
+SQLALCHEMY_DATABASE_URL = config("DB_URL")
 
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL_TEST")
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
 
 
-@pytest.fixture(scope="function")
-def session():
-    Base.metadata.drop_all(bind=engine)
-    Base.metadata.create_all(bind=engine)
+def override_get_db():
     db = TestingSessionLocal()
     try:
         yield db
@@ -38,61 +31,56 @@ def session():
         db.close()
 
 
-@pytest.fixture(scope="function")
-def client(session):
-    def override_get_db():
-        try:
-            yield session
-        finally:
-            session.close()
+app.dependency_overrides[get_db] = override_get_db
 
-    app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
+client = TestClient(app)
 
 
-# client = TestClient(app)
+@pytest.fixture(scope="module")
+def test_db():
+    db = TestingSessionLocal()
+    yield db
+    db.close()
 
 
-@pytest.fixture(scope="function")
-def setup(request, session):
-    print("\nSetting up resources...")
-    db = session
-    hashed_password = hash_password("adminpassword")
+def create_user(test_db):
+
+    # Add user to database
     user = User(
-        username="admin",
-        email="admin@example.com",
-        password=hashed_password,
-        first_name="Admin",
+        username="testuser",
+        email="testuser@gmail.com",
+        password=hash_password("Testpassword@123"),
+        first_name="Test",
         last_name="User",
         is_active=True,
+        is_admin=False,
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
 
-    token_expires = timedelta(minutes=30)
-    token = create_access_token(
-        data={"username": user.username}, expires_delta=token_expires
+
+def test_create_job_success(test_db):
+    user = User(
+        username="testuser1",
+        email="testuser1@gmail.com",
+        password=hash_password("Testpassword@123"),
+        first_name="Test",
+        last_name="User",
+        is_active=False,
+        is_admin=False,
+    )
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
+
+    login = client.post(
+        "/auth/login", data={"username": "testuser1", "password": "Testpassword@123"}
     )
 
-    def finalizer():
-        db.query(Job).delete()
-        db.query(User).delete()
-        db.commit()
-        db.close()
-        # Clean up any resources if needed
 
-    # Register the finalizer to ensure cleanup
-    request.addfinalizer(finalizer)
-
-
-    return {
-        "token": token,
-    }
-
-
-def test_create_job(client: TestClient, setup: dict[str, str]):
-    headers = {"authorization": f"Bearer {setup['token']}"}
+    access_token = login.json()["access_token"]
+    headers = {"authorization": f"Bearer {access_token}"}
 
     data = {
         "title": "first job",
@@ -103,6 +91,76 @@ def test_create_job(client: TestClient, setup: dict[str, str]):
         "company_name": "Dev endgine technology",
     }
 
+
     response = client.post("/api/v1/jobs", headers=headers, json=data)
 
+    # clean up the database
+
+    test_db.query(Job).delete()
+    test_db.query(User).delete()
+    test_db.commit()
+    test_db.close()
+
     assert response.status_code == 201
+def test_create_job_bad_request(test_db):
+    user = User(
+        username="testuser1",
+        email="testuser1@gmail.com",
+        password=hash_password("Testpassword@123"),
+        first_name="Test",
+        last_name="User",
+        is_active=False,
+        is_admin=False,
+    )
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
+
+    login = client.post(
+        "/auth/login", data={"username": "testuser1", "password": "Testpassword@123"}
+    )
+
+
+    access_token = login.json()["access_token"]
+    headers = {"authorization": f"Bearer {access_token}"}
+
+    data = {
+        "location": "Sokoto",
+        "job_type": "Frontend developer",
+        "salary": 50000,
+        "company_name": "Dev endgine technology",
+    }
+
+
+    response = client.post("/api/v1/jobs", headers=headers, json=data)
+
+    # clean up the database
+
+    test_db.query(Job).delete()
+    test_db.query(User).delete()
+    test_db.commit()
+    test_db.close()
+
+    assert response.status_code == 422
+
+def test_create_job_by_unauthenticated_user(test_db):
+    data = {
+        "title": "first job",
+        "description": "This is my first job",
+        "location": "Sokoto",
+        "job_type": "Frontend developer",
+        "salary": 50000,
+        "company_name": "Dev endgine technology",
+    }
+
+
+    response = client.post("/api/v1/jobs", json=data)
+
+    # clean up the database
+
+    test_db.query(Job).delete()
+    test_db.query(User).delete()
+    test_db.commit()
+    test_db.close()
+
+    assert response.status_code == 401
