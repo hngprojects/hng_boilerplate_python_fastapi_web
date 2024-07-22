@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 import pytest
 from unittest.mock import patch, MagicMock
 from ..main import app
-import main
+
 
 # Initialize TestClient
 client = TestClient(app)
@@ -34,7 +34,7 @@ def setup_db():
     yield
     db.clear()
 
-@patch('main.get_db', return_value=db)
+@patch('test.database.get_db', return_value=db)
 def test_update_topic_success(mock_get_db, setup_db):
     update_data = {
         "title": "Updated Title",
