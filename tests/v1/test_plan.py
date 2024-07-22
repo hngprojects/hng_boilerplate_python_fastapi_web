@@ -121,8 +121,8 @@ def get_user_token():
         }
     )
     assert response.status_code == 200
-    token = response.json()["access_token"]
-    return token
+    user_token = response.json()["access_token"]
+    return user_token
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -133,7 +133,7 @@ def setup_test_user(db: Session):
 def test_create_subscription_plan_unauthorized(db: Session):
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer {token}"},
+        headers={"Authorization": "Bearer {user_token}"},
         json={
             "name": "Unauthorized Plan",
             "description": "This should not be created.",
