@@ -39,7 +39,7 @@ class JsonResponseDict(JSONResponse):
     def response(self):
         """return a json response dictionary"""
         print(f"response: {format(self)}")
-        if self.status_code <= 300:
+        if self.status_code < 300:
             return {
                 "message": self.message,
                 "data": self.data,
