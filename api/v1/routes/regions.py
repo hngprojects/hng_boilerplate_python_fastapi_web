@@ -58,5 +58,11 @@ def create_region(
 async def get_regions(
     db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
-    regions = db.query(Region).all()
-    return regions
+    try:
+        regions = db.query(Region).all()
+        return regions
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An unexpected error occurred: " + str(e),
+        )
