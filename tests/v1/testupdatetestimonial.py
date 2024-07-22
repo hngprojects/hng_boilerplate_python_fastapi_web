@@ -2,8 +2,8 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 from datetime import datetime
-from ...main import app
-from ...api.db.database import get_db, get_db_engine, Base
+from main import app
+from api.db.database import get_db, get_db_engine, Base
 
 client = TestClient(app)
 
@@ -24,7 +24,7 @@ def test_update_testimonial_with_id(db_session_mock, testimonial_id):
     testimonial_data = {
         "content_data" : "I love testimonials"
     }
-    response = client.post(f'/api/v1/testimonials/{testimonial_id}', json=testimonial_data)
+    response = client.put(f'/api/v1/testimonials/{testimonial_id}', json=testimonial_data)
 
     assert response.status_code == 200
     assert response.json() == {
