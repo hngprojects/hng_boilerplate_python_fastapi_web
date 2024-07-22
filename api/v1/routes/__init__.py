@@ -10,6 +10,7 @@ api_version_one = APIRouter(prefix="/api/v1")
 api_version_one.include_router(auth)
 api_version_one.include_router(role)
 api_version_one.include_router(newsletter)
-api_version_one.include_router(plans)
 api_version_one.include_router(testimonial_router)
+api_version_one.include_router(plans)
+
 
