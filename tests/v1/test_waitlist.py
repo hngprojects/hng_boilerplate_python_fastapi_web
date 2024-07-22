@@ -8,8 +8,8 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 import os
 from decouple import config
-from api.v1.models.user import WaitlistUser  # Ensure this import is correct
-from api.v1.models.base import Base  # Ensure this import is correct
+from api.v1.models.user import WaitlistUser  
+from api.v1.models.base import Base  
 from api.db.database import get_db
 
 # Load environment variables
@@ -21,7 +21,7 @@ engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine)
 
-# Create all tables including WaitlistUser
+
 Base.metadata.create_all(bind=engine)
 
 print(f"Tables created: {Base.metadata.tables.keys()}")
