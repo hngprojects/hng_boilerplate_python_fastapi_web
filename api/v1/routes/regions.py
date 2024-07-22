@@ -7,18 +7,25 @@ from api.v1.models.region import Region
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user, get_current_admin
 
-region = APIRouter(prefix="/regions",tags=["Regions"])
+router = APIRouter(
+    prefix="/api/v1/regions",
+    tags=["regions"],
+    dependencies=[Depends(get_current_admin)],
+)
+
 
 # Region Add Endpoint
-@region.post(
+@router.post(
     "/", response_model=region_schemas.RegionBase, status_code=status.HTTP_201_CREATED
 )
 def create_region(
-    region: region_schemas.RegionBase, 
-    db: Session = Depends(get_db), 
-    current_user: dict = Depends(get_current_admin)
+    region: region_schemas.RegionCreate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_admin),
 ):
-    db_region = db.query(Region).filter(Region.region_code == region.region_code).first()
+    db_region = (
+        db.query(Region).filter(Region.region_code == region.region_code).first()
+    )
     if db_region:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -27,11 +34,9 @@ def create_region(
             ],
         )
     try:
-        # Add created_by field to the new Region instance
         new_region = Region(
             **region.dict(), 
-            created_by=current_user['id']  # Automatically set created_by
-        )
+            created_by=current_user["id"])
         db.add(new_region)
         db.commit()
         db.refresh(new_region)
@@ -43,9 +48,8 @@ def create_region(
     return new_region
 
 
-
 # Region List Endpoint
-@region.get(
+@router.get(
     "/",
     response_model=List[region_schemas.RegionResponse],
     status_code=status.HTTP_200_OK,
