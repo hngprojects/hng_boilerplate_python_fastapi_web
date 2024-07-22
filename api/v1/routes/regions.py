@@ -7,7 +7,7 @@ from api.v1.models.region import Region
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user, get_current_admin
 
-router = APIRouter(
+region = APIRouter(
     prefix="/api/v1/regions",
     tags=["regions"],
     dependencies=[Depends(get_current_admin)],
@@ -15,7 +15,7 @@ router = APIRouter(
 
 
 # Region Add Endpoint
-@router.post(
+@region.post(
     "/", response_model=region_schemas.RegionBase, status_code=status.HTTP_201_CREATED
 )
 def create_region(
@@ -49,7 +49,7 @@ def create_region(
 
 
 # Region List Endpoint
-@router.get(
+@region.get(
     "/",
     response_model=List[region_schemas.RegionResponse],
     status_code=status.HTTP_200_OK,
