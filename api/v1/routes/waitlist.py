@@ -16,7 +16,7 @@ class WaitlistResponse(BaseModel):
 
 @router.post("/waitlist", response_model=WaitlistResponse, status_code=201)
 @rate_limit(max_calls=5, time_frame=60)
-async def signup_waitlist(
+async def waitlist_signup(
     request: Request,
     user: WaitlistUserCreate,
     db: Session = Depends(get_db)

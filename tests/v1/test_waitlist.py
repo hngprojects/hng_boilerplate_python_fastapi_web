@@ -54,7 +54,7 @@ def client_with_mocks(mocker, test_db):
             yield client
 
 
-def test_signup_waitlist(client_with_mocks, mocker):
+def test_waitlist_signup(client_with_mocks, mocker):
     email = f"test{uuid.uuid4()}@example.com"
     response = client_with_mocks.post(
         "/api/v1/waitlist", json={"email": email, "full_name": "Test User"})
