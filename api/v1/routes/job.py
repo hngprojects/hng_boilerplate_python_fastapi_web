@@ -8,7 +8,7 @@ from api.v1.models.job import Job
 from api.v1.models.user import User
 from api.v1.schemas.job import JobCreate, JobResponseSchema
 
-job = APIRouter(prefix="/jobs", tags=["jobs"])
+job = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
 
 @job.post(
