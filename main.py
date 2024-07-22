@@ -4,6 +4,7 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+from api.v1.routes import permission
 
 from api.db.database import Base, engine
 
@@ -48,6 +49,7 @@ app.include_router(user)
 # app.include_router(users, tags=["Users"])
 app.include_router(Permission, tags=["Permissions"])
 # app.include_router(users, tags=["Users"])
+app.include_router(permission, tags=["Permission"])
 
 
 @app.get("/", tags=["Home"])
