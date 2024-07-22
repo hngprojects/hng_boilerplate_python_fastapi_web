@@ -49,7 +49,7 @@ app.include_router(user)
 # app.include_router(users, tags=["Users"])
 app.include_router(Permission, tags=["Permissions"])
 # app.include_router(users, tags=["Users"])
-app.include_router(permission, tags=["Permission"])
+app.include_router(Permission, tags=["Permission"])
 
 
 @app.get("/", tags=["Home"])
