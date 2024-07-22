@@ -43,6 +43,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(auth)
 app.include_router(user)
+app.include_router(plans)
 # app.include_router(users, tags=["Users"])
 
 
