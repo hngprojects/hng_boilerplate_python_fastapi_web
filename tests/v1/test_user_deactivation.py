@@ -44,8 +44,8 @@ from api.utils.auth import hash_password
 from api.v1.models.user import User
 from api.v1.models.base import Base
 
-SQLALCHEMY_DATABASE_URL = config('DB_URL')
-
+# SQLALCHEMY_DATABASE_URL = config('DB_URL')
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db6"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -88,7 +88,7 @@ def create_user(test_db):
 def error_user_deactivation(test_db):
     '''Test for user deactivation'''
 
-    login =  client.post('/auth/login', data={
+    login =  client.post('/api/v1/auth/login', data={
         "username": "testuser",
         "password": "Testpassword@123"
     })

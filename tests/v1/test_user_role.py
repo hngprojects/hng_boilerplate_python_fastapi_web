@@ -1,11 +1,72 @@
+
+import sys
+import os
+import warnings
+
+# DB_URL = os.getenv("DB_URL")
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+# Append the project root directory to the PYTHONPATH
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from decouple import config
+from main import app
+from api.db.database import Base, get_db
+from api.utils.auth import hash_password
+from api.v1.models.user import User
+from api.v1.models.base import Base
+
+# SQLALCHEMY_DATABASE_URL = config('DB_URL')
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db5"
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base.metadata.create_all(bind=engine)
+
+def override_get_db():
+	db = TestingSessionLocal()
+	try:
+		yield db
+	finally:
+		db.close()
+
+app.dependency_overrides[get_db] = override_get_db
+
+client = TestClient(app)
+
+
+@pytest.fixture(scope="module")
+def test_db():
+	db = TestingSessionLocal()
+	yield db
+	db.close()
+	
+
+def create_user(test_db):
+	
+    # Add user to database
+    user = User(
+        username="testuser",
+        email="testuser@gmail.com",
+        password=hash_password('Testpassword@123'),
+		first_name='Test',
+		last_name='User'
+    )
+    test_db.add(user)
+    test_db.commit()
+    test_db.refresh(user)
+
 
 url = "/api/v1"
 
 
-def create_permission(client, name: str, token: str):
+def create_permission(name: str, token: str):
     headers = {"Authorization": f"Bearer {token}"}
     data = {
         "name": name
@@ -14,7 +75,7 @@ def create_permission(client, name: str, token: str):
     print("permission: ", response.json())
     assert response.status_code == 201
 
-def create_organization(client, name: str, desc: str, token: str):
+def create_organization(name: str, desc: str, token: str):
     headers = {"Authorization": f"Bearer {token}"}
     org_data = {
         "name": name,
@@ -25,7 +86,7 @@ def create_organization(client, name: str, desc: str, token: str):
     assert response.status_code == 201  # Assuming 201 is the status code for successful creation
     return response.json()["id"]
 
-def create_user(client, username: str, password: str):
+def create_user(username: str, password: str):
     user_data = {
         "username": username,
         "password": password,
@@ -40,7 +101,7 @@ def create_user(client, username: str, password: str):
     assert response.status_code == 201  # Assuming 201 is the status code for successful creation
     return response.json()
 
-def get_auth_token(client, username: str, password: str):
+def get_auth_token(username: str, password: str):
     login_data = {
         "username": username,
         "password": password
@@ -50,7 +111,7 @@ def get_auth_token(client, username: str, password: str):
     assert response.status_code == 200
     return response.json()["access_token"]
 
-def create_role(client, token: str, role_name: str, organization_id: str, permission_ids: list = None):
+def create_role(token: str, role_name: str, organization_id: str, permission_ids: list = None):
     headers = {"Authorization": f"Bearer {token}"}
     role_data = {
         "role_name": role_name,
@@ -62,23 +123,23 @@ def create_role(client, token: str, role_name: str, organization_id: str, permis
     assert response.status_code == 201  # Assuming 200 is the status code for successful creation
     return response.json()
 
-def test_create_role(client):
+def test_create_role():
     
     # Create a user
     username = "admin"
     password = "admin12345"
-    create_user(client, username=username, password=password)
+    create_user(username=username, password=password)
     
     # # Get authentication token
-    token = get_auth_token(client, username=username, password=password)
+    token = get_auth_token(username=username, password=password)
     # print(token)
 
     # # Create an organization
-    organization_id = create_organization(client, desc="Test Organization", name="Mba", token=token)
-    permission = create_permission(client, name="Read", token=token)
+    organization_id = create_organization(desc="Test Organization", name="Mba", token=token)
+    permission = create_permission(name="Read", token=token)
     
     # # Create a role
     role_name = "Manager1"
     permission = ["Read"]
-    create_role(client, token=token, role_name=role_name, organization_id=organization_id, permission_ids=permission)
+    create_role(token=token, role_name=role_name, organization_id=organization_id, permission_ids=permission)
 
