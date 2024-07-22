@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
+from api.v1.routes.generate_invite import invite
 
 from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
@@ -43,6 +44,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 app.include_router(auth)
 app.include_router(user)
 # app.include_router(users, tags=["Users"])
+app.include_router(invite)
 
 
 @app.get("/", tags=["Home"])
