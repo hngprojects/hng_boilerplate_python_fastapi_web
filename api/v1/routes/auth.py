@@ -3,17 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, Annotated
-from api.v1.models.user import User, WaitlistUser
-from api.v1.models.org import Organization
-from api.v1.models.profile import Profile
-from api.v1.models.product import Product
-from api.v1.models.base import Base
-from api.v1.models.subscription import Subscription
-from api.v1.models.blog import Blog
-from api.v1.models.job import Job
-from api.v1.models.invitation import Invitation
-from api.v1.models.role import Role
-from api.v1.models.permission import Permission
+from api.v1.models import *
 from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
@@ -30,12 +20,13 @@ from api.v1.models.product import Product
 db = next(get_db())
 
 
-auth = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+auth = APIRouter(prefix="/auth", tags=["auth"])
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+
 @auth.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
-def login_for_access_token(login_request: LoginRequest, db: Session = Depends(get_db)):
+def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, login_request.username, login_request.password)
     if not user:
         raise HTTPException(
@@ -47,7 +38,7 @@ def login_for_access_token(login_request: LoginRequest, db: Session = Depends(ge
     access_token = create_access_token(
         data={"username": user.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return Token(access_token=access_token, token_type="bearer")
   
 @auth.post("/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
@@ -70,14 +61,15 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     access_token = create_access_token(
         data={"username": user.username}, expires_delta=access_token_expires
     )
-
+    
     db_user = User(
         username=user.username,
         email=user.email,
         password = password_hashed,
         first_name=user.first_name,
         last_name=user.last_name,
-        is_active=True
+        is_active=True,
+        is_admin = user.is_admin
     )
     try: 
         db.add(db_user)

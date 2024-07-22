@@ -13,15 +13,49 @@ from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
+from api.utils.auth import hash_password
 
 create_database()
 db = next(get_db())
 
+<<<<<<< HEAD
+user_1 = User(
+    email="test@mail",
+    username="testuser",
+    password="testpass",
+    first_name="John",
+    last_name="Doe",
+)
+user_2 = User(
+    email="test1@mail",
+    username="testuser1",
+    password="testpass1",
+    first_name="Jane",
+    last_name="Boyle",
+)
+user_3 = User(
+    email="test2@mail",
+    username="testuser2",
+    password="testpass2",
+    first_name="Bob",
+    last_name="Dwayne",
+)
+admin = User(
+    email="admin@mail",
+    username="admin",
+    password=hash_password("admin12345"),
+    first_name="mba",
+    last_name="kama",
+    is_admin = True,
+    is_active = True
+)
+=======
 user_1 = User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe")
 user_2 = User(email="test1@mail", username="testuser1", password="testpass1", first_name="Jane", last_name="Boyle")
 user_3 = User(email="test2@mail", username="testuser2", password="testpass2", first_name="Bob", last_name="Dwayne")
+>>>>>>> 343a290ec289fcc324c0810f6ba1ea25a333af81
 
-db.add_all([user_1, user_2, user_3])
+db.add_all([user_1, user_2, user_3, admin])
 
 org_1 = Organization(name= "Python Org", description="An organization for python develoers")
 org_2 = Organization(name="Django Org", description="An organization of django devs")

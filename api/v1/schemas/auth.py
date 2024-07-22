@@ -18,10 +18,11 @@ class UserCreate(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    is_admin: Optional[bool] = False
 
     @field_validator('password')
     def password_validator(cls, value):
-        if len(value) < 8:
+        if len(value) < 3:
             raise ValueError('Password must be at least 3 characters long')
         if not re.search(r'[a-z]', value):
             raise ValueError('Password must contain at least one lowercase letter')
@@ -46,3 +47,7 @@ class ErrorResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class loginCredentials(BaseModel):
+    username: str
+    password: str
