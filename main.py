@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
 
-from api.v1.routes.newsletter_router import router as newsletter
+from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
@@ -17,6 +17,7 @@ from api.v1.routes.deactivate_invite_link_router import (
 )
 
 from api.v1.routes.auth import auth
+from api.v1.routes.user import user
 from api.v1.routes.roles import role
 from api.v1.routes.deactivate_invite_link_router import router as deactivate_invite_router
 
@@ -48,7 +49,8 @@ app.include_router(newsletter, tags=["Newsletter"])
 app.include_router(deactivate_invite_router, tags=["org"])
 
 app.include_router(auth)
-
+app.include_router(user)
+# app.include_router(users, tags=["Users"])
 
 
 @app.get("/", tags=["Home"])

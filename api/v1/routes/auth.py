@@ -30,7 +30,7 @@ from api.v1.models.product import Product
 db = next(get_db())
 
 
-auth = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+auth = APIRouter(prefix="/auth", tags=["auth"])
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
