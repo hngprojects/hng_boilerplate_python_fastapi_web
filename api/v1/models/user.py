@@ -19,11 +19,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association, user_role_association
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 from sqlalchemy.dialects.postgresql import UUID
 
 
-class User(BaseModel, Base):
+class User(BaseTableModel, Base):
     __tablename__ = 'users'
 
     username = Column(String(50), unique=True, nullable=False)
@@ -47,7 +47,7 @@ class User(BaseModel, Base):
     def __str__(self):
         return self.email
 
-class WaitlistUser(BaseModel, Base):
+class WaitlistUser(BaseTableModel):
     __tablename__ = 'waitlist_users'
 
     email = Column(String(100), unique=True, nullable=False)

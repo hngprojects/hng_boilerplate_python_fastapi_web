@@ -4,13 +4,14 @@
 from uuid_extensions import uuid7
 from fastapi import Depends
 from sqlalchemy.dialects.postgresql import UUID
+from api.v1.models.base import Base
 from sqlalchemy import (
         Column,
         DateTime,
         func
         )
 
-class BaseModel():
+class BaseTableModel(Base):
     """ This model creates helper methods for all models
     """
     __abstract__ = True

@@ -1,12 +1,12 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Table, Boolean, DateTime, func
 from sqlalchemy.orm import relationship
 from api.v1.models.base import Base
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 from api.v1.models.base import role_permission_association, user_role_association
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
 
-class Role(BaseModel, Base):
+class Role(BaseTableModel):
     __tablename__ = 'roles'
 
     role_name = Column(String, index=True, nullable=False)

@@ -15,12 +15,12 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
 
 
-class Job(BaseModel, Base):
+class Job(BaseTableModel):
     __tablename__ = 'jobs'
     
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False, default=uuid7)

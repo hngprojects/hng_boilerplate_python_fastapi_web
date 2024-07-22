@@ -15,11 +15,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 from api.v1.models.base import Base
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 
 
 
-class Profile(BaseModel, Base):
+class Profile(BaseTableModel):
     __tablename__ = 'profiles'
 
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), unique=True, nullable=False)
