@@ -17,6 +17,7 @@ from api.v1.routes.auth import auth
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
 from api.v1.routes import api_version_one
+from api.v1.routes.plans import plans
 
 Base.metadata.create_all(bind=engine)
 
@@ -43,8 +44,10 @@ app.add_middleware(
 # Newsletter custom exception registration
 app.add_exception_handler(CustomException, custom_exception_handler)
 app.include_router(newsletter, tags=["Newsletter"])
-
 app.include_router(api_version_one)
+app.include_router(auth)
+app.include_router(user)
+# app.include_router(users, tags=["Users"])
 
 
 @app.get("/", tags=["Home"])
