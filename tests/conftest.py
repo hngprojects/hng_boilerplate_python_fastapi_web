@@ -11,11 +11,9 @@ warnings.filterwarnings("ignore", category=DeprecationWarning)
 # Append the project root directory to the PYTHONPATH
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from api.main import app
+from main import app
 from api.db.database import Base, get_db
 
-
-from api.main import app
 from api.v1.models.role import Role
 from api.v1.schemas.role import RoleCreate, ResponseModel
 from api.v1.models.user import User, WaitlistUser
