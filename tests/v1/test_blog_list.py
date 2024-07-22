@@ -1,22 +1,23 @@
 import pytest
 from fastapi.testclient import TestClient
-
-# from unittest.mock import MagicMock
+from unittest.mock import MagicMock
 from main import app
 from api.v1.models.blog import Blog
+from api.db.database import get_db
 
 client = TestClient(app)
 
 
 @pytest.fixture
-def db_session_mock(mocker):
-    db_session = mocker.MagicMock()
-    yield db_session
+def db_session_mock():
+    return MagicMock()
 
 
 @pytest.fixture(autouse=True)
-def override_get_db(mocker, db_session_mock):
-    mocker.patch("api.v1.routes.blog.get_db", return_value=db_session_mock)
+def override_get_db(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    yield
+    app.dependency_overrides[get_db] = None
 
 
 def test_successful_retrieval_of_paginated_blog_posts(db_session_mock):
