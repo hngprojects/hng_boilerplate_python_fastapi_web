@@ -4,26 +4,24 @@
 from uuid_extensions import uuid7
 from fastapi import Depends
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import (
-        Column,
-        DateTime,
-        func
-        )
+from sqlalchemy import Column, DateTime, func
 
-class BaseModel():
-    """ This model creates helper methods for all models
-    """
+
+class BaseModel:
+    """This model creates helper methods for all models"""
+
     __abstract__ = True
     id = Column(UUID(as_uuid=True), primary_key=True, index=True, default=uuid7)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     def to_dict(self):
-        """ returns a dictionary representation of the instance
-        """
+        """returns a dictionary representation of the instance"""
         obj_dict = self.__dict__.copy()
         del obj_dict["_sa_instance_state"]
-        obj_dict['id'] = str(self.id)
+        obj_dict["id"] = str(self.id)
         if self.created_at:
             obj_dict["created_at"] = self.created_at.isoformat()
         if self.updated_at:
@@ -33,6 +31,7 @@ class BaseModel():
     @classmethod
     def get_all(cls):
         from api.db.database import get_db
+
         db = Depends(get_db)
         """ returns all instance of the class in the db
         """
@@ -41,6 +40,7 @@ class BaseModel():
     @classmethod
     def get_by_id(cls, id):
         from api.db.database import get_db
+
         db = Depends(get_db)
         """ returns a single object from the db
         """

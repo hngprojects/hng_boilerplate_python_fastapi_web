@@ -6,12 +6,15 @@ from api.v1.models.base import role_permission_association
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
 
+
 class Permission(BaseModel, Base):
-    __tablename__ = 'permissions'
+    __tablename__ = "permissions"
 
     name = Column(String, index=True, nullable=False)
 
-    roles = relationship('Role', secondary=role_permission_association, back_populates='permissions')
+    roles = relationship(
+        "Role", secondary=role_permission_association, back_populates="permissions"
+    )
 
 
 def get_user_permissions(self):
@@ -22,11 +25,11 @@ def get_user_permissions(self):
             permissions.add(permission.name)
     return permissions
 
+
 def user_has_permission(self, permission) -> bool:
     """Check if a user has a specific permission."""
     perms = self.get_user_permissions()
     if permission in perms:
-            return True
+        return True
     else:
-            return False
-
+        return False

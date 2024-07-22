@@ -13,10 +13,7 @@ class Blog(BaseModel, Base):
     __tablename__ = "blogs"
 
     author_id = Column(
-        UUID(as_uuid=True),
-        ForeignKey("users.id"),
-        nullable=False,
-        default=uuid7
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, default=uuid7
     )
     title = Column(String(100), nullable=False)
     content = Column(Text)

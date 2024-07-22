@@ -12,10 +12,14 @@ import bcrypt
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
 from .config import SECRET_KEY, ALGORITHM
+
 # Initialize OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
-def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+
+def get_current_user(
+    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -34,7 +38,10 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
     return user
 
-def get_current_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+
+def get_current_admin(
+    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+):
     user = get_current_user(db, token)
     if not user.is_admin:
         raise HTTPException(
@@ -42,4 +49,3 @@ def get_current_admin(db: Session = Depends(get_db), token: str = Depends(oauth2
             detail="You do not have permission to access this resource",
         )
     return user
-

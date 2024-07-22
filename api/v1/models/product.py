@@ -2,14 +2,14 @@
 """ The Product model
 """
 from sqlalchemy import (
-        Column,
-        Integer,
-        String,
-        Text,
-        Numeric,
-        DateTime,
-        func,
-        )
+    Column,
+    Integer,
+    String,
+    Text,
+    Numeric,
+    DateTime,
+    func,
+)
 from datetime import datetime
 from api.v1.models.base import Base
 from api.v1.models.base_model import BaseModel
@@ -18,8 +18,11 @@ from uuid_extensions import uuid7
 
 
 class Product(BaseModel, Base):
-    __tablename__ = 'products'
+    __tablename__ = "products"
 
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)
+    productId = Column(UUID(as_uuid=True), nullable=False)
+    currentStock = Column(Integer, nullable=False)
+    lastUpdated = Column(DateTime, nullable=False)

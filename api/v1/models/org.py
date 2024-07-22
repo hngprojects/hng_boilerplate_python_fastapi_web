@@ -2,16 +2,16 @@
 """ The Organization model
 """
 from sqlalchemy import (
-        Column,
-        Integer,
-        String,
-        Text,
-        Date,
-        ForeignKey,
-        Numeric,
-        DateTime,
-        func,
-        )
+    Column,
+    Integer,
+    String,
+    Text,
+    Date,
+    ForeignKey,
+    Numeric,
+    DateTime,
+    func,
+)
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
@@ -21,18 +21,15 @@ from uuid_extensions import uuid7
 
 
 class Organization(BaseModel, Base):
-    __tablename__ = 'organizations'
+    __tablename__ = "organizations"
 
     name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
-    
-    users = relationship(
-            "User",
-            secondary=user_organization_association,
-            back_populates="organizations"
-            )
-    roles = relationship('Role', back_populates='organization')
 
+    users = relationship(
+        "User", secondary=user_organization_association, back_populates="organizations"
+    )
+    roles = relationship("Role", back_populates="organization")
 
     def __str__(self):
         return self.name

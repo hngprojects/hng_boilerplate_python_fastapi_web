@@ -16,16 +16,22 @@ from .config import SECRET_KEY, ALGORITHM
 # Initialize OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
+
 def hash_password(password: str) -> str:
     salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password.decode('utf-8')
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed_password.decode("utf-8")
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+    return bcrypt.checkpw(
+        plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+    )
+
 
 def get_user(db, username: str):
     return db.query(User).filter(User.username == username).first()
+
 
 def authenticate_user(db, username: str, password: str):
     user = get_user(db, username)
@@ -34,6 +40,7 @@ def authenticate_user(db, username: str, password: str):
     if not verify_password(password, user.password):
         return False
     return user
+
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
