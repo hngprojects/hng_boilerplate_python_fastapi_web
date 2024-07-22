@@ -34,6 +34,7 @@ class User(BaseModel, Base):
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
 
+    oauth2_data_id = Column(UUID(as_uuid=True), ForeignKey("oauth2_data.id", ondelete="SET NULL"), nullable=True)  # tokens from oauth provider
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
