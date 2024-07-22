@@ -8,12 +8,15 @@ from starlette.requests import Request
 from api.db.database import engine
 from api.v1.models.base import Base
 
+from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
 )
 
-from api.v1.routes import api_version_one
+from api.v1.routes.auth import auth
+from api.v1.routes.user import user
+from api.v1.routes.roles import role
 from api.v1.routes.products import product_router
 
 from exceptions import validation_exception_handler
@@ -41,10 +44,12 @@ app.add_middleware(
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.include_router(newsletter, tags=["Newsletter"])
 
-app.include_router(api_version_one)
+app.include_router(auth)
+app.include_router(user)
 app.include_router(product_router)
-
+# app.include_router(users, tags=["Users"])
 
 
 @app.get("/", tags=["Home"])
