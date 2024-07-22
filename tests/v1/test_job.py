@@ -1,81 +1,107 @@
-from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
+from decouple import config
 from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
-from api.db.database import get_db
-from api.v1.models.job import Job
+from api.db.database import Base, get_db
+from api.utils.auth import hash_password
+from api.v1.models.job import Job  # Assuming Job is the model name
 from api.v1.models.user import User
-from api.v1.schemas.job import JobSchema
+from main import app
 
-from ...main import app
+# Database configuration
+SQLALCHEMY_DATABASE_URL = config("DB_URL")
 
-# from uuid import uuid7
+engine = create_engine(SQLALCHEMY_DATABASE_URL)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base.metadata.create_all(bind=engine)
+
+
+def override_get_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
 
-# Mock the database dependency
-@pytest.fixture
-def db_session_mock(mocker):
-    db_session = mocker.MagicMock()
-    yield db_session
+@pytest.fixture(scope="module")
+def test_db():
+    db = TestingSessionLocal()
+    yield db
+    db.close()
 
 
-# Override the dependency with the mock
-@pytest.fixture(autouse=True)
-def override_get_db(mocker, db_session_mock):
-    mocker.patch("app.routes.job.get_db", return_value=db_session_mock)
-
-
-def test_get_job_by_id_success(db_session_mock):
-    # Arrange
-    user_1 = User(
-        username="user1",
-        email="user1@example.com",
-        password="password1",
-        first_name="User",
-        last_name="One",
+def create_user(test_db):
+    # Add user to database
+    user = User(
+        username="testuser",
+        email="testuser@gmail.com",
+        password=hash_password("Testpassword@123"),
+        first_name="Test",
+        last_name="User",
         is_active=True,
+        is_admin=False,
     )
-    job = Job(
-        user_id=user_1.id,
-        title="Software Engineer",
-        description="Develop and maintain software applications.",
-        location="New York, NY",
-        salary=120000.00,
-        job_type="Full-time",
-        company_name="Tech Innovations Inc.",
-    )
-    db_session_mock.query(Job).get.return_value = job
 
-    # Act
+    test_db.add(user)
+    test_db.commit()
+
+    test_db.refresh(user)
+    return user.id
+
+
+def create_job(test_db, user_id):
+    job = Job(
+        user_id=user_id,
+        title="Test Job Title",
+        description="Test job description",
+        location="Test location",
+        salary="1000",
+        job_type='Test Job Type',
+        company_name="Test Company Name",
+    )
+    test_db.add(job)
+    test_db.commit()
+    test_db.refresh(job)
+    return job
+
+
+def test_get_job_by_id_success(test_db):
+    # Create a job in the test database
+    user_id = create_user(test_db)
+    job = create_job(test_db, user_id)
+
+    # Make a request to get the job by ID
     response = client.get(f"/api/v1/jobs/{job.id}")
 
-    # Assert
+    # Assert the response
     assert response.status_code == 200
     assert response.json() == {
         "id": job.id,
-        "user_id": user_1.id,
-        "title": "Software Engineer",
-        "description": "Develop and maintain software applications.",
-        "location": "New York, NY",
-        "salary": 120000.00,
-        "job_type": "Full-time",
-        "company_name": "Tech Innovations Inc.",
+        "title": job.title,
+        "description": job.description,
+        "location": job.location,
+        "salary": job.salary,
     }
 
 
-def test_get_job_by_id_not_found(db_session_mock):
-    # Arrange
-    db_session_mock.query(Job).get.return_value = None
+def test_get_job_by_id_not_found(test_db):
+    # Make a request to get a job that does not exist
+    response = client.get("/api/v1/jobs/999")
 
-    # Act
-    response = client.get(f"/api/v1/jobs/")
-
-    # Assert
+    # Assert the response
     assert response.status_code == 404
-    assert response.json() == {"detail": "Not Found"}
+    assert response.json() == {"detail": "Job not found"}
 
 
 if __name__ == "__main__":
