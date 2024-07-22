@@ -14,7 +14,7 @@ from main import app
 
 load_dotenv()
 
-DATABASE_URL = os.environ.get("PSGL_TEST_DB_URI")
+DATABASE_URL = os.environ.get("PSGL_TEST_DB_URI") or "postgresql://root:QTwUQOv5q0X0oHayjE0iVfqsjyfRIkQS@dpg-cq46trmehbks73b7rlh0-a.oregon-postgres.render.com/hngmgt_f374"
 
 engine = create_engine(DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
