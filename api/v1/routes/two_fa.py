@@ -3,33 +3,38 @@
 """2FA endpoint implementation"""
 
 import json
+import os
 from typing import Annotated, List
-from fastapi.responses import StreamingResponse
+from urllib.parse import unquote
 
 import pyotp
-import io
-from urllib.parse import unquote
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm.session import Session
 
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user
 from api.utils.password_auth import validate_password
-from api.utils.two_fa import generate_backup_codes, generate_qr_code, hash_backup_codes, verify_backup_codes
+from api.utils.two_fa import (generate_backup_codes, generate_qr_code,
+                              hash_backup_codes, verify_backup_codes)
 from api.v1.models.user import User
 from api.v1.schemas.two_fa import (TwoFactorData, TwoFactorDisableRequest,
-                                   TwoFactorEnableRequest, TwoFactorRecoveryRequest,
-                                   TwoFactorResponse, TwoFactorVerifRequest,
-                                   TwoFactorVerifResponse
-                                   )
+                                   TwoFactorEnableRequest,
+                                   TwoFactorRecoveryRequest, TwoFactorResponse,
+                                   TwoFactorVerifRequest,
+                                   TwoFactorVerifResponse)
 
 two_fa = APIRouter(prefix="/2fa", tags=["2fa"])
+
+
+base_url = os.getenv("API_URL", "http://localhost:7001/api/v1")
 
 
 @two_fa.post("/enable", response_model=TwoFactorResponse)
 async def enable_2fa(
     current_user: Annotated[User, Depends(get_current_user)],
     request: TwoFactorEnableRequest,
+    api_request: Request,
     db: Session = Depends(get_db)
 ):
     """Enable 2FA for user account"""
@@ -43,12 +48,13 @@ async def enable_2fa(
     current_user.secret_key = secret
 
     db.commit()
-
     totp = pyotp.TOTP(secret)
     qr_code_url = totp.provisioning_uri(
         name=str(current_user.username),
         issuer_name="FastAPI boilerplate",
     )
+
+    qr_code_url = f"{base_url}{two_fa.url_path_for('create_qr_code')}?size=150x150&data={qr_code_url}"
 
     return TwoFactorResponse(
         status_code=200,
@@ -160,6 +166,7 @@ def generate_user_backup_codes(
 
 @two_fa.post("/recover", response_model=TwoFactorResponse)
 def recover_two_fa(
+    api_request: Request,
     user: Annotated[User, Depends(get_current_user)],
     request: TwoFactorRecoveryRequest,
     db: Annotated[Session, Depends(get_db)]
@@ -181,6 +188,8 @@ def recover_two_fa(
             issuer_name="FastAPI boilerplate",
         )
 
+        qr_code_url = f"{base_url}{two_fa.url_path_for('create_qr_code')}?size=150x150&data={qr_code_url}"
+
         return TwoFactorResponse(
             status_code=200,
             message="Recovered Backup Code",
@@ -192,7 +201,7 @@ def recover_two_fa(
     raise HTTPException(status_code=400, detail="2fa recovered successfully")
 
 
-@two_fa.get("/v1/create-qr-code/")
+@two_fa.get("/create-qr-code/")
 async def create_qr_code(
     size: str = Query("150x150", regex=r"^\d+x\d+$"),
     data: str = Query(..., min_length=1)

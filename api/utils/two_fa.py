@@ -55,3 +55,24 @@ async def generate_qr_code(data: str, size: tuple):
         return img_byte_arr.getvalue()
 
     return await loop.run_in_executor(None, _generate)
+
+
+def verify_totp(secret_key: str, totp_code: str, window: int = 1) -> bool:
+    """
+    Verify a TOTP code against a secret key.
+
+    Args:
+        secret_key (str): The secret key used to generate the TOTP.
+        totp_code (str): The TOTP code provided by the user.
+        window (int, optional): The time window in which the TOTP is valid.
+                                Defaults to 1, which is usually 30 seconds
+                                before and after the current time.
+
+    Returns:
+        bool: True if the TOTP is valid, False otherwise.
+    """
+    if not secret_key or not totp_code:
+        return False
+
+    totp = pyotp.TOTP(secret_key)
+    return totp.verify(totp_code, valid_window=window)

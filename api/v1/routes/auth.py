@@ -19,7 +19,7 @@ from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
 from api.db.database import get_db
 from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
-from api.utils.dependencies import get_current_admin, get_current_user
+from api.utils.dependencies import get_current_admin, get_current_user, requires_2fa
 
 
 from api.v1.models.org import Organization
@@ -36,7 +36,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
 @auth.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
-def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@requires_2fa
+async def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(), totp_code: Optional[str] = None, db: Session = Depends(get_db)):
     user = authenticate_user(db, login_request.username, login_request.password)
     if not user:
         raise HTTPException(
@@ -49,7 +50,7 @@ def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(),
         data={"username": user.username}, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
-  
+
 @auth.post("/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
@@ -64,7 +65,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered",
         )
-    
+
     password_hashed = hash_password(user.password)
 
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -80,7 +81,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         last_name=user.last_name,
         is_active=True
     )
-    try: 
+    try:
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -104,7 +105,7 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
         data=data
     )
     return response
-    
+
 
 # Protected route example: test route
 @auth.get("/admin")

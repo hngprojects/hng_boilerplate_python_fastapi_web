@@ -5,6 +5,7 @@ from pydantic import BaseModel
 import jwt
 from typing import Optional
 from datetime import datetime, timedelta
+from api.utils.auth import authenticate_user
 from api.v1.models.user import User
 import os
 from jose import JWTError
@@ -12,6 +13,8 @@ import bcrypt
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
 from .config import SECRET_KEY, ALGORITHM
+from functools import wraps
+from api.utils.two_fa import verify_totp
 # Initialize OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -43,3 +46,35 @@ def get_current_admin(db: Session = Depends(get_db), token: str = Depends(oauth2
         )
     return user
 
+
+def requires_2fa(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        request: Optional[OAuth2PasswordRequestForm] = kwargs.get('login_request')
+        db: Optional[Session] = kwargs.get('db')
+        totp_code: Optional[str] = kwargs.get('totp_code')
+
+        user = authenticate_user(db, request.username, request.password)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect username or password",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if user.is_2fa_enabled:
+            if not totp_code:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="2FA is enabled. TOTP code required.",
+                )
+
+            if not verify_totp(user.secret_key, totp_code):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid TOTP code",
+                )
+
+        return await func(*args, **kwargs)
+
+    return wrapper
