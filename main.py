@@ -6,6 +6,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
 
+
+from api.v1.routes.newsletter_router import (
+    CustomException,
+    custom_exception_handler
+)
+
+from api.v1.routes import api_version_one
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
