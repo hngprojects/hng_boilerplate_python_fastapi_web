@@ -6,6 +6,7 @@ from api.v1.schemas import region_schemas
 from api.v1.models.region import Region
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user, get_current_admin
+from api.v1.models.user import User
 
 region = APIRouter(
     prefix="/api/v1/regions",
@@ -21,7 +22,7 @@ region = APIRouter(
 def create_region(
     region: region_schemas.RegionCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_admin),
+    current_user: User = Depends(get_current_admin),
 ):
     db_region = (
         db.query(Region).filter(Region.region_code == region.region_code).first()
@@ -36,7 +37,7 @@ def create_region(
     try:
         new_region = Region(
             **region.dict(), 
-            created_by=current_user["id"])
+            created_by=current_user.id)
         db.add(new_region)
         db.commit()
         db.refresh(new_region)
