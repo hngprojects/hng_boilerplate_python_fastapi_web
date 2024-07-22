@@ -107,9 +107,11 @@ def test_get_job_by_id_not_found(test_db):
     # Make a request to get a job that does not exist
     response = client.get("/api/v1/jobs/999")
 
+    print(response)
+    print(response.json())
     # Assert the response
     assert response.status_code == 404
-    assert response.json() == {"detail": "not found"}
+    assert response.json() == {"detail": "Not found"}
 
 
 if __name__ == "__main__":
