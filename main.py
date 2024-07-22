@@ -8,12 +8,15 @@ from api.db.database import Base, engine
 
 from api.v1.routes.aboutpage_router import router as aboutpage
 from api.v1.routes.newsletter_router import router as newsletter
+from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
 )
 
 from api.v1.routes.auth import auth
+from api.v1.routes.user import user
+from api.v1.routes.roles import role
 
 Base.metadata.create_all(bind=engine)
 
@@ -40,6 +43,7 @@ app.add_exception_handler(CustomException, custom_exception_handler) # Newslette
 app.include_router(newsletter, tags=["Newsletter"])
 app.include_router(aboutpage, tags="AboutPage")
 app.include_router(auth)
+app.include_router(user)
 # app.include_router(users, tags=["Users"])
 
 
