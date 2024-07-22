@@ -125,8 +125,8 @@ def success_deactivation_test(test_db):
 def test_iser_inactive(test_db):
 	
     user = User(
-        username="testuser1",
-        email="testuser1@gmail.com",
+        username="testuser3",
+        email="testuser3@gmail.com",
         password=hash_password('Testpassword@123'),
 		first_name='Test',
 		last_name='User',
@@ -138,7 +138,7 @@ def test_iser_inactive(test_db):
     test_db.refresh(user)
 	
     login =  client.post('/auth/login', data={
-        "username": "testuser1",
+        "username": "testuser3",
         "password": "Testpassword@123"
     })
     access_token = login.json()['access_token']
