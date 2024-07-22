@@ -35,6 +35,11 @@ async def waitlist_signup(
     db.commit()
     db.refresh(db_user)
 
-    await send_confirmation_email(user.email, user.full_name)
+    try:
+        await send_confirmation_email(user.email, user.full_name)
+    except HTTPException as e:
+
+        raise HTTPException(
+            status_code=500, detail="Failed to send confirmation email")
 
     return {"message": "You are all signed up!"}
