@@ -190,8 +190,11 @@ async def google_oauth2_callback(request: Request,
     # generate refresh token for the user
     refresh_token: str = create_access_token({"username": new_user.username}, expires_at)
 
-    return JsonResponseDict(
+    res = JsonResponseDict(
         message="Authentication successful",
         data={"access_token": access_token,
               "refresh_token": refresh_token},
               status_code=201)
+    res.pop("error", None)
+                                   
+    return res
