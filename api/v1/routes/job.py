@@ -25,7 +25,7 @@ job = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 )
 async def update_job_post(
     id: str,
-    current_user: Annotated[User, Depends(get_current_user)],  # Ensure user is authenticated
+    current_user: Annotated[User, Depends(get_current_user)],
     job_update: JobUpdate,
     db: Session = Depends(get_db),
 ):
