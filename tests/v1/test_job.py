@@ -111,7 +111,7 @@ def test_get_job_by_id_not_found(test_db):
     print(response.json())
     # Assert the response
     assert response.status_code == 404
-    assert response.json() == {"detail": "Not found"}
+    assert response.json() == {"detail": "Not Found"}
 
 
 if __name__ == "__main__":
