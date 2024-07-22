@@ -8,18 +8,10 @@ from api.db.database import Base, engine
 from api.v1.models.org import Organization
 from api.v1.models.preference import OrgPreference
 
-<<<<<<< HEAD
-from api.v1.routes.auth import auth
 from api.v1.routes.job import job
 
 
-=======
-
-
-
-
 from api.v1.routes.newsletter_router import newsletter
->>>>>>> 191ecdd71485bb5933685682468d7c423f2800f4
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
@@ -54,17 +46,11 @@ app.add_middleware(
 )
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
-<<<<<<< HEAD
 
-
-app.include_router(auth)
 app.include_router(job)
 # app.include_router(users, tags=["Users"])
-app.include_router(api_version_one)
 
-=======
 app.include_router(newsletter, tags=["Newsletter"])
->>>>>>> 191ecdd71485bb5933685682468d7c423f2800f4
 
 
 @app.get("/", tags=["Home"])
