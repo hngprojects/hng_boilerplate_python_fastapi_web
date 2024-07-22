@@ -10,8 +10,9 @@ from api.v1.schemas.product import ProductUpdate
 from api.db.database import engine, get_db
 from api.v1.models.product import Product
 from api.v1.models.user import User
-from api.utils.auth import get_current_user
-
+from api.db.database import get_db
+from api.utils.dependencies import get_current_user
+from uuid import UUID
 
 
 
@@ -19,10 +20,9 @@ from api.utils.auth import get_current_user
 
 Product = APIRouter(prefix="/api/v1", tags=["Products"])
 
-
-@Product.put("/products/id", response_model=ProductUpdate)
+@Product.put("/products/{id}", response_model=ProductUpdate)
 async def update_product(
-    id: int,
+    id: UUID,
     product: ProductUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)

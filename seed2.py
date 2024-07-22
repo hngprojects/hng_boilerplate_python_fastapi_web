@@ -65,38 +65,38 @@ user_3 = User(
 db.add_all([user_1, user_2, user_3])
 db.commit()
 
-# Add sample roles
-role_1 = Role(id=uuid7(), role_name="Admin", organization_id=org_1.id)
-role_2 = Role(id=uuid7(), role_name="Member", organization_id=org_1.id)
-role_3 = Role(id=uuid7(), role_name="Admin", organization_id=org_2.id)
-role_4 = Role(id=uuid7(), role_name="Member", organization_id=org_2.id)
+# # Add sample roles
+# role_1 = Role(id=uuid7(), role_name="Admin", organization_id=org_1.id)
+# role_2 = Role(id=uuid7(), role_name="Member", organization_id=org_1.id)
+# role_3 = Role(id=uuid7(), role_name="Admin", organization_id=org_2.id)
+# role_4 = Role(id=uuid7(), role_name="Member", organization_id=org_2.id)
 
-db.add_all([role_1, role_2, role_3, role_4])
-db.commit()
+# db.add_all([role_1, role_2, role_3, role_4])
+# db.commit()
 
-# Add sample permissions
-perm_1 = Permission(id=uuid7(), name="read")
-perm_2 = Permission(id=uuid7(), name="write")
-perm_3 = Permission(id=uuid7(), name="delete")
+# # Add sample permissions
+# perm_1 = Permission(id=uuid7(), name="read")
+# perm_2 = Permission(id=uuid7(), name="write")
+# perm_3 = Permission(id=uuid7(), name="delete")
 
-db.add_all([perm_1, perm_2, perm_3])
-db.commit()
+# db.add_all([perm_1, perm_2, perm_3])
+# db.commit()
 
-# Add sample user roles
-user_role_1 = UserRole(user_id=user_1.id, role_id=role_1.id)
-user_role_2 = UserRole(user_id=user_2.id, role_id=role_3.id)
-user_role_3 = UserRole(user_id=user_3.id, role_id=role_2.id)
+# # Add sample user roles
+# user_role_1 = UserRole(user_id=user_1.id, role_id=role_1.id)
+# user_role_2 = UserRole(user_id=user_2.id, role_id=role_3.id)
+# user_role_3 = UserRole(user_id=user_3.id, role_id=role_2.id)
 
-db.add_all([user_role_1, user_role_2, user_role_3])
-db.commit()
+# db.add_all([user_role_1, user_role_2, user_role_3])
+# db.commit()
 
-# Add sample role permissions
-role_perm_1 = RolePermission(role_id=role_1.id, permission_id=perm_1.id)
-role_perm_2 = RolePermission(role_id=role_1.id, permission_id=perm_2.id)
-role_perm_3 = RolePermission(role_id=role_3.id, permission_id=perm_3.id)
+# # Add sample role permissions
+# role_perm_1 = RolePermission(role_id=role_1.id, permission_id=perm_1.id)
+# role_perm_2 = RolePermission(role_id=role_1.id, permission_id=perm_2.id)
+# role_perm_3 = RolePermission(role_id=role_3.id, permission_id=perm_3.id)
 
-db.add_all([role_perm_1, role_perm_2, role_perm_3])
-db.commit()
+# db.add_all([role_perm_1, role_perm_2, role_perm_3])
+# db.commit()
 
 # Add sample profiles
 profile_1 = Profile(

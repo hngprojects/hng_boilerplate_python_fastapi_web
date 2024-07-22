@@ -16,7 +16,7 @@ from .config import SECRET_KEY, ALGORITHM
 # Initialize OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-def hash_password(password: str) -> str:
+def hash_password(password: str) -> bytes:
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed_password.decode('utf-8')

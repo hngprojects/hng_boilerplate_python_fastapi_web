@@ -14,7 +14,7 @@ from api.v1.routes.newsletter_router import (
 
 from api.v1.routes.auth import auth
 from api.v1.routes.user import user
-from api.v1.routes.roles import role
+from api.v1.routes.update_product import Product
 
 Base.metadata.create_all(bind=engine)
 
@@ -43,6 +43,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 app.include_router(auth)
 app.include_router(user)
 # app.include_router(users, tags=["Users"])
+app.include_router(Product)
 
 
 @app.get("/", tags=["Home"])
