@@ -97,11 +97,43 @@ def test_create_subscription_plan_duplicate_name(db: Session):
     assert response.status_code == 400
     assert response.json() == {"detail": "Subscription plan already exists."}
 
+# Create a test user
+def create_test_user(db: Session):
+    test_user = User(
+        username="testuser",
+        email="testuser@email.com",
+        password=hash_password("userpassword"),
+        is_active=True,
+        is_admin=False
+    )
+    db.add(test_user)
+    db.commit()
+    db.refresh(test_user)
+    return test_user
+
+# Generate token for the test user
+def get_user_token():
+    response = client.post(
+        "/auth/login",
+        data={
+            "username": "testuser",
+            "password": "userpassword"
+        }
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    return token
+
+
+@pytest.fixture(scope="module", autouse=True)
+def setup_test_user(db: Session):
+    create_test_user(db)
+    
 # Test unauthorized plan creation
 def test_create_subscription_plan_unauthorized(db: Session):
     response = client.post(
         "/api/v1/plans",
-        headers={"Authorization": "Bearer invalidtoken"},
+        headers={"Authorization": "Bearer {token}"},
         json={
             "name": "Unauthorized Plan",
             "description": "This should not be created.",
