@@ -4,7 +4,10 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+<<<<<<< HEAD
 #from api.v1.models import user, profile, organization, org_preference
+=======
+>>>>>>> origin/dev
 from api.db.database import Base, engine
 # In main.py or wherever you initialize your app
 from api.v1.models.org import Organization
@@ -14,6 +17,16 @@ from api.v1.models.preference import OrgPreference
 
 
 
+from api.v1.routes.newsletter_router import newsletter
+from api.v1.routes.newsletter_router import (
+    CustomException,
+    custom_exception_handler
+)
+
+from api.v1.routes.auth import auth
+from api.v1.routes.user import user
+from api.v1.routes.roles import role
+
 Base.metadata.create_all(bind=engine)
 
 
@@ -21,10 +34,7 @@ Base.metadata.create_all(bind=engine)
 async def lifespan(app: FastAPI):
     yield
 
-
 app = FastAPI(lifespan=lifespan)
-
-    
 
 origins = [
     "http://localhost:3000",
@@ -40,10 +50,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
+app.include_router(newsletter, tags=["Newsletter"])
 
-# app.include_router(auth, tags=["Auth"])
+app.include_router(auth)
+app.include_router(user)
 # app.include_router(users, tags=["Users"])
-
 
 
 @app.get("/", tags=["Home"])
