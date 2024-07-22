@@ -34,6 +34,7 @@ def create_user(client, username: str, password: str):
         "email": f"{username}@example.com",
         "is_admin": True
     }
+    
     response = client.post(f"{url}/auth/register", json=user_data)
     print("user: ", response.json())
     assert response.status_code == 201  # Assuming 201 is the status code for successful creation

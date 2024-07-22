@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import warnings
 
-DB_URL = os.getenv("DB_URL")
+# DB_URL = os.getenv("DB_URL")
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -27,13 +27,15 @@ from api.v1.models.product import Product
 from api.v1.models.base import Base
 from api.v1.models.subscription import Subscription
 from api.v1.models.blog import Blog
+from decouple import config
 from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 
+SQLALCHEMY_DATABASE_URL = config('DB_URL')
 # Test Database URL (use an in-memory SQLite database for tests)
-SQLALCHEMY_DATABASE_URL = DB_URL
+# SQLALCHEMY_DATABASE_URL = DB_URL
 # SQLALCHEMY_DATABASE_URL = "sqlite://"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
