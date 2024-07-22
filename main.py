@@ -4,12 +4,7 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-<<<<<<< HEAD
-#from api.v1.models import user, profile, organization, org_preference
-=======
->>>>>>> origin/dev
 from api.db.database import Base, engine
-# In main.py or wherever you initialize your app
 from api.v1.models.org import Organization
 from api.v1.models.preference import OrgPreference
 
