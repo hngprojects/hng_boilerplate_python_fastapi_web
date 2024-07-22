@@ -34,6 +34,10 @@ class User(BaseModel, Base):
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
 
+    # Relationship definitions with foreign keys
+    created_regions = relationship(
+        "Region", back_populates="creator", foreign_keys="Region.created_by"
+    )
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
@@ -42,7 +46,6 @@ class User(BaseModel, Base):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
         return obj_dict
-
 
     def __str__(self):
         return self.email

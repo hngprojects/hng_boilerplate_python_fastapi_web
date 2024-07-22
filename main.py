@@ -16,7 +16,7 @@ from api.v1.routes.auth import auth
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
 from api.v1.routes.plans import plans
-
+from api.v1.routes.regions import region
 Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
@@ -44,6 +44,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 app.include_router(auth)
 app.include_router(user)
 app.include_router(plans)
+app.include_router(region)
 # app.include_router(users, tags=["Users"])
 
 
