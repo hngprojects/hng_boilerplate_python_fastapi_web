@@ -20,22 +20,29 @@ from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, 
 from api.db.database import get_db
 from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
 from api.utils.dependencies import get_current_admin, get_current_user
-
-
 from api.v1.models.org import Organization
-
 from api.v1.models.product import Product
+
+
+from fastapi import APIRouter,Depends,status,HTTPException,Response
+from sqlalchemy.orm import Session
+from api.v1.models.user import User
+from api.v1.schemas import schemas
+
+from api.db import database
+from api.utils import deps
+from api.utils import oauth2
+from fastapi.security.oauth2 import OAuth2PasswordRequestForm
+
 
 
 db = next(get_db())
 
-
-
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["authentication"])
 
-@router.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
+@router.post("/api/v1/login", response_model=Token, status_code=status.HTTP_200_OK)
 def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = authenticate_user(db, login_request.username, login_request.password)
     if not user:
@@ -50,7 +57,7 @@ def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(),
     )
     return Token(access_token=access_token, token_type="bearer")
   
-@router.post("/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/api/v1/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
 def register_user(user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.username == user.username).first()
     if db_user:
@@ -105,50 +112,9 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
     )
     return response
     
-
 # Protected route example: test route
-@auth.get("/admin")
+@router.get("/admin")
 def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
-
-
-from fastapi import APIRouter,Depends,status,HTTPException,Response
-from sqlalchemy.orm import Session
-from api.v1.models.user import User
-from api.v1.schemas import schemas
-
-from api.db import database
-from api.utils import deps
-from api.utils import oauth2
-
-
-
-
-from fastapi.security.oauth2 import OAuth2PasswordRequestForm
-
-router = APIRouter(tags=['authentication'])
-
-#here request body are sent through form not json
-@router.post('/api/v1/login')
-def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
-    
-    user = db.query(User).filter(User.email == user_credentials.username).first()
-
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"invalid credentials")
-    
-    #r = utils.verify(user_credentials.password,user.password)
-    if not deps.verify(user_credentials.password,user.password):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"invalid credentials")
-    
-
-    access_token= oauth2.create_access_token(data={"user_id":str(user.id)})
-    # access_token= oauth2.create_access_token(data={"user_id":user.id})
-
-
-    return {"access_token": access_token,"token_type": "bearer"}
-
-
-
 
 
