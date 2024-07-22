@@ -45,7 +45,7 @@ def mock_google_oauth2():
     with patch.object(oauth.google, 'authorize_redirect') as mock_authorize_redirect:
         with patch.object(oauth.google, 'authorize_access_token') as mock_authorize_token_userinfo:
             with patch.object(oauth.google, 'parse_id_token') as _:
-                mock_authorize_redirect.return_value = "http://testserver/api/v1/auth/login/google"
+                mock_authorize_redirect.return_value = "http://testserver/auth/login/google"
                 mock_authorize_token_userinfo.return_value = return_value
 
                 yield mock_authorize_redirect, mock_authorize_token_userinfo
@@ -54,7 +54,7 @@ def test_login(client, mock_google_oauth2):
     response = client.get("/auth/login/google")
     print("response: ", response)
     assert response.status_code == 200
-    assert response.url == "http://testserver/api/v1/auth/login/google"
+    assert response.url == "http://testserver/auth/login/google"
 
 def test_auth(client, mock_google_oauth2):
     response = client.get("/auth/callback/google?code=fake-code")
