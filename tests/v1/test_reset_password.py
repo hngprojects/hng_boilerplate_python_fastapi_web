@@ -35,7 +35,7 @@ async def test_password_reset_email(client, mock_db):
 
     app.dependency_overrides[get_db] = lambda: mock_db
 
-    with patch('api.util.auth.reset_password_request', return_value=True) as mock_create_token:
+    with patch('api.utils.auth.reset_password_request', return_value=True) as mock_create_token:
         response = await client.post("/api/v1/auth/reset-password",
                                     json={"new_password": "fakeha@#23shedpassword"},
                                     headers = {
