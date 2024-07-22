@@ -4,7 +4,7 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from api.v1.routes import permission
+from api.v1.routes import permission_router
 
 from api.db.database import Base, engine
 
