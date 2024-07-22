@@ -20,7 +20,7 @@ def create_test_admin_user(db: Session):
     admin_user = User(
         username="testadmin",
         email="testadmin@example.com",
-        hashed_password=hash_password("testpassword"),
+        password=hash_password("testpassword"),
         is_active=True,
         is_admin=True  
     )
