@@ -58,7 +58,7 @@ def test_login(client, mock_google_oauth2):
 
 def test_auth(client, mock_google_oauth2):
     response = client.get("/auth/callback/google?code=fake-code")
-    assert response.status_code == 201
+    assert response.status_code == 200
     data = response.json()
     assert 'access_token' in data["data"]
     assert 'refresh_token' in data["data"]
