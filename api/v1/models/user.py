@@ -28,7 +28,7 @@ class User(BaseModel, Base):
 
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
+    password = Column(String(255), nullable=True)
     first_name = Column(String(50))
     last_name = Column(String(50))
     is_active = Column(Boolean, server_default=text('true'))
