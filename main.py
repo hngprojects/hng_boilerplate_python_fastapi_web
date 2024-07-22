@@ -15,7 +15,6 @@ from api.db.database import Base, engine
 
 
 from api.v1.routes.auth import auth
-from api.v1.routes.subscription import subscription as sub
 
 Base.metadata.create_all(bind=engine)
 
@@ -43,7 +42,6 @@ app.add_middleware(
 
 
 app.include_router(auth)
-app.include_router(sub)
 # app.include_router(users, tags=["Users"])
 
 
