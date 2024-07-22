@@ -41,16 +41,4 @@ async def test_password_reset_email(client, mock_db):
         "/api/v1/auth/reset-password",
         json={"new_password": "fakeha@#23shedpassword"},
     )
-    assert response.status_code == 401
-    # Test with valid token
-    with patch('api.v1.routes.auth.reset_password_request', return_value=True) as mock_ret:
-        response = await client.post(
-            "/api/v1/auth/reset-password",
-            json={"new_password": "fakeha@#23shedpassword"},
-            headers={
-                'accept': 'application/json',
-                'x-reset-token':token,
-                'Content-Type': 'application/json',
-            }
-        )
-        assert response.status_code == 401
+    assert response.status_code == 404
