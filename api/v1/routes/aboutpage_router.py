@@ -8,7 +8,7 @@ from api.utils.dependencies import get_current_admin
 
 router = APIRouter()
 
-@router.put("/api/v1/content/about", response_model=AboutPageUpdate, dependencies=[Depends(get_current_admin)], tags="AboutPage")
+@router.put("/api/v1/content/about", response_model=AboutPageUpdate, dependencies=[Depends(get_current_admin)], tags="aboutpage")
 def update_about_page(about_page_update: AboutPageUpdate, db: Session = Depends(get_db)):
     """
     Update the content of the About page.
