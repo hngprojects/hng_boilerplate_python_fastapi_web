@@ -195,6 +195,7 @@ async def google_oauth2_callback(request: Request,
         data={"access_token": access_token,
               "refresh_token": refresh_token},
               status_code=201)
+    res = res.__dict__.copy()
     res.pop("error", None)
                                    
     return res
