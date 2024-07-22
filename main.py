@@ -11,12 +11,6 @@ from api.v1.models.preference import OrgPreference
 from api.v1.routes.job import job
 
 
-from api.v1.routes.newsletter_router import newsletter
-from api.v1.routes.newsletter_router import (
-    CustomException,
-    custom_exception_handler
-)
-
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
 
@@ -45,12 +39,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 
 app.include_router(job)
 # app.include_router(users, tags=["Users"])
 
-app.include_router(newsletter, tags=["Newsletter"])
 
 
 @app.get("/", tags=["Home"])
