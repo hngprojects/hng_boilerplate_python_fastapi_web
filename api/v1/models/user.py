@@ -19,6 +19,8 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association, user_role_association
+from api.v1.models.profile import Profile
+from api.v1.models.org import Organization
 from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -33,10 +35,23 @@ class User(BaseModel, Base):
     last_name = Column(String(50))
     is_active = Column(Boolean, server_default=text('true'))
     is_admin = Column(Boolean, server_default=text('false'))
+    is_admin = Column(Boolean, default=False) # required for certain operation
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
+    profile = relationship("Profile", uselist=False, back_populates="user")
+    organizations = relationship(
+            "Organization",
+            secondary=user_organization_association,
+            back_populates="users"
+            )
+    
+   
+
+
 
     def to_dict(self):
         obj_dict = super().to_dict()

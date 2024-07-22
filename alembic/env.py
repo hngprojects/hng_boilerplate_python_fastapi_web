@@ -5,6 +5,11 @@ from alembic import context
 from decouple import config as decouple_config
 from api.v1.models import *
 from api.v1.models.base import Base
+from api.v1.models.subscription import Subscription
+from api.v1.models.blog import Blog
+from api.v1.models.job import Job
+from api.v1.models.preference import OrgPreference
+
 
 # this is the Alembic Config object, which provides access to the values within the .ini file in use.
 config = context.config

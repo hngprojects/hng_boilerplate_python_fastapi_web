@@ -6,8 +6,7 @@ from api.utils.dependencies import get_current_user
 from api.db.database import get_db
 from api.v1.models.job import Job
 from api.v1.models.user import User
-from api.v1.schemas.job import JobCreate, JobResponseSchema
-from api.v1.schemas.job import JobUpdate, JobResponse
+from api.v1.schemas.job import JobUpdate
 from fastapi import APIRouter, Depends, HTTPException, status
 from utils.json_response import JsonResponseDict
 
