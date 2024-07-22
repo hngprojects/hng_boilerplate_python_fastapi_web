@@ -1,67 +1,72 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from api.db.database import Base
-from api.v1.main import app  # Adjust the import to your main FastAPI app
+import logging
+import uuid
+from datetime import datetime, timedelta
+from collections import OrderedDict
+from urllib.parse import urlencode
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy import insert
+from pytz import timezone
+
+
+from api.v1.schemas import invitations
+from api.utils.json_response import JSONResponse
+from api.v1.models.invitation import Invitation
 from api.v1.models.user import User
 from api.v1.models.org import Organization
-from api.v1.schemas.invitations import InvitationCreate
+from api.v1.models.base import user_organization_association, Base
+from api.db.database import engine, SessionLocal
 
-# Create a test database engine
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:golden@localhost:5432/HNG4test"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+# Configure logging
+logging.getLogger('passlib').setLevel(logging.ERROR)
+
+# Define constants
+UTC = timezone('UTC')
+INVITE_URL = "http://127.0.0.1:8000/api/v1/invite/accept"
+
+# Create database tables
+Base.metadata.create_all(engine)
 
 
-# Override the get_session dependency for testing
-def override_get_session():
+def get_session():
+    """
+    Provide a transactional scope around a series of operations.
+    """
+    session = SessionLocal()
     try:
-        db = TestingSessionLocal()
-        yield db
+        yield session
+    except Exception as e:
+        session.rollback()
+        raise e
     finally:
-        db.close()
+        session.close()
 
 
-app.dependency_overrides[get_session] = override_get_session
-
-# Create tables in the test database
-Base.metadata.create_all(bind=engine)
+# APIRouter instance
+invite = APIRouter(prefix='/api/v1/invite', tags=["org"])
 
 
-@pytest.fixture(scope="module")
-def client():
-    with TestClient(app) as c:
-        yield c
+@invite.post("/create", tags=["Invitation Management"])
+async def generate_invite_link(invite: invitations.InvitationCreate, session: Session = Depends(get_session)):
+    """
+    Generate an invitation link for a user to join an organization.
+    """
+    user = session.query(User).filter_by(id=invite.user_id).first()
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid user ID")
 
+    org = session.query(Organization).filter_by(id=invite.organization_id).first()
+    if not org:
+        raise HTTPException(status_code=400, detail="Invalid organization ID")
 
-@pytest.fixture(scope="module")
-def db_session():
-    session = TestingSessionLocal()
-    yield session
-    session.close()
+    expiration = datetime.utcnow() + timedelta(days=1)
+    new_invite = Invitation(user_id=invite.user_id, organization_id=invite.organization_id, expires_at=expiration)
 
+    session.add(new_invite)
+    session.commit()
+    session.refresh(new_invite)
 
-def setup_test_data(db_session):
-    user = User(id=1, name="Test User", email="testuser@example.com")
-    org = Organization(id=1, name="Test Organization")
-    db_session.add(user)
-    db_session.add(org)
-    db_session.commit()
+    invite_link = f"{INVITE_URL}?{urlencode({'invitation_id': str(new_invite.id)})}"
 
-
-@pytest.mark.asyncio
-async def test_generate_invite_link(client, db_session):
-    setup_test_data(db_session)
-
-    invite_data = {
-        "user_id": 1,
-        "organization_id": 1
-    }
-
-    response = await client.post("/api/v1/invite/create", json=invite_data)
-
-    assert response.status_code == 200
-    response_data = response.json()
-    assert "invitation_link" in response_data
-    assert response_data["invitation_link"].startswith("http://127.0.0.1:8000/api/v1/invite/accept?invitation_id=")
+    return {"invitation_link": invite_link}
