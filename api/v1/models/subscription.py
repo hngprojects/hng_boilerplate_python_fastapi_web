@@ -16,14 +16,12 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base
 from api.v1.models.base_model import BaseModel
-from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID
 
 
 class Subscription(BaseModel, Base):
     __tablename__ = 'subscriptions'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
     user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     plan = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True)

@@ -2,7 +2,7 @@
 """ The database module
 """
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from api.utils.settings import settings, BASE_DIR
 
@@ -37,13 +37,16 @@ engine = get_db_engine()
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+db_session = scoped_session(SessionLocal)
+
 Base = declarative_base()
 
+def create_database():
+    return Base.metadata.create_all(bind=engine)
+
 def get_db():
-    db = SessionLocal()
+    db = db_session()
     try:
         yield db
     finally:
         db.close()
-
-
