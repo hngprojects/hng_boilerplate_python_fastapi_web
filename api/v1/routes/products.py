@@ -11,7 +11,7 @@ from typing import List
 from uuid import UUID
 
 db = next(get_db())
-product_router = APIRouter(prefix="/api/v1/products", tags=["auth"])
+product_router = APIRouter(prefix="/products", tags=["auth"])
 
 
 @product_router.get("/{product_id}", status_code=status.HTTP_200_OK)
