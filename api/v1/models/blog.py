@@ -26,3 +26,10 @@ class Blog(BaseModel, Base):
     excerpt = Column(String(500), nullable=True)
 
     author = relationship("User", backref="blogs")
+
+
+
+class BlogCategory(BaseModel, Base):
+    __tablename__ = 'blog_categories'
+
+    name = Column(String, unique=True, nullable=False)
