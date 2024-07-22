@@ -10,10 +10,7 @@ from api.v1.models.base import user_organization_association
 from api.v1.schemas.membersSchemas import JsonResponseDict
 from uuid import UUID
 from enum import Enum
-import logging
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 router = APIRouter()
 
@@ -57,13 +54,9 @@ async def get_members(
         )
 
     filters = [user_organization_association.c.organization_id == UUID(organization_id)]
-    logger.debug(f"Initial filters: {filters}")
 
     if status != MemberStatus.all:
         filters.append(user_organization_association.c.status == status.value)
-        logger.debug(f"Applied status filter: {status.value}")
-
-    logger.debug(f"Querying members with page={page} and limit={limit}")
 
     try:
         query = db.query(
@@ -80,24 +73,18 @@ async def get_members(
             Organization.id == user_organization_association.c.organization_id
         ).filter(and_(*filters)).offset((page - 1) * limit).limit(limit)
 
-        logger.debug(f"SQL Query: {str(query.statement.compile(dialect=db.bind.dialect))}")
-
         members = query.all()
-        logger.debug(f"Members retrieved: {members}")
 
         total_members = db.query(User.id).join(
             user_organization_association
         ).filter(and_(*filters)).count()
-        logger.debug(f"Total members count: {total_members}")
 
     except DataError as e:
-        logger.error("Data error during database query", exc_info=True)
         raise HTTPException(
             status_code=400,
             detail="Invalid data or UUID format"
         )
     except Exception as e:
-        logger.error("Error fetching members", exc_info=True)
         raise HTTPException(
             status_code=500,
             detail="Internal server error"
