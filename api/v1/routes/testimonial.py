@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Security
-from fastapi_pagination import Page, paginate, Params, add_pagination
+from fastapi import APIRouter, Depends, Security, HTTPException, Query
+from fastapi_pagination import Page, Params, add_pagination
 from sqlalchemy.orm import Session
+from datetime import datetime
 from api.v1.models.testimonials import Testimonial as TestimonialModel
 from api.v1.schemas.testimonial import Testimonial
 from api.db.database import get_db
@@ -14,29 +15,47 @@ route = APIRouter()
 async def get_testimonials(
     db: Session = Depends(get_db),
     params: Params = Depends(),
-    current_user: User = Security(get_current_user)
+    current_user: User = Security(get_current_user),
+    rating: int = Query(None, ge=1, le=5, description="Rating of the testimonial (1-5)"),
+    date: str = Query(None, description="Date of the testimonial in YYYY-MM-DD format")
 ):
-    testimonials = db.query(TestimonialModel).all()
+    if rating is not None and (rating < 1 or rating > 5):
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    if date:
+        try:
+            datetime.strptime(date, '%Y-%m-%d')
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Date must be in YYYY-MM-DD format")
+
+    query = db.query(TestimonialModel)
+
+    if rating:
+        query = query.filter(TestimonialModel.rating == rating)
     
-    if not testimonials:
-        return {
-                "message": "Error retrieving testimonials",
-                "status_code": 500
-        }
-        
-    data = paginate(testimonials, params)
-    
-    return{
+    if date:
+        query = query.filter(TestimonialModel.date == date)
+
+    total = query.count()
+    total_pages = (total + params.size - 1) // params.size
+
+    if params.page > total_pages:
+        params.page = total_pages
+
+    query = query.offset((params.page - 1) * params.size).limit(params.size)
+    testimonials = query.all()
+
+    return {
         "message": "Testimonials retrieved successfully",
         "status_code": 200,
-        "data": data.items,
+        "data": testimonials,
         "pagination": {
-            "current_page": data.page,
-            "per_page": data.size,
-            "total_pages": data.pages,
-            "total_testimonials": data.total
+            "current_page": params.page,
+            "per_page": params.size,
+            "total_pages": total_pages,
+            "total_testimonials": total
+        }
     }
-}
 
 # Add pagination to the route
 add_pagination(route)
