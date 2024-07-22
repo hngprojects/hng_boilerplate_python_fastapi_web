@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from api.v1.routes.auth import auth
 from api.v1.models.user import User
 from api.db.database import get_db
+from api.utils.auth import create_access_token
 
 app = FastAPI()
 app.include_router(auth)
@@ -34,22 +35,22 @@ async def test_password_reset_email(client, mock_db):
     mock_db.query.return_value.filter.return_value.first.return_value = test_user
 
     app.dependency_overrides[get_db] = lambda: mock_db
-
-    with patch('api.v1.routes.auth.reset_password_request', return_value=True) as mock_create_token:
-        response = await client.post("/api/v1/auth/reset-password",
-                                    json={"new_password": "fakeha@#23shedpassword"},
-                                    headers = {
-                                        'accept': 'application/json',
-                                        'x-reset-token': 'fake_token',
-                                        'Content-Type': 'application/json',
-                                    })      
-
-
-        assert response.status_code == 200
-
-        response = await client.post("/api/v1/auth/reset-password",
-                                    json={"new_password": "fakeha@#23shedpassword"},
-                                   )      
+    token = create_access_token({"sub": "gihxdma356@couldmail.com"})
+    # Test with invalid token
+    response = await client.post(
+        "/api/v1/auth/reset-password",
+        json={"new_password": "fakeha@#23shedpassword"},
+    )
+    assert response.status_code == 401
+    # Test with valid token
+    with patch('api.v1.routes.auth.reset_password_request', return_value=True) as mock_ret:
+        response = await client.post(
+            "/api/v1/auth/reset-password",
+            json={"new_password": "fakeha@#23shedpassword"},
+            headers={
+                'accept': 'application/json',
+                'x-reset-token':token,
+                'Content-Type': 'application/json',
+            }
+        )
         assert response.status_code == 401
-
-       
