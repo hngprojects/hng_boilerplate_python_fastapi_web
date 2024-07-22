@@ -7,7 +7,7 @@ from api.utils.dependencies import get_current_admin
 import uuid
 
 
-blogs = APIRouter(prefix="/blogs", tags=["Blogs"])
+blogs = APIRouter(prefix="/api/v1/blogs", tags=["Blogs"])
 
 
 def validate_uuid(id: str):
@@ -33,6 +33,10 @@ async def delete_blog(id: str, db: Session = Depends(get_db), user: str = Depend
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Blog not active")
 
+        blog_data.is_deleted = True
+        db.commit()
+
+        return {"message": "Blog successfully deleted", "status_code": 202}
     except HTTPException as e:
         raise e
     except Exception as e:
