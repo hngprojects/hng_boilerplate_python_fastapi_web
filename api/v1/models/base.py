@@ -13,9 +13,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID
+import sqlalchemy.orm
 
-
-Base = declarative_base()
+Base = sqlalchemy.orm.declarative_base()
 
 
 user_organization_association = Table('user_organization', Base.metadata,
@@ -33,7 +33,6 @@ role_permission_association = Table(
     Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id',  ondelete='CASCADE'), primary_key=True),
     Column('permission_id', UUID(as_uuid=True), ForeignKey('permissions.id',  ondelete='CASCADE'), primary_key=True)
 )
-
 
 
 class BaseModel():

@@ -4,8 +4,8 @@ from typing import Union
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from api.db.database import Base, engine
-
+from api.v1.models.base import Base
+from api.db.database import engine
 from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
     CustomException,

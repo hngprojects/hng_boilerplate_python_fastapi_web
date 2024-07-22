@@ -5,7 +5,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import create_engine
 from api.utils.settings import settings, BASE_DIR
-
+import sqlalchemy.orm
 
 DB_HOST = settings.DB_HOST
 DB_PORT = settings.DB_PORT
@@ -39,7 +39,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 db_session = scoped_session(SessionLocal)
 
-Base = declarative_base()
+Base = sqlalchemy.orm.declarative_base()
 
 def create_database():
     return Base.metadata.create_all(bind=engine)
