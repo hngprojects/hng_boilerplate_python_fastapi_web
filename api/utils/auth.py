@@ -10,8 +10,6 @@ import os
 from jose import JWTError
 import bcrypt
 from api.v1.schemas.token import TokenData
-from api.v1.schemas.auth import ResetPasswordTokenData
-
 from api.db.database import get_db
 from .config import SECRET_KEY, ALGORITHM
 
@@ -46,24 +44,3 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
-
-def reset_password_request(password, token, db: Session = Depends(get_db)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    email = payload.get("email", None)
-    if email is None:
-        raise credentials_exception
-    token_data = ResetPasswordTokenData(email=email)
-    user = db.query(User).filter(User.email == token_data.email).first()
-    if user is None:
-        raise credentials_exception
-    password_hashed = hash_password(password)
-    user.password = password_hashed
-    db.commit()
-    db.refresh(user)
-    db.close()
-    return True
