@@ -17,12 +17,12 @@ class Settings(BaseSettings):
 
     # Database configurations
     DB_HOST: str = config("DB_HOST")
-    DB_PORT: int = config("DB_PORT", cast=int)
+    DB_PORT: int = config("DB_PORT")
     DB_USER: str = config("DB_USER")
     DB_PASSWORD: str = config("DB_PASSWORD")
     DB_NAME: str = config("DB_NAME")
     DB_TYPE: str = config("DB_TYPE")
-    dev: str     = config("DB_TEST_ENV")
+    dev: str = config("DB_TEST_ENV")
 
 
 settings = Settings()
