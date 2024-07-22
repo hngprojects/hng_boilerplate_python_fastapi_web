@@ -11,10 +11,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from utils.json_response import JsonResponseDict
 
 
-job = APIRouter(
-    prefix="/api/v1/jobs",
-    tags=["todos"],
-)
+job = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
+
 
 
 # update a job post
