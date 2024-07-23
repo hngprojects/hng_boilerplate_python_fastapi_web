@@ -14,7 +14,7 @@ from api.v1.models.invitation import Invitation
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 
-create_database()
+# create_database()
 db = next(get_db())
 
 user_1 = User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe")
