@@ -3,17 +3,17 @@
 
 from sqlalchemy import Column, String, Text, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
-from api.v1.models.base import Base
-from api.v1.models.base_model import BaseModel
+# from api.v1.models.base import Base
+from api.v1.models.base_model import BaseTableModel
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 from uuid_extensions import uuid7
 
 
-class Blog(BaseModel, Base):
+class Blog(BaseTableModel):
     __tablename__ = "blogs"
 
     author_id = Column(
-        UUID(as_uuid=True),
+        String,
         ForeignKey("users.id"),
         nullable=False,
         default=uuid7
