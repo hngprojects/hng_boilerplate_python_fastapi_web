@@ -115,7 +115,7 @@ Use HTTP methods according to their purpose:
 
 ## Code Reviews
 
-- **Review Process**: All code changes must be reviewed and approved by at least one other contributor.
+- **Review Process**: All code changes must be reviewed and approved by at least one mentor.
 
 - **Review Criteria**: Ensure changes follow the project's coding conventions, are well-documented, and include appropriate tests.
 
