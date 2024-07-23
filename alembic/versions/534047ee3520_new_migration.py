@@ -176,6 +176,14 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'role_id')
     )
+    op.create_table('regions',
+        sa.Column('id', sa.UUID(), nullable=False),
+        sa.Column('name', sa.String(length=100), nullable=False),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_regions_id'), 'regions', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
@@ -208,4 +216,6 @@ def downgrade() -> None:
     op.drop_table('permissions')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
     op.drop_table('organizations')
+    op.drop_index(op.f("ix_regions_id"), table_name="regions")
+    op.drop_table("regions")
     # ### end Alembic commands ###
