@@ -186,7 +186,7 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
     """Test for user deactivation errors."""
     create_mock_user(mock_user_service, mock_db_session)
 
-    login = client.post('/auth/login', data={
+    login = client.post('/api/v1/auth/login', data={
         "username": "testuser",
         "password": "Testpassword@123"
     })
@@ -219,7 +219,7 @@ def test_success_deactivation(mock_user_service, mock_db_session):
     """Test for successful user deactivation."""
     create_mock_user(mock_user_service, mock_db_session)
 
-    login = client.post('/auth/login', data={
+    login = client.post('api/v1/auth/login', data={
         "username": "testuser",
         "password": "Testpassword@123"
     })
@@ -250,7 +250,7 @@ def test_user_inactive(mock_user_service, mock_db_session):
     mock_db_session.commit.return_value = None
     mock_db_session.refresh.return_value = None
 
-    login = client.post('/auth/login', data={
+    login = client.post('/api/v1/auth/login', data={
         "username": "testuser1",
         "password": "Testpassword@123"
     })
