@@ -22,7 +22,7 @@ from sqlalchemy.dialects.postgresql import UUID
 class Subscription(BaseTableModel):
     __tablename__ = 'subscriptions'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
+    user_id = Column(String, ForeignKey('users.id'), nullable=False)
     plan = Column(String(50), nullable=False)
     is_active = Column(Boolean, default=True)
     start_date = Column(DateTime(timezone=True), server_default=func.now())

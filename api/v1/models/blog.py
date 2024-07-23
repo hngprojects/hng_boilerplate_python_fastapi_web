@@ -13,7 +13,7 @@ class Blog(BaseTableModel):
     __tablename__ = "blogs"
 
     author_id = Column(
-        UUID(as_uuid=True),
+        String,
         ForeignKey("users.id"),
         nullable=False,
         default=uuid7

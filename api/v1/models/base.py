@@ -4,6 +4,7 @@
 from sqlalchemy import (
         Column,
         ForeignKey,
+        String,
         Table,
     )
 from sqlalchemy.dialects.postgresql import UUID
@@ -11,19 +12,19 @@ from api.db.database import Base
 
 
 user_organization_association = Table('user_organization', Base.metadata,
-	Column('user_id', UUID(as_uuid=True), ForeignKey('users.id',  ondelete='CASCADE'), primary_key=True),
-	Column('organization_id', UUID(as_uuid=True), ForeignKey('organizations.id',  ondelete='CASCADE'), primary_key=True)
+	Column('user_id', String, ForeignKey('users.id',  ondelete='CASCADE'), primary_key=True),
+	Column('organization_id', String, ForeignKey('organizations.id',  ondelete='CASCADE'), primary_key=True)
 )
 
 user_role_association = Table('user_role', Base.metadata,
-    Column('user_id', UUID(as_uuid=True), ForeignKey('users.id',  ondelete='CASCADE'), primary_key=True),
-    Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id',  ondelete='CASCADE'), primary_key=True)
+    Column('user_id', String, ForeignKey('users.id',  ondelete='CASCADE'), primary_key=True),
+    Column('role_id', String, ForeignKey('roles.id',  ondelete='CASCADE'), primary_key=True)
 )
 
 role_permission_association = Table(
     'role_permission', Base.metadata,
-    Column('role_id', UUID(as_uuid=True), ForeignKey('roles.id',  ondelete='CASCADE'), primary_key=True),
-    Column('permission_id', UUID(as_uuid=True), ForeignKey('permissions.id',  ondelete='CASCADE'), primary_key=True)
+    Column('role_id', String, ForeignKey('roles.id',  ondelete='CASCADE'), primary_key=True),
+    Column('permission_id', String, ForeignKey('permissions.id',  ondelete='CASCADE'), primary_key=True)
 )
 
 

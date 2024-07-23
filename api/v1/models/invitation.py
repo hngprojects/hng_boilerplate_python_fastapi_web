@@ -10,7 +10,7 @@ from sqlalchemy.dialects.postgresql import UUID
 class Invitation(BaseTableModel):
     __tablename__ = 'invitations'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
-    organization_id = Column(UUID(as_uuid=True), ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
+    user_id = Column(String, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    organization_id = Column(String, ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_valid = Column(Boolean, default=True)

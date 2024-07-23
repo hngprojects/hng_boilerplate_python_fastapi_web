@@ -8,7 +8,7 @@ from fastapi import (
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from api.v1.models.newsletter import NEWSLETTER
-from api.v1.schemas.newsletter_schema import EMAILSCHEMA
+from api.v1.schemas.newsletter import EMAILSCHEMA
 from api.db.database import get_db, Base, engine
 
 
