@@ -67,13 +67,13 @@ def error_user_deactivation(test_db):
     access_token = login.json()['data']['access_token']
 
 
-    missing_field = client.patch('/api/v1/users/accounts/deactivate', json={
+    missing_field = client.post('/api/v1/users/deactivation', json={
         "reason": "No longer need the account"
     }, headers={'Authorization': f'Bearer {access_token}'})
     assert missing_field.status_code == 422
 
 
-    confirmation_false = client.patch('/api/v1/users/accounts/deactivate', json={
+    confirmation_false = client.post('/api/v1/users/deactivation', json={
         "reason": "No longer need the account",
         "confirmation": False
     }, headers={'Authorization': f'Bearer {access_token}'})
@@ -81,7 +81,7 @@ def error_user_deactivation(test_db):
     assert confirmation_false.json()['message'] == 'Confirmation required to deactivate account'
 
 
-    unauthorized = client.patch('/api/v1/users/accounts/deactivate', json={
+    unauthorized = client.post('/api/v1/users/deactivation', json={
         "reason": "No longer need the account",
         "confirmation": True
     })
@@ -96,7 +96,7 @@ def success_deactivation_test(test_db):
     })
     access_token = login.json()['access_token']
 	
-    success_deactivation = client.patch('/api/v1/users/accounts/deactivate', json={
+    success_deactivation = client.post('/api/v1/users/deactivation', json={
         "reason": "No longer need the account",
         "confirmation": True
     }, headers={'Authorization': f'Bearer {access_token}'})
@@ -125,7 +125,7 @@ def test_user_inactive(test_db):
     access_token = login.json()['data']['access_token']
 
 	
-    user_already_deactivated = client.patch('/api/v1/users/accounts/deactivate', json={
+    user_already_deactivated = client.post('/api/v1/users/deactivation', json={
         "reason": "No longer need the account",
         "confirmation": True
     }, headers={'Authorization': f'Bearer {access_token}'})
@@ -194,13 +194,13 @@ def test_user_inactive(test_db):
 #     access_token = login.json()['data']['access_token']
 
 #     # Missing field test
-#     missing_field = client.patch('/api/v1/users/accounts/deactivate', json={
+#     missing_field = client.post('/api/v1/users/deactivation', json={
 #         "reason": "No longer need the account"
 #     }, headers={'Authorization': f'Bearer {access_token}'})
 #     assert missing_field.status_code == 422
 
 #     # Confirmation false test
-#     confirmation_false = client.patch('/api/v1/users/accounts/deactivate', json={
+#     confirmation_false = client.post('/api/v1/users/deactivation', json={
 #         "reason": "No longer need the account",
 #         "confirmation": False
 #     }, headers={'Authorization': f'Bearer {access_token}'})
@@ -208,7 +208,7 @@ def test_user_inactive(test_db):
 #     assert confirmation_false.json()['message'] == 'Confirmation required to deactivate account'
 
 #     # Unauthorized test
-#     unauthorized = client.patch('/api/v1/users/accounts/deactivate', json={
+#     unauthorized = client.post('/api/v1/users/deactivation', json={
 #         "reason": "No longer need the account",
 #         "confirmation": True
 #     })
@@ -226,7 +226,7 @@ def test_user_inactive(test_db):
 #     mock_user_service.authenticate_user.return_value = create_mock_user(mock_user_service, mock_db_session)
 #     access_token = login.json()['data']['access_token']
 
-#     success_deactivation = client.patch('/api/v1/users/accounts/deactivate', json={
+#     success_deactivation = client.post('/api/v1/users/deactivation', json={
 #         "reason": "No longer need the account",
 #         "confirmation": True
 #     }, headers={'Authorization': f'Bearer {access_token}'})
@@ -257,7 +257,7 @@ def test_user_inactive(test_db):
 #     mock_user_service.authenticate_user.return_value = mock_user
 #     access_token = login.json()['data']['access_token']
 
-#     user_already_deactivated = client.patch('/api/v1/users/accounts/deactivate', json={
+#     user_already_deactivated = client.post('/api/v1/users/deactivation', json={
 #         "reason": "No longer need the account",
 #         "confirmation": True
 #     }, headers={'Authorization': f'Bearer {access_token}'})

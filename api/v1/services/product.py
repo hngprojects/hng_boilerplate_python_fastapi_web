@@ -28,7 +28,7 @@ class ProductService(Service):
         # Enable filter by query parameter
         if query_params:
             for column, value in query_params.items():
-                if hasattr(Product, column) and value is not None:
+                if hasattr(Product, column) and value:
                     query = query.filter(getattr(Product, column).ilike(f'%{value}%'))
 
         return query.all()

@@ -11,7 +11,7 @@ def success_response(status_code: int, message: str, data: Optional[dict] = None
         "message": message
     }
 
-    if data is not None:
+    if data:
         response_data['data'] = data
 
     return JSONResponse(

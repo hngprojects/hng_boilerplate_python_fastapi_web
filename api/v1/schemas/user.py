@@ -11,7 +11,7 @@ class UserBase(BaseModel):
     first_name: str
     last_name: str
     username: str
-    email: str
+    email: EmailStr
     created_at: datetime
 
 class UserCreate(BaseModel):
