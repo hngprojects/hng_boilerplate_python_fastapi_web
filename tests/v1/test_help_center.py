@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch
 from fastapi import HTTPException
 from ...main import app
-# from api.utils.dependencies import get_current_admin
+# from api.v1.routes.help_center import get_current_admin
 from datetime import datetime
 
 
@@ -22,13 +22,14 @@ def reset_mock_db():
 
 client = TestClient(app)
 
-# Mock JWT token 
+## Mock JWT tokens 
 valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lI"
+invalid_token = "invalid.token"
 
 @patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.v1.routes.help_center.get_current_admin", return_value={"user_id": "admin123"})
-def test_update_article_authorized(mock_get_db, mock_get_current_admin):
+@patch("api.v1.routes.help_center.get_current_user", return_value={"user_id": "user123"})
+def test_update_article_authorized(mock_get_current_user, mock_get_current_admin, mock_get_db):
     reset_mock_db()
     # Initialize mock database with test data
     db_article = {
@@ -63,7 +64,8 @@ def test_update_article_authorized(mock_get_db, mock_get_current_admin):
 
 @patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.v1.routes.help_center.get_current_admin", side_effect=HTTPException(status_code=403, detail="Forbidden"))
-def test_update_article_unauthorized(mock_get_db, mock_get_current_admin):
+@patch("api.v1.routes.help_center.get_current_user", return_value={"user_id": "user123"})
+def test_update_article_unauthorized(mock_get_current_user, mock_get_current_admin, mock_get_db):
     reset_mock_db()
     # Initialize mock database with test data
     get_mock_db()["1"] = {
@@ -86,7 +88,8 @@ def test_update_article_unauthorized(mock_get_db, mock_get_current_admin):
 
 @patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.v1.routes.help_center.get_current_admin", return_value={"user_id": "admin123"})
-def test_update_article_input_validation(mock_get_db, mock_get_current_admin):
+@patch("api.v1.routes.help_center.get_current_user", return_value={"user_id": "user123"})
+def test_update_article_input_validation(mock_get_current_user, mock_get_current_admin, mock_get_db):
     reset_mock_db()
     # Initialize mock database with test data
     get_mock_db()["1"] = {
