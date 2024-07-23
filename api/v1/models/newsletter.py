@@ -1,16 +1,15 @@
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String
 from uuid import uuid4
 from datetime import datetime
 from api.db.database import Base
+from api.v1.models.base_model import BaseTableModel
 
 
-class NEWSLETTER(Base):
+class Newsletter(BaseTableModel):
     """
     Newsletter db model
     """
     __tablename__ = 'newsletters'
 
-    id = Column(String(500), primary_key=True, default=lambda: str(uuid4()))
     email = Column(String(150), unique=True, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
  
