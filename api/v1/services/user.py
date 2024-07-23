@@ -241,6 +241,9 @@ class UserService(Service):
 
         self.perform_user_check(user)
 
+        if not schema.confirmation:
+            raise HTTPException(status_code=400, detail='Confirmation required to deactivate account')
+
         user.is_active = False
 
         # Create reactivation token
