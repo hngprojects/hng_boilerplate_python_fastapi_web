@@ -1,4 +1,5 @@
 from datetime import datetime
+from fastapi import HTTPException
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Any, Optional
 from uuid_extensions import uuid7
@@ -26,7 +27,7 @@ class UserCreate(BaseModel):
     @field_validator('password')
     def password_validator(cls, value):
         if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', value):
-            raise ValueError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character.')
+            raise HTTPException(400, 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character.')
         return value
 
 # class SuccessResponseData(BaseModel):
