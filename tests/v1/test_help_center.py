@@ -20,7 +20,7 @@ def reset_mock_db():
     global mock_db
     mock_db = {}
 
-client = TestClient(router)
+client = TestClient(app)
 
 # Mock JWT token 
 valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
