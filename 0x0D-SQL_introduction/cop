@@ -1,5 +1,0 @@
-USE mysql;
-UPDATE user
-SET authentication_string=PASSWORD('Njenga008')
-WHERE User='root';
-FLUSH PRIVILEGES;
