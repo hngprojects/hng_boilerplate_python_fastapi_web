@@ -1,1 +1,0 @@
-$('header').css('color', 'red');
