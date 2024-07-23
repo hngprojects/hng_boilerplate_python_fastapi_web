@@ -134,7 +134,7 @@ class UserService(Service):
     def create_access_token(self, user_id: str) -> str:
         '''Function to create access token'''
         
-        expires = dt.datetime.now(dt.UTC) + dt.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires = dt.datetime.utcnow() + dt.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         data = {
             'user_id': user_id,
             'exp': expires,
@@ -148,7 +148,7 @@ class UserService(Service):
     def create_refresh_token(self, user_id: str) -> str:
         '''Function to create access token'''
                 
-        expires = dt.datetime.now(dt.UTC) + dt.timedelta(days=settings.JWT_REFRESH_EXPIRY)
+        expires = dt.datetime.utcnow() + dt.timedelta(days=settings.JWT_REFRESH_EXPIRY)
         
         data = {
             'user_id': user_id,
