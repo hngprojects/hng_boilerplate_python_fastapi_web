@@ -67,7 +67,7 @@ def create_mock_user(mock_user_service, mock_db_session):
 def test_error_user_deactivation(mock_user_service, mock_db_session):
     """Test for user deactivation errors."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
-    print(f"mock_user: {mock_user}")
+    
     # mock_user_service.get_current_user.return_value = create_mock_user(mock_user_service, mock_db_session)
     # login = client.post('/api/v1/auth/login', data={
     #     "username": "testuser",
@@ -83,7 +83,7 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
     missing_field = client.post(DEACTIVATION_ENDPOINT, json={
         "reason": "No longer need the account"
     }, headers={'Authorization': f'Bearer {access_token}'})
-    print(f"missing: {missing_field.json()}")
+    
     assert missing_field.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     # Confirmation false test
@@ -91,7 +91,7 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
         "reason": "No longer need the account",
         "confirmation": False
     }, headers={'Authorization': f'Bearer {access_token}'})
-    print(f"client: {confirmation_false.json()}")
+    
     assert confirmation_false.status_code == status.HTTP_400_BAD_REQUEST
     assert confirmation_false.json().get('message') == 'Confirmation required to deactivate account'
 
