@@ -131,7 +131,7 @@ def test_user_inactive(test_db):
     }, headers={'Authorization': f'Bearer {access_token}'})
 
     assert user_already_deactivated.status_code == 403
-    assert user_already_deactivated.json()['message'] == 'User is inactive'
+    assert user_already_deactivated.json()['message'] == 'User is not active'
 	
 
 # import pytest
