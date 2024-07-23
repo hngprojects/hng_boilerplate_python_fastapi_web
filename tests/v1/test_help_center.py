@@ -27,7 +27,7 @@ valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwi
 invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lI"
 
 @patch("main.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("main.dependencies.get_current_admin", return_value={"user_id": "admin123"})
+@patch("main.get_current_admin", return_value={"user_id": "admin123"})
 def test_update_article_authorized(mock_get_db, mock_get_current_admin):
     reset_mock_db()
     # Initialize mock database with test data
