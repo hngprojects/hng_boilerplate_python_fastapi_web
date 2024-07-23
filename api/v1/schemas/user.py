@@ -27,7 +27,7 @@ class UserCreate(BaseModel):
     @field_validator('password')
     def password_validator(cls, value):
         if not re.match(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$', value):
-            raise HTTPException(400, 'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character.')
+            raise ValueError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character.')
         return value
 
 # class SuccessResponseData(BaseModel):
