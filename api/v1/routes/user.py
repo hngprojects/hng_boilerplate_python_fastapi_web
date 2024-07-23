@@ -20,7 +20,7 @@ def get_current_user_details(db: Session = Depends(get_db), current_user: User =
     return current_user
 
 
-@user.patch('/accounts/deactivate', status_code=200)
+@user.post('/deactivation', status_code=status.HTTP_200_OK)
 async def deactivate_account(request: Request, schema: DeactivateUserSchema, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     '''Endpoint to deactivate a user account'''
 
@@ -33,20 +33,20 @@ async def deactivate_account(request: Request, schema: DeactivateUserSchema, db:
     )
 
 
-@user.get('/current-user/delete', status_code=200)
-async def reactivate_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-    '''Endpoint to delete a user account'''
+# @user.get('/current-user/delete', status_code=200)
+# async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+#     '''Endpoint to delete a user account'''
 
-    # Delete current user
-    user_service.delete(db=db)
+#     # Delete current user
+#     user_service.delete(db=db)
 
-    return success_response(
-        status_code=200,
-        message='User deleted successfully',
-    )
+#     return success_response(
+#         status_code=200,
+#         message='User deleted successfully',
+#     )
 
 
-@user.get('/accounts/reactivate', status_code=200)
+@user.get('/reactivation', status_code=200)
 async def reactivate_account(request: Request, db: Session = Depends(get_db)):
     '''Endpoint to reactivate a user account'''
 

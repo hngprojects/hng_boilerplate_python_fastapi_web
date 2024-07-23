@@ -27,7 +27,7 @@ class UserService(Service):
         # Enable filter by query parameter
         if query_params:
             for column, value in query_params.items():
-                if hasattr(User, column) and value is not None:
+                if hasattr(User, column) and value:
                     query = query.filter(getattr(User, column).ilike(f'%{value}%'))
 
         return query.all()

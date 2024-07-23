@@ -15,7 +15,10 @@ from api.db.database import get_db
 from fastapi import status
 from datetime import datetime, timezone
 
+
 client = TestClient(app)
+DEACTIVATION_ENDPOINT = '/api/v1/users/deactivation'
+LOGIN_ENDPOINT = 'api/v1/auth/login'
 
 
 @pytest.fixture
@@ -77,14 +80,14 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
     access_token = user_service.create_access_token(user_id=str(uuid7()))
 
     # Missing field test
-    missing_field = client.patch('/api/v1/users/accounts/deactivate', json={
+    missing_field = client.post(DEACTIVATION_ENDPOINT, json={
         "reason": "No longer need the account"
     }, headers={'Authorization': f'Bearer {access_token}'})
     print(f"missing: {missing_field.json()}")
     assert missing_field.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     # Confirmation false test
-    confirmation_false = client.patch('/api/v1/users/accounts/deactivate', json={
+    confirmation_false = client.post(DEACTIVATION_ENDPOINT, json={
         "reason": "No longer need the account",
         "confirmation": False
     }, headers={'Authorization': f'Bearer {access_token}'})
@@ -93,7 +96,7 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
     assert confirmation_false.json().get('message') == 'Confirmation required to deactivate account'
 
     # Unauthorized test
-    unauthorized = client.patch('/api/v1/users/accounts/deactivate', json={
+    unauthorized = client.post(DEACTIVATION_ENDPOINT, json={
         "reason": "No longer need the account",
         "confirmation": True
     })
@@ -105,7 +108,7 @@ def test_success_deactivation(mock_user_service, mock_db_session):
     """Test for successful user deactivation."""
     create_mock_user(mock_user_service, mock_db_session)
 
-    login = client.post('api/v1/auth/login', data={
+    login = client.post(LOGIN_ENDPOINT, data={
         "username": "testuser",
         "password": "Testpassword@123"
     })
@@ -114,7 +117,7 @@ def test_success_deactivation(mock_user_service, mock_db_session):
     assert response.get("status_code") == status.HTTP_200_OK
     access_token = response.get('data').get('access_token')
 
-    success_deactivation = client.patch('/api/v1/users/accounts/deactivate', json={
+    success_deactivation = client.post(DEACTIVATION_ENDPOINT, json={
         "reason": "No longer need the account",
         "confirmation": True
     }, headers={'Authorization': f'Bearer {access_token}'})
