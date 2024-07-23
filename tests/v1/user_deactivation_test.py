@@ -161,5 +161,5 @@ def test_user_inactive(mock_user_service, mock_db_session):
         "confirmation": True
     }, headers={'Authorization': f'Bearer {access_token}'})
 
-    assert user_already_deactivated.status_code == 400
+    assert user_already_deactivated.status_code == 403
     assert user_already_deactivated.json().get('message') == 'User is not active'
