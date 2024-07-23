@@ -24,7 +24,7 @@ client = TestClient(app)
 
 # Mock JWT token 
 valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-invalid_token = "invalid.token"
+invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lI"
 
 @patch("api.db.database.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.utils.dependencies.get_current_admin", return_value={"user_id": "admin123"})
