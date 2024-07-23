@@ -62,6 +62,8 @@ jobs:
             echo "main.py failed to start"
             exit 1
           fi
+      - name: Create Alembic versions directory
+        run: mkdir -p /home/runner/work/hng_boilerplate_python_fastapi_web/hng_boilerplate_python_fastapi_web/alembic/versions
 
       - name: Run migrations
         run: |
