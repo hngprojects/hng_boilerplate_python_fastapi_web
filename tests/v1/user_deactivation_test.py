@@ -121,7 +121,14 @@ def success_deactivation_test(test_db):
     }, headers={'Authorization': f'Bearer {access_token}'})
     assert success_deactivation.status_code == 200
 	
-
+@pytest.fixture(scope="function", autouse=True)
+def setup_and_teardown(test_db):
+    test_db.query(User).delete()
+    test_db.commit()
+    yield
+    test_db.query(User).delete()
+    test_db.commit()
+    
 def test_iser_inactive(test_db):
 	
     user = User(
