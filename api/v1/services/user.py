@@ -68,8 +68,6 @@ class UserService(Service):
         if db.query(User).filter(User.email == schema.email).first() or db.query(User).filter(User.username == schema.username).first():
             raise HTTPException(status_code=400, detail='User with this email or username already exists')
 
-        print(f'PASSWORD: -- {schema.password}')
-
         # Hash password
         schema.password = self.hash_password(password=schema.password)
         
@@ -242,6 +240,7 @@ class UserService(Service):
         '''Function to deactivate a user'''
 
         self.perform_user_check(user)
+
         user.is_active = False
 
         # Create reactivation token
