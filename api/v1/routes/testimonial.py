@@ -9,9 +9,9 @@ from .auth import get_current_user
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from api.v1.models.user import User
 
-route = APIRouter()
+testimonial = APIRouter()
 
-@route.get("/api/testimonials")
+@testimonial.get("/api/testimonials")
 async def get_testimonials(
     db: Session = Depends(get_db),
     params: Params = Depends(),
@@ -58,4 +58,4 @@ async def get_testimonials(
     }
 
 # Add pagination to the route
-add_pagination(route)
+add_pagination(testimonial)

@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
 from api.db.database import create_database
-from api.v1.routes.testimonial import route as testimonial
+from api.v1.routes.testimonial import testimonial
 
 from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
