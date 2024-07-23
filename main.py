@@ -19,16 +19,13 @@ from routers import jobs
 
 app = FastAPI()
 
+# Include routers
 app.include_router(jobs.router)
+app.include_router(newsletter, tags=["Newsletter"])
+app.include_router(auth)
+app.include_router(user)
 
-Base.metadata.create_all(bind=engine)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    yield
-
-app = FastAPI(lifespan=lifespan)
-
+# Set up CORS middleware
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
@@ -42,13 +39,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
-app.include_router(newsletter, tags=["Newsletter"])
+# Exception handlers
+app.add_exception_handler(CustomException, custom_exception_handler)
 
-app.include_router(auth)
-app.include_router(user)
-# app.include_router(users, tags=["Users"])
-
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
@@ -56,7 +51,6 @@ async def get_root(request: Request) -> dict:
         "message": "Welcome to API",
         "URL": "",
     }
-
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)
