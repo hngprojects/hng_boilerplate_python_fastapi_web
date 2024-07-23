@@ -1,115 +1,142 @@
-# FASTAPI
-FastAPI boilerplate
+# Code of Conduct
 
-## Setup
+## Introduction
 
-1. Create a virtual environment.
- ```sh
-    python3 -m venv .venv
- ```
-2. Activate virtual environment.
-```sh
-    source /path/to/venv/bin/activate`
-```
-3. Install project dependencies `pip install -r requirements.txt`
-4. Create a .env file by copying the .env.sample file
-`cp .env.sample .env`
+Welcome to our FastAPI project! Our community values respectful and constructive collaboration. This Code of Conduct establishes clear guidelines for acceptable behavior and outlines the conventions and methods to be used in this project. By participating, you agree to abide by this Code of Conduct.
 
-5. Start server.
- ```sh
- python main.py
-```
+We encourage participants to read the `README.md` in branch `Setup-workflow` in this repo before pushing code and pulling code.
+ 
 
-## **DATABASE TEST SETUP**
+## Conventions
 
-To set up the database, follow the following steps:
+***Code Style***
 
-**Cloning**
-- clone the repository using `git clone https://github.com/hngprojects/hng_boilerplate_python_fastapi_web`
-- `cd` into the directory hng_boilerplate_python_fastapi_web
-- switch branch using `git checkout backend`
+***Language***: The project uses Python.
 
-**Environment Setup**
-- run `pip install -r requrements.txt` to install dependencies
-- create a `.env` file in the root directory and copy the content of `.env.sample` and update it accordingly
+***Indentation***: Use 4 spaces for indentation.
 
-**Create your local database**
-```bash
-sudo -u root psql
-```
-```sql
-CREATE USER user WITH PASSWORD 'your desired password'; 
-CREATE DATABASE hng_fast_api;
-GRANT ALL PRIVILEGES ON DATABASE hng_fast_api TO user;
-```
-
-**Starting the database**
-after cloning the database, dont run 
-`alembic revision --autogenerate -m 'initial migration'`
-but run
-`alembic upgrade head`
-
-if you make changes to any table locally, then run the below command.
-```bash
-alembic revision --autogenerate -m 'initial migration'
-alembic upgrade head
-```
-
-**create dummy data**
-```bash
-python3 seed.py
-```
+***Line Length***: Limit lines to 79 characters.
 
 
-**Adding tables and columns to models**
+## Naming Conventions
 
-After creating new tables, or adding new models. Make sure to run alembic revision --autogenerate -m "Migration messge"
+- **Variables and Functions**: Use snake_case (e.g., my_function).
 
-After creating new tables, or adding new models. Make sure you import the new model properly in th 'api/v1/models/__init__.py file
+- **Classes**: Use PascalCase (e.g., MyClass).
 
-After importing it in the init file, you need not import it in the /alembic/env.py file anymore
+- **Constants**: Use UPPER_CASE (e.g., MY_CONSTANT).
+
+- **Comments**: Use # for single-line comments and ''' or """ for docstrings.
+
+## Git Commit Messages
+
+- Format: Follow the conventional commits standard.
 
 
-**Adding new routes**
 
-To add a new route, confirm if a file relating to that route is not already created. If it is add the route in that file using the already declared router
+## Branching and Pull Requests
 
-If the there is no file relating to the route in the 'api/v1/routes/' directory create a new one following the naming convention
+***Branch Naming***:
 
-After creating the new route file, declare the router and add the prefix as well as the tag
+- **Feature Branches**: feature/branch-name
 
-The prefix should not include the base prefix ('/api/v1') as it is already includedin the base `api_version_one` router
+- **Bug Fix Branches**: bugfix/branch-name
 
-After creating the router, import it in the 'api/v1/routes/__init__.py' file and include the router in the `api_version_one` router using
-```python
-api_version_one.include_router(<router_name>)
-```
+- **Hotfix Branches**: hotfix/branch-name
 
-## TEST THE ENDPOINT
-- run the following code
-```
-python -m unittest tests/v1/test_login.py
-python -m unittest tests/v1/test_signup.py
-```
+- **Pull Request Titles**: Use the format [Type]: Brief description (e.g., [Bugfix]: Fix user login issue,  [Feat]: add user login).
 
-## Issues
-if you encounter the following Error, when you run the code below
 
-**alembic revision --autogenerate -m 'your migration message'**
 
-```
-INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
-INFO  [alembic.runtime.migration] Will assume transactional DDL.
-ERROR [alembic.util.messaging] Target database is not up to date.
-  FAILED: Target database is not up to date.
-```
 
-## Solutions
-Run the following code below first to update the datebase
-**alembic upgrade head**
-then, run this again.
-**alembic revision --autogenerate -m 'your migration message'**
+## PR MESSAGE FORMAT
 
-## update 
-please make sure to test your endpoint or model before pushing.
-push your alembic migrations.
+**Title**: Fix token validation issue in login endpoint
+
+**Description**:
+- **Purpose**:
+   - Example: This PR resolves an issue where users were unable to log in due to incorrect token validation.
+
+- **Changes**: 
+  - Example: Refactored token validation logic in the login endpoint.
+
+- **Impact**:
+   - Example: Ensures users can log in successfully with valid credentials. No impact on other endpoints.
+
+- **Testing**:
+   - Example: Added unit tests for token validation; all tests pass.
+
+- **Additional Information**:
+   - Example: Related to issue #123.
+
+
+
+
+
+**Endpoint Naming**:
+
+- Use descriptive and concise names.
+
+- Use nouns to represent the resources being acted upon. Example: /users/orders/{order_id}
+
+### HTTP Methods:
+
+Use HTTP methods according to their purpose:
+
+- GET for retrieving resources.
+- POST for creating resources.
+- PUT for updating resources.
+- DELETE for deleting resources.
+
+### Status Codes:
+
+- Use appropriate HTTP status codes to represent the outcome of the operations.
+
+- **Example**: 200 OK for successful operations, 201 Created for successful resource creation, 404 Not Found for missing resources.
+
+**Path Parameters**:
+- Use curly braces {} to define path parameters.
+         Example: /users/{user_id}
+ 
+
+## Testing
+
+- **Test Framework**: Use pytest for testing.
+
+- **Pytest**: Write Pytest for all new features and bug fixes.
+
+- **Test Coverage**: Ensure at least 100% test coverage.
+
+### Documentation
+
+- **Docstrings**: Use docstrings for all public functions and classes.
+
+- **Update Frequency**: Update documentation with each significant change.
+
+## Code Reviews
+
+- **Review Process**: All code changes must be reviewed and approved by at least one other contributor.
+
+- **Review Criteria**: Ensure changes follow the project's coding conventions, are well-documented, and include appropriate tests.
+
+
+## Conduct
+
+- Be Respectful
+
+- Treat all members of the community with respect and consideration.
+
+- Refrain from demeaning, discriminatory, or harassing behavior and speech.
+
+- Be Collaborative.
+
+- Seek constructive feedback and be open to suggestions.
+
+
+## Reach out to Team Member
+
+Instances of you having questions reach out to the project maintainers on slack [@Sunday Mba, @joboy-dev, @TMCoded, @Modupe Akanni, @Olusegun Emmanuel]. All complaints will be reviewed promptly.
+
+## Acknowledgment
+
+By participating in this project, you agree to abide by this Code of Conduct and help foster a positive and productive community.
