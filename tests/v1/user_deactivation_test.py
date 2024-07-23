@@ -60,7 +60,7 @@ def create_user(test_db):
 def error_user_deactivation(test_db):
     '''Test for user deactivation'''
 
-    login =  client.post('/auth/login', data={
+    login =  client.post('/api/v1/auth/login', data={
         "username": "testuser",
         "password": "Testpassword@123"
     })
@@ -90,7 +90,7 @@ def error_user_deactivation(test_db):
 
 def success_deactivation_test(test_db):
 	
-    login =  client.post('/auth/login', data={
+    login =  client.post('/api/v1/auth/login', data={
         "username": "testuser",
         "password": "Testpassword@123"
     })
@@ -118,7 +118,7 @@ def test_user_inactive(test_db):
     test_db.commit()
     test_db.refresh(user)
 	
-    login =  client.post('/auth/login', data={
+    login =  client.post('/api/v1/auth/login', data={
         "username": "testuser1",
         "password": "Testpassword@123"
     })
