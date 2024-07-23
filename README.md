@@ -1,115 +1,101 @@
-# FASTAPI
-FastAPI boilerplate
+# Contribute to the hng_boilerplate_python_fastapi_web Project by Forking and Using Your Terminal to Get Upstream Updates
 
-## Setup
+Contributing to a GitHub project by forking and using your terminal to get upstream updates involves several steps. Here's a detailed explanation:
 
-1. Create a virtual environment.
- ```sh
-    python3 -m venv .venv
- ```
-2. Activate virtual environment.
+## 1. Fork the Repository
+Forking a repository creates a personal copy of the project on your GitHub. This allows you to make changes without affecting the original project.
+
+- Go to the GitHub repository you want to contribute to. [here click](https://github.com/hngprojects/hng_boilerplate_python_fastapi_web)
+- Click on the "Fork" button at the top-right corner of the repository page.
+This will create a copy of the repository under your GitHub account.
+
+## 2. Clone the Forked Repository
+Clone the forked repository to your local machine so you can work on it.
+
+In this case
 ```sh
-    source /path/to/venv/bin/activate`
+git clone https://github.com/your-username/hng_boilerplate_python_fastapi_web.git
+cd hng_boilerplate_python_fastapi_web
 ```
-3. Install project dependencies `pip install -r requirements.txt`
-4. Create a .env file by copying the .env.sample file
-`cp .env.sample .env`
+- **REMEMBER to replace your-username with your GitHub username**
 
-5. Start server.
- ```sh
- python main.py
-```
+## 3. Configure the Upstream Repository
+To keep your fork up-to-date with the original repository, you need to configure a remote that points to the original repository (upstream repository).
 
-## **DATABASE TEST SETUP**
-
-To set up the database, follow the following steps:
-
-**Cloning**
-- clone the repository using `git clone https://github.com/hngprojects/hng_boilerplate_python_fastapi_web`
-- `cd` into the directory hng_boilerplate_python_fastapi_web
-- switch branch using `git checkout backend`
-
-**Environment Setup**
-- run `pip install -r requrements.txt` to install dependencies
-- create a `.env` file in the root directory and copy the content of `.env.sample` and update it accordingly
-
-**Create your local database**
-```bash
-sudo -u root psql
-```
-```sql
-CREATE USER user WITH PASSWORD 'your desired password'; 
-CREATE DATABASE hng_fast_api;
-GRANT ALL PRIVILEGES ON DATABASE hng_fast_api TO user;
+In this case
+```sh
+git remote add upstream https://github.com/hngprojects/hng_boilerplate_python_fastapi_web.git
 ```
 
-**Starting the database**
-after cloning the database, dont run 
-`alembic revision --autogenerate -m 'initial migration'`
-but run
-`alembic upgrade head`
+## 4. Fetch and Merge Upstream Changes
+To keep your fork in sync with the upstream repository, fetch the changes and merge them into your local repository.
 
-if you make changes to any table locally, then run the below command.
-```bash
-alembic revision --autogenerate -m 'initial migration'
-alembic upgrade head
+```sh
+git fetch upstream
+git checkout dev
+git merge upstream/dev
+```
+**Replace dev with the name of the branch you want to sync with.**
+
+### Important: list all branches available in the upstream repository:
+
+```sh
+git branch -r
 ```
 
-**create dummy data**
-```bash
-python3 seed.py
+## 5. Create a New Branch
+Create a new branch for your feature or bug fix. This keeps your changes organized and separate from the main branch.
+
+```sh
+git checkout -b feature/branch-name
+```
+- **Replace branch-name with a descriptive name for your branch.**
+
+## 6. Make Changes and Commit
+Make your changes to the code. Once you're satisfied with your changes, commit them to your new branch.
+
+```sh
+git add .
+git commit -m "Description of the changes"
 ```
 
+## 7. Push Changes to Your Fork
+Push your changes to the corresponding branch in your forked repository on GitHub.
 
-**Adding tables and columns to models**
-
-After creating new tables, or adding new models. Make sure to run alembic revision --autogenerate -m "Migration messge"
-
-After creating new tables, or adding new models. Make sure you import the new model properly in th 'api/v1/models/__init__.py file
-
-After importing it in the init file, you need not import it in the /alembic/env.py file anymore
-
-
-**Adding new routes**
-
-To add a new route, confirm if a file relating to that route is not already created. If it is add the route in that file using the already declared router
-
-If the there is no file relating to the route in the 'api/v1/routes/' directory create a new one following the naming convention
-
-After creating the new route file, declare the router and add the prefix as well as the tag
-
-The prefix should not include the base prefix ('/api/v1') as it is already includedin the base `api_version_one` router
-
-After creating the router, import it in the 'api/v1/routes/__init__.py' file and include the router in the `api_version_one` router using
-```python
-api_version_one.include_router(<router_name>)
+```sh
+git push origin feature/branch-name
 ```
 
-## TEST THE ENDPOINT
-- run the following code
+## 8. Create a Pull Request
+To contribute your changes back to the original repository, you need to create a pull request.
+
+- Go to your forked repository on GitHub.
+- Switch to the branch you pushed your changes to.
+- Click the "Pull Request" button.
+- Add a descriptive title and detailed description for your pull request.
+- Submit the pull request.
+  
+## 9. Keep Your Fork Updated
+Regularly fetch and merge upstream changes to keep your fork up-to-date.
+
+```sh
+git fetch upstream
+git checkout main
+git merge upstream/dev
+git push origin dev
 ```
-python -m unittest tests/v1/test_login.py
-python -m unittest tests/v1/test_signup.py
-```
+- This ensures that your fork stays current with the original repository, minimizing merge conflicts and making it easier to contribute in the future.
 
-## Issues
-if you encounter the following Error, when you run the code below
+## Summary
+- Fork the repository on GitHub.
+- Clone your fork to your local machine.
+- Add the upstream repository as a remote.
+- Fetch and merge upstream changes to keep your fork updated.
+- Create a new branch for your changes.
+- Make changes and commit them to your branch.
+- Push your changes to your fork on GitHub.
+- Create a pull request to contribute your changes back to the original repository.
+- Regularly update your fork with upstream changes.
 
-**alembic revision --autogenerate -m 'your migration message'**
-
-```
-INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
-INFO  [alembic.runtime.migration] Will assume transactional DDL.
-ERROR [alembic.util.messaging] Target database is not up to date.
-  FAILED: Target database is not up to date.
-```
-
-## Solutions
-Run the following code below first to update the datebase
-**alembic upgrade head**
-then, run this again.
-**alembic revision --autogenerate -m 'your migration message'**
-
-## update 
-please make sure to test your endpoint or model before pushing.
-push your alembic migrations.
+  
+By following these steps, you can effectively contribute to the hng_boilerplate_python_fastapi_web projects while keeping your fork and local repository up-to-date with the original project.
