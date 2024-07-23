@@ -134,13 +134,12 @@ class UserService(Service):
     def create_access_token(self, user_id: str) -> str:
         '''Function to create access token'''
         
-        expires = dt.datetime.now(dt.UTC) + dt.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         data = {
             'user_id': user_id,
             'exp': expires,
             'type': 'access'
         }
-        
         encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
@@ -148,7 +147,7 @@ class UserService(Service):
     def create_refresh_token(self, user_id: str) -> str:
         '''Function to create access token'''
                 
-        expires = dt.datetime.now(dt.UTC) + dt.timedelta(days=settings.JWT_REFRESH_EXPIRY)
+        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=settings.JWT_REFRESH_EXPIRY)
         
         data = {
             'user_id': user_id,
@@ -233,6 +232,7 @@ class UserService(Service):
         )
         
         token = self.verify_access_token(access_token, credentials_exception)
+
         user =  db.query(User).filter(User.id == token.id).first()
         
         return user
@@ -240,6 +240,9 @@ class UserService(Service):
 
     def deactivate_user(self, request: Request, db: Session, schema: user.DeactivateUserSchema, user: User):
         '''Function to deactivate a user'''
+
+        if not schema.confirmation:
+            raise HTTPException(detail='Confirmation required to deactivate account', status_code=400)
 
         self.perform_user_check(user)
         user.is_active = False
