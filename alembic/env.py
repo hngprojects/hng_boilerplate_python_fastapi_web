@@ -13,6 +13,7 @@ from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from api.v1.models.newsletter import NEWSLETTER
 from api.v1.models.testimonials import Testimonial
+from api.v1.models.product import Product 
 
 
 # this is the Alembic Config object, which provides
