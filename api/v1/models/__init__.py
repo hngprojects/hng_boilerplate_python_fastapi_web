@@ -1,3 +1,4 @@
+from api.v1.models.oauth_token import OauthToken
 from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
