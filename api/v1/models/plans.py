@@ -6,10 +6,10 @@ from sqlalchemy import (
         ARRAY
         )
 from api.v1.models.base import Base
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 
 
-class SubscriptionPlan(BaseModel, Base):
+class SubscriptionPlan(BaseTableModel):
     __tablename__ = "plans"
     
     name = Column(String(255), nullable=False)
