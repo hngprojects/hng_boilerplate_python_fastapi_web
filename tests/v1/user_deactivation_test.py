@@ -130,7 +130,7 @@ def test_user_inactive(test_db):
         "confirmation": True
     }, headers={'Authorization': f'Bearer {access_token}'})
 
-    assert user_already_deactivated.status_code == 400
+    assert user_already_deactivated.status_code == 403
     assert user_already_deactivated.json()['message'] == 'User is inactive'
 	
 
