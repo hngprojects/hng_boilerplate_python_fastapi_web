@@ -9,6 +9,7 @@ from datetime import datetime
 
 
 
+
 # Mock in-memory database
 mock_db = {}
 
@@ -19,7 +20,11 @@ def reset_mock_db():
     global mock_db
     mock_db = {}
 
-client = TestClient(app)
+client = TestClient(router)
+
+# Mock JWT token 
+valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+invalid_token = "invalid.token"
 
 @patch("api.db.database.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.utils.dependencies.get_current_admin", return_value={"user_id": "admin123"})
@@ -39,7 +44,7 @@ def test_update_article_authorized(mock_get_db, mock_get_current_admin):
     response = client.patch(
         "/help-center/topics/1",
         json={"title": "Updated Title", "content": "Updated Content"},
-        headers={"Authorization": "Bearer valid_token"}
+        headers={"Authorization": f"Bearer {valid_token}"}
     )
 
     assert response.status_code == 200
@@ -73,7 +78,7 @@ def test_update_article_unauthorized(mock_get_db, mock_get_current_admin):
     response = client.patch(
         "/help-center/topics/1",
         json={"title": "Updated Title", "content": "Updated Content"},
-        headers={"Authorization": "Bearer invalid_token"}
+        headers={"Authorization": f"Bearer {invalid_token}"}
     )
 
     assert response.status_code == 403
@@ -96,7 +101,7 @@ def test_update_article_input_validation(mock_get_db, mock_get_current_admin):
     response = client.patch(
         "/help-center/topics/1",
         json={"title": "", "content": "Updated Content"},  # Invalid title
-        headers={"Authorization": "Bearer valid_token"}
+        headers={"Authorization": f"Bearer {valid_token}"}
     )
 
     assert response.status_code == 422  # Unprocessable Entity, or a similar validation error code
