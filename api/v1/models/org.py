@@ -13,10 +13,8 @@ from sqlalchemy import (
         func,
         )
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
+from api.v1.models.base import user_organization_association
 from api.v1.models.base_model import BaseTableModel
-from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 
 
@@ -31,7 +29,7 @@ class Organization(BaseTableModel):
             secondary=user_organization_association,
             back_populates="organizations"
             )
-    roles = relationship('Role', back_populates='organization')
+    roles = relationship("OrgRole", back_populates="organization", cascade="all, delete-orphan")
 
 
     def __str__(self):
