@@ -10,7 +10,6 @@ from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
-from api.utils.dependencies import get_current_admin
 from api.v1.services.user import user_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -173,6 +172,6 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 
 # Protected route example: test route
 @auth.get("/admin")
-def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
+def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
 
