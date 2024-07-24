@@ -10,25 +10,6 @@ from fastapi.responses import JSONResponse
 
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
 
-class CustomException(HTTPException):
-    """
-    Custom error handling
-    """
-    def __init__(self, status_code: int, detail: dict):
-        super().__init__(status_code=status_code, detail=detail)
-        self.message = detail.get("message")
-        self.success = detail.get("success")
-        self.status_code = detail.get("status_code")
-
-async def custom_exception_handler(request: Request, exc: CustomException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "message": exc.message,
-            "success": exc.success,
-            "status_code": exc.status_code
-        }
-    )
 
 class WaitlistResponse(BaseModel):
     message: str
@@ -41,14 +22,14 @@ async def waitlist_signup(
 ):
     if not user.full_name:
         logger.error("Full name is required")
-        raise CustomException(status_code=422, detail={"message": "Full name is required", 
+        raise HTTPException(status_code=422, detail={"message": "Full name is required", 
                                                        "success": False, "status_code": 422})
 
     existing_user = db.query(Waitlist).filter(
         Waitlist.email == user.email).first()
     if existing_user:
         logger.error(f"Email already registered: {user.email}")
-        raise CustomException(status_code=400, detail={"message": "Email already registered", 
+        raise HTTPException(status_code=400, detail={"message": "Email already registered", 
                                                        "success": False, "status_code": 400})
 
     db_user = Waitlist(email=user.email, full_name=user.full_name)
@@ -61,7 +42,7 @@ async def waitlist_signup(
         logger.info(f"Confirmation email sent successfully to {user.email}")
     except HTTPException as e:
         logger.error(f"Failed to send confirmation email: {e.detail}")
-        raise CustomException(
+        raise HTTPException(
             status_code=500, detail={"message": "Failed to send confirmation email", 
                                      "success": False, "status_code": 500})
 

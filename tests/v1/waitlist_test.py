@@ -39,7 +39,9 @@ def test_duplicate_email(client_with_mocks):
     )
     data = response.json()
     print(type(data))
-    inner_message = data['message']['message']
+    print(data)
+    outer_message = data['message']
+    inner_message = outer_message['message']
     expected_message = 'Email already registered'
     assert inner_message == expected_message
     assert data['status_code'] == 400
