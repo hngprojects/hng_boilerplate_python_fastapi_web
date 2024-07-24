@@ -29,5 +29,6 @@ class Blog(BaseTableModel):
     dislikes_audit = Column(ARRAY(String), nullable=True)
 
     author = relationship("User", back_populates="blogs")
-    comments = relationship(
-        "Comment", back_populates="blog", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
+    likes = relationship("BlogLike", back_populates="blog", cascade="all, delete-orphan")
+    dislikes = relationship("BlogDislike", back_populates="blog", cascade="all, delete-orphan")
