@@ -8,7 +8,7 @@ from api.v1.models.article import Article
 from api.v1.schemas.article import Article as ArticleSchema
 from api.v1.schemas.article import ArticleUpdate
 
-help_center = APIRouter(prefix="/help-center", tags=["help"])
+help_center = APIRouter(prefix="/help-center", tags=["Helpcenter"])
 
 
 @help_center.patch("/topics/{article_id}", response_model=ArticleSchema)

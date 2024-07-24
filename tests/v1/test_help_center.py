@@ -1,13 +1,13 @@
-import sys
 import os
-import jwt
+import sys
 from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
 from unittest.mock import patch
+
+import jwt
 from fastapi import HTTPException
+from fastapi.testclient import TestClient
+
 from ...main import app
-
-
 
 # Mock in-memory database
 mock_db = {}
@@ -54,7 +54,7 @@ def test_update_article_authorized(mock_get_current_user, mock_get_current_admin
     get_mock_db()["1"] = db_article
 
     response = client.patch(
-        "/help-center/topics/1",
+        "/api/v1/help-center/topics/1",
         json={"title": "Updated Title", "content": "Updated Content"},
         headers={"Authorization": f"Bearer {admin_token}"}
     )
@@ -89,7 +89,7 @@ def test_update_article_unauthorized(mock_get_current_user, mock_get_current_adm
     }
 
     response = client.patch(
-        "/help-center/topics/1",
+        "/api/v1/help-center/topics/1",
         json={"title": "Updated Title", "content": "Updated Content"},
         headers={"Authorization": f"Bearer {invalid_token}"}
     )
@@ -113,7 +113,7 @@ def test_update_article_input_validation(mock_get_current_user, mock_get_current
     }
 
     response = client.patch(
-        "/help-center/topics/1",
+        "/api/v1/help-center/topics/1",
         json={"title": "", "content": "Updated Content"},  # Invalid title
         headers={"Authorization": f"Bearer {admin_token}"}
     )
