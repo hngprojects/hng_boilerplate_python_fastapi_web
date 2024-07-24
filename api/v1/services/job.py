@@ -1,7 +1,26 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from datetime import datetime
 from api.v1.models.job import Job
 from api.v1.schemas.job import JobCreate
+
+# Function to create a job
+def create_job(db: Session, job_data: JobCreate, user_id: str):
+    job = Job(
+        user_id=user_id,
+        title=job_data.title,
+        description=job_data.description,
+        location=job_data.location,
+        salary=job_data.salary,
+        job_type=job_data.job_type,
+        company_name=job_data.company_name,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+    return job
 
 
 # Function to get job by ID
