@@ -7,14 +7,15 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.org import Organization
 from api.v1.models.user import User
 from api.v1.models.org_role import OrgRole
+from api.v1.schemas.org import OrganizationSchema
 
 class OrganizationService():
     """Organization service functionality"""
 
-    def create (self, db: Session, schema):
+    def create (self, db: Session, schema:OrganizationSchema):
        """Create Organization"""
 
-       new_organization = Organization(**schema.model_dump())
+       new_organization = Organization(**schema)
        db.add(new_organization)
        db.commit()
        db.refresh(new_organization)
