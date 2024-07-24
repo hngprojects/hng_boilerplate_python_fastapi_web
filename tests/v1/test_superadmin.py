@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 
 
 client = TestClient(app)
-USER_DELETE_ENDPOINT = "/api/v1/superadmin/users"
+USER_DELETE_ENDPOINT = "/api/v1/users"
 
 
 @pytest.fixture
