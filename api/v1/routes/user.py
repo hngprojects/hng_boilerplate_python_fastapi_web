@@ -60,3 +60,19 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
         status_code=200,
         message='User reactivation successful',
     )
+
+
+@user.patch("/current-user/", status_code=status.HTTP_204_NO_CONTENT)
+def delete_current_user(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    # Perform the deletion logic here. For a soft delete, you might just set is_active to False
+    db.delete(current_user)
+    db.commit()
+
+    return None
