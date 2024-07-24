@@ -29,8 +29,7 @@ def delete_user(
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
-    user = db.get(User, ident=user_id)
-    print(f"user {user.username} is about to be deleted")
+    user = user_service.fetch(db=db, id=str(user_id))
 
     # check if the user_id points to a valid user
     if user is None:
@@ -39,6 +38,6 @@ def delete_user(
         )
 
     # soft-delete the user
-    user_service.delete(db=db, id=user_id)
+    user_service.delete(db=db, id=str(user_id))
 
     return success_response(status_code=200, message="user deleted successfully")
