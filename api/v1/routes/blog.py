@@ -57,7 +57,7 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
 
 @blog.put("/{id}", response_model=BlogUpdateResponseModel)
 async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # blog_service = BlogService()
+    blog_service = BlogService(db)
     try:
         updated_blog_post = blog_service.update(
             blog_id=id,
