@@ -8,6 +8,7 @@ from uuid_extensions import uuid7
 
 
 
+
 class UserBase(BaseModel):
     """Base user schema"""
 
@@ -40,6 +41,22 @@ class UserCreate(BaseModel):
         return value
 
 
+# class SuccessResponseData(BaseModel):
+
+#     token: str
+#     user: UserBase
+
+# class SuccessResponse(BaseModel):
+#     statusCode: int = Field(201, example=201)
+#     message: str
+#     data: SuccessResponseData
+
+# class ErrorResponse(BaseModel):
+#     message: str
+#     error: str
+#     statusCode: int
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
@@ -55,7 +72,4 @@ class DeactivateUserSchema(BaseModel):
     """Schema for deactivating a user"""
 
     reason: Optional[str] = None
-    
-    
-    
-    
+    confirmation: bool
