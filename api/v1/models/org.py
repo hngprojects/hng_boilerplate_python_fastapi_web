@@ -17,7 +17,6 @@ from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
 from api.v1.models.base_model import BaseTableModel
 from sqlalchemy.dialects.postgresql import UUID
-from uuid_extensions import uuid7
 
 
 class Organization(BaseTableModel):
@@ -25,7 +24,7 @@ class Organization(BaseTableModel):
 
     name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
-    
+
     users = relationship(
             "User",
             secondary=user_organization_association,
