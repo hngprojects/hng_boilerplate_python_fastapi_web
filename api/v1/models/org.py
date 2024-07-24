@@ -30,7 +30,7 @@ class Organization(BaseTableModel):
             back_populates="organizations"
             )
     roles = relationship("OrgRole", back_populates="organization", cascade="all, delete-orphan")
-
+    billing_plans = relationship("BillingPlan", back_populates="organization", cascade="all, delete-orphan")
 
     def __str__(self):
         return self.name
