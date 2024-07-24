@@ -9,7 +9,7 @@ from uuid import UUID
 from fastapi import HTTPException
 
 
-class BlogService:
+class BlogService(Service):
     '''Blog service functionality'''
 
     def create(self, db: Session, schema):
