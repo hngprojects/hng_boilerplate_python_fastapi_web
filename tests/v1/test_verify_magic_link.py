@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from api.v1.services.user import UserService
 from api.v1.routes.verify_magic_link import router
-from database import get_db, Base
+from api.db.database import get_db, Base
 import logging
 
 # Configure logging
