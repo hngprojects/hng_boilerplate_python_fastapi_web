@@ -19,7 +19,7 @@ from api.v1.services.user import user_service
 user = APIRouter(prefix="/users", tags=["Users"])
 
 
-@user.get("/me", status_code=status.HTTP_200_OK, response_model=UserBase)
+@user.get("/current-user", status_code=status.HTTP_200_OK, response_model=UserBase)
 def get_current_user_details(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
@@ -75,23 +75,4 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
     return success_response(
         status_code=200,
         message="User reactivation successful",
-    )
-
-
-@user.patch("/me/password", status_code=200, response_model=ChangePwdRet)
-async def change_password(
-    schema: ChangePasswordSchema,
-    db: Session = Depends(get_db),
-    user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to change the user's password"""
-
-    user_service.change_password(schema.old_password, schema.new_password, user, db)
-
-    return JSONResponse(
-        content={
-            "success": True,
-            "status_code": 200,
-            "message": "Password Changed successfully",
-        }
     )

@@ -7,6 +7,7 @@ from api.v1.models.user import User
 from api.v1.schemas.profile import ProfileBase, ProfileCreateUpdate
 from api.db.database import get_db
 from api.v1.services.user import user_service
+
 from api.v1.services.profile import profile_service
 
 
@@ -25,7 +26,8 @@ def get_current_user_profile(
     return profile_service.fetch_by_user_id(db, user_id=current_user.id)
 
 
-@profile.post("/", status_code=status.HTTP_201_CREATED, response_model=ProfileBase)
+@profile.post("/", status_code=status.HTTP_201_CREATED, 
+              response_model=ProfileBase)
 def create_user_profile(
     schema: ProfileCreateUpdate,
     db: Session = Depends(get_db),
@@ -33,5 +35,24 @@ def create_user_profile(
 ):
     """Endpoint to create user profile from the frontend"""
 
-    user_profile = profile_service.create(db, schema=schema, user_id=current_user.id)
+    user_profile = profile_service.create(
+        db, schema=schema, user_id=current_user.id)
     return user_profile
+
+
+@profile.put("/current-user", status_code=status.HTTP_200_OK, response_model=ProfileBase)
+def update_user_profile(
+    schema: ProfileCreateUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to update the current user's profile"""
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated"
+        )
+
+    updated_profile = profile_service.update(
+        db, schema=schema, user_id=current_user.id)
+    return updated_profile

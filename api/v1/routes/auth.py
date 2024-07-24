@@ -15,7 +15,7 @@ from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
-from api.v1.services.user import user_service
+from api.v1.services.user import UserService as user_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
