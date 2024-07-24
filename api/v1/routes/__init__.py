@@ -4,7 +4,7 @@ from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.blog import blog
-from api.v1.routes.org import org
+from api.v1.routes.organization import org
 
 
 api_version_one = APIRouter(prefix="/api/v1")
