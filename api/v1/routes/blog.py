@@ -5,9 +5,10 @@ from .auth import get_current_admin
 from api.v1.models.user import User
 from api.v1.schemas.blog import BlogCreate
 from api.v1.models.blog import Blog
+from api.v1.services.blog import BlogService
 
 blog = APIRouter()
-
+blog_service = BlogService()
 
 
 
@@ -15,21 +16,13 @@ blog = APIRouter()
 def create_blog(blog: BlogCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_admin)):
     if not current_user:
         raise HTTPException(status_code=401, detail="You are not Authorized")
-    db_blog = Blog(
-            author_id = current_user.id,
-            title = blog.title,
-            content = blog.content,
-            image_url = blog.image_url,
-            tags = blog.tags,
-            excerpt = blog.excerpt)
     
-    db.add(db_blog)
-    db.commit()
-    db.refresh(db_blog)
+    new_blogpost = blog_service.create(db=db, schema=blog, author_id=current_user.id)
+
     return {
         "message": "Post Created Successfully!",
         "status_code": 200,
-        "data": db_blog
+        "data": new_blogpost
 }
 
 
