@@ -1,3 +1,5 @@
+import random
+import string
 from typing import Any, Optional
 import bcrypt, datetime as dt
 from fastapi.security import OAuth2PasswordBearer
@@ -5,13 +7,16 @@ from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from datetime import datetime, timedelta
 
 from api.core.base.services import Service
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
 from api.v1.models.user import User
+from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
+from api.v1.schemas import token
 
 oauth2_scheme = OAuth2PasswordBearer("/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -311,5 +316,34 @@ class UserService(Service):
                 detail="You do not have permission to access this resource",
             )
         return user
+
+    def save_login_token(self, db: Session, user: User, token: str, expiration: datetime):
+        '''Save the token and expiration in the user's record'''
+        db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
+
+        token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
+        db.add(token)
+        db.commit()
+        db.refresh(token)
+
+    def verify_login_token(self, db: Session, schema:token.TokenRequest):
+        '''Verify the token and email combination'''
+        user = db.query(User).filter(User.email == schema.email).first()
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid email or token")
+        
+        token = db.query(TokenLogin).filter(TokenLogin.user_id == user.id).first()
+
+        if token.token != schema.token or token.expiry_time < datetime.utcnow():
+            raise HTTPException(status_code=401, detail="Invalid email or token")
+
+        return user
+    
+    def generate_token(self):
+        '''Generate a 6-digit token'''
+        return ''.join(random.choices(string.digits, k=6)), datetime.utcnow() + timedelta(minutes=10)
+
+
 
 user_service = UserService()
