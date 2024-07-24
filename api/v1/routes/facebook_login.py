@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from typing import Annotated
@@ -42,8 +42,9 @@ async def facebook_login(request: OAuthToken, db: Annotated[Session, Depends(get
         fb_user_data = fb_user_service.get_facebook_user_data(access_token)
 
         # retrieve the user from the database
-        user = fb_user_service.fetch(db, fb_user_id)
-        if not user:
+        try:
+            user = fb_user_service.fetch(db, fb_user_id)
+        except HTTPException:
             # create a new user if the user does not exist
             user, is_new = [fb_user_service.create(db, fb_user_data), True]
         # generate a jwt token based on the user id to allow for protected routes access
