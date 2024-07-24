@@ -5,7 +5,6 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 from fastapi import HTTPException
-from api.v1.routes.help_center import router
 from ...main import app
 
 
