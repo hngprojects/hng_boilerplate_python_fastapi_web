@@ -17,3 +17,28 @@ def create_activity_log(activity_log: ActivityLogCreate, db: Session = Depends(g
 
     created_activity_log = service.create(db, activity_log)
     return created_activity_log
+
+
+@router.get("activity-logs/{user_id}", response_model=ActivityLogResponse)
+def get_activity_logs(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_superuser)
+):
+    """
+    Retrieve all activity logs for a specific user.
+    Accessible only to superusers.
+    """
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Not Found: User ID does not exist"
+        )
+
+    activity_logs = db.query(ActivityLog).filter(ActivityLog.user_id == user_id).all()
+    return ActivityLogResponse(
+        message="Activity logs retrieved successfully",
+        status_code=200,
+        data=activity_logs
+    )
