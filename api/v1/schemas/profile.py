@@ -1,35 +1,42 @@
-from pydantic import BaseModel
-from typing import Optional
-from pydantic.types import Emailstr
-from api.models.user import UserBase
+from datetime import datetime
+from fastapi import HTTPException
+from pydantic import BaseModel, Field, EmailStr, field_validator
+from typing import Any, Optional
+from uuid_extensions import uuid7
+import re
+from api.v1.schemas.user import UserBase
 
 
 class ProfileBase(BaseModel):
     """Base profile schema"""
-    
-    id:str
-    pronouns: Optional[str]
-    job_title: Optional[str]
-    department: Optional[str]
-    social: Optional[str]  # Assuming JSON or similar data type
-    bio: Optional[str]
-    phone_number: Optional[str]
-    avatar_url: Optional[str]
-    recovery_email: Optional[Emailstr]
+
+    id: str
+    created_at: datetime
+    pronouns: str
+    job_title: str
+    department: str
+    social: str
+    bio: str
+    phone_number: str
+    avatar_url: str
+    recovery_email: Optional[EmailStr]
     user: UserBase
 
 
-class ProfileCreate(ProfileBase):
-    pass
+class ProfileCreateUpdate(BaseModel):
+    """Schema to create a profile"""
 
+    pronouns: str
+    job_title: str
+    department: str
+    social: str
+    bio: str
+    phone_number: str
+    avatar_url: str
+    recovery_email: Optional[EmailStr]
 
-class ProfileUpdate(ProfileBase):
-    pass
-
-
-class ProfileResponse(ProfileBase):
-    id: str
-    user_id: str
-
-    class Config:
-        orm_mode = True
+    @field_validator("phone_number")
+    def phone_number_validator(cls, value):
+        if not re.match(r"^\+?[1-9]\d{1,14}$", value):
+            raise ValueError("Please use a valid phone number format")
+        return value
