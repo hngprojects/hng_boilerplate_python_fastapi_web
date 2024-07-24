@@ -2,10 +2,10 @@
 
 from fastapi import APIRouter, Depends
 
-from api.v1.models.user import WaitlistUser
+from api.v1.models.waitlist import Waitlist
 from api.db.database import get_db
 
-from api.utils.dependencies import get_current_admin
+from api.utils.dependencies import get_super_admin
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.utils.json_response import JsonResponseDict
 from api.utils.exceptions import CustomWaitlistException
@@ -21,7 +21,7 @@ db = next(get_db())
 )
 def add_user_to_waitlist(
     item: WaitlistAddUserSchema,
-    admin=Depends(get_current_admin)
+    admin=Depends(get_super_admin)
 ):
     """
     Manually adds a user to the waitlist.
@@ -30,7 +30,7 @@ def add_user_to_waitlist(
     Parameters:
     - item: WaitlistAddUserSchema
         The details of the user to be added to the waitlist.
-    - admin: User (Depends on get_current_admin)
+    - admin: User (Depends on get_super_admin)
         The current admin making the request. This is a dependency that provides the current admin context.
 
     Returns:
@@ -49,8 +49,11 @@ def add_user_to_waitlist(
         if len(item.full_name) == 0:
             error_format["message"] = "full_name field cannot be blank"
             raise CustomWaitlistException(status_code=400, detail=error_format)
-
-        new_waitlist_user = WaitlistUser(email=item.email, full_name=item.full_name)
+        
+        if obj:= db.query(Waitlist).where(Waitlist.email==item.email).first() != None:
+            raise IntegrityError("Duplicate entry", {}, None)
+        
+        new_waitlist_user = Waitlist(email=item.email, full_name=item.full_name)
         db.add(new_waitlist_user)
         db.commit()
     except IntegrityError:

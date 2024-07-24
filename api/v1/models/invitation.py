@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime
+from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
 from uuid_extensions import uuid7
 from sqlalchemy.dialects.postgresql import UUID

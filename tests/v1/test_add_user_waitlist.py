@@ -8,7 +8,7 @@ from sqlalchemy.exc import IntegrityError
 
 from fastapi.testclient import TestClient
 from main import app
-from api.utils.dependencies import get_current_admin
+from api.utils.dependencies import get_super_admin
 
 def mock_deps():
     return MagicMock(is_admin=True)
@@ -21,7 +21,7 @@ def client():
 class TestCodeUnderTest:
     @classmethod 
     def setup_class(cls):
-        app.dependency_overrides[get_current_admin] = mock_deps
+        app.dependency_overrides[get_super_admin] = mock_deps
         
     @classmethod
     def teardown_class(cls):
@@ -31,8 +31,15 @@ class TestCodeUnderTest:
     
     @patch('api.v1.routes.waitlist.db')
     def test_add_user_to_waitlist_success(self, mock_db, client):
-        app.dependency_overrides[get_current_admin] = mock_deps
-    
+        app.dependency_overrides[get_super_admin] = mock_deps
+
+        mock_where = MagicMock()
+        mock_first= MagicMock()
+
+        mock_db.query.return_value = mock_where
+        mock_where.where.return_value = mock_first
+        mock_first.first.return_value = None 
+
         response = client.post("/api/v1/waitlist/admin", json={"email": "tes@example.com", "full_name": "Test User"})
     
         assert response.status_code == 201
@@ -40,7 +47,7 @@ class TestCodeUnderTest:
 
     # # Handling empty full_name field and raising appropriate exception
     def test_add_user_to_waitlist_empty_full_name(self, mocker, client):
-        app.dependency_overrides[get_current_admin] = mock_deps
+        app.dependency_overrides[get_super_admin] = mock_deps
 
         response = client.post("/api/v1/waitlist/admin", json={"email": "test@example.com", "full_name": ""})
     
