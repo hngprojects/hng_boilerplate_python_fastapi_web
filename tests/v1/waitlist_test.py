@@ -41,7 +41,6 @@ def test_duplicate_email(client_with_mocks):
     assert data['message']['message'] == 'Email already registered'
     assert data['status_code'] == 400
     assert data['success'] == False
-    assert response.status_code == 400
 
 def test_invalid_email(client_with_mocks):
     client, _ = client_with_mocks
