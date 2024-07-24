@@ -40,7 +40,7 @@ async def verify_magic_link(
         user = user_service.verify_access_token(token, HTTPException(
             status_code=400, detail="Invalid or expired token"
         ))
-        # Token verified, generate a new authentication token or perform other actions
+        # Token verified, generate a new authentication token
         auth_token = user_service.create_access_token(user.id)
         return {"auth_token": auth_token, "status": 200}
     except HTTPException as e:
