@@ -14,7 +14,7 @@ from api.v1.models.blog import Blog
 
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
-blog_service = BlogService()
+blog_service = BlogService(db)
 
 
 @blog.get("/", response_model=List[BlogResponse])
