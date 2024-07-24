@@ -130,9 +130,3 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
 
     return response
     
-# Protected route example: test route
-@auth.get("/admin")
-def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
-    return {"message": "Hello, admin!"}
-
-

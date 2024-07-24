@@ -12,7 +12,7 @@ from api.v1.services.user import user_service
 
 bill_plan = APIRouter(prefix='/organizations', tags=['Billing-Plan'])
 
-@bill_plan.get('/12345/billing-plans')
+@bill_plan.get('/billing-plans')
 async def retrieve_all_billing_plans(
                      current_user: User = Depends(user_service.get_current_user),
                                      db: Session = Depends(get_db)):

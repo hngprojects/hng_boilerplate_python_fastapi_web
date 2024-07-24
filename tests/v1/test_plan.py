@@ -17,8 +17,6 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-DEACTIVATION_ENDPOINT = '/api/v1/users/deactivation'
-LOGIN_ENDPOINT = 'api/v1/auth/login'
 BILLPLAN_ENDPOINT = '/api/v1/organizations/12345/billing-plans'
 
 
@@ -57,26 +55,14 @@ def create_mock_user(mock_user_service, mock_db_session):
         updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
-
-    # mock_db_session.return_value.__enter__.return_value = mock_user
-    # mock_user_service.hash_password.return_value = "hashed_password"
-    # mock_db_session.add.return_value = None
-    # mock_db_session.commit.return_value = None
-    # mock_db_session.refresh.return_value = None
-
     return mock_user
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_error_user_deactivation(mock_user_service, mock_db_session):
     """Test for user deactivation errors."""
-
     mock_user = create_mock_user(mock_user_service, mock_db_session)
-    
     access_token = user_service.create_access_token(user_id=str(uuid7()))
-    print(access_token)
-    # Missing field test
     missing_field = client.get(BILLPLAN_ENDPOINT
                                , headers={'Authorization': f'Bearer {access_token}'})
-    
     assert missing_field.status_code == status.HTTP_200_OK
