@@ -46,7 +46,8 @@ class User(BaseTableModel, Base):
     payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan") 
     blogs = relationship("Blog", back_populates="author", cascade="all, delete-orphan") 
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
-
+    invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
