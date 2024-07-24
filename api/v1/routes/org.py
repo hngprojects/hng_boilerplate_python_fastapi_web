@@ -6,7 +6,7 @@ from ..models.org import Organization
 # from api.v1.schemas.user import DeactivateUserSchema
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user
-from api.v1.services.org import OrganizationService as organization_service
+from api.v1.services.org import OrganizationService
 
 
 org = APIRouter(prefix='/organization', tags=['Organizations'])
@@ -18,7 +18,7 @@ async def add_user_to_organization(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-
+    organization_service = OrganizationService()
     organization_service.add_user(db=db, org_id=org_id, user=user)
 
     return {

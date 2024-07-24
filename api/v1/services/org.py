@@ -1,4 +1,5 @@
 from typing import Any, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
@@ -6,13 +7,13 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.org import Organization
 from api.v1.models.user import User
 
-class OrganizationService(Service):
+class OrganizationService():
     """Organization service functionality"""
 
     def create (self, db: Session, schema):
        """Create Organization"""
 
-       new_organisation = Organization(**schema.model_dump())
+       new_organization = Organization(**schema.model_dump())
        db.add(new_organization)
        db.commit()
        db.refresh(new_organization)
@@ -33,14 +34,14 @@ class OrganizationService(Service):
         return query.all()
 
     def fetch(self, db: Session, id):
-        '''Fetches a user by their id'''
+        '''Fetches an Organisation by their id'''
 
         organization = check_model_existence(db, Organization, id)
         return organization
 
 
     def add_user(self, db: Session, org_id: int, user: User):
-        '''Fetches a user by their id'''
+        '''Adds a current user to an Organisation'''
 
         # Fetch the organization by ID
         organization = db.query(Organization).filter(Organization.id == org_id).first()
@@ -66,8 +67,6 @@ class OrganizationService(Service):
     def delete(self, db: Session, id: str):
         '''Deletes an Organization'''
 
-        organization = self.fetch(id=id)
+        organization = self.fetch(id=id, db=db)
         db.delete(organization)
         db.commit()
-
-organization_service = OrganizationService()
