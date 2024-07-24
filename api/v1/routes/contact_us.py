@@ -22,15 +22,17 @@ class CustomException(HTTPException):
 
 
 @contact_us.get('/messages/', response_model=ContactMessageList)
-async def get_contact_messages(db: Session = Depends(get_db)):
+async def get_contact_messages(
+        db: Session = Depends(get_db),
+        request_user: User = Depends(user_service.get_current_user)
+):
     """
     Fetch all contact messages endpoint
     """
-    request_user = Annotated[User, Depends(user_service.get_current_user)]
     # check if current user is an admin
-    if not current_user.is_superadmin:
+    if not request_user.is_super_admin:
         raise HTTPException(
-            detail="Access denied, Superadmin only",
+            detail="Access denied, Super-admin only",
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
