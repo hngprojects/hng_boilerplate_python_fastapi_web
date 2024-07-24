@@ -18,7 +18,7 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
+from api.v1.models.base import Base, user_organization_association, user_newsletter_association
 from api.v1.models.base_model import BaseTableModel
 
 
@@ -48,7 +48,8 @@ class User(BaseTableModel, Base):
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
     invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
     messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
-    
+    newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
+
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
