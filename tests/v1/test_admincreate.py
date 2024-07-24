@@ -78,27 +78,3 @@ def test_super_user_creation(data, db_session_mock):
     data.pop('email')
     invalid_data_response = client.post(url, json=data)
     assert invalid_data_response.status_code == 422
-
-
-   
-   
-
-    
-    
-
-    
-
-
-
-  
-    
-
-
-
-
-
-
-
-
-
-
