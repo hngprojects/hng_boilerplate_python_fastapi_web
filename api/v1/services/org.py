@@ -20,14 +20,14 @@ class OrganizationService(Service):
 
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-         '''Fetch all products with option tto search using query parameters'''
-         query = db.query(Organization)
+        '''Fetch all products with option tto search using query parameters'''
+        query = db.query(Organization)
 
-         # Enable filter by query parameter
+        # Enable filter by query parameter
         if query_params:
-             for column, value in query_params.items():
-                 if hasattr(Organization, column) and value:
-                     query = query.filter(getattr(Organization, column).ilike(f'%{value}%'))
+            for column, value in query_params.items():
+                if hasattr(Organization, column) and value:
+                    query = query.filter(getattr(Organization, column).ilike(f'%{value}%'))
 
         return query.all()
 
