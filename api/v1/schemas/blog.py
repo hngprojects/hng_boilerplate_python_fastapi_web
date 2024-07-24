@@ -1,5 +1,4 @@
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel
 
 class blogRequest(BaseModel):
     title: str

@@ -1,6 +1,6 @@
 import pytest
-from uuid_extensions import uuid7
 from fastapi.testclient import TestClient
+from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
 import sys
@@ -28,7 +28,7 @@ def mock_db_session():
 
 @pytest.fixture
 def current_user():
-    return User(id=uuid7(), username="testuser", email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
+    return User(id=f'{uuid7()}', username="testuser", email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
 
 @pytest.fixture
 def valid_blog_post():
@@ -36,7 +36,7 @@ def valid_blog_post():
 
 @pytest.fixture
 def existing_blog_post(mock_db_session, current_user):
-    blog = Blog(id=uuid7(), title="Original Title", content="Original Content", author_id=current_user.id)
+    blog = Blog(id=f'{uuid7()}', title="Original Title", content="Original Content", author_id=current_user.id)
     mock_db_session.query(Blog).filter(Blog.id == blog.id).first.return_value = blog
     return blog
 
@@ -59,21 +59,20 @@ async def test_update_blog_success(client, mock_db_session, current_user, valid_
 
 @pytest.mark.asyncio
 async def test_update_blog_not_found(client, mock_db_session, current_user, valid_blog_post):
-    test_id = uuid7()
-    mock_db_session.query(Blog).filter(Blog.id == test_id).first.return_value = None
+    mock_db_session.query(Blog).filter(Blog.id == f'{uuid7()}').first.return_value = None
 
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blog/{test_id}", json=valid_blog_post.model_dump())
+    response = client.put(f"api/v1/blog/{uuid7()}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 404
-    assert response.json() == {"detail": "Post not Found"}
+    assert response.json() == {'message': 'Post not Found', 'status_code': 404, 'success': False}
 
 @pytest.mark.asyncio
 async def test_update_blog_forbidden(client, mock_db_session, current_user, valid_blog_post, existing_blog_post):
     # Simulate a different user
-    different_user = User(id=uuid7(), username="otheruser", email="other@example.com", password="hashedpassword1", first_name="other", last_name="user")
+    different_user = User(id=f'{uuid7()}', username="otheruser", email="other@example.com", password="hashedpassword1", first_name="other", last_name="user")
 
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: different_user
@@ -81,7 +80,7 @@ async def test_update_blog_forbidden(client, mock_db_session, current_user, vali
     response = client.put(f"api/v1/blog/{existing_blog_post.id}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 403
-    assert response.json() == {"detail": "Not authorized to update this blog"}
+    assert response.json() == {'message': 'Not authorized to update this blog', 'status_code': 403, 'success': False}
 
 @pytest.mark.asyncio
 async def test_update_blog_empty_fields(client, mock_db_session, current_user, existing_blog_post):
@@ -91,7 +90,7 @@ async def test_update_blog_empty_fields(client, mock_db_session, current_user, e
     response = client.put(f"api/v1/blog/{existing_blog_post.id}", json={"title": "", "content": ""})
 
     assert response.status_code == 400
-    assert response.json() == {"detail": "Title and content cannot be empty"}
+    assert response.json() == {'message': 'Title and content cannot be empty', 'status_code': 400, 'success': False}
 
 @pytest.mark.asyncio
 async def test_update_blog_internal_error(client, mock_db_session, current_user, valid_blog_post, existing_blog_post):
@@ -104,4 +103,4 @@ async def test_update_blog_internal_error(client, mock_db_session, current_user,
     response = client.put(f"api/v1/blog/{existing_blog_post.id}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 500
-    assert response.json() == {"detail": "An error occurred while updating the blog post"}
+    assert response.json() == {'message': 'An error occurred while updating the blog post', 'status_code': 500, 'success': False}

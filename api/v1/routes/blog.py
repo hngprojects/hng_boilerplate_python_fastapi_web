@@ -5,15 +5,20 @@ from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.utils.dependencies import get_current_user
-from api.v1.services.blog_services import blogUpdateService
-from uuid import UUID
+from api.v1.services.blog import BlogService
 
-blog_router = APIRouter(prefix="/api/v1", tags=["blogs"])
+blog_router = APIRouter(tags=["blogs"])
 
 @blog_router.put("/blog/{blog_id}", response_model=blogResponseModel)
-async def updateBlog(blog_id: UUID, blogPost: blogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+async def update_blog(blog_id: str, blogPost: blogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    blog_service = BlogService(db)
     try:
-        updated_blog_post = blogUpdateService(blog_id, blogPost.title, blogPost.content, db, current_user)
+        updated_blog_post = blog_service.update(
+            blog_id=blog_id,
+            title=blogPost.title,
+            content=blogPost.content,
+            current_user=current_user
+        )
     except HTTPException as e:
         raise e
     except Exception as e:
