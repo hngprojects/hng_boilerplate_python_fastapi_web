@@ -1,87 +1,81 @@
+import sys, os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from decouple import config
-from main import app
-from api.db.database import get_db
-from api.v1.models.user import User
-from api.v1.models.base import Base
-from api.v1.services.user import user_service
+from sqlalchemy.orm import Session
+from unittest.mock import MagicMock, patch
+from uuid_extensions import uuid7
+from datetime import datetime, timezone, timedelta
+
+from ...main import app
+from api.v1.routes.blog import get_db
 from api.v1.models.notifications import Notification
-
-SQLALCHEMY_DATABASE_URL = config("DB_URL")
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
+from api.v1.services.user import user_service
+from api.v1.models.user import User
 
 
-def override_get_db():
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# Mock database dependency
+@pytest.fixture
+def db_session_mock():
+    db_session = MagicMock(spec=Session)
+    return db_session
 
 
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-
-@pytest.fixture(scope="module")
-def test_db():
-    db = TestingSessionLocal()
-    yield db
-    db.close()
+@pytest.fixture
+def client(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides = {}
 
 
-def test_mark_notification_as_read(test_db):
-    # Create test user
+# Mock user service dependency
 
-    user = User(
-        username="testuser1",
-        email="testuser1@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
-        first_name="Test",
-        last_name="User",
-        is_active=False,
-    )
-    test_db.add(user)
-    test_db.commit()
-    test_db.refresh(user)
+user_id = uuid7()
+notification_id = uuid7()
+timezone_offset = -8.0
+tzinfo = timezone(timedelta(hours=timezone_offset))
+timeinfo = datetime.now(tzinfo)
+created_at = timeinfo
+updated_at = timeinfo
+access_token = user_service.create_access_token(str(user_id))
 
-    # Create test notification
+# Create test user
 
-    notification = Notification(
-        user_id=user.id,
-        title="Test notification",
-        message="This is my test notification message",
-    )
-    test_db.add(notification)
-    test_db.commit()
-    test_db.refresh(notification)
+user = User(
+    id=user_id,
+    username="testuser1",
+    email="testuser1@gmail.com",
+    password=user_service.hash_password("Testpassword@123"),
+    first_name="Test",
+    last_name="User",
+    is_active=False,
+    created_at=created_at,
+    updated_at=updated_at,
+)
 
-    # get access token
+# Create test notification
 
-    login = client.post(
-        "api/v1/auth/login",
-        data={"username": "testuser1", "password": "Testpassword@123"},
-    )
+notification = Notification(
+    id=notification_id,
+    user_id=user_id,
+    title="Test notification",
+    message="This is my test notification message",
+    status="unread",
+    created_at=created_at,
+    updated_at=updated_at,
+)
 
-    access_token = login.json()["data"]["access_token"]
+
+def test_mark_notification_as_read(client, db_session_mock):
+
+    db_session_mock.query().filter().all.return_value = [user, notification]
+
     headers = {"authorization": f"Bearer {access_token}"}
 
     response = client.patch(f"/api/v1/notifications/{notification.id}", headers=headers)
-
-    # clean up the database
-
-    test_db.query(Notification).delete()
-    test_db.query(User).delete()
-    test_db.commit()
-    test_db.close()
 
     assert response.status_code == 200
     assert response.json()["success"] == True
@@ -89,40 +83,12 @@ def test_mark_notification_as_read(test_db):
     assert response.json()["message"] == "Notifcation marked as read"
 
 
-def test_mark_notification_as_read_unauthenticated_user(test_db):
-    # Create test user
-
-    user = User(
-        username="testuser1",
-        email="testuser1@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
-        first_name="Test",
-        last_name="User",
-        is_active=False,
-    )
-    test_db.add(user)
-    test_db.commit()
-    test_db.refresh(user)
-
+def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock):
     # Create test notification
 
-    notification = Notification(
-        user_id=user.id,
-        title="Test notification",
-        message="This is my test notification message",
-    )
-    test_db.add(notification)
-    test_db.commit()
-    test_db.refresh(notification)
+    db_session_mock.query().filter().all.return_value = [notification]
 
     response = client.patch(f"/api/v1/notifications/{notification.id}")
-
-    # clean up the database
-
-    test_db.query(Notification).delete()
-    test_db.query(User).delete()
-    test_db.commit()
-    test_db.close()
 
     assert response.status_code == 401
     assert response.json()["success"] == False
