@@ -10,7 +10,7 @@ from api.db.database import get_db
 from api.utils.json_response import JsonResponseDict
 from api.v1.services.user import user_service
 
-bill_plan = APIRouter(prefix='/api/v1/organizations', tags=['Billing-Plan'])
+bill_plan = APIRouter(prefix='/organizations', tags=['Billing-Plan'])
 
 @bill_plan.get('/12345/billing-plans')
 async def retrieve_all_billing_plans(
