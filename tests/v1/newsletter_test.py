@@ -40,7 +40,7 @@ def test_sub_newsletter_success(db_session_mock):
     email_data = {"email": "test1@example.com"}
 
     # Act
-    response = client.post("/api/v1/pages/newsletter", json=email_data)
+    response = client.post("/api/v1/newsletters", json=email_data)
 
     # Assert
     assert response.status_code == 200
@@ -58,7 +58,7 @@ def test_sub_newsletter_existing_email(db_session_mock):
     email_data = {"email": "test@example.com"}
 
     # Act
-    response = client.post("/api/v1/pages/newsletter", json=email_data)
+    response = client.post("/api/v1/newsletters", json=email_data)
 
     # Assert
     assert response.status_code == 400
