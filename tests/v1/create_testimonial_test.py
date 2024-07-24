@@ -1,84 +1,64 @@
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-from unittest.mock import MagicMock, patch
-from uuid_extensions import uuid7
-from datetime import datetime, timezone, timedelta
-
-from main import app
-from api.v1.models.testimonial import Testimonial
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from api.db.database import Base, get_db
+from main import app  # Assuming your FastAPI app is defined in a module named main
+from api.v1.schemas import testimonial_schema, user
 from api.v1.models.user import User
-from api.v1.routes.testimonial import get_db
-from api.v1.schemas.testimonial_schema import TestimonialCreate
 from api.v1.services.user import user_service
 
-# Mock database dependency
-@pytest.fixture
-def db_session_mock():
-    db_session = MagicMock(spec=Session)
-    return db_session
+# Create a new database session for testing
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base.metadata.create_all(bind=engine)
+
+# Dependency override to use test database
+def override_get_db():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
+
+app.dependency_overrides[get_db] = override_get_db
+
+# Dependency override to use a mock current user
+def override_get_current_user():
+    return User(id=1, username="testuser", email="test@example.com", hashed_password="fakehashedpassword")
+
+app.dependency_overrides[user_service.get_current_user] = override_get_current_user
+
+client = TestClient(app)
 
 @pytest.fixture
-def client(db_session_mock):
-    app.dependency_overrides[get_db] = lambda: db_session_mock
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides = {}
+def db():
+    Base.metadata.create_all(bind=engine)
+    db = TestingSessionLocal()
+    yield db
+    db.close()
+    Base.metadata.drop_all(bind=engine)
 
-@pytest.fixture
-def token():
-    # Mock the token creation
-    with patch.object(user_service, 'create_access_token', return_value="test_access_token"):
-        yield "test_access_token"
+def test_create_testimonial(db):
+    # Mock user to be inserted in the database
+    mock_user = User(id=1, username="testuser", email="test@example.com", hashed_password="fakehashedpassword")
+    db.add(mock_user)
+    db.commit()
+    db.refresh(mock_user)
 
-def test_create_testimonial(client, db_session_mock, token):
-    user_id = str(uuid7())
-    testimonial_id = str(uuid7())
-    timezone_offset = -8.0
-    tzinfo = timezone(timedelta(hours=timezone_offset))
-    timeinfo = datetime.now(tzinfo)
-    created_at = timeinfo
-    updated_at = timeinfo
-
-    # Create a mock user
-    user = User(id=user_id, username="testuser", email="testuser@example.com")
-
-    # Data for creating a testimonial
+    # Testimonial data
     testimonial_data = {
-        "content": "This is a test testimonial",
-        "client_designation": "Client Designation",
-        "client_name": "Client Name",
-        "ratings": 4.5
+        "title": "Great service",
+        "content": "The service was excellent and I highly recommend it.",
     }
 
-    # Mock the return value for the query to get the current user
-    with patch('api.v1.services.user.user_service.get_current_user', return_value=user):
-        # Call the endpoint with authentication
-        response = client.post(
-            "/api/v1/testimonials",
-            json=testimonial_data,
-            headers={"Authorization": f"Bearer {token}"}
-        )
-
-    # Mock the return value for the query to get testimonials
-    testimonial = Testimonial(
-        id=testimonial_id,
-        content=testimonial_data["content"],
-        client_designation=testimonial_data["client_designation"],
-        client_name=testimonial_data["client_name"],
-        ratings=testimonial_data["ratings"],
-        author_id=user_id,
-        created_at=created_at,
-        updated_at=updated_at
-    )
-
-    db_session_mock.query().filter().first.return_value = testimonial
-
-    # Assert the response
+    response = client.post("/testimonials", json=testimonial_data)
+    
     assert response.status_code == 200
     response_data = response.json()
+    assert response_data["title"] == testimonial_data["title"]
     assert response_data["content"] == testimonial_data["content"]
-    assert response_data["client_designation"] == testimonial_data["client_designation"]
-    assert response_data["client_name"] == testimonial_data["client_name"]
-    assert response_data["ratings"] == testimonial_data["ratings"]
-    assert response_data["author_id"] == user_id
+    assert response_data["author_id"] == mock_user.id
+
