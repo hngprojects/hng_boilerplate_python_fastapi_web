@@ -40,4 +40,4 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=str(user_id))
 
-    return success_response(status_code=200, message="user deleted successfully")
+    return success_response(status_code=204, message="user deleted successfully")
