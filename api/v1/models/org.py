@@ -13,27 +13,26 @@ from sqlalchemy import (
         func,
         )
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
-from api.v1.models.base_model import BaseModel
-from sqlalchemy.dialects.postgresql import UUID
+from api.v1.models.base import user_organization_association
+from api.v1.models.base_model import BaseTableModel
 from uuid_extensions import uuid7
 
 
-class Organization(BaseModel, Base):
+class Organization(BaseTableModel):
     __tablename__ = 'organizations'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    name = Column(String(50), unique=True, nullable=False)
+    name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-
+    
     users = relationship(
             "User",
             secondary=user_organization_association,
             back_populates="organizations"
             )
-
+    roles = relationship("OrgRole", back_populates="organization", cascade="all, delete-orphan")
+    billing_plans = relationship("BillingPlan", back_populates="organization", cascade="all, delete-orphan")
+    invitations = relationship("Invitation", back_populates="organization", cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="organization", cascade="all, delete-orphan")
+    
     def __str__(self):
         return self.name

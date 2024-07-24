@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ User data model
 """
 from sqlalchemy import (
@@ -7,6 +6,7 @@ from sqlalchemy import (
         Integer,
         String,
         Text,
+        text,
         Date,
         ForeignKey,
         Numeric,
@@ -17,32 +17,42 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from datetime import datetime
-from api.v1.models.base import Base, user_organization_association
-from api.v1.models.base_model import BaseModel
-from uuid_extensions import uuid7
-from sqlalchemy.dialects.postgresql import UUID
+from api.v1.models.base import Base, user_organization_association, user_newsletter_association
+from api.v1.models.base_model import BaseTableModel
 
 
-class User(BaseModel, Base):
+
+class User(BaseTableModel):
     __tablename__ = 'users'
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    username = Column(String(50), unique=True, nullable=False)
-    email = Column(String(100), unique=True, nullable=False)
-    password = Column(String(255), nullable=False)
-    first_name = Column(String(50))
-    last_name = Column(String(50))
+    username = Column(String, unique=True, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=True)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    is_super_admin = Column(Boolean, default=False)
+    is_deleted = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
 
-    profile = relationship("Profile", uselist=False, back_populates="user")
-    organizations = relationship(
-            "Organization",
-            secondary=user_organization_association,
-            back_populates="users"
-            )
-
+    profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
+    organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
+    roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
+    jobs = relationship("Job", back_populates="author", cascade="all, delete-orphan")
+    token_login = relationship("TokenLogin", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    oauth = relationship("OAuth", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    testimonials = relationship("Testimonial", back_populates="author", cascade="all, delete-orphan")
+    payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan") 
+    blogs = relationship("Blog", back_populates="author", cascade="all, delete-orphan") 
+    comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
+    invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
+    messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
+    newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
+    blog_likes = relationship("BlogLike", back_populates="user", cascade="all, delete-orphan")
+    blog_dislikes = relationship("BlogDislike", back_populates="user", cascade="all, delete-orphan")
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
@@ -51,10 +61,3 @@ class User(BaseModel, Base):
 
     def __str__(self):
         return self.email
-
-class WaitlistUser(BaseModel, Base):
-    __tablename__ = 'waitlist_users'
-
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid7)
-    email = Column(String(100), unique=True, nullable=False)
-    full_name = Column(String(100), nullable=False)
