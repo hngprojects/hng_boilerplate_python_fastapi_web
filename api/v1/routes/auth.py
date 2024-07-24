@@ -7,7 +7,6 @@ from typing import Annotated
 from datetime import timedelta
 from api.v1.schemas.user import UserCreate
 from api.db.database import get_db
-from api.utils.dependencies import get_current_admin
 from api.v1.services.user import user_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -129,3 +128,4 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     )
 
     return response
+ 
