@@ -10,7 +10,6 @@ class OTP(BaseTableModel):
 
     email = Column(String, index=True, nullable=False)
     otp_code = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow())
     expires_at = Column(DateTime, default=lambda: datetime.utcnow() + timedelta(minutes=10))
 
     user = relationship("User", secondary=user_password_reset_otp_association, back_populates="users")
@@ -18,5 +17,4 @@ class OTP(BaseTableModel):
     def __init__(self, email: str, otp_code: int):
         self.email = email
         self.otp_code = otp_code
-        self.created_at = datetime.utcnow()
         self.expires_at = self.created_at + timedelta(minutes=10)
