@@ -5,6 +5,7 @@ from api.v1.routes.user import user
 from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.blog import blog
+from api.v1.routes.customers import customers
 
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -15,3 +16,4 @@ api_version_one.include_router(user)
 api_version_one.include_router(notification)
 api_version_one.include_router(testimonial)
 api_version_one.include_router(blog)
+api_version_one.include_router(customers)
