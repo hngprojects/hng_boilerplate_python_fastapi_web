@@ -20,7 +20,7 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
 from api.v1.models.base_model import BaseTableModel
-from sqlalchemy.dialects.postgresql import UUID
+
 
 
 class User(BaseTableModel, Base):
@@ -37,6 +37,7 @@ class User(BaseTableModel, Base):
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
