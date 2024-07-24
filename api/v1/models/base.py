@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ Associations
 """
 from sqlalchemy import (
