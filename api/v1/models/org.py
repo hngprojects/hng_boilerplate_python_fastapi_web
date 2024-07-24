@@ -15,6 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from api.v1.models.base import user_organization_association
 from api.v1.models.base_model import BaseTableModel
+from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 
 
