@@ -11,26 +11,7 @@ from api.v1.models.newsletter import Newsletter
 from api.v1.schemas.newsletter import EMAILSCHEMA
 from api.db.database import get_db, Base, engine
 
-
-class CustomException(HTTPException):
-    """
-    Custom error handling
-    """
-    def __init__(self, status_code: int, detail: dict):
-        super().__init__(status_code=status_code, detail=detail)
-        self.message = detail.get("message")
-        self.success = detail.get("success")
-        self.status_code = detail.get("status_code")
-
-async def custom_exception_handler(request: Request, exc: CustomException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "message": exc.message,
-            "success": exc.success,
-            "status_code": exc.status_code
-        }
-    )
+from api.utils.exceptions import CustomException
 
 newsletter = APIRouter(prefix='/pages', tags=['Newsletter'])
 
