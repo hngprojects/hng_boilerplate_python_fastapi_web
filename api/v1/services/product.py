@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.product import Product
-from api.v1.schemas.products import Product
+# from api.v1.schemas.products import Product
 from pydantic import BaseModel
 from api.v1.schemas.products import ProductSchema
 
@@ -12,10 +12,11 @@ from api.v1.schemas.products import ProductSchema
 class ProductService(Service):
     '''Product service functionality'''
 
-    def create(self, db: Session,  schema: BaseModel = ProductSchema):
-        '''Create a new product'''
+    def create(self, db: Session,  schema):
 
-        new_product = Product(**schema.model_dump())
+        '''Create a new product'''
+        
+        new_product = ProductSchema(**schema)
         db.add(new_product)
         db.commit()
         db.refresh(new_product)

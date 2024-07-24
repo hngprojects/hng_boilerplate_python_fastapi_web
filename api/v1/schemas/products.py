@@ -4,5 +4,8 @@ class ProductSchema(BaseModel):
     name:str
     description:str
     price:int
-    org_id:int
     tags:str
+
+
+class DemoModel(BaseModel):
+    number: str

@@ -22,7 +22,12 @@ def getClient():
 def test_create_product(setUp, getClient):
     client = TestClient(app)
     # print(get_db())
+    url = 'http://localhost:7001/api/v1/product/create/'
+    
+    data = {'name': 'test1', 'description': "thinking", "price": 100, "tags": 'th', }
 
-    response = getClient.post("/api/v1/product/create/", json = {'name': 'test1', 'description': "thinking", "price": 100})
+    response = getClient.post("/api/v1/product/create/", json=data)
+    print(response.text)
+    
     assert response.status_code == 200
 
