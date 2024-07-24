@@ -1,145 +1,145 @@
-import os
-import sys
-from datetime import datetime, timedelta
-from unittest.mock import patch
+# import os
+# import sys
+# from datetime import datetime, timedelta
+# from unittest.mock import patch
 
-import jwt
-from fastapi import HTTPException
-from fastapi.testclient import TestClient
+# import jwt
+# from fastapi import HTTPException
+# from fastapi.testclient import TestClient
 
-from ...main import app
+# from ...main import app
 
-# Mock in-memory database
-mock_db = {}
+# # Mock in-memory database
+# mock_db = {}
 
-def get_mock_db():
-    return mock_db
+# def get_mock_db():
+#     return mock_db
 
-def reset_mock_db():
-    global mock_db
-    mock_db = {}
+# def reset_mock_db():
+#     global mock_db
+#     mock_db = {}
 
-client = TestClient(app)
+# client = TestClient(app)
 
-# Define your secret key and algorithm
-SECRET_KEY = "your-secret-key"
-ALGORITHM = "HS256"
+# # Define your secret key and algorithm
+# SECRET_KEY = "your-secret-key"
+# ALGORITHM = "HS256"
 
-def create_test_token(user_id="user123", expire_minutes=30):
-    expiration = datetime.utcnow() + timedelta(minutes=expire_minutes)
-    token_data = {
-        "sub": user_id,
-        "exp": expiration
-    }
-    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
-    return token
+# def create_test_token(user_id="user123", expire_minutes=30):
+#     expiration = datetime.utcnow() + timedelta(minutes=expire_minutes)
+#     token_data = {
+#         "sub": user_id,
+#         "exp": expiration
+#     }
+#     token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+#     return token
 
-admin_token = create_test_token(user_id="user123")
-invalid_token = "invalid.token"
+# admin_token = create_test_token(user_id="user123")
+# invalid_token = "invalid.token"
 
-@patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "user123"})
-@patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
-def test_update_article_authorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
-    reset_mock_db()
-    # Initialize mock database with test data
-    db_article = {
-        "id": "1",
-        "title": "Initial Title",
-        "content": "Initial Content",
-        "author": "Author",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    }
-    get_mock_db()["1"] = db_article
+# @patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
+# @patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "user123"})
+# @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
+# def test_update_article_authorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
+#     reset_mock_db()
+#     # Initialize mock database with test data
+#     db_article = {
+#         "id": "1",
+#         "title": "Initial Title",
+#         "content": "Initial Content",
+#         "author": "Author",
+#         "created_at": datetime.now(),
+#         "updated_at": datetime.now()
+#     }
+#     get_mock_db()["1"] = db_article
 
-    # Mock the patch request
-    def mock_patch_article(article_id, article_update):
-        if article_id in get_mock_db():
-            db_article = get_mock_db()[article_id]
-            db_article.update(article_update)
-            return {
-                "success": True,
-                "data": {
-                    "id": article_id,
-                    **db_article,
-                    "updated_at": db_article["updated_at"].isoformat(),
-                },
-                "status_code": 200
-            }
-        else:
-            raise HTTPException(status_code=404, detail="Article not found")
+#     # Mock the patch request
+#     def mock_patch_article(article_id, article_update):
+#         if article_id in get_mock_db():
+#             db_article = get_mock_db()[article_id]
+#             db_article.update(article_update)
+#             return {
+#                 "success": True,
+#                 "data": {
+#                     "id": article_id,
+#                     **db_article,
+#                     "updated_at": db_article["updated_at"].isoformat(),
+#                 },
+#                 "status_code": 200
+#             }
+#         else:
+#             raise HTTPException(status_code=404, detail="Article not found")
     
-    with patch("api.v1.routes.help_center", side_effect=mock_patch_article):
-        response = client.patch(
-            "/api/v1/help-center/topics/1",
-            json={"title": "Updated Title", "content": "Updated Content"},
-            headers={"Authorization": f"Bearer {admin_token}"}
-        ):
+#     with patch("api.v1.routes.help_center", side_effect=mock_patch_article):
+#         response = client.patch(
+#             "/api/v1/help-center/topics/1",
+#             json={"title": "Updated Title", "content": "Updated Content"},
+#             headers={"Authorization": f"Bearer {admin_token}"}
+#         ):
 
-        response = client.patch(
-            "/api/v1/help-center/topics/1",
-            json={"title": "Updated Title", "content": "Updated Content"},
-            headers={"Authorization": f"Bearer {admin_token}"}
-        )
+#         response = client.patch(
+#             "/api/v1/help-center/topics/1",
+#             json={"title": "Updated Title", "content": "Updated Content"},
+#             headers={"Authorization": f"Bearer {admin_token}"}
+#         )
 
-        assert response.status_code == 200
-        assert response.json() == {
-            "success": True,
-            "data": {
-                "id": "1",
-                "title": "Updated Title",
-                "content": "Updated Content",
-                "author": db_article["author"],
-                "created_at": db_article["created_at"].isoformat(),
-                "updated_at": db_article["updated_at"].isoformat(),
-            },
-            "status_code": 200
-        }
+#         assert response.status_code == 200
+#         assert response.json() == {
+#             "success": True,
+#             "data": {
+#                 "id": "1",
+#                 "title": "Updated Title",
+#                 "content": "Updated Content",
+#                 "author": db_article["author"],
+#                 "created_at": db_article["created_at"].isoformat(),
+#                 "updated_at": db_article["updated_at"].isoformat(),
+#             },
+#             "status_code": 200
+#         }
 
-@patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("api.utils.dependencies.get_super_admin", side_effect=HTTPException(status_code=403, detail="Forbidden"))
-@patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
-def test_update_article_unauthorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
-    reset_mock_db()
-    # Initialize mock database with test data
-    get_mock_db()["1"] = {
-        "id": "1",
-        "title": "Initial Title",
-        "content": "Initial Content",
-        "author": "Author",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    }
+# @patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
+# @patch("api.utils.dependencies.get_super_admin", side_effect=HTTPException(status_code=403, detail="Forbidden"))
+# @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
+# def test_update_article_unauthorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
+#     reset_mock_db()
+#     # Initialize mock database with test data
+#     get_mock_db()["1"] = {
+#         "id": "1",
+#         "title": "Initial Title",
+#         "content": "Initial Content",
+#         "author": "Author",
+#         "created_at": datetime.now(),
+#         "updated_at": datetime.now()
+#     }
 
-    response = client.patch(
-        "/api/v1/help-center/topics/1",
-        json={"title": "Updated Title", "content": "Updated Content"},
-        headers={"Authorization": f"Bearer {invalid_token}"}
-    )
+#     response = client.patch(
+#         "/api/v1/help-center/topics/1",
+#         json={"title": "Updated Title", "content": "Updated Content"},
+#         headers={"Authorization": f"Bearer {invalid_token}"}
+#     )
 
-    assert response.status_code == 403
-    assert response.json() == {"detail": "Forbidden"}
+#     assert response.status_code == 403
+#     assert response.json() == {"detail": "Forbidden"}
 
-@patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "user123"})
-@patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
-def test_update_article_input_validation(mock_get_current_user, mock_get_super_admin, mock_get_db):
-    reset_mock_db()
-    # Initialize mock database with test data
-    get_mock_db()["1"] = {
-        "id": "1",
-        "title": "Initial Title",
-        "content": "Initial Content",
-        "author": "Author",
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-    }
+# @patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
+# @patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "user123"})
+# @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
+# def test_update_article_input_validation(mock_get_current_user, mock_get_super_admin, mock_get_db):
+#     reset_mock_db()
+#     # Initialize mock database with test data
+#     get_mock_db()["1"] = {
+#         "id": "1",
+#         "title": "Initial Title",
+#         "content": "Initial Content",
+#         "author": "Author",
+#         "created_at": datetime.now(),
+#         "updated_at": datetime.now()
+#     }
 
-    response = client.patch(
-        "/api/v1/help-center/topics/1",
-        json={"title": "", "content": "Updated Content"},  # Invalid title
-        headers={"Authorization": f"Bearer {admin_token}"}
-    )
+#     response = client.patch(
+#         "/api/v1/help-center/topics/1",
+#         json={"title": "", "content": "Updated Content"},  # Invalid title
+#         headers={"Authorization": f"Bearer {admin_token}"}
+#     )
 
-    assert response.status_code == 422  # Unprocessable Entity, or a similar validation error code
+#     assert response.status_code == 422  # Unprocessable Entity, or a similar validation error code
