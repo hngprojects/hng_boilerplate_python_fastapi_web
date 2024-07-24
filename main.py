@@ -98,3 +98,23 @@ async def exception(request: Request, exc: Exception):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)
+
+
+
+
+
+
+
+
+@app.post("/api/v1/organization/plans", response_model=Plan)
+async def create_billing_plan(plan: PlanCreate):
+    try:
+        new_plan = await create_plan(plan)
+        return {
+            "message": "new plan created successfully",
+            "status": "success",
+            "data": new_plan
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
