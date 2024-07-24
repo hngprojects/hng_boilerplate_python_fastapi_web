@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
+import uuid
 
 class JobCreate(BaseModel):
     title: str
@@ -11,7 +12,8 @@ class JobCreate(BaseModel):
     company_name: Optional[str] = None
     
 class JobResponse(BaseModel):
-    job_title: str
+    job_id: uuid.UUID
+    title: str
     description: str
     location: Optional[str] = None
     salary: Optional[float] = None
@@ -22,5 +24,5 @@ class JobResponse(BaseModel):
     updated_at: datetime
     
     class Config:
-        orm_mode = True
+        from_attributes = True
     

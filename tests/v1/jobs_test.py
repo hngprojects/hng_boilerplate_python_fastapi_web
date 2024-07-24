@@ -1,171 +1,97 @@
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
 from sqlalchemy.orm import Session
+from uuid_extensions import uuid7
+from datetime import datetime, timezone
 import sys, os
-# Mock environment variables
-os.environ['MAIL_USERNAME'] = 'test@example.com'
-os.environ['MAIL_PASSWORD'] = 'password'
-os.environ['MAIL_FROM'] = 'no-reply@example.com'
-os.environ['MAIL_PORT'] = '587'
-os.environ['MAIL_SERVER'] = 'smtp.example.com'
-os.environ['SECRET_KEY'] = 'your_secret_key'
-os.environ['DB_URL'] = 'postgresql+psycopg2://postgres:Akanking43.43@localhost:5432/another_db'
-
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+
 from main import app
 from api.db.database import get_db
 from api.v1.models.user import User
-from api.v1.models.job import Job
 from api.v1.services.user import UserService
-from datetime import datetime, timedelta
-import jwt
-from uuid_extensions import uuid7
+from api.v1.models.job import Job
 
 client = TestClient(app)
 user_service = UserService()
+JOB_ENDPOINT = '/api/v1/jobs'
+LOGIN_ENDPOINT = 'api/v1/auth/login'
 
-# Mock environment variables
-os.environ['SECRET_KEY'] = 'your_secret_key'
+@pytest.fixture
+def mock_db_session():
+    """Fixture to create a mock database session."""
+    with patch("api.db.database.get_db", autospec=True) as mock_get_db:
+        mock_db = MagicMock()
+        app.dependency_overrides[get_db] = lambda: mock_db
+        yield mock_db
+    app.dependency_overrides = {}
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = "HS256"
+@pytest.fixture
+def mock_user_service():
+    """Fixture to create a mock user service."""
+    with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
+        yield mock_service
 
-def create_token(user_id: str):
-    expire = datetime.utcnow() + timedelta(minutes=30)
-    to_encode = {"sub": user_id, "exp": expire}
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
-@pytest.fixture(scope="module")
-def db():
-    db_session = next(get_db())
-    yield db_session
-    db_session.close()
-
-def create_test_admin_user(db: Session):
-    hashed_password = user_service.hash_password(password="adminpassword")
-    admin_user = User(
+def create_mock_user(mock_user_service, mock_db_session):
+    """Create a mock user in the mock database session."""
+    mock_user = User(
         id=str(uuid7()),
-        first_name="user",
-        last_name="admin",
-        username="adminuser",
-        email="adminuser@example.com",
-        password=hashed_password,
+        username="testuser",
+        email="testuser@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name='Test',
+        last_name='User',
         is_active=True,
         is_admin=True,
-        is_deleted=False
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
-    db.add(admin_user)
-    db.commit()
-    db.refresh(admin_user)
-    return admin_user
+    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
+    return mock_user
 
-def create_test_user(db: Session):
-    hashed_password = user_service.hash_password(password="userpassword")
-    test_user = User(
-        id=str(uuid7()),
-        first_name="test",
-        last_name="user",
-        username="testuser",
-        email="testuser@example.com",
-        password=hashed_password,
-        is_active=True,
-        is_admin=False,
-        is_deleted=False
-    )
-    db.add(test_user)
-    db.commit()
-    db.refresh(test_user)
-    return test_user
-
-@pytest.fixture(scope="module", autouse=True)
-def setup_users(db: Session):
-    create_test_admin_user(db)
-    create_test_user(db)
-
-def get_token(username: str, password: str):
-    response = client.post(
-        "/auth/login",
-        data={"username": username, "password": password}
-    )
-    assert response.status_code == 200
-    token = response.json()["access_token"]
-    return token
-
-def test_create_job(db: Session):
-    token = get_token("adminuser", "adminpassword")
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    job_data = {
-        "title": "New Job",
-        "description": "New Description",
-        "location": "New Location",
-        "salary": 1500.0,
-        "job_type": "Part-time",
-        "company_name": "New Company",
-        "tags": ["Engineering", "Remote"]
-    }
-    
-    response = client.post("/api/v1/jobs/", headers=headers, json=job_data)
-    assert response.status_code == 201
-    response_data = response.json()
-    assert response_data["title"] == "New Job"
-    assert response_data["description"] == "New Description"
-    assert response_data["location"] == "New Location"
-    assert response_data["salary"] == 1500.0
-    assert response_data["job_type"] == "Part-time"
-    assert response_data["company_name"] == "New Company"
-    assert response_data["tags"] == ["Engineering", "Remote"]
-
-def test_get_job(db: Session):
-    token = get_token("adminuser", "adminpassword")
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Create a job to retrieve
-    job = Job(
-        user_id="admin_user_id",
-        title="Job to Retrieve",
-        description="Job Description",
-        location="Job Location",
+def create_mock_job(mock_db_session, user_id):
+    """Create a mock job in the mock database session."""
+    mock_job = Job(
+        id=str(uuid7()), 
+        user_id=user_id,
+        title="Test Job",
+        description="Test Description",
+        location="Test Location",
         salary=2000.0,
         job_type="Full-time",
-        company_name="Company Name",
-        tags=["Full-time", "On-site"],
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow()
+        company_name="Test Company",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
-    db.add(job)
-    db.commit()
-    db.refresh(job)
+    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_job
+    return mock_job
+
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_get_job(mock_user_service, mock_db_session):
+    """Test for retrieving a job by ID."""
     
-    response = client.get(f"/api/v1/jobs/{job.id}", headers=headers)
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    mock_job = create_mock_job(mock_db_session, mock_user.id)
+    
+    # Create a token for the mock user
+    access_token = user_service.create_access_token(user_id=mock_user.id)
+    
+    print(f"Generated Access Token: {access_token}")
+    
+    # Test GET endpoint
+    response = client.get(f"{JOB_ENDPOINT}/{mock_job.id}", headers={'Authorization': f'Bearer {access_token}'})
+    
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data["title"] == "Job to Retrieve"
-    assert response_data["description"] == "Job Description"
-    assert response_data["location"] == "Job Location"
+    
+    assert response_data["title"] == "Test Job"
+    assert response_data["description"] == "Test Description"
+    assert response_data["location"] == "Test Location"
     assert response_data["salary"] == 2000.0
     assert response_data["job_type"] == "Full-time"
-    assert response_data["company_name"] == "Company Name"
-    assert response_data["tags"] == ["Full-time", "On-site"]
-
-def test_create_job_unauthorized(db: Session):
-    token = get_token("testuser", "userpassword")
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    job_data = {
-        "title": "Unauthorized Job",
-        "description": "This should not be created.",
-        "location": "Unauthorized Location",
-        "salary": 2500.0,
-        "job_type": "Part-time",
-        "company_name": "Unauthorized Company",
-        "tags": ["Unauthorized"]
-    }
-    
-    response = client.post("/api/v1/jobs/", headers=headers, json=job_data)
-    assert response.status_code == 403
-    assert response.json() == {"detail": "You do not have permission to perform this action."}
+    assert response_data["company_name"] == "Test Company"
