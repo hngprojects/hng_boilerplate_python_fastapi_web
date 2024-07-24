@@ -302,7 +302,6 @@ class UserService(Service):
         db.commit()
 
     def change_password(
-        # request: Request,
         self,
         old_password: str,
         new_password: str,
@@ -311,7 +310,6 @@ class UserService(Service):
     ):
         """Endpoint to change the user's password"""
 
-        # Verify old password (you need to implement this logic)
         if not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
 
