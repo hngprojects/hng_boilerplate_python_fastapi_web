@@ -25,14 +25,10 @@ class Organization(BaseTableModel):
 
     name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)
-    
+
     users = relationship(
             "User",
             secondary=user_organization_association,
             back_populates="organizations"
             )
     roles = relationship('Role', back_populates='organization')
-
-
-    def __str__(self):
-        return self.name
