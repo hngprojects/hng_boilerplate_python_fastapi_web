@@ -21,3 +21,4 @@ class Blog(BaseTableModel):
     tags = Column(Text, nullable=True)  # Assuming tags are stored as a comma-separated string
 
     author = relationship("User", back_populates="blogs")
+    comments = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
