@@ -1,34 +1,38 @@
-from pydantic import BaseModel
+from api.v1.models.activity_logs import ActivityLog
+from pydantic import BaseModel, ConfigDict
 from datetime import datetime
-from uuid import UUID
 from typing import List
 
 
-class ActivityLogCreate(ActivityLog):
-    pass
+class ActivityLogCreate(BaseModel):
+    user_id: str
+    action: str
 
 
-class ActivityLogResponse(ActivityLog):
-    id: UUID
+class GetActivityLogBase(BaseModel):
+    user_id: str
+    user: str = None
+    action: str
     timestamp: datetime
 
-    class Config:
-        orm_mode = True
+
+class GetActivityLogResponse(GetActivityLogBase):
+    user: None
+    action: str
+    timestamp: datetime
+
 
 class ActivityLogBase(BaseModel):
     user_id: str
     action: str
-
-class ActivityLogCreate(ActivityLogBase):
-    pass
 
 
 class ActivityLogResponse(BaseModel):
     id: str
     message: str
     status_code: int
-    data: List[ActivityLog] = []
     timestamp: datetime
+
 
     class Config:
         orm_mode = True
