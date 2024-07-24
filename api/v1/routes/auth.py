@@ -129,4 +129,3 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     )
 
     return response
-    
