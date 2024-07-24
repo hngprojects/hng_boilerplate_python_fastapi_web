@@ -22,6 +22,20 @@ def delete_user(
     current_user: Annotated[User, Depends(user_service.get_current_user)],
     db: Session = Depends(get_db),
 ):
+    """Endpoint for user deletion (soft-delete)
+
+    Args:
+        user_id (UUID): User ID
+        current_user (User): Current logged in user
+        db (Session, optional): Database Session. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: 403 FORBIDDEN (Current user is not a super admin)
+        HTTPException: 404 NOT FOUND (User to be deleted cannot be found)
+
+    Returns:
+        JSONResponse: 204 NO CONTENT (successful user deletion)
+    """
     # check if current user is an admin
     if not current_user.is_super_admin:
         raise HTTPException(

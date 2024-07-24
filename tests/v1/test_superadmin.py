@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
 from api.v1.models.user import User
-from api.v1.services.user import user_service
+from api.v1.services.user import user_service, UserService
 from uuid_extensions import uuid7
 from api.db.database import get_db
 from fastapi import status
@@ -21,7 +21,11 @@ USER_DELETE_ENDPOINT = "/api/v1/users"
 
 @pytest.fixture
 def mock_db_session():
-    """Fixture to create a mock database session."""
+    """Fixture to create a mock database session."
+
+    Yields:
+        MagicMock: mock database
+    """
 
     with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
@@ -39,9 +43,10 @@ def mock_user_service():
         yield mock_service
 
 
-# Mock the get_current_user dependency
 @pytest.fixture
 def override_get_current_user_to_admin():
+    """Mock the get_current_user dependency for admin user"""
+
     app.dependency_overrides[user_service.get_current_user] = lambda: User(
         id=str(uuid7()),
         username="admintestuser",
@@ -58,6 +63,8 @@ def override_get_current_user_to_admin():
 
 @pytest.fixture
 def override_get_current_user_to_non_admin():
+    """Mock the get_current user dependency"""
+
     app.dependency_overrides[user_service.get_current_user] = lambda: User(
         id=str(uuid7()),
         username="testuser",
@@ -75,7 +82,13 @@ def override_get_current_user_to_non_admin():
 mock_id = str(uuid7())
 
 
-def create_dummy_mock_user(mock_user_service, mock_db_session: Session):
+def create_dummy_mock_user(mock_user_service: UserService, mock_db_session: Session):
+    """generate a dummy mock user
+
+    Args:
+        mock_user_service (UserService): mock user service
+        mock_db_session (Session): mock database session
+    """
     dummy_mock_user = User(
         id=mock_id,
         username="dummyuser",
@@ -93,7 +106,7 @@ def create_dummy_mock_user(mock_user_service, mock_db_session: Session):
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_unauthorised_access(mock_user_service, mock_db_session):
+def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Session):
     """Test for unauthorized access to endpoint."""
 
     response = client.delete(f"{USER_DELETE_ENDPOINT}/{str(uuid7())}")
@@ -105,7 +118,9 @@ def test_unauthorised_access(mock_user_service, mock_db_session):
     "mock_db_session", "mock_user_service", "override_get_current_user_to_non_admin"
 )
 def test_non_admin_access(
-    mock_user_service, mock_db_session, override_get_current_user_to_non_admin
+    mock_user_service: UserService,
+    mock_db_session: Session,
+    override_get_current_user_to_non_admin,
 ):
     """Test for non admin user access to endpoint"""
 
@@ -120,7 +135,9 @@ def test_non_admin_access(
     "mock_db_session", "mock_user_service", "override_get_current_user_to_admin"
 )
 def test_successful_deletion(
-    mock_user_service, mock_db_session: Session, override_get_current_user_to_admin
+    mock_user_service: UserService,
+    mock_db_session: Session,
+    override_get_current_user_to_admin,
 ):
     """Test for successful deletion of user"""
 
@@ -140,9 +157,12 @@ def test_successful_deletion(
     "mock_db_session", "mock_user_service", "override_get_current_user_to_admin"
 )
 def test_not_found_error(
-    mock_user_service, mock_db_session: Session, override_get_current_user_to_admin
+    mock_user_service: UserService,
+    mock_db_session: Session,
+    override_get_current_user_to_admin,
 ):
     """Test for invalid user ID"""
+
     response = client.delete(
         f"{USER_DELETE_ENDPOINT}/{str(uuid7())}",
     )
