@@ -28,7 +28,7 @@ def test_delete_blog_success():
     blog_id = "test_id"
     mock_blog = Blog(id=blog_id, title="Test Blog", content="Test Content", is_deleted=False)
     
-    with patch('api.v1.models.blog.Blog.query') as mock_query:
+    with patch('api.v1.models.blog.Blog') as mock_query:
         mock_query.filter.return_value.first.return_value = mock_blog
         
         response = client.delete(f"/api/v1/blog/{blog_id}")
@@ -49,7 +49,7 @@ def test_delete_blog_unauthorized():
 def test_delete_blog_not_found():
     blog_id = "non_existent_id"
     
-    with patch('api.v1.models.blog.Blog.query') as mock_query:
+    with patch('api.v1.models.blog.Blog') as mock_query:
         mock_query.filter.return_value.first.return_value = None
         
         response = client.delete(f"/api/v1/blog/{blog_id}")
@@ -63,7 +63,7 @@ def test_get_all_blogs():
         Blog(id="2", title="Blog 2", content="Content 2", is_deleted=False)
     ]
     
-    with patch('api.v1.models.blog.Blog.query') as mock_query:
+    with patch('api.v1.models.blog.Blog') as mock_query:
         mock_query.filter.return_value.all.return_value = mock_blogs
         
         response = client.get("/blog/")
