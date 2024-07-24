@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 from api.v1.models.user import User
 from pydantic import BaseModel, EmailStr
@@ -10,11 +11,19 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-from pydantic import BaseModel
 
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+class TokenRequest(BaseModel):
+    email: EmailStr
+    token: str
+    
 
 class OAuthToken(BaseModel):
     access_token: str
