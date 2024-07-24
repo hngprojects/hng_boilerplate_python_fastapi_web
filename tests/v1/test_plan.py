@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-BILLPLAN_ENDPOINT = '/api/v1/organizations/12345/billing-plans'
+BILLPLAN_ENDPOINT = '/api/v1/organizations/billing-plans'
 
 
 @pytest.fixture
