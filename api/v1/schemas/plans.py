@@ -1,17 +1,13 @@
 from pydantic import BaseModel
-from typing import List, Optional
-import uuid
 
-class CreateSubscriptionPlan(BaseModel):
-    name: str
-    description: Optional[str] = None
-    price: int
-    duration: str
-    features: List[str]
-    
-    
-class SubscriptionPlanResponse(CreateSubscriptionPlan):
-    id: uuid.UUID
-    
+class PlanCreate(BaseModel):
+    plan_name: str
+    amount: int
+
+class Plan(BaseModel):
+    id: int
+    plan_name: str
+    amount: int
+
     class Config:
         orm_mode = True
