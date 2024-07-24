@@ -15,6 +15,9 @@ class UserBase(BaseModel):
     email: EmailStr
     created_at: datetime
 
+    class Config:
+        from_attributes = True
+
 class UserCreate(BaseModel):
     '''Schema to create a user'''
     
