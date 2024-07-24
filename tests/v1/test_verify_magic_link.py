@@ -7,6 +7,7 @@ from api.v1.services.user import UserService
 from api.v1.routes.verify_magic_link import router
 from api.db.database import get_db, Base
 import logging
+import pytest_postgresql
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -36,24 +37,19 @@ class MockUserService:
 app = FastAPI()
 app.include_router(router)
 
-# Create an in-memory SQLite database and bind the session
-DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Create the database tables
-Base.metadata.create_all(bind=engine)
-
 # Mock database dependency
 @pytest.fixture
-def mock_db():
+def mock_db(postgresql):
+    DATABASE_URL = postgresql.url()
+    engine = create_engine(DATABASE_URL)
+    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    Base.metadata.create_all(bind=engine)
     db = TestingSessionLocal()
     try:
         yield db
     finally:
         db.close()
+    Base.metadata.drop_all(bind=engine)
 
 # Mock UserService dependency
 @pytest.fixture
