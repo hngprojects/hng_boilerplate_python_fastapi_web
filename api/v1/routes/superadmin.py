@@ -23,7 +23,7 @@ def delete_user(
     db: Session = Depends(get_db),
 ):
     # check if current user is an admin
-    if not current_user.is_admin:
+    if not current_user.is_super_admin:
         raise HTTPException(
             detail="Access denied, Superadmin only",
             status_code=status.HTTP_403_FORBIDDEN,
@@ -32,7 +32,7 @@ def delete_user(
     user = user_service.fetch(db=db, id=str(user_id))
 
     # check if the user_id points to a valid user
-    if user is None:
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="user not found"
         )
@@ -40,4 +40,6 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=str(user_id))
 
-    return success_response(status_code=status.HTTP_204_NO_CONTENT, message="user deleted successfully")
+    return success_response(
+        status_code=status.HTTP_204_NO_CONTENT, message="user deleted successfully"
+    )
