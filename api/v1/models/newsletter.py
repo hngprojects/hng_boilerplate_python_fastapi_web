@@ -17,4 +17,4 @@ class Newsletter(BaseTableModel):
     title = Column(String, nullable=False)
     content = Column(Text, nullable=False)
 
-subscribers = relationship("User", secondary=user_newsletter_association, back_populates="newsletters")
+    subscribers = relationship("User", secondary=user_newsletter_association, back_populates="newsletters")

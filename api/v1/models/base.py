@@ -23,6 +23,6 @@ user_newsletter_association = Table(
     'user_newsletter_association',
     Base.metadata,
     Column('user_id', String, ForeignKey('users.id'), primary_key=True),
-    Column('newsletter_id', Integer, ForeignKey('newsletters.id'), primary_key=True),
+    Column('newsletter_id', String, ForeignKey('newsletters.id'), primary_key=True),
     Column('created_at', DateTime(timezone=True), server_default=func.now())
 )
