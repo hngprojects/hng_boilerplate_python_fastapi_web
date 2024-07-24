@@ -3,7 +3,6 @@ from sqlalchemy.orm import sessionmaker
 from api.v1 import models
 from api.v1.models.base import Base
 from api.v1.models.org import Organization
-from api.v1.models.preference import OrgPreference
 from api.v1.models.user import User  # Update with your actual import path
 import bcrypt
 
@@ -29,14 +28,6 @@ def seed_organizations():
     session.add_all([org1, org2])
     session.commit()
 
-def seed_org_preferences():
-    org1 = session.query(Organization).filter_by(name="Organization One").first()
-    org2 = session.query(Organization).filter_by(name="Organization Two").first()
-
-    preference1 = OrgPreference(key="theme", value="dark", organization_id=org1.id)
-    preference2 = OrgPreference(key="language", value="en", organization_id=org2.id)
-    session.add_all([preference1, preference2])
-    session.commit()
 
 def seed_users():
     password1 = "plaintextpassword1"
@@ -53,7 +44,6 @@ def main():
 
     # Seed data
     seed_organizations()
-    seed_org_preferences()
     seed_users()
 
 if __name__ == "__main__":
