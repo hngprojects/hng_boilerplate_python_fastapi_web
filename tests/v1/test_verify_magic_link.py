@@ -1,9 +1,9 @@
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session, declarative_base
-from services.token_service import TokenService
+from sqlalchemy.orm import sessionmaker, Session
+from api.v1.services.user import UserService
 from api.v1.routes.verify_magic_link import router
 from database import get_db, Base
 import logging
@@ -12,28 +12,25 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# Create a mock TokenService
-class MockTokenService:
+# Mock UserService implementation
+class MockUserService:
     def __init__(self, valid_tokens=None, invalid_tokens=None):
         self.valid_tokens = valid_tokens or []
         self.invalid_tokens = invalid_tokens or []
 
-    def generate_token(self):
-        token = "new_valid_token"
-        self.valid_tokens.append(token)
-        logger.debug(f"Generated token: {token}")
-        return token
+    def create_access_token(self, user_id: str) -> str:
+        return f"auth_token_for_{user_id}"
 
-    def validate_token(self, db, token):
-        is_valid = token in self.valid_tokens
-        logger.debug(f"Validating token: {token}, is_valid: {is_valid}")
-        return is_valid
-
-    def invalidate_token(self, db, token):
+    def verify_access_token(self, token: str, credentials_exception):
         if token in self.valid_tokens:
-            self.valid_tokens.remove(token)
-            logger.debug(f"Invalidated token: {token}")
+            return user.TokenData(id="user_id_for_valid_token")
+        elif token in self.invalid_tokens:
+            raise HTTPException(status_code=400, detail="Invalid or expired token")
+        else:
+            raise credentials_exception
 
+    def invalidate_token(self, db: Session, token: str):
+        pass
 
 # Setup test app
 app = FastAPI()
@@ -42,7 +39,7 @@ app.include_router(router)
 # Create an in-memory SQLite database and bind the session
 DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(
-        DATABASE_URL, connect_args={"check_same_thread": False}
+    DATABASE_URL, connect_args={"check_same_thread": False}
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -58,16 +55,16 @@ def mock_db():
     finally:
         db.close()
 
-# Mock TokenService dependency
+# Mock UserService dependency
 @pytest.fixture
-def mock_token_service():
-    yield MockTokenService(valid_tokens=["valid_token"], invalid_tokens=["expired_token"])
+def mock_user_service():
+    return MockUserService(valid_tokens=["valid_token"], invalid_tokens=["expired_token", "invalid_token"])
 
 # Create a mock app and override dependencies using dependency_overrides
 @pytest.fixture
-def test_app(mock_db, mock_token_service):
+def test_app(mock_db, mock_user_service):
     app.dependency_overrides[get_db] = lambda: mock_db
-    app.dependency_overrides[TokenService] = lambda: mock_token_service
+    app.dependency_overrides[UserService] = lambda: mock_user_service
     yield app
     app.dependency_overrides.clear()
 
@@ -79,7 +76,6 @@ def test_empty_token(test_app):
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": ""})
     assert response.status_code == 422
 
-
 def test_whitespace_token(test_app):
     client = TestClient(test_app)
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": " "})
@@ -90,16 +86,24 @@ def test_min_length_token(test_app):
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": "a"})
     assert response.status_code in [200, 400]
 
+def test_valid_token(test_app):
+    client = TestClient(test_app)
+    response = client.post("/api/v1/auth/verify-magic-link", json={"token": "valid_token"})
+    assert response.status_code == 200
+    assert "auth_token" in response.json()
+    assert response.json()["status"] == 200
+
 def test_invalid_token(test_app):
     client = TestClient(test_app)
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": "invalid_token"})
     assert response.status_code == 400
+    assert response.json() == {"detail": "Invalid or expired token"}
 
 def test_expired_token(test_app):
     client = TestClient(test_app)
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": "expired_token"})
     assert response.status_code == 400
-
+    assert response.json() == {"detail": "Invalid or expired token"}
 
 def test_special_characters_token(test_app):
     client = TestClient(test_app)
