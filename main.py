@@ -15,13 +15,8 @@ from api.v1.routes.newsletter import (
     custom_exception_handler
 )
 from api.v1.routes import api_version_one
+from api.v1.routes.activity_log import router as activity_log_router
 
-from api.v1.routes.auth import auth
-from api.v1.routes.user import user
-from api.v1.routes.roles import role
-from api.v1.routes import activity_log
-
-Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -43,14 +38,8 @@ app.add_middleware(
 )
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
-app.include_router(newsletter, tags=["Newsletter"])
-
-app.include_router(auth)
-app.include_router(user)
-app.include_router(activity_log.router, prefix="/api/v1")
-# app.include_router(users, tags=["Users"])
 app.include_router(api_version_one)
-
+app.include_router(activity_log_router, prefix="/api/v1")
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:

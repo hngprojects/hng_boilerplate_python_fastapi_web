@@ -3,16 +3,14 @@ from datetime import datetime
 from uuid import UUID
 
 class ActivityLogBase(BaseModel):
-    user_id: UUID
-
+    user_id: str
     action: str
-    description: str = None
 
 class ActivityLogCreate(ActivityLogBase):
     pass
 
 class ActivityLogResponse(ActivityLogBase):
-    id: UUID
+    id: str
     timestamp: datetime
 
     class Config:

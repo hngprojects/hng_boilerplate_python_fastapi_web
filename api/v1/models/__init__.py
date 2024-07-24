@@ -17,7 +17,6 @@ from api.v1.models.testimonial import Testimonial
 from api.v1.models.token_login import TokenLogin
 from api.v1.models.oauth import OAuth
 from api.v1.models.invitation import Invitation
-from api.v1.models.role import Role
-from api.v1.models.permission import Permission
-from api.v1.models.activity_log import ActivityLog
 from api.v1.models.newsletter import Newsletter
+from api.v1.models.blog_dislike import BlogDislike
+from api.v1.models.blog_like import BlogLike

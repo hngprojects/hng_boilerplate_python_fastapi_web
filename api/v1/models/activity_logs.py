@@ -8,6 +8,7 @@ class ActivityLog(BaseTableModel):
 
     user_id = Column(String, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
     action = Column(String, nullable=False)
+
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="activity_logs")

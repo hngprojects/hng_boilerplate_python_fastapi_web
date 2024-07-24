@@ -32,11 +32,11 @@ class User(BaseTableModel):
     last_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_super_admin = Column(Boolean, default=False)
+    is_deleted = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
-    roles = relationship('Role', secondary=user_role_association, back_populates='users')
-    activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
     roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
@@ -50,7 +50,9 @@ class User(BaseTableModel):
     invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
     messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
     newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
-
+    blog_likes = relationship("BlogLike", back_populates="user", cascade="all, delete-orphan")
+    blog_dislikes = relationship("BlogDislike", back_populates="user", cascade="all, delete-orphan")
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")

@@ -3,17 +3,6 @@
 """
 from api.v1.models import *
 from api.v1.models.base import Base
-<<<<<<< HEAD
-from api.v1.models.subscription import Subscription
-from api.v1.models.blog import Blog
-from api.v1.models.job import Job
-from api.v1.models.invitation import Invitation
-from api.v1.models.role import Role
-from api.v1.models.permission import Permission
-from api.v1.models.activity_log import ActivityLog
-
-create_database()
-=======
 from api.v1.services.user import user_service
 from api.db.database import create_database, get_db
 
@@ -24,7 +13,6 @@ from api.db.database import create_database, get_db
 
 
 # create_database()
->>>>>>> 2a6b850c723f700ce4928879d0b6defcc1b6d64a
 db = next(get_db())
 
 user_1 = User(email="test@mail", username="testuser", password=user_service.hash_password("testpass"), first_name="John", last_name="Doe")
