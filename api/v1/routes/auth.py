@@ -1,11 +1,14 @@
 from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
 from api.v1.models import User
 from typing import Annotated
-from datetime import timedelta
+from datetime import datetime, timedelta
+
 from api.v1.schemas.user import UserCreate
+from api.v1.schemas.token import EmailRequest, TokenRequest
+from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
 
@@ -128,4 +131,3 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     )
 
     return response
- 
