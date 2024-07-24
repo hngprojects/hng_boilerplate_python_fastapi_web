@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter, Depends
 
-from email_validator import validate_email, EmailNotValidError
 from api.v1.models.user import WaitlistUser
 from api.db.database import get_db
 
@@ -11,9 +10,6 @@ from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.utils.json_response import JsonResponseDict
 from api.utils.exceptions import CustomWaitlistException
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
-from typing import Union
-
 
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
 db = next(get_db())

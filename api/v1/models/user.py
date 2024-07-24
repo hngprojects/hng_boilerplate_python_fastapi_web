@@ -2,25 +2,14 @@
 """ User data model
 """
 from sqlalchemy import (
-        create_engine,
         Column,
-        Integer,
         String,
-        Text,
         text,
-        Date,
-        ForeignKey,
-        Numeric,
-        DateTime,
-        func,
-        Table,
         Boolean
         )
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from api.v1.models.base import Base, user_organization_association, user_role_association
+from api.v1.models.base import user_organization_association, user_role_association
 from api.v1.models.base_model import BaseTableModel
-from sqlalchemy.dialects.postgresql import UUID
 
 
 class User(BaseTableModel):
