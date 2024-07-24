@@ -40,6 +40,7 @@ class User(BaseTableModel, Base):
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
     jobs = relationship("Job", back_populates="author", cascade="all, delete-orphan")
+    token_login = relationship("TokenLogin", back_populates="user", uselist=False, cascade="all, delete-orphan")
     
     def to_dict(self):
         obj_dict = super().to_dict()
