@@ -1,25 +1,23 @@
-from fastapi.encoders import jsonable_encoder
-from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest, BlogResponse, BlogPostResponse
-from sqlalchemy.orm import Session
-from api.v1.models.user import User
-from api.utils.dependencies import get_current_user
-from api.v1.services.blog import BlogService
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from api.db.database import get_db
+from sqlalchemy.orm import Session
 from typing import List
-from uuid import UUID
-from api.v1.models.blog import Blog
 
+from api.v1.models.blog import Blog, BlogPostResponse, BlogResponse
+from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest
+from api.v1.services.blog import BlogService
+from api.utils.dependencies import get_current_user
+from api.db.database import get_db
+from api.v1.models.user import User
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
-blog_service = BlogService(db)
 
 
 @blog.get("/", response_model=List[BlogResponse])
 def get_all_blogs(db: Session = Depends(get_db)):
-    blogs = db.query(Blog).filter(Blog.is_deleted == False).all()
+
+    blogs = blog_service.fetch_all()  # Assuming you have this implemented
     if not blogs:
         return []
     return blogs
@@ -40,7 +38,8 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     Raises:
         HTTPException: If the blog post is not found.
     """
-    blog_post = blog_service.fetch(db, id)
+    blog_service = BlogService(db)
+    blog_post = blog_service.fetch(id)
     if not blog_post:
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -56,7 +55,7 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
 
 @blog.put("/{id}", response_model=BlogUpdateResponseModel)
 async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    # blog_service = BlogService(db)
+    blog_service = BlogService(db)
     try:
         updated_blog_post = blog_service.update(
             blog_id=id,
