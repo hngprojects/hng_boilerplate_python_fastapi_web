@@ -7,7 +7,6 @@ from api.v1.models import *
 from api.v1.models.base import Base
 from api.v1.models.blog import Blog
 from api.v1.models.job import Job
-from api.v1.models.preference import OrgPreference
 
 
 
