@@ -17,7 +17,7 @@ class SubscriptionPlanResponse(CreateSubscriptionPlan):
         orm_mode = True
 
 
-class SubscriptionPlanDisplay(CreateSubscriptionPlan):
+class BillingPlanDisplay(BaseModel):
     id: uuid.UUID
     name: str
     price: int
