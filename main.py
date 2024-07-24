@@ -15,6 +15,8 @@ from api.v1.routes.newsletter import (
     custom_exception_handler
 )
 from api.v1.routes import api_version_one
+from api.v1.routes.notificationroute import router as notifications_router
+
 
 
 @asynccontextmanager
@@ -38,6 +40,7 @@ app.add_middleware(
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.include_router(api_version_one)
+app.include_router(notifications_router, prefix="/api/v1/notifications")  # Register notifications router
 
 
 @app.get("/", tags=["Home"])
