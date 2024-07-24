@@ -30,7 +30,7 @@ def register_admin(user : UserCreate , db : db_dependency):
     return success_response(
         status_code=201,
         message= 'User Created Successfully',
-        data= user_created.to_dict()
+        data=user_created.to_dict()
     )
 
     

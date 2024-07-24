@@ -7,15 +7,7 @@ from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
 from api.v1.models.user import User
 
-
-
-
-
-
-
 client = TestClient(app)
-
-
 data1 = {
     "first_name": "Marvelous",
     "last_name": "Uboh",
@@ -39,10 +31,7 @@ data3 = {
     "username": "marveldid",
     "password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
-
 }
-
-
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock()
@@ -58,12 +47,6 @@ def override_get_db(db_session_mock):
     yield
     # Clean up after the test by removing the override
     app.dependency_overrides = {}
-
-
-
-
-
-
 
 @pytest.mark.parametrize('data', [data1, data2, data3])
 def test_super_user_creation(data, db_session_mock):
@@ -82,10 +65,6 @@ def test_super_user_creation(data, db_session_mock):
     
     assert response.json()['message'] == 'User Created Successfully'
     assert response.status_code == 201
-    
-    
-
-
     # Assert that create_user was called with the correct data
    
     db_session_mock.query().filter().first.return_value = data

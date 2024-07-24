@@ -11,5 +11,4 @@ api_version_one.include_router(auth)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(user)
 api_version_one.include_router(blog)
-
 api_version_one.include_router(superadmin)
