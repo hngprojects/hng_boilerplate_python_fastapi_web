@@ -13,7 +13,7 @@ from api.v1.models.user import User
 from api.v1.services.user import user_service
 from uuid import UUID
 
-superadmin = APIRouter(prefix="", tags=["superadmin"])
+superadmin = APIRouter(prefix="/superadmin", tags=["superadmin"])
 
 
 @superadmin.delete("/users/{user_id}")
