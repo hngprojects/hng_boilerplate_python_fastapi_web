@@ -21,11 +21,13 @@ from datetime import datetime
 from api.v1.models.base import Base, user_organization_association, user_role_association
 from api.v1.models.base_model import BaseModel
 from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 
 class User(BaseModel, Base):
     __tablename__ = 'users'
 
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String(50), unique=True, nullable=False)
     email = Column(String(100), unique=True, nullable=False)
     password = Column(String(255), nullable=False)

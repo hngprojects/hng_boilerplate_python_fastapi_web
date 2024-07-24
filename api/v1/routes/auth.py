@@ -18,7 +18,14 @@ from datetime import datetime, timedelta
 from api.v1.schemas.token import Token, LoginRequest
 from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
 from api.db.database import get_db
-from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
+from api.utils.auth import (
+    authenticate_user,
+    create_access_token,
+    hash_password,get_user,
+    generate_password_reset_token,
+    generate_reset_password_url,
+    get_user_by_email
+)
 from api.utils.dependencies import get_current_admin, get_current_user
 
 
@@ -26,12 +33,20 @@ from api.v1.models.org import Organization
 
 from api.v1.models.product import Product
 
+from fastapi import BackgroundTasks
+from fastapi_mail import FastMail, MessageSchema
+
+from fastapi import BackgroundTasks
+from fastapi_mail import ConnectionConfig
+from pydantic import BaseModel, EmailStr
+from api.utils.settings import settings, BASE_DIR
 
 db = next(get_db())
 
 
 auth = APIRouter(prefix="/auth", tags=["auth"])
 
+# This is in the .evn file already though
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 
@@ -111,3 +126,51 @@ def register_user(user: UserCreate, db: Session = Depends(get_db)):
 def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
 
+
+conf = ConnectionConfig(
+    MAIL_USERNAME=settings.MAIL_USERNAME,
+    MAIL_PASSWORD=settings.MAIL_PASSWORD,
+    MAIL_FROM=settings.MAIL_FROM,
+    MAIL_PORT=settings.MAIL_PORT,
+    MAIL_SERVER=settings.MAIL_SERVER,
+    MAIL_STARTTLS=settings.MAIL_STARTTLS,
+    MAIL_SSL_TLS=settings.MAIL_SSL_TLS
+)
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+
+@auth.post("/password-reset-email/", status_code=status.HTTP_200_OK)
+async def send_email(background_tasks: BackgroundTasks, email: EmailRequest, db: Session = Depends(get_db)):
+    """
+    Getting the user from the database, the email in the db since the email schema in the db is unique, it picks the 1st
+    """
+
+    user = get_user_by_email(db, email.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="We don't have user with the provided email in our database.")
+    # Generate password reset token
+    password_reset_token = generate_password_reset_token(user_id=str(user.id))
+    reset_password_url = generate_reset_password_url(user_id=str(user.id), token=password_reset_token)
+
+    email_body = (f"Dear {user.username}!\nYou requested for email reset on our site.\n"
+                  f"To reset your password, click the following link: {reset_password_url}")
+
+    message: MessageSchema = MessageSchema(
+        subject="Reset Password",
+        recipients=[email.email],
+        body=email_body,
+        subtype="plain"
+    )
+    fm = FastMail(conf)
+
+    try:
+        background_tasks.add_task(fm.send_message, message)
+        return {
+            "message": "Password reset email sent successfully.",
+            "reset_link": reset_password_url
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending email: {e}")
