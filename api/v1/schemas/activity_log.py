@@ -4,6 +4,7 @@ from uuid import UUID
 
 class ActivityLogBase(BaseModel):
     user_id: UUID
+
     action: str
     description: str = None
 
