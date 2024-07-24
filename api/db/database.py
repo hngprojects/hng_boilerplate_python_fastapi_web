@@ -17,7 +17,7 @@ DB_TYPE = settings.DB_TYPE
 
 def get_db_engine(test_mode: bool = False):
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-    
+    print(DB_PASSWORD)
     if DB_TYPE == "sqlite" or test_mode:
         BASE_PATH = f"sqlite:///{BASE_DIR}"
         DATABASE_URL = BASE_PATH + "/"
