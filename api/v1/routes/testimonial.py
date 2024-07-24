@@ -21,7 +21,7 @@ def get_testimonial(testimonial_id, db: Session = Depends(get_db), current_user:
     if testimonial and testimonial_id == testimonial.id:
         return success_response(
             status_code=200,
-            message='Testimonial {} retrieved successfully'.format(testimonial_id),
+            message=f'Testimonial {testimonial_id} retrieved successfully',
             data={
                 'id': testimonial.id,
                 'client_designation': testimonial.client_designation,
@@ -37,6 +37,6 @@ def get_testimonial(testimonial_id, db: Session = Depends(get_db), current_user:
         content={
             "success": False,
             "status_code": 404,
-            "message": "Testimonial {} not found".format(testimonial_id)
+            "message": f'Testimonial {testimonial_id} not found'
         }
     )
