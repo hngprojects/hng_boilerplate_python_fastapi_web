@@ -1,10 +1,10 @@
 from pydantic import BaseModel
 
-class blogRequest(BaseModel):
+class BlogRequest(BaseModel):
     title: str
     content: str
 
-class blogResponseModel(BaseModel):
+class BlogUpdateResponseModel(BaseModel):
     status: str
     message: str
     data: dict

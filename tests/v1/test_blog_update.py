@@ -13,7 +13,7 @@ from main import app
 from api.utils.dependencies import get_db, get_current_user
 from api.v1.models.user import User
 from api.v1.models.blog import Blog
-from api.v1.schemas.blog import blogRequest
+from api.v1.schemas.blog import BlogRequest
 from fastapi.encoders import jsonable_encoder
 
 @pytest.fixture(scope="module")
@@ -32,7 +32,7 @@ def current_user():
 
 @pytest.fixture
 def valid_blog_post():
-    return blogRequest(title="Updated Title", content="Updated Content")
+    return BlogRequest(title="Updated Title", content="Updated Content")
 
 @pytest.fixture
 def existing_blog_post(mock_db_session, current_user):
@@ -46,7 +46,7 @@ async def test_update_blog_success(client, mock_db_session, current_user, valid_
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blog/{existing_blog_post.id}", json=valid_blog_post.model_dump())
+    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 200
     assert response.json() == {
@@ -64,7 +64,7 @@ async def test_update_blog_not_found(client, mock_db_session, current_user, vali
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blog/{uuid7()}", json=valid_blog_post.model_dump())
+    response = client.put(f"api/v1/blogs/{uuid7()}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 404
     assert response.json() == {'message': 'Post not Found', 'status_code': 404, 'success': False}
@@ -77,7 +77,7 @@ async def test_update_blog_forbidden(client, mock_db_session, current_user, vali
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: different_user
 
-    response = client.put(f"api/v1/blog/{existing_blog_post.id}", json=valid_blog_post.model_dump())
+    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 403
     assert response.json() == {'message': 'Not authorized to update this blog', 'status_code': 403, 'success': False}
@@ -87,7 +87,7 @@ async def test_update_blog_empty_fields(client, mock_db_session, current_user, e
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blog/{existing_blog_post.id}", json={"title": "", "content": ""})
+    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json={"title": "", "content": ""})
 
     assert response.status_code == 400
     assert response.json() == {'message': 'Title and content cannot be empty', 'status_code': 400, 'success': False}
@@ -100,7 +100,7 @@ async def test_update_blog_internal_error(client, mock_db_session, current_user,
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blog/{existing_blog_post.id}", json=valid_blog_post.model_dump())
+    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json=valid_blog_post.model_dump())
 
     assert response.status_code == 500
     assert response.json() == {'message': 'An error occurred while updating the blog post', 'status_code': 500, 'success': False}
