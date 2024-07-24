@@ -10,7 +10,6 @@ from unittest.mock import MagicMock
 from main import app
 from api.db.database import get_db
 from api.v1.models.newsletter import Newsletter
-from api.v1.schemas.newsletter import EMAILSCHEMA
 
 client = TestClient(app)
 
@@ -28,11 +27,10 @@ def override_get_db(db_session_mock):
     
     app.dependency_overrides[get_db] = get_db_override
     yield
-    # Clean up after the test by removing the override
+
     app.dependency_overrides = {}
 
 def test_status_code(db_session_mock):
-    # Arrange
     db_session_mock.query(Newsletter).filter().first.return_value = None
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
@@ -45,16 +43,12 @@ def test_status_code(db_session_mock):
         "email": "user@example.com"
     }
 
-    # Act
     response = client.post("/api/v1/auth/register", json=user)
 
-    print(response.json())
-
-    # Assert
     assert response.status_code == 201
 
 def test_user_fields(db_session_mock):
-    # Arrange
+
     db_session_mock.query(Newsletter).filter().first.return_value = None
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
@@ -67,14 +61,9 @@ def test_user_fields(db_session_mock):
         "email": "mba@gmail.com"
     }
 
-    # Act
     response = client.post("/api/v1/auth/register", json=user)
 
-    print(response.json())
-
-    # Assert
     assert response.status_code == 201
-    # assert response.json().get("message") == "User created successfully"
     assert response.json()['data']["user"]['email'] == "mba@gmail.com"
     assert response.json()['data']["user"]['username'] == "mba"
     assert response.json()['data']["user"]['first_name'] == "sunday"
