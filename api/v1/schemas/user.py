@@ -61,3 +61,10 @@ class DeactivateUserSchema(BaseModel):
 
     reason: Optional[str] = None
     confirmation: bool
+
+
+class ChangePasswordSchema(BaseModel):
+    """Schema for changing password of a user"""
+
+    old_password: str
+    new_password: str

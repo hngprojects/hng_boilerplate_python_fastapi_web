@@ -6,8 +6,9 @@ from api.core.dependencies.email import mail_service
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.user import DeactivateUserSchema, UserBase
+from api.v1.schemas.user import DeactivateUserSchema, UserBase, ChangePasswordSchema
 from api.db.database import get_db
+# from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 
 
@@ -60,3 +61,19 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
         status_code=200,
         message='User reactivation successful',
     )
+
+@user.patch("/current-user/change-password", status_code=200)
+async def change_password(
+    # request: Request,
+    schema: ChangePasswordSchema,
+    db: Session = Depends(get_db),
+    user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to change the user's password"""
+
+    user_service.change_password(schema.old_password,schema.new_password,user,db)
+
+    return {
+        "status_code": 200,
+        "message": "Password Changed successfully",
+    }

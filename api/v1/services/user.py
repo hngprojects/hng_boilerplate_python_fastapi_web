@@ -289,6 +289,29 @@ class UserService(Service):
 
         # Commit changes to deactivate the user
         db.commit()
+        
+    def change_password(
+    # request: Request,
+    self,
+    old_password: str,
+    new_password: str,
+    user: User,
+    db: Session,
+    ):
+        """Endpoint to change the user's password"""
+
+        # Verify old password (you need to implement this logic)
+        if not self.verify_password(old_password, user.password):
+            raise HTTPException(status_code=400, detail="Incorrect old password")
+
+        # # Update password (you need to implement this logic)
+        user.password = self.hash_password(
+            new_password
+        )  # Make sure to hash the new password
+
+        # # Commit changes to deactivate the user
+        db.commit()
+
 
 
 user_service = UserService()
