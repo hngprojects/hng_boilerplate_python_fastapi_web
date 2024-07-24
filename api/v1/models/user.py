@@ -53,6 +53,8 @@ class User(BaseTableModel):
     blog_likes = relationship("BlogLike", back_populates="user", cascade="all, delete-orphan")
     blog_dislikes = relationship("BlogDislike", back_populates="user", cascade="all, delete-orphan")
 
+
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
