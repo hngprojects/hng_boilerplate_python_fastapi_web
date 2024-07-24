@@ -9,12 +9,12 @@ from api.v1.services.blog import BlogService
 
 blog_router = APIRouter(tags=["blogs"])
 
-@blog_router.put("/blog/{blog_id}", response_model=blogResponseModel)
-async def update_blog(blog_id: str, blogPost: blogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@blog_router.put("/blog/{id}", response_model=blogResponseModel)
+async def update_blog(id: str, blogPost: blogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     blog_service = BlogService(db)
     try:
         updated_blog_post = blog_service.update(
-            blog_id=blog_id,
+            blog_id=id,
             title=blogPost.title,
             content=blogPost.content,
             current_user=current_user
