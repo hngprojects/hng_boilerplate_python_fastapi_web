@@ -7,7 +7,6 @@ from api.v1.services.user import UserService
 from api.v1.routes.verify_magic_link import router
 from api.db.database import get_db, Base
 import logging
-import pytest_postgresql
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
