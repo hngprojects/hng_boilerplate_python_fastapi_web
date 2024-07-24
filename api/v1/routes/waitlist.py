@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from api.v1.models.user import WaitlistUser
+from api.v1.models.waitlist  import Waitlist
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.db.database import get_db
 from api.v1.services.waitlist_email import send_confirmation_email
