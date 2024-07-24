@@ -73,17 +73,8 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
 
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     
-    # mock_user_service.get_current_user.return_value = create_mock_user(mock_user_service, mock_db_session)
-    # login = client.post('/api/v1/auth/login', data={
-    #     "username": "testuser",
-    #     "password": "Testpassword@123"
-    # })
-    # result = login.json()
-    # print(f"login: {result}")
-    # assert result.get("success") == True
-    # access_token = result['data']['access_token']
     access_token = user_service.create_access_token(user_id=str(uuid7()))
-
+    print(access_token)
     # Missing field test
     missing_field = client.get(BILLPLAN_ENDPOINT
                                , headers={'Authorization': f'Bearer {access_token}'})
