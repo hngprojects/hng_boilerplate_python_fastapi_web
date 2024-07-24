@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.db.database import Base, engine
-
+from api.v1.routes.blog import blog_router
 from api.v1.routes.newsletter_router import newsletter
 from api.v1.routes.newsletter_router import (
     CustomException,
@@ -42,6 +42,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(auth)
 app.include_router(user)
+app.include_router(blog_router)
 # app.include_router(users, tags=["Users"])
 
 
