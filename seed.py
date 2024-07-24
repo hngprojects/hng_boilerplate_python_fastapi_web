@@ -3,6 +3,7 @@
 """
 from api.v1.models import *
 from api.v1.models.base import Base
+from api.v1.models.contact import ContactMessage
 from api.v1.services.user import user_service
 from api.db.database import create_database, get_db
 
@@ -40,7 +41,26 @@ product_2 = Product(name="shoe", price=150000, org_id=org_2.id)
 profile_1 = Profile(bio='My name is John Doe', phone_number='09022112233')
 user_1.profile = profile_1
 
-db.add_all([product_1, product_2])
+# Create Contact Messages
+contact_msg_1 = ContactMessage(
+    id="1",  # Assuming UUIDs are managed manually or replaced with actual UUIDs
+    sender="Alice",
+    email="alice@example.com",
+    message="Hello, I need help with my account.",
+    created_at="2024-07-01T12:00:00Z",
+    updated_at="2024-07-01T12:00:00Z"
+)
+
+contact_msg_2 = ContactMessage(
+    id="2",  # Assuming UUIDs are managed manually or replaced with actual UUIDs
+    sender="Bob",
+    email="bob@example.com",
+    message="Inquiry about product features.",
+    created_at="2024-07-02T13:00:00Z",
+    updated_at="2024-07-02T13:00:00Z"
+)
+
+db.add_all([product_1, product_2, contact_msg_1, contact_msg_2])
 db.commit()
 users = db.query(Organization).first().users
 print("Seed data succesfully")
