@@ -1,8 +1,8 @@
-"""added users, invitation, waitlist and other  table
+"""initial migration
 
-Revision ID: eca40a718b7a
+Revision ID: 0a0dac87b14d
 Revises: 
-Create Date: 2024-07-24 08:46:08.212541
+Create Date: 2024-07-24 13:29:11.537993
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'eca40a718b7a'
+revision: str = '0a0dac87b14d'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -279,6 +279,7 @@ def upgrade() -> None:
     op.create_table('user_organization',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('organization_id', sa.String(), nullable=False),
+    sa.Column('status', sa.String(length=20), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'organization_id')
