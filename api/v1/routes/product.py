@@ -1,14 +1,14 @@
 from fastapi import Depends, status, APIRouter, Response, Request
-from fastapi.security import OAuth2PasswordRequestForm
+# from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
-from api.v1.models import User
-from typing import Annotated
-from datetime import timedelta
+# from api.v1.models import User
+# from typing import Annotated
+# from datetime import timedelta
 from api.v1.schemas.user import UserCreate
 from api.db.database import get_db
-from api.utils.dependencies import get_current_admin
-from api.v1.services.user import user_service
+
+# from api.v1.services.user import user_service
 from api.v1.services.product import ProductService
 
 product = APIRouter(prefix="/product/create", tags=["Product"])
