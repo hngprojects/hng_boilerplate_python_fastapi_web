@@ -1,24 +1,33 @@
-# #!/usr/bin/env python3
-# """ The Profile model
-# """
-# from sqlalchemy import (
-#         Column,
-#         String,
-#         Text,
-#         ForeignKey,
-#         )
-# from sqlalchemy.orm import relationship
-# from api.v1.models.base import Base
-# from api.v1.models.base_model import BaseTableModel
+#!/usr/bin/env python3
+""" The Profile model
+"""
+from sqlalchemy import (
+        Column,
+        String,
+        Text,
+        ForeignKey,
+        )
+from sqlalchemy.orm import relationship
+from api.v1.models.base import Base
+from api.v1.models.base_model import BaseTableModel
 
 
 
-# class Profile(BaseTableModel):
-#     __tablename__ = 'profiles'
+class Profile(BaseTableModel):
+    __tablename__ = 'profiles'
 
-#     user_id = Column(String, ForeignKey('users.id'), unique=True, nullable=False)
-#     bio = Column(Text, nullable=True)
-#     phone_number = Column(String(50), nullable=True)
-#     avatar_url = Column(String(100), nullable=True)
+    user_id = Column(String, ForeignKey('users.id', ondelete="CASCADE"), unique=True, nullable=False)
+    username = Column(String, nullable=True)
+    first_name = Column(String, nullable=True)
+    last_name = Column(String, nullable=True)
+    pronouns = Column(String, nullable=True)
+    job_title = Column(String, nullable=True)
+    department = Column(String, nullable=True)
+    social = Column(Text, nullable=True)  # Assuming JSON or similar data type
+    bio = Column(Text, nullable=True)
+    phone_number = Column(String, nullable=True)
+    avatar_url = Column(String, nullable=True)
+    recovery_email = Column(String, nullable=True)
 
-#     user = relationship("User", back_populates="profile")
+
+    user = relationship("User", back_populates="profile")

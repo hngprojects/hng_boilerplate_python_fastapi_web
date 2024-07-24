@@ -34,7 +34,7 @@ class User(BaseTableModel, Base):
     is_active = Column(Boolean, default=True)
     is_super_admin = Column(Boolean, default=False)
 
-    # profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
+    profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
     def to_dict(self):

@@ -1,6 +1,7 @@
 from api.v1.models.user import User
 from api.v1.models.org import Organization
-# from api.v1.models.profile import Profile
+from api.v1.models.org_role import OrgRole
+from api.v1.models.profile import Profile
 # from api.v1.models.product import Product
 # from api.v1.models.subscription import Subscription
 # from api.v1.models.blog import Blog
