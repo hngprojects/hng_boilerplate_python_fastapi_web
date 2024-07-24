@@ -15,4 +15,3 @@ class SubscriptionPlanResponse(CreateSubscriptionPlan):
     
     class Config:
         orm_mode = True
-

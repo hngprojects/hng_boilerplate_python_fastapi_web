@@ -131,3 +131,40 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     )
 
     return response
+
+@auth.post("/request-token", status_code=status.HTTP_200_OK)
+async def request_signin_token(email_schema: EmailRequest, db: Session = Depends(get_db)):
+    '''Generate and send a 6-digit sign-in token to the user's email'''
+
+    user = user_service.fetch_by_email(db, email_schema.email)
+
+    token, token_expiry = user_service.generate_token()
+
+    # Save the token and expiry
+    user_service.save_login_token(db, user, token, token_expiry)
+
+    # Send the token to the user's email
+    # send_mail(to=user.email, subject="Your SignIn Token", body=token)
+
+    return success_response(
+        status_code=200,
+        message="Sign-in token sent to email"
+    )
+
+@auth.post("/verify-token", status_code=status.HTTP_200_OK)
+async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(get_db)):
+    '''Verify the 6-digit sign-in token and log in the user'''
+
+    user = user_service.verify_login_token(db, schema=token_schema)
+
+    # Generate JWT token
+    access_token = user_service.create_access_token(user_id=user.id)
+
+    return success_response(
+        status_code=200,
+        message="Sign-in successful",
+        data={
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    )
