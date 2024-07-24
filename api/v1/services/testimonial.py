@@ -22,8 +22,7 @@ class TestimonialService(Service):
     def fetch(self, db: Session, id: str):
         '''Fetches a single testimonial id'''
 
-        testimonial = check_model_existence(db, Testimonial, id)
-        return testimonial
+        return check_model_existence(db, Testimonial, id)
     
 
     def update(self, db: Session, id: str, schema):
