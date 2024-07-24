@@ -4,8 +4,8 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import List
 
-from api.v1.models.blog import Blog, BlogPostResponse, BlogResponse
-from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest
+from api.v1.models.blog import Blog
+from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest, BlogResponse, BlogPostResponse
 from api.v1.services.blog import BlogService
 from api.utils.dependencies import get_current_user
 from api.db.database import get_db
