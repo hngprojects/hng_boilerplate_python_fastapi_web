@@ -3,6 +3,15 @@ from typing import List, Optional
 from uuid import UUID
 from datetime import datetime
 
+class BlogRequest(BaseModel):
+    title: str
+    content: str
+
+class BlogUpdateResponseModel(BaseModel):
+    status: str
+    message: str
+    data: dict
+
 class BlogResponse(BaseModel):
     id: UUID
     author_id: UUID
@@ -17,4 +26,3 @@ class BlogResponse(BaseModel):
 
     class Config:
         orm_mode = True
-
