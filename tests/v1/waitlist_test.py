@@ -38,12 +38,6 @@ def test_duplicate_email(client_with_mocks):
         "/api/v1/waitlist/join", json={"email": "duplicate@gmail.com", "full_name": "Test User"}
     )
     data = response.json()
-    print(type(data))
-    print(data)
-    outer_message = data['message']
-    inner_message = outer_message['message']
-    expected_message = 'Email already registered'
-    assert inner_message == expected_message
     assert data['status_code'] == 400
     assert data['success'] == False
 

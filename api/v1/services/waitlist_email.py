@@ -2,6 +2,8 @@ from pydantic import EmailStr
 from api.core.dependencies.email import mail_service
 from fastapi import HTTPException
 from api.utils.logger import logger
+from sqlalchemy.orm import Session
+from api.v1.models.waitlist import Waitlist
 
 
 async def send_confirmation_email(email: EmailStr, full_name: str):
@@ -18,3 +20,16 @@ async def send_confirmation_email(email: EmailStr, full_name: str):
     except Exception as e:
         logger.error(f"Unexpected error while sending email: {str(e)}")  
         raise HTTPException(status_code=500, detail=f"Failed to send confirmation email: {str(e)}")
+
+
+def add_user_to_waitlist(db: Session, email: str, full_name: str):
+    """Adds a user to the waitlist."""
+    db_user = Waitlist(email=email, full_name=full_name)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def find_existing_user(db: Session, email: str):
+    """Finds an existing user by email."""
+    return db.query(Waitlist).filter(Waitlist.email == email).first()

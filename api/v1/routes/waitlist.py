@@ -1,15 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from api.v1.models.waitlist  import Waitlist
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
-from api.db.database import get_db
-from api.v1.services.waitlist_email import send_confirmation_email
+from api.v1.services.waitlist_email import send_confirmation_email, add_user_to_waitlist, find_existing_user
 from api.utils.logger import logger
 from fastapi.responses import JSONResponse
+from api.db.database import get_db
 
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
-
 
 class WaitlistResponse(BaseModel):
     message: str
@@ -23,19 +21,15 @@ async def waitlist_signup(
     if not user.full_name:
         logger.error("Full name is required")
         raise HTTPException(status_code=422, detail={"message": "Full name is required", 
-                                                       "success": False, "status_code": 422})
+                                                     "success": False, "status_code": 422})
 
-    existing_user = db.query(Waitlist).filter(
-        Waitlist.email == user.email).first()
+    existing_user = find_existing_user(db, user.email)
     if existing_user:
         logger.error(f"Email already registered: {user.email}")
         raise HTTPException(status_code=400, detail={"message": "Email already registered", 
-                                                       "success": False, "status_code": 400})
+                                                     "success": False, "status_code": 400})
 
-    db_user = Waitlist(email=user.email, full_name=user.full_name)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
+    db_user = add_user_to_waitlist(db, user.email, user.full_name)
 
     try:
         await send_confirmation_email(user.email, user.full_name)
