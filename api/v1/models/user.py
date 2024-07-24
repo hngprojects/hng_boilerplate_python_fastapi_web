@@ -32,6 +32,7 @@ class User(BaseTableModel):
     last_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_super_admin = Column(Boolean, default=False)
+    is_deleted = Column(Boolean, default=False)
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
