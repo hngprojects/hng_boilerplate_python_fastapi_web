@@ -34,10 +34,14 @@ def test_duplicate_email(client_with_mocks):
     # Simulate an existing user in the database
     mock_db.query.return_value.filter.return_value.first.return_value = MagicMock()
 
+    client.post(
+        "/api/v1/waitlist/join", json={"email": "duplicate@gmail.com", "full_name": "Test User"}
+    )
     response = client.post(
         "/api/v1/waitlist/join", json={"email": "duplicate@gmail.com", "full_name": "Test User"}
     )
     data = response.json()
+    print(response.status_code)
     assert response.status_code == 400
     assert data['success'] == False
 
