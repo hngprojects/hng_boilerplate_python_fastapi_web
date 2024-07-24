@@ -37,6 +37,7 @@ class User(BaseModel, Base):
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship('Role', secondary=user_role_association, back_populates='users')
+    activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
 
     def to_dict(self):
         obj_dict = super().to_dict()
