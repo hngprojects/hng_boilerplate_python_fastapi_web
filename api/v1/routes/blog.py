@@ -22,11 +22,11 @@ def get_all_blogs(db: Session = Depends(get_db)):
 @blog.delete("/api/v1/blogs/{id}", response_model=DeleteBlogResponse, status_code=status.HTTP_200_OK)
 def delete_blog(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
     if not current_user:
-        return {"status_code":401, "message":"Unauthorized User"}
+        return {"status_code":403, "message":"Unauthorized User"}
     post = db.query(Blog).filter(Blog.id == id, Blog.is_deleted == False).first()
     
     if not post:
-        return {"status_code":status.HTTP_404_NOT_FOUND, "detail": "Blog with the given ID does not exist"}
+        return {"status_code":status.HTTP_404_NOT_FOUND, "message": "Blog with the given ID does not exist"}
     
     post.is_deleted = True
     # db.delete(post)

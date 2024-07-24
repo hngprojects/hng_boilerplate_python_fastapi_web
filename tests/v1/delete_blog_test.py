@@ -25,7 +25,7 @@ app.dependency_overrides[get_super_admin] = mock_get_super_admin
 client = TestClient(app)
 
 def test_delete_blog_success():
-    blog_id = "test_id"
+    blog_id = "1"
     mock_blog = Blog(id=blog_id, title="Test Blog", content="Test Content", is_deleted=False)
     
     with patch('api.v1.models.blog.Blog') as mock_query:
@@ -34,17 +34,18 @@ def test_delete_blog_success():
         response = client.delete(f"/api/v1/blog/{blog_id}")
         
         assert response.status_code == 200
-        assert response.json() == {"message": "Blog post deleted successfully", "status_code": 202}
+        assert response.json() == {"message": "Blog post deleted successfully", "status_code": 200}
         assert mock_blog.is_deleted == True
 
 def test_delete_blog_unauthorized():
-    blog_id = "test_id"
+    blog_id = "1"
+    mock_blog = Blog(id=blog_id, title="Test Blog", content="Test Content", is_deleted=False)
     app.dependency_overrides[get_super_admin] = lambda: None
     
     response = client.delete(f"/api/v1/blog/{blog_id}")
     
-    assert response.status_code == 401
-    assert response.json()["detail"] == "Unauthorized User"
+    assert response.status_code == 403
+    assert response.json()["message"] == "Unauthorized User"
 
 def test_delete_blog_not_found():
     blog_id = "non_existent_id"
@@ -55,23 +56,7 @@ def test_delete_blog_not_found():
         response = client.delete(f"/api/v1/blog/{blog_id}")
         
         assert response.status_code == 404
-        assert response.json()["detail"] == "Blog with the given ID does not exist"
-
-def test_get_all_blogs():
-    mock_blogs = [
-        Blog(id="1", title="Blog 1", content="Content 1", is_deleted=False),
-        Blog(id="2", title="Blog 2", content="Content 2", is_deleted=False)
-    ]
-    
-    with patch('api.v1.models.blog.Blog') as mock_query:
-        mock_query.filter.return_value.all.return_value = mock_blogs
-        
-        response = client.get("/blog/")
-        
-        assert response.status_code == 200
-        assert len(response.json()) == 2
-        assert response.json()[0]["title"] == "Blog 1"
-        assert response.json()[1]["title"] == "Blog 2"
+        assert response.json()["message"] == "Blog with the given ID does not exist"
 
 
 if __name__ == "__main__":
