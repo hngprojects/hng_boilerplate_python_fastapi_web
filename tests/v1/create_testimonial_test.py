@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
-from api.main import app
+from main import app
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
 from api.v1.routes.testimonial import get_db
