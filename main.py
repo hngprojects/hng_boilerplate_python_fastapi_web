@@ -16,7 +16,6 @@ from api.v1.routes.newsletter import (
 from api.v1.routes import api_version_one
 
 
-Base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager
