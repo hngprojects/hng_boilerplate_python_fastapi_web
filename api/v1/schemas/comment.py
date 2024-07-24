@@ -3,9 +3,9 @@ from uuid import UUID
 
 
 class CommentResponse(BaseModel):
-    id: UUID
-    user_id: UUID
-    blog_id: UUID
+    id: str
+    user_id: str
+    blog_id: str
     content: str
 
     class Config:
