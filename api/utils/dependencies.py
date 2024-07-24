@@ -43,3 +43,6 @@ def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_s
         )
     return user
 
+def get_org_admin(user: User = Depends(get_current_user)):
+
+    return user

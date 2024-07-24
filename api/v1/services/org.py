@@ -6,6 +6,7 @@ from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.org import Organization
 from api.v1.models.user import User
+from api.v1.models.org_role import OrgRole
 
 class OrganizationService():
     """Organization service functionality"""
@@ -48,6 +49,11 @@ class OrganizationService():
         if organization is None:
             raise HTTPException(status_code=404, detail="Organization not found")
 
+
+        # Check if the current user is an admin of the organization
+        if not self.is_admin_of_org(db, user, organization):
+            raise HTTPException(status_code=403, detail="Insufficient permissions to add users to this organization")
+
         # Fetch the user to be added
         user_to_add = db.query(User).filter(User.id == user.id).first()
         if user_to_add is None:
@@ -64,9 +70,21 @@ class OrganizationService():
         db.refresh(organization)
 
 
+    def is_admin_of_org(self, db: Session, user: User, organization: Organization) -> bool:
+        '''Checks if the user is an admin of the given organization.'''
+        return db.query(OrgRole).filter(
+            OrgRole.user_id == user.id,
+            OrgRole.org_id == organization.id,
+            OrgRole.is_admin == True
+        ).first() is not None
+
     def delete(self, db: Session, id: str):
         '''Deletes an Organization'''
 
         organization = self.fetch(id=id, db=db)
+        if not organization:
+            raise HTTPException(status_code=404, detail="Organization not found! ")
         db.delete(organization)
         db.commit()
+
+organization_service = OrganizationService()
