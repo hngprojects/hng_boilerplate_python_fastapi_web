@@ -55,7 +55,7 @@ class NotificationInDBBase(NotificationBase):
     updated_at: datetime
 
     class Config:
-        orm_mode: True
+        from_attributes = True 
 
 class Notification(NotificationInDBBase):
     """
