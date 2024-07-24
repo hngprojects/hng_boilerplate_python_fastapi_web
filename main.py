@@ -72,15 +72,13 @@ async def http_exception(request: Request, exc: HTTPException):
 async def validation_exception(request: Request, exc: RequestValidationError):
     '''Validation exception handler'''
 
-    errors = [{"loc": error["loc"], "msg": error["msg"], "type": error["type"]} for error in exc.errors()]
-
     return JSONResponse(
         status_code=422,
         content={
             "success": False,
             "status_code": 422,
             "message": "Invalid input",
-            "errors": errors
+            "errors": jsonable_encoder(exc.errors())
         }
     )
 
