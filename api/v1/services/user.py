@@ -1,4 +1,4 @@
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 import bcrypt, datetime as dt
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
@@ -12,8 +12,6 @@ from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
 from api.v1.models.user import User
 from api.v1.schemas import user
-from api.v1.models.profile import Profile
-from api.v1.schemas.user import UserUpdate
 
 oauth2_scheme = OAuth2PasswordBearer("/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -297,5 +295,18 @@ class UserService(Service):
 
         # Commit changes to deactivate the user
         db.commit()
-            
-  
+
+    def get_current_super_admin(
+        self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    ):
+        """Get the current super admin"""
+        user = self.get_current_user(db, token)
+        if not user.is_super_admin:
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to access this resource",
+            )
+        return user
+
+
+user_service = UserService()
