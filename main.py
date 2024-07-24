@@ -52,6 +52,8 @@ async def get_root(request: Request) -> dict:
 
 @app.exception_handler(HTTPException)
 async def http_exception(request: Request, exc: HTTPException):
+    """HTTP exception handler"""
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -64,19 +66,28 @@ async def http_exception(request: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception(request: Request, exc: RequestValidationError):
+    """Validation exception handler"""
+
+    errors = [
+        {"loc": error["loc"], "msg": error["msg"], "type": error["type"]}
+        for error in exc.errors()
+    ]
+
     return JSONResponse(
         status_code=422,
         content={
             "success": False,
             "status_code": 422,
             "message": "Invalid input",
-            "errors": f"{exc.errors()}",
+            "errors": errors,
         },
     )
 
 
 @app.exception_handler(Exception)
 async def exception(request: Request, exc: Exception):
+    """Other exception handlers"""
+
     logger.exception(f"Exception occured; {exc}")
 
     return JSONResponse(
