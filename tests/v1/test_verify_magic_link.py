@@ -1,11 +1,11 @@
 import pytest
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 from api.v1.services.user import UserService
 from api.v1.routes.verify_magic_link import router
-from api.db.database import get_db, Base
+from api.db.database import get_db
+from unittest.mock import MagicMock, patch
 import logging
 
 # Configure logging
@@ -38,17 +38,9 @@ app.include_router(router)
 
 # Mock database dependency
 @pytest.fixture
-def mock_db(postgresql):
-    DATABASE_URL = postgresql.url()
-    engine = create_engine(DATABASE_URL)
-    TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    Base.metadata.create_all(bind=engine)
-    db = TestingSessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-    Base.metadata.drop_all(bind=engine)
+def mock_db():
+    with patch('api.db.database.SessionLocal', autospec=True) as mock_session:
+        yield mock_session()
 
 # Mock UserService dependency
 @pytest.fixture
