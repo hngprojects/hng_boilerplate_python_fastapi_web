@@ -37,7 +37,7 @@ def create_test_token(user_id="user123", expire_minutes=30):
 admin_token = create_test_token(user_id="user123")
 invalid_token = "invalid.token"
 
-@patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
+@patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "user123"})
 @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
 def test_update_article_authorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
@@ -73,7 +73,7 @@ def test_update_article_authorized(mock_get_current_user, mock_get_super_admin, 
         "status_code": 200
     }
 
-@patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
+@patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.utils.dependencies.get_super_admin", side_effect=HTTPException(status_code=403, detail="Forbidden"))
 @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
 def test_update_article_unauthorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
@@ -97,7 +97,7 @@ def test_update_article_unauthorized(mock_get_current_user, mock_get_super_admin
     assert response.status_code == 403
     assert response.json() == {"detail": "Forbidden"}
 
-@patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
+@patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
 @patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "user123"})
 @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
 def test_update_article_input_validation(mock_get_current_user, mock_get_super_admin, mock_get_db):
