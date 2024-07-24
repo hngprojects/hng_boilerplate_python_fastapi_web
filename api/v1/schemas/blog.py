@@ -17,7 +17,7 @@ class BlogResponse(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Blog(BaseModel):
@@ -28,7 +28,7 @@ class Blog(BaseModel):
     image_url: Optional[str]
     is_deleted: bool
     excerpt: Optional[str]
-    tags: Optional[List[str]]
+    tags: Optional[str]
     created_at: datetime
     updated_at: datetime
 
