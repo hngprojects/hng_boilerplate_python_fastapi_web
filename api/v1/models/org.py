@@ -15,14 +15,12 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association
-# from api.v1.models.user import User
-from api.v1.models.preference import OrgPreference
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 from sqlalchemy.dialects.postgresql import UUID
 from uuid_extensions import uuid7
 
 
-class Organization(BaseModel, Base):
+class Organization(BaseTableModel):
     __tablename__ = 'organizations'
 
     name = Column(String(50), nullable=False)
