@@ -1,4 +1,5 @@
 from datetime import datetime
+from fastapi import HTTPException
 from pydantic import BaseModel, Field, EmailStr, field_validator
 from typing import Any, Optional
 from uuid_extensions import uuid7
