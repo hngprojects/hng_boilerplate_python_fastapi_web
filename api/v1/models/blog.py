@@ -4,8 +4,9 @@ from api.v1.models.base import Base
 from api.v1.models.base_model import BaseModel
 from datetime import datetime
 
-class Blog(BaseModel, Base):
-    __tablename = "blogs"
+
+class Blog(BaseTableModel):
+    __tablename__ = "blogs"
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     author_id = Column(
@@ -21,5 +22,13 @@ class Blog(BaseModel, Base):
     excerpt = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow(), nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow(), onupdate=datetime.utcnow(), nullable=False)
+    author_id = Column(String, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    image_url = Column(String, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    excerpt = Column(Text, nullable=True)
+    tags = Column(Text, nullable=True)  # Assuming tags are stored as a comma-separated string
 
-    author = relationship("User", backref="blogs")
+    author = relationship("User", back_populates="blogs")
+    comments = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
