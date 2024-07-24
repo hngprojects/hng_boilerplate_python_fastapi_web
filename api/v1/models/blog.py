@@ -7,7 +7,6 @@ from datetime import datetime
 class Blog(BaseTableModel):
     __tablename__ = "blogs"
 
-    # id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     author_id = Column(String, ForeignKey(
         'users.id', ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False)
