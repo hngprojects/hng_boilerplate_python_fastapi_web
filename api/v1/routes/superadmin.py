@@ -6,7 +6,9 @@ from api.v1.schemas.user import UserCreate,UserBase
 from fastapi import APIRouter,Depends,status,HTTPException
 from api.v1.services.user import user_service
 
-
+'''
+The Endpoint created is for the creation of super admins 
+'''
 
 
 superadmin  = APIRouter(
@@ -18,6 +20,7 @@ db_dependency = Annotated[Session , Depends(get_db)]
 
 
 @superadmin.post(path='/register', status_code=status.HTTP_201_CREATED)
+
 def register_admin(user : UserCreate , db : db_dependency):
    
     user_created = user_service.create(db=db, schema=user)
@@ -27,14 +30,7 @@ def register_admin(user : UserCreate , db : db_dependency):
     return success_response(
         status_code=201,
         message= 'User Created Successfully',
-        data={
-            'id' : user_created.id ,
-            'first_name' : user_created.first_name,
-            'last_name': user_created.last_name,
-            'username' : user_created.username,
-             'email': user_created.email,
-            'created_at' : str(user_created.created_at)
-        }
+        data= user_created.to_dict()
     )
 
     
