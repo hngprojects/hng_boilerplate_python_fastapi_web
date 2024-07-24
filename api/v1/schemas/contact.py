@@ -3,16 +3,11 @@ from typing import List
 from datetime import datetime
 
 
-class ContactMessageBase(BaseModel):
-    sender: str
+class ContactMessageResponse(BaseModel):
+    full_name: str
     email: str
+    title: str
     message: str
-    created_at: datetime
-    updated_at: datetime
-
-
-class ContactMessageResponse(ContactMessageBase):
-    id: str
 
     class Config:
         orm_mode = True

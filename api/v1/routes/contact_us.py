@@ -1,11 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
-from api.db.database import get_db
-from api.v1.models.contact import ContactMessage
-from api.v1.schemas.contact import ContactMessageList
+from typing import Annotated
 
-router = APIRouter(prefix='/contact-us', tags=['ContactUs'])
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from sqlalchemy.sql.functions import current_user
+
+from api.db.database import get_db
+from api.v1.models import User
+from api.v1.schemas.contact import ContactMessageList
+from api.v1.services.contact_us import ContactService
+from api.v1.services.user import user_service
+
+contact_us = APIRouter(prefix='/contact-us', tags=['ContactUs'])
 
 
 class CustomException(HTTPException):
@@ -16,12 +21,20 @@ class CustomException(HTTPException):
         self.status_code = detail.get("status_code")
 
 
-@router.get('/messages/', response_model=ContactMessageList)
+@contact_us.get('/messages/', response_model=ContactMessageList)
 async def get_contact_messages(db: Session = Depends(get_db)):
     """
     Fetch all contact messages endpoint
     """
-    messages = db.query(ContactMessage).all()
+    request_user = Annotated[User, Depends(user_service.get_current_user)]
+    # check if current user is an admin
+    if not current_user.is_superadmin:
+        raise HTTPException(
+            detail="Access denied, Superadmin only",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    messages = ContactService.get_all_contact_messages(db)
     if not messages:
         raise CustomException(
             status_code=status.HTTP_404_NOT_FOUND,
