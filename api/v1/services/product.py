@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.product import Product
+from api.v1.models import Organization
+from api.utils.db_validators import check_user_in_org
 
 
 class ProductService(Service):
@@ -35,11 +37,27 @@ class ProductService(Service):
 
     
     def fetch(self, db: Session, id: str):
-        '''Fetches a user by their id'''
+        '''Fetches a product by id'''
 
         product = check_model_existence(db, Product, id)
         return product
-    
+
+    def fetch_by_organization(self, db: Session, user, org_id, limit, page):
+        '''Fetches all products of an organization'''
+
+        # check if organization exists
+        organization = check_model_existence(db, Organization, org_id)
+
+        # Check if the user exist in the organization
+        check_user_in_org(user=user, organization=organization)
+
+        # calculating offset value from page and limit given
+        offset_value = (page -1) * limit
+
+        # Filter to return only products of the org_id
+        products = db.query(Product).filter(Product.org_id == org_id).offset(offset_value).limit(page).all()
+
+        return products
 
     def update(self, db: Session, id: str, schema):
         '''Updates a product'''
@@ -63,3 +81,4 @@ class ProductService(Service):
         db.delete(product)
         db.commit()
     
+product_service = ProductService()
