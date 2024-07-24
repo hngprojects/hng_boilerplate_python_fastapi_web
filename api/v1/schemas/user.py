@@ -62,3 +62,7 @@ class DeactivateUserSchema(BaseModel):
 
     reason: Optional[str] = None
     confirmation: bool
+    
+    
+    
+    
