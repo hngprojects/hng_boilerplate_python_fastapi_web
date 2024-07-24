@@ -1,6 +1,8 @@
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
+
+from pydantic import BaseModel
+
 
 class ArticleBase(BaseModel):
     title: str  
@@ -16,4 +18,4 @@ class Article(ArticleBase):
     updatedAt: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
