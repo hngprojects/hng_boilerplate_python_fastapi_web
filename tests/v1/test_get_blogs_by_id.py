@@ -84,5 +84,5 @@ def test_fetch_blog_by_id_not_found(client, db_session_mock):
     assert response.json() == {
         "success": False,
         "status_code": 404,
-        "message": "Blog post not found."
+        "message": "Blog post not found"
     }

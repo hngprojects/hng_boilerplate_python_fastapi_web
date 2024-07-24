@@ -43,7 +43,7 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
             content={
                 "success": False,
                 "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "Blog post not found."
+                "message": "Blog post not found"
             }
         )
 
