@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from api.v1.models.newsletter import Newsletter
 from api.v1.schemas.newsletter import EMAILSCHEMA
 from api.db.database import get_db, Base, engine
-
+from api.v1.services.newsletter import NewsletterService
 
 class CustomException(HTTPException):
     """
@@ -32,16 +32,16 @@ async def custom_exception_handler(request: Request, exc: CustomException):
         }
     )
 
-newsletter = APIRouter(prefix='/pages', tags=['Newsletter'])
+newsletter = APIRouter(tags=['Newsletter'])
 
-@newsletter.post('/newsletter')
+@newsletter.post('/newsletters')
 async def sub_newsletter(request: EMAILSCHEMA, db: Session = Depends(get_db)):
     """
     Newsletter subscription endpoint
     """
 
     # check for duplicate email
-    existing_subscriber = db.query(Newsletter).filter(Newsletter.email==request.email).first()
+    existing_subscriber = NewsletterService.check_existing_subscriber(db, request)
     if existing_subscriber:
         raise CustomException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -53,9 +53,7 @@ async def sub_newsletter(request: EMAILSCHEMA, db: Session = Depends(get_db)):
         )
 
     # Save user to the database
-    new_subscriber = Newsletter(email=request.email)
-    db.add(new_subscriber)
-    db.commit()
+    NewsletterService.create(db, request)
 
     return {
         "message": "Thank you for subscribing to our newsletter.",
