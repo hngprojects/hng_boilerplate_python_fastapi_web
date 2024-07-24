@@ -4,8 +4,6 @@ from fastapi import HTTPException
 
 def send_mail(to: str, subject: str, body: str):
     '''Function to send email to a user either as a regular test or as html file'''
-    print(f"Sending email to {to}")
-    print(settings.MAIL_SERVER, settings.MAIL_PORT, settings.MAIL_USERNAME, settings.MAIL_PASSWORD, settings.MAIL_FROM)
     try:
         with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT) as conn:
             conn.starttls()
