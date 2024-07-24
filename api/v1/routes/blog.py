@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
@@ -24,10 +25,13 @@ def get_all_blogs(db: Session = Depends(get_db)):
 def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     blog_post = blog_service.fetch(db, id)
     if not blog_post:
-        return {
-            "success": False,
-            "status_code": status.HTTP_404_NOT_FOUND,
-            "message": "Blog post not found."
-        }
+        return JSONResponse(
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={
+                "success": False,
+                "status_code": status.HTTP_404_NOT_FOUND,
+                "message": "Blog post not found."
+            }
+        )
 
     return blog_post
