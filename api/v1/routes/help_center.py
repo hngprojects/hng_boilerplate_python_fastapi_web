@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from api.db.database import get_db
-from api.utils.dependencies import get_current_admin, get_current_user
+from api.utils.dependencies import get_super_admin, get_current_user
 from api.v1.models.article import Article
 from api.v1.schemas.article import Article as ArticleSchema
 from api.v1.schemas.article import ArticleUpdate
@@ -16,11 +16,11 @@ def update_article(
     article_id: str,
     article: ArticleUpdate,
     db: Session = Depends(get_db),
-    current_admin_user: dict = Depends(get_current_admin),
+    current_admin_user: dict = Depends(get_super_admin),
 ):
     # Check if the current user is an admin
     try:
-        current_admin_user = get_current_admin(current_admin_user)
+        current_admin_user = get_super_admin(current_admin_user)
     except HTTPException as e:
         if e.status_code == status.HTTP_401_UNAUTHORIZED:
             return JSONResponse(

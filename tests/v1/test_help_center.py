@@ -38,9 +38,9 @@ admin_token = create_test_token(user_id="admin123")
 invalid_token = "invalid.token"
 
 @patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("api.utils.dependencies.get_current_admin", return_value={"user_id": "admin123"})
+@patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "admin123"})
 @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
-def test_update_article_authorized(mock_get_current_user, mock_get_current_admin, mock_get_db):
+def test_update_article_authorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
     reset_mock_db()
     # Initialize mock database with test data
     db_article = {
@@ -74,9 +74,9 @@ def test_update_article_authorized(mock_get_current_user, mock_get_current_admin
     }
 
 @patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("api.utils.dependencies.get_current_admin", side_effect=HTTPException(status_code=403, detail="Forbidden"))
+@patch("api.utils.dependencies.get_super_admin", side_effect=HTTPException(status_code=403, detail="Forbidden"))
 @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
-def test_update_article_unauthorized(mock_get_current_user, mock_get_current_admin, mock_get_db):
+def test_update_article_unauthorized(mock_get_current_user, mock_get_super_admin, mock_get_db):
     reset_mock_db()
     # Initialize mock database with test data
     get_mock_db()["1"] = {
@@ -98,9 +98,9 @@ def test_update_article_unauthorized(mock_get_current_user, mock_get_current_adm
     assert response.json() == {"detail": "Forbidden"}
 
 @patch("api.utils.dependencies.get_db", side_effect=lambda: iter([get_mock_db()]))
-@patch("api.utils.dependencies.get_current_admin", return_value={"user_id": "admin123"})
+@patch("api.utils.dependencies.get_super_admin", return_value={"user_id": "admin123"})
 @patch("api.utils.dependencies.get_current_user", return_value={"user_id": "user123"})
-def test_update_article_input_validation(mock_get_current_user, mock_get_current_admin, mock_get_db):
+def test_update_article_input_validation(mock_get_current_user, mock_get_super_admin, mock_get_db):
     reset_mock_db()
     # Initialize mock database with test data
     get_mock_db()["1"] = {
