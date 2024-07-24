@@ -10,6 +10,7 @@ from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
 from api.v1.routes.testimonial import get_db
 from api.v1.schemas.testimonial_schema import TestimonialCreate
+from api.v1.services.user import user_service
 
 # Mock database dependency
 @pytest.fixture
@@ -24,7 +25,13 @@ def client(db_session_mock):
     yield client
     app.dependency_overrides = {}
 
-def test_create_testimonial(client, db_session_mock):
+@pytest.fixture
+def token():
+    # Mock the token creation
+    with patch.object(user_service, 'create_access_token', return_value="test_access_token"):
+        yield "test_access_token"
+
+def test_create_testimonial(client, db_session_mock, token):
     user_id = str(uuid7())
     testimonial_id = str(uuid7())
     timezone_offset = -8.0
@@ -46,8 +53,12 @@ def test_create_testimonial(client, db_session_mock):
 
     # Mock the return value for the query to get the current user
     with patch('api.v1.services.user.user_service.get_current_user', return_value=user):
-        # Call the endpoint
-        response = client.post("/api/v1/testimonials", json=testimonial_data)
+        # Call the endpoint with authentication
+        response = client.post(
+            "/api/v1/testimonials",
+            json=testimonial_data,
+            headers={"Authorization": f"Bearer {token}"}
+        )
 
     # Mock the return value for the query to get testimonials
     testimonial = Testimonial(
