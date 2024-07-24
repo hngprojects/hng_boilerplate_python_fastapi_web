@@ -18,7 +18,10 @@ class SubscriptionPlanResponse(CreateSubscriptionPlan):
 
 
 class BillingPlanDisplay(BaseModel):
-    id: uuid.UUID
+    id: int
     name: str
     price: int
     features: List[str]
+    
+    class Config:
+        from_attributes=True

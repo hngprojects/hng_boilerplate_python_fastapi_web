@@ -27,6 +27,15 @@ org_3 = Organization(name="FastAPI Devs", description="An organization of Fast A
 
 
 db.add_all([org_1, org_2, org_3])
+db.commit()
+
+bill_1 = BillingPlan(organization_id=org_1.id, name="Basic", price=5.00, currency="NGN", features=['Free basis'])
+bill_2 = BillingPlan(organization_id=org_2.id, name="Upgrade", price=10.00, currency="NGN", features=['Free basis'])
+bill_3 = BillingPlan(organization_id=org_3.id, name="Premium", price=15.00, currency="NGN", features=['Free basis'])
+
+
+db.add_all([bill_1, bill_2, bill_3])
+db.commit()
 
 
 org_1.users.extend([user_1, user_2, user_3])
