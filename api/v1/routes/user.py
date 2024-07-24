@@ -62,7 +62,7 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
         message='User reactivation successful',
     )
 
-@user.patch("/current-user/change-password", status_code=200)
+@user.patch("/me/password", status_code=200)
 async def change_password(
     # request: Request,
     schema: ChangePasswordSchema,
