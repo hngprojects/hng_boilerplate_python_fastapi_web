@@ -30,6 +30,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
     return user
 
+
 def get_current_active_user(current_user: User = Depends(get_current_user)):
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
@@ -37,6 +38,11 @@ def get_current_active_user(current_user: User = Depends(get_current_user)):
 
 def get_current_admin(current_user: User = Depends(get_current_active_user)):
     if not current_user.is_admin:
+
+def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    user = get_current_user(db, token)
+    if not user.is_super_admin:
+
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to access this resource",
