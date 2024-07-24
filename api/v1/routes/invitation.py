@@ -1,6 +1,7 @@
 import logging, uuid
 from datetime import datetime, timedelta
 from collections import OrderedDict
+from uuid import UUID
 from urllib.parse import urlparse, parse_qs, urlencode
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -33,6 +34,16 @@ def get_session():
 
 invite = APIRouter(prefix='/invite', tags=["Invitation Management"])
 
+
+def is_valid_uuid7(uuid_str: str) -> bool:
+    try:
+        uuid_obj = UUID(uuid_str)
+    except ValueError:
+        return False
+
+    # Check if it's a version 7 UUID
+    return uuid_obj.version == 7
+
 #helper route for generating invitation link pending when the actual endpoint will be ready
 @invite.post("/create", tags=["Invitation Management"])
 async def generate_invite_link(invite: invitations.InvitationCreate, session: Session = Depends(get_session)):
@@ -50,6 +61,7 @@ async def generate_invite_link(invite: invitations.InvitationCreate, session: Se
     session.refresh(new_invite)
 
     # Invite link placeholder
+
     invite_link = f"http://127.0.0.1:8000/api/v1/invite/accept?{urlencode({'invitation_id': str(new_invite.id)})}"
     
     return {"invitation_link": invite_link}
@@ -66,8 +78,12 @@ async def add_user_to_organization(user_data: invitations.UserAddToOrganization,
         raise HTTPException(status_code=400, detail="Invalid invitation link")
 
     logging.info(f"Processing invitation ID: {invite_id}")
+
     try:
-        invite_uuid = uuid.UUID(invite_id)
+        # Validate that the invite_id is a valid UUIDv7
+        if not is_valid_uuid7(invite_id):
+            raise ValueError("Invalid UUID7 format")
+        invite_uuid = invite_id
     except ValueError:
         logging.warning("Malformed invitation ID.")
         raise HTTPException(status_code=400, detail="Invalid invitation link")
@@ -76,8 +92,7 @@ async def add_user_to_organization(user_data: invitations.UserAddToOrganization,
     logging.info(f"Found invitation: {invite}")
 
     if not invite:
-        logging.warning(f"Invalid or expired invitation link: {invite_id}")
-        raise HTTPException(status_code=404, detail="Invalid or expired invitation link")
+        raise HTTPException(status_code=404, detail="Invitation not found or already used")
 
     now = datetime.now(utc)
     if invite.expires_at < now:

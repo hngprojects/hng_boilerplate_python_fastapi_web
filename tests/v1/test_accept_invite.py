@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from decouple import config
+from uuid_extensions import uuid7
 from main import app
 from api.db.database import Base, get_db
 from datetime import datetime, timedelta
@@ -44,14 +45,14 @@ def test_db():
 
 def test_accept_invite_valid_link(test_db):
     # Create test data
-    user = User(id=uuid.uuid4(), email="testuser@example.com", username="testuser1234", password="password")
-    org = Organization(id=uuid.uuid4(), name="Test Organization")
+    user = User(id=str(uuid7()), email="testuser@example.com", username="testuser1234", password="password")
+    org = Organization(id=str(uuid.uuid4()), name="Test Organization")
     test_db.add(user)
     test_db.add(org)
     test_db.commit()  # Commit user and organization before adding invitation
 
     invitation = Invitation(
-        id=uuid.uuid4(),
+        id=user.id,
         user_id=user.id,
         organization_id=org.id,
         expires_at=datetime.utcnow() + timedelta(days=1),
@@ -72,14 +73,14 @@ def test_accept_invite_valid_link(test_db):
 
 def test_accept_invite_expired_link(test_db):
     # Create test data
-    user = User(id=uuid.uuid4(), email="testuser@example.com", username="testuser", password="password")
-    org = Organization(id=uuid.uuid4(), name="Test Organization")
+    user = User(id=str(uuid7()), email="testuser@example.com", username="testuser", password="password")
+    org = Organization(id=str(uuid7()), name="Test Organization")
     test_db.add(user)
     test_db.add(org)
     test_db.commit()  # Commit user and organization before adding invitation
 
     invitation = Invitation(
-        id=uuid.uuid4(),
+        id=str(uuid7()),
         user_id=user.id,
         organization_id=org.id,
         expires_at=datetime.utcnow() - timedelta(days=1),
@@ -93,9 +94,10 @@ def test_accept_invite_expired_link(test_db):
         "/api/v1/invite/accept",
         json={"invitation_link": invite_link}
     )
+    print("JSON Response ", response.json())
     assert response.status_code == 400
     data = response.json()
-    assert data["detail"] == "Expired invitation link"
+    assert data["message"] == "Expired invitation link"
 
 def test_accept_invite_malformed_link(test_db):
     invite_link = f"http://127.0.0.1:8000/api/v1/invite/accept?invitation_id=invalid-uuid"
@@ -105,18 +107,18 @@ def test_accept_invite_malformed_link(test_db):
     )
     assert response.status_code == 400
     data = response.json()
-    assert data["detail"] == "Invalid invitation link"
+    assert data["message"] == "Invalid invitation link"
 
 def test_load_testing_accept_invite(test_db):
     # Create test data
-    user = User(id=uuid.uuid4(), email="testuser@example.com", username="testuser", password="password")
-    org = Organization(id=uuid.uuid4(), name="Test Organization")
+    user = User(id=str(uuid7()), email="testuser@example.com", username="testuser", password="password")
+    org = Organization(id=str(uuid7()), name="Test Organization")
     test_db.add(user)
     test_db.add(org)
     test_db.commit()  # Commit user and organization before adding invitation
 
     invitation = Invitation(
-        id=uuid.uuid4(),
+        id=str(uuid7()),
         user_id=user.id,
         organization_id=org.id,
         expires_at=datetime.utcnow() + timedelta(days=1),
@@ -146,4 +148,4 @@ def test_load_testing_accept_invite(test_db):
             assert data["message"] == "User added to organization successfully"
         else:
             data = r.json()
-            assert data["detail"] in ["Invalid or expired invitation link", "User already in organization"]
+            assert data["message"] in ["Invitation not found or already used", "User already in organization"]
