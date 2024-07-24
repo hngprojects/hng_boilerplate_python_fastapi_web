@@ -11,10 +11,10 @@ from api.utils.dependencies import get_current_user
 # db = next(get_db())
 
 
-products = APIRouter(tags=["products"])
+product = APIRouter(tags=["products"])
 
 
-@app.post("/api/v1/products", response_model=ProductResponse)
+@product.post("/api/v1/products", response_model=ProductResponse)
 def get_product(request: ProductRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     org_id = request.org_id
     product_id = request.pro_id

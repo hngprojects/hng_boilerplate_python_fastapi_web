@@ -15,7 +15,7 @@ from api.v1.routes.newsletter_router import (
 from api.v1.routes.auth import auth
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
-from api.v1.routes.ptoduct import product
+from api.v1.routes.product import product
 
 Base.metadata.create_all(bind=engine)
 
