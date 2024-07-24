@@ -49,7 +49,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_admin=False,
+        is_super_admin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -69,7 +69,7 @@ def test_successful_user_deletion(mock_user_service, mock_db_session):
     assert login_response.status_code == status.HTTP_200_OK
     access_token = login_response.json()['data']['access_token']
 
-    delete_response = client.patch(DELETE_USER_ENDPOINT, headers={
+    delete_response = client.delete(DELETE_USER_ENDPOINT, headers={
                                    'Authorization': f'Bearer {access_token}'})
     assert delete_response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -77,5 +77,5 @@ def test_successful_user_deletion(mock_user_service, mock_db_session):
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_unauthorized_user_deletion(mock_user_service, mock_db_session):
     """Test for unauthorized user deletion."""
-    delete_response = client.patch(DELETE_USER_ENDPOINT)
+    delete_response = client.delete(DELETE_USER_ENDPOINT)
     assert delete_response.status_code == status.HTTP_401_UNAUTHORIZED
