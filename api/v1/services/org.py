@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.org import Organization
+from api.v1.models.user import User
 
 class OrganizationService(Service):
     """Organization service functionality"""
