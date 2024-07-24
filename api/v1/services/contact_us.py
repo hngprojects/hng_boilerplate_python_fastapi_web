@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
-from api.v1.schemas.contact_us import ContactUsCreate
+
 from api.v1.models.contact_us import ContactUs
+from api.v1.schemas.contact_us import ContactUsCreate
 
 
 class ContactUsService:

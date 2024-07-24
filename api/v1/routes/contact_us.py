@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from api.db.database import get_db
 from api.v1.schemas.contact_us import ContactUsCreate, ContactUsResponse
 from api.v1.services.contact_us import ContactUsService
