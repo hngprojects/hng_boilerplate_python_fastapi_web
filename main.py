@@ -16,7 +16,6 @@ from api.v1.routes.newsletter import (
 )
 from api.v1.routes import api_version_one
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
