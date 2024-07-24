@@ -2,7 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock, patch
-from uuid import uuid4
+from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
 from ...main import app
@@ -34,8 +34,8 @@ def test_get_all_blogs_empty(client, db_session_mock):
     assert response.json() == []
 
 def test_get_all_blogs_with_data(client, db_session_mock):
-    blog_id = uuid4()
-    author_id = uuid4()
+    blog_id = uuid7()
+    author_id = uuid7()
     timezone_offset = -8.0
     tzinfo = timezone(timedelta(hours=timezone_offset))
     timeinfo = datetime.now(tzinfo)
