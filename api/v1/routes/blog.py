@@ -4,7 +4,7 @@ from typing import List
 from uuid import UUID
 
 from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogResponse, Blog
+from api.v1.schemas.blog import BlogResponse, SingleResponse
 from api.db.database import get_db
 from api.v1.services.blog import BlogService
 
@@ -20,7 +20,7 @@ def get_all_blogs(db: Session = Depends(get_db)):
     return blogs
 
 
-@blog.get("/{id}", response_model=Blog)
+@blog.get("/{id}", response_model=SingleResponse)
 def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     blog_post = blog_service.fetch(db, id)
     if not blog_post:

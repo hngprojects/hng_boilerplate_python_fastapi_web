@@ -20,7 +20,7 @@ class BlogResponse(BaseModel):
         from_attributes = True
 
 
-class Blog(BaseModel):
+class SingleResponse(BaseModel):
 
     author_id: str
     title: str
