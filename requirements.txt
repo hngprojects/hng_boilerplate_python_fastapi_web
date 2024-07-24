@@ -35,7 +35,7 @@ Pygments==2.18.0
 PyJWT==2.8.0
 PyMySQL==1.1.1
 pytest==8.2.2
-pytest-asyncio==0.23.8
+pytest-asyncio==0.2c3.8
 python-decouple==3.8
 python-dotenv==1.0.1
 python-jose==3.3.0

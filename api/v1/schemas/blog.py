@@ -1,7 +1,9 @@
-from pydantic import BaseModel
+from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from datetime import datetime
+
+from pydantic import BaseModel
+
 
 class BlogResponse(BaseModel):
     id: UUID
@@ -18,3 +20,7 @@ class BlogResponse(BaseModel):
     class Config:
         orm_mode = True
 
+
+class DeleteBlogResponse(BaseModel):
+    message: str
+    status_code: int
