@@ -7,7 +7,6 @@ from datetime import datetime
 class Blog(BaseTableModel):
     __tablename__ = "blogs"
 
-    # id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     author_id = Column(String, ForeignKey(
         'users.id', ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False)
@@ -29,5 +28,6 @@ class Blog(BaseTableModel):
     dislikes_audit = Column(ARRAY(String), nullable=True)
 
     author = relationship("User", back_populates="blogs")
-    comments = relationship(
-        "Comment", back_populates="blog", cascade="all, delete-orphan")
+    comments = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
+    likes = relationship("BlogLike", back_populates="blog", cascade="all, delete-orphan")
+    dislikes = relationship("BlogDislike", back_populates="blog", cascade="all, delete-orphan")
