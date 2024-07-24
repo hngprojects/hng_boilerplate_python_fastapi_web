@@ -29,7 +29,7 @@ def delete_blog(id: str, db: Session = Depends(get_db), current_user: User = Dep
         return {"status_code":status.HTTP_404_NOT_FOUND, "detail": "Blog with the given ID does not exist"}
     
     post.is_deleted = True
-    db.delete(post)
+    # db.delete(post)
     db.commit()
     
     return {"message": "Blog post deleted successfully", "status_code": 200}
