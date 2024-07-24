@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ User data model
 """
 from sqlalchemy import (
