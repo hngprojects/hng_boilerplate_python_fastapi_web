@@ -3,15 +3,15 @@ from api.utils.dependencies import get_super_admin
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from api.v1.models.article import Article
-from api.v1.schemas.article import Article as ArticleSchema
+from api.v1.models.blog import Blog
+from api.v1.schemas.blog import BlogResponse
 
 
 router = APIRouter(prefix="/help-center", tags=["Help center"])
 
-@router.patch("/topics/{article_id}", response_model=ArticleSchema)
+@router.patch("/topics/{blog_id}", response_model=BlogResponse)
 def update_article(
-    article_id: str,
+    blog_id: str,
     article: ArticleUpdate,
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_super_admin)
@@ -41,8 +41,8 @@ def update_article(
         raise e
 
     # Check if artile exist
-    db_article = db.query(Article).filter(Article.article_id == article_id).first()
-    if db_article is None:
+    db_blog = db.query(Blog).filter(Blog.blog_id == blog_id).first()
+    if db_blog is None:
         return JSONResponse(
             content={
                 "success": False,
@@ -52,22 +52,22 @@ def update_article(
             status_code=status.HTTP_404_NOT_FOUND
         )
 
-    db_article.title = article.title
-    db_article.content = article.content
-    db_article.author = article.author
+    db_blog.title = article.title
+    db_blog.content = article.content
+    db_blog.author = article.author
     db.commit()
-    db.refresh(db_article)
+    db.refresh(db_blog)
 
     return JSONResponse(
         content={
             "success": True,
             "data": {
-                "id": db_article.article_id,
-                "title": db_article.title,
-                "content": db_article.content,
-                "author": db_article.author,
-                "created_at": db_article.created_at.isoformat(),
-                "updated_at": db_article.updated_at.isoformat()
+                "id": db_blog.blog_id,
+                "title": db_blog.title,
+                "content": db_blog.content,
+                "author": db_blog.author,
+                "created_at": db_blog.created_at.isoformat(),
+                "updated_at": db_blog.updated_at.isoformat()
             },
             "status_code": 200
         },
