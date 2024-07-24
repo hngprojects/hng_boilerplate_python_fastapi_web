@@ -6,7 +6,7 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.org import Organization
 
 class OrganizationService(Service):
-   ```Organization service functionality```
+    ```Organization service functionality```
 
     def create (self, db: Session, schema):
        ```Create Organization```
