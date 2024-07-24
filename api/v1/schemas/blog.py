@@ -4,15 +4,16 @@ from uuid import UUID
 from datetime import datetime
 
 
-
 class BlogRequest(BaseModel):
     title: str
     content: str
+
 
 class BlogUpdateResponseModel(BaseModel):
     status: str
     message: str
     data: dict
+
 
 class BlogResponse(BaseModel):
     id: UUID

@@ -1,30 +1,18 @@
 from fastapi.encoders import jsonable_encoder
-from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest
+from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest, BlogResponse, BlogPostResponse
 from sqlalchemy.orm import Session
-from api.db.database import get_db
+
 from api.v1.models.user import User
 from api.utils.dependencies import get_current_user
 from api.v1.services.blog import BlogService
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest
-from sqlalchemy.orm import Session
 from api.db.database import get_db
-from api.v1.models.user import User
-from api.utils.dependencies import get_current_user
-from api.v1.services.blog import BlogService
-from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
 from uuid import UUID
+from api.v1.models.blog import Blog
 
-from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogResponse, BlogPostResponse
-from api.db.database import get_db
-from api.v1.services.blog import BlogService
-from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogResponse, BlogPostResponse
-from api.v1.services.blog import BlogService
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 blog_service = BlogService()
