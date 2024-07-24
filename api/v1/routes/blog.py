@@ -21,7 +21,7 @@ def get_all_blogs(db: Session = Depends(get_db)):
 
 
 @blog.get("/{id}", response_model=Blog)
-def get_blog_by_id(id: UUID, db: Session = Depends(get_db)):
+def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     blog_post = blog_service.fetch(db, id)
     if not blog_post:
         raise HTTPException(
