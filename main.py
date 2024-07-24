@@ -38,7 +38,6 @@ app.add_middleware(
 )
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
-app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(api_version_one)
 
