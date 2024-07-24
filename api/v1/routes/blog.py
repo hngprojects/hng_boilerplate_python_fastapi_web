@@ -1,7 +1,6 @@
 from fastapi.encoders import jsonable_encoder
 from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest, BlogResponse, BlogPostResponse
 from sqlalchemy.orm import Session
-
 from api.v1.models.user import User
 from api.utils.dependencies import get_current_user
 from api.v1.services.blog import BlogService
@@ -57,7 +56,7 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
 
 @blog.put("/{id}", response_model=BlogUpdateResponseModel)
 async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    blog_service = BlogService(db)
+    # blog_service = BlogService(db)
     try:
         updated_blog_post = blog_service.update(
             blog_id=id,

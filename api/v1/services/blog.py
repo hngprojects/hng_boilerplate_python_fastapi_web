@@ -1,5 +1,4 @@
 from api.v1.models.user import User
-from typing import Optional
 from typing import Any, Optional
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
@@ -12,13 +11,16 @@ from fastapi import HTTPException
 class BlogService(Service):
     '''Blog service functionality'''
 
-    def create(self, db: Session, schema):
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create(self, schema):
         '''Create a new blog post'''
 
-    def fetch_all(self, db: Session, **query_params: Optional[Any]):
+    def fetch_all(self, **query_params: Optional[Any]):
         '''Fetch all blog posts with option to search using query parameters'''
 
-    def fetch(self, db: Session, id: str):
+    def fetch(self, id: str):
         return db.query(Blog).filter(Blog.id == id, Blog.is_deleted == False).first()
 
     def update(self, blog_id: str, title: Optional[str] = None, content: Optional[str] = None, current_user: User = None):
