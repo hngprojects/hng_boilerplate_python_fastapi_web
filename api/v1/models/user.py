@@ -35,19 +35,7 @@ class User(BaseTableModel):
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
-    roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
-    notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
-    activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
-    jobs = relationship("Job", back_populates="author", cascade="all, delete-orphan")
-    token_login = relationship("TokenLogin", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    oauth = relationship("OAuth", back_populates="user", uselist=False, cascade="all, delete-orphan")
-    testimonials = relationship("Testimonial", back_populates="author", cascade="all, delete-orphan")
-    payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan") 
-    blogs = relationship("Blog", back_populates="author", cascade="all, delete-orphan") 
-    comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
-    invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
-    messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
-    newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
+    roles = relationship('Role', secondary=user_role_association, back_populates='users')
 
     def to_dict(self):
         obj_dict = super().to_dict()
