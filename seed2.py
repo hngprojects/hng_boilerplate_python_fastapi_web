@@ -17,7 +17,7 @@ from api.v1.models.base import user_organization_association as UserOrganization
 from api.v1.models.base import user_role_association as UserRole
 from api.v1.models.base import role_permission_association as RolePermission
 
-create_database()
+# create_database()
 db = next(get_db())
 
 # Add sample organizations
