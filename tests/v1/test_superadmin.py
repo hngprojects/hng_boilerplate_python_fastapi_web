@@ -120,7 +120,7 @@ def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Se
 def test_non_admin_access(
     mock_user_service: UserService,
     mock_db_session: Session,
-    override_get_current_user_to_non_admin,
+    override_get_current_user_to_non_admin: None,
 ):
     """Test for non admin user access to endpoint"""
 
@@ -137,7 +137,7 @@ def test_non_admin_access(
 def test_successful_deletion(
     mock_user_service: UserService,
     mock_db_session: Session,
-    override_get_current_user_to_admin,
+    override_get_current_user_to_admin: None,
 ):
     """Test for successful deletion of user"""
 
@@ -159,7 +159,7 @@ def test_successful_deletion(
 def test_not_found_error(
     mock_user_service: UserService,
     mock_db_session: Session,
-    override_get_current_user_to_admin,
+    override_get_current_user_to_admin: None,
 ):
     """Test for invalid user ID"""
 
