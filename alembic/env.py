@@ -5,6 +5,7 @@ from alembic import context
 from decouple import config as decouple_config
 from api.v1.models import *
 from api.v1.models.base import Base
+from api.v1.models.blog import Blog
 
 
 # this is the Alembic Config object, which provides

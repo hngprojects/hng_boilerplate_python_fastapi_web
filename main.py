@@ -8,6 +8,7 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.utils.json_response import JsonResponseDict
+from api.v1.routes.blog import blog
 
 from api.utils.logger import logger
 from api.v1.routes.newsletter import (
