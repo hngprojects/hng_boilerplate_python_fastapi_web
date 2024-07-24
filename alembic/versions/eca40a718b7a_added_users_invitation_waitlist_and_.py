@@ -295,6 +295,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comments_id'), 'comments', ['id'], unique=False)
+    # create Rate Limiting Table
+    op.create_table('rate_limits',
+        sa.Column('id', sa.String(), nullable=False),
+        sa.Column('client_ip', sa.String(), nullable=False),
+        sa.Column('count', sa.Integer, nullable=False, server_default='0'),
+        sa.Column('start_time', sa.Float, nullable=False, ),
+        sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+        sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    )
     # ### end Alembic commands ###
 
 
@@ -342,4 +351,5 @@ def downgrade() -> None:
     op.drop_table('newsletters')
     op.drop_index(op.f('ix_contact_us_id'), table_name='contact_us')
     op.drop_table('contact_us')
+    op.drop_table('rate_limits')
     # ### end Alembic commands ###
