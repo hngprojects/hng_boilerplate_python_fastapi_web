@@ -31,7 +31,3 @@ class Organization(BaseTableModel):
             back_populates="organizations"
             )
     roles = relationship('Role', back_populates='organization')
-
-
-    def __str__(self):
-        return self.name
