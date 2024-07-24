@@ -104,3 +104,16 @@ def test_delete_organization_not_found(mock_organization_service, mock_db_sessio
     assert response.json() == {
         "detail": "Not Found"
     }
+
+def test_delete_organization_forbidden(mock_organization_service, mock_db_session, mock_user_normal):
+    """Test for forbidden access by non-superadmin."""
+    mock_organization = create_mock_organization(mock_db_session)
+    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_organization
+    mock_organization_service.return_value = True
+
+    response = client.delete(DELETE_ORGANIZATION_ENDPOINT.format(org_id=mock_organization.id), headers={"Authorization": "Bearer normal_user_token"})
+    
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+    assert response.json() == {
+        "detail": "Access forbidden"
+    }
