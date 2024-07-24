@@ -1,3 +1,4 @@
+
 import uvicorn
 from contextlib import asynccontextmanager
 from typing import Union
@@ -15,6 +16,7 @@ from api.v1.routes.newsletter_router import (
 from api.v1.routes.auth import auth
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
+from api.v1.routes.org import org
 
 Base.metadata.create_all(bind=engine)
 
@@ -42,6 +44,7 @@ app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(auth)
 app.include_router(user)
+app.include_router(org)
 # app.include_router(users, tags=["Users"])
 
 
