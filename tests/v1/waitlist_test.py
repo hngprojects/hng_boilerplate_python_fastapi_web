@@ -35,9 +35,13 @@ def test_duplicate_email(client_with_mocks):
     mock_db.query.return_value.filter.return_value.first.return_value = MagicMock()
 
     response = client.post(
-        "/api/v1/waitlist/join", json={"email": "duplicate@example.com", "full_name": "Test User"}
+        "/api/v1/waitlist/join", json={"email": "duplicate@gmail.com", "full_name": "Test User"}
     )
     data = response.json()
+    # Add checks to make sure the structure is correct
+    assert isinstance(data, dict), "data is not a dictionary"
+    assert 'message' in data, "'message' key is not in data"
+    assert isinstance(data['message'], dict), "'message' key does not contain a dictionary"
     assert data['message']['message'] == 'Email already registered'
     assert data['status_code'] == 400
     assert data['success'] == False
