@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """ The Product model
 """
 from sqlalchemy import (

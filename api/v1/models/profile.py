@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """ The Profile model
 """
 from sqlalchemy import (
