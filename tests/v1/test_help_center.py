@@ -1,14 +1,15 @@
 import sys
 import os
+import jwt
+from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from unittest.mock import patch
 from fastapi import HTTPException
+from api.v1.routes.help_center import router
 from ...main import app
-# from api.v1.routes.help_center import get_current_admin
-from datetime import datetime
 
-
-
+# Add the project root directory to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Mock in-memory database
 mock_db = {}
@@ -22,8 +23,20 @@ def reset_mock_db():
 
 client = TestClient(app)
 
-## Mock JWT tokens 
-valid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+# Define your secret key and algorithm
+SECRET_KEY = "your-secret-key"
+ALGORITHM = "HS256"
+
+def create_test_token(user_id="user123", expire_minutes=30):
+    expiration = datetime.utcnow() + timedelta(minutes=expire_minutes)
+    token_data = {
+        "sub": user_id,
+        "exp": expiration
+    }
+    token = jwt.encode(token_data, SECRET_KEY, algorithm=ALGORITHM)
+    return token
+
+admin_token = create_test_token(user_id="admin123")
 invalid_token = "invalid.token"
 
 @patch("api.v1.routes.help_center.get_db", side_effect=lambda: iter([get_mock_db()]))
@@ -45,7 +58,7 @@ def test_update_article_authorized(mock_get_current_user, mock_get_current_admin
     response = client.patch(
         "/help-center/topics/1",
         json={"title": "Updated Title", "content": "Updated Content"},
-        headers={"Authorization": f"Bearer {valid_token}"}
+        headers={"Authorization": f"Bearer {admin_token}"}
     )
 
     assert response.status_code == 200
@@ -104,7 +117,7 @@ def test_update_article_input_validation(mock_get_current_user, mock_get_current
     response = client.patch(
         "/help-center/topics/1",
         json={"title": "", "content": "Updated Content"},  # Invalid title
-        headers={"Authorization": f"Bearer {valid_token}"}
+        headers={"Authorization": f"Bearer {admin_token}"}
     )
 
     assert response.status_code == 422  # Unprocessable Entity, or a similar validation error code
