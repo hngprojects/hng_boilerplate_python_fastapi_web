@@ -15,8 +15,10 @@ from api.v1.routes.newsletter_router import (
 from api.v1.routes.auth import auth
 from api.v1.routes.user import user
 from api.v1.routes.roles import role
+from api.v1.routes.ptoduct import product
 
 Base.metadata.create_all(bind=engine)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -37,11 +39,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
+# Newsletter custom exception registration
+app.add_exception_handler(CustomException, custom_exception_handler)
 app.include_router(newsletter, tags=["Newsletter"])
 
 app.include_router(auth)
 app.include_router(user)
+app.include_router(product)
 # app.include_router(users, tags=["Users"])
 
 
