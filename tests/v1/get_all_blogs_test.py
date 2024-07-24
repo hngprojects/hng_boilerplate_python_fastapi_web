@@ -76,3 +76,4 @@ def test_get_all_blogs_with_data(client, db_session_mock):
         "created_at": created_at.isoformat(),
         "updated_at": updated_at.isoformat()
     }]
+

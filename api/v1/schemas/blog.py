@@ -17,3 +17,4 @@ class BlogResponse(BaseModel):
 
     class Config:
         orm_mode = True
+

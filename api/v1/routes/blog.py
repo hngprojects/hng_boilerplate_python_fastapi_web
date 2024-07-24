@@ -14,3 +14,4 @@ def get_all_blogs(db: Session = Depends(get_db)):
     if not blogs:
         return []
     return blogs
+
