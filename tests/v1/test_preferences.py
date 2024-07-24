@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
-from . import main
+from main import app
 
-client = TestClient(main.app)
+client = TestClient(app)
 
 def test_create_preference():
     response = client.post(
