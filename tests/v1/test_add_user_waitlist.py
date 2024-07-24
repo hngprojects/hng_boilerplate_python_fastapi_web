@@ -53,7 +53,7 @@ class TestCodeUnderTest:
         response = client.post("/api/v1/waitlist/admin", json={"email": "test@example.com", "full_name": ""})
     
         assert response.status_code == 400
-        assert response.json()["message"]['message'] == "full_name field cannot be blank"
+        assert response.json()["message"] == "full_name field cannot be blank"
 
     # # Handling invalid email format and raising appropriate exception
     def test_add_user_to_waitlist_invalid_email(self, client):    
@@ -74,4 +74,4 @@ class TestCodeUnderTest:
         response = client.post("/api/v1/waitlist/admin", json={"email": "duplicate@example.com", "full_name": "Test User"})
     
         assert response.status_code == 400
-        assert response.json()["message"]['message'] == "Email already added"
+        assert response.json()["message"]== "Email already added"

@@ -39,17 +39,10 @@ def add_user_to_waitlist(
     - 400: Validation error
     - 403: Forbidden
     """
-
-    error_format: dict = {
-        "message": "Invalid email format",
-        "error": "Bad Request",
-        "status_code": 400,
-    }
-
     try:
         if len(item.full_name) == 0:
-            error_format["message"] = "full_name field cannot be blank"
-            raise HTTPException(status_code=400, detail=error_format)
+            detail = "full_name field cannot be blank"
+            raise HTTPException(status_code=400, detail=detail)
         
         if obj:= db.query(Waitlist).where(Waitlist.email==item.email).first() != None:
             raise IntegrityError("Duplicate entry", {}, None)
@@ -58,8 +51,8 @@ def add_user_to_waitlist(
         db.add(new_waitlist_user)
         db.commit()
     except IntegrityError:
-        error_format["message"] = "Email already added"
-        raise HTTPException(status_code=400, detail=error_format)
+        detail = "Email already added"
+        raise HTTPException(status_code=400, detail=detail)
 
     resp = {
         "message": "User added to waitlist successfully",
