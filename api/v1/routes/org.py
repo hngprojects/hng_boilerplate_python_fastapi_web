@@ -6,7 +6,7 @@ from ..models.org import Organization
 # from api.v1.schemas.user import DeactivateUserSchema
 from api.db.database import get_db
 from api.utils.dependencies import get_current_user
-from api.v1.services.org import organization_service
+from api.v1.services.org import OrganizationService as organization_service
 
 
 org = APIRouter(prefix='/organization', tags=['Organizations'])
