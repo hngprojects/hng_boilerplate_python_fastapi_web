@@ -15,7 +15,7 @@ from api.db.database import get_db
 
 # Setup test app
 app = FastAPI()
-app.include_router(router)
+app.include_router(router, prefix="/api/v1")
 
 # Mock UserService implementation
 class MockUserService:
@@ -59,33 +59,33 @@ def client(db_session_mock, mock_user_service):
 
 # Test cases
 def test_empty_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": ""})
+    response = client.post("/auth/verify-magic-link", json={"token": ""})
     assert response.status_code == 422
 
 def test_whitespace_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": " "})
+    response = client.post("/auth/verify-magic-link", json={"token": " "})
     assert response.status_code == 422
 
 def test_min_length_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": "a"})
+    response = client.post("/auth/verify-magic-link", json={"token": "a"})
     assert response.status_code in [200, 400]
 
 def test_valid_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": "valid_token"})
+    response = client.post("/auth/verify-magic-link", json={"token": "valid_token"})
     assert response.status_code == 200
     assert "auth_token" in response.json()
     assert response.json()["status"] == 200
 
 def test_invalid_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": "invalid_token"})
+    response = client.post("/auth/verify-magic-link", json={"token": "invalid_token"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid or expired token"}
 
 def test_expired_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": "expired_token"})
+    response = client.post("/auth/verify-magic-link", json={"token": "expired_token"})
     assert response.status_code == 400
     assert response.json() == {"detail": "Invalid or expired token"}
 
 def test_special_characters_token(client):
-    response = client.post("/api/v1/auth/verify-magic-link", json={"token": "!@#$%^&*()"})
+    response = client.post("/auth/verify-magic-link", json={"token": "!@#$%^&*()"})
     assert response.status_code in [200, 400]
