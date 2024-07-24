@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
 """ Populates the database with seed data
 """
-from api.db.database import create_database, get_db
 from api.v1.models import *
+from api.v1.models.base import Base
+from api.v1.services.user import user_service
+from api.db.database import create_database, get_db
+
+
+
+
+
+
 
 # create_database()
 db = next(get_db())
 
-user_1 = User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe")
-user_2 = User(email="test1@mail", username="testuser1", password="testpass1", first_name="Jane", last_name="Boyle")
-user_3 = User(email="test2@mail", username="testuser2", password="testpass2", first_name="Bob", last_name="Dwayne")
+user_1 = User(email="test@mail", username="testuser", password=user_service.hash_password("testpass"), first_name="John", last_name="Doe")
+user_2 = User(email="test1@mail", username="testuser1", password=user_service.hash_password("testpass1"), first_name="Jane", last_name="Boyle")
+user_3 = User(email="test2@mail", username="testuser2", password=user_service.hash_password("testpass2"), first_name="Bob", last_name="Dwayne")
 
 db.add_all([user_1, user_2, user_3])
 

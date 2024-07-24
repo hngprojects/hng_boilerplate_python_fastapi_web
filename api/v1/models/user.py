@@ -22,7 +22,7 @@ from api.v1.models.base_model import BaseTableModel
 
 
 
-class User(BaseTableModel, Base):
+class User(BaseTableModel):
     __tablename__ = 'users'
 
     username = Column(String, unique=True, nullable=False)
