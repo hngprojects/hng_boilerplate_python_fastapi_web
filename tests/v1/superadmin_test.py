@@ -39,14 +39,14 @@ def mock_organization_service():
 @pytest.fixture
 def mock_user_superadmin():
     """Fixture to mock superadmin user."""
-    with patch("api.v1.services.user.get_current_user") as mock_get_current_user:
+    with patch("api.v1.routes.del_org.get_current_user") as mock_get_current_user:
         mock_get_current_user.return_value = {"id": 1, "role": "superadmin"}
         yield mock_get_current_user
 
 @pytest.fixture
 def mock_user_normal():
     """Fixture to mock normal user."""
-    with patch("api.v1.services.user.get_current_user") as mock_get_current_user:
+    with patch("api.v1.routes.del_org.get_current_user") as mock_get_current_user:
         mock_get_current_user.return_value = {"id": 2, "role": "normal"}
         yield mock_get_current_user
 
