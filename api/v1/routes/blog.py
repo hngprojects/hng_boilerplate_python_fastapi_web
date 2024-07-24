@@ -24,7 +24,7 @@ def get_all_blogs(db: Session = Depends(get_db)):
 @blog.get("/{id}", response_model=BlogPostResponse)
 def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     """
-    Retrieve a blog post by its ID.
+    Retrieve a blog post by its Id.
 
     Args:
         id (str): The ID of the blog post.
