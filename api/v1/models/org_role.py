@@ -1,7 +1,6 @@
 from sqlalchemy import Column, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
-from uuid_extensions import uuid7
 
 class OrgRole(BaseTableModel):
     __tablename__ = "org_roles"
