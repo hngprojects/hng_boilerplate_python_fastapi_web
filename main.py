@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-
-=======
-from fastapi.responses import JSONResponse
->>>>>>> origin
 import uvicorn
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
