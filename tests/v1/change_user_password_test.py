@@ -20,7 +20,7 @@ from main import app
 
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
-CHANGE_PWD_ENDPOINT = "/api/v1/users/current-user/change-password"
+CHANGE_PWD_ENDPOINT = "/api/v1/users/me/password"
 
 
 @pytest.fixture
