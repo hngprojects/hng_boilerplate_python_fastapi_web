@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 
 from api.db.database import get_db
 from api.utils.dependencies import get_super_admin
+from api.v1.models import User
 from api.v1.models.blog import Blog
 from api.v1.schemas.blog import BlogResponse, DeleteBlogResponse
-from api.v1.schemas.user import User
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
