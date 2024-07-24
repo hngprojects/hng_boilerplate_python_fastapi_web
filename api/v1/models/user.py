@@ -38,6 +38,9 @@ class User(BaseTableModel, Base):
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
     roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
+    activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
+    
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
