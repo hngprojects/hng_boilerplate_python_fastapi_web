@@ -9,9 +9,10 @@ from api.v1.models import User
 from api.v1.models.blog import Blog
 from api.v1.schemas.blog import BlogResponse, DeleteBlogResponse
 
-blog = APIRouter(prefix="/blogs", tags=["Blog"])
+blogs = APIRouter(prefix="/blogs", tags=["Blog"])
+blog = APIRouter(prefix="/blog", tags=["Blog"])
 
-@blog.get("/", response_model=List[BlogResponse])
+@blogs.get("/", response_model=List[BlogResponse])
 def get_all_blogs(db: Session = Depends(get_db)):
     blogs = db.query(Blog).filter(Blog.is_deleted == False).all()
     if not blogs:
@@ -19,13 +20,13 @@ def get_all_blogs(db: Session = Depends(get_db)):
     return blogs
 
 
-@blog.delete("/api/v1/blogs/{id}", response_model=DeleteBlogResponse, status_code=status.HTTP_200_OK)
+@blog.delete("/{id}", status_code=status.HTTP_200_OK)
 def delete_blog(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
     if not current_user:
         return {"status_code":403, "message":"Unauthorized User"}
-    post = db.query(Blog).filter(Blog.id == id, Blog.is_deleted == False).first()
+    post = db.query(Blog).filter_by(Blog.id == id, Blog.is_deleted == False).first()
     
-    if not post:
+    if not  post:
         return {"status_code":status.HTTP_404_NOT_FOUND, "message": "Blog with the given ID does not exist"}
     
     post.is_deleted = True
