@@ -44,14 +44,14 @@ async def waitlist_signup(
         raise CustomException(status_code=422, detail={"message": "Full name is required", 
                                                        "success": False, "status_code": 422})
 
-    existing_user = db.query(WaitlistUser).filter(
-        WaitlistUser.email == user.email).first()
+    existing_user = db.query(Waitlist).filter(
+        Waitlist.email == user.email).first()
     if existing_user:
         logger.error(f"Email already registered: {user.email}")
         raise CustomException(status_code=400, detail={"message": "Email already registered", 
                                                        "success": False, "status_code": 400})
 
-    db_user = WaitlistUser(email=user.email, full_name=user.full_name)
+    db_user = Waitlist(email=user.email, full_name=user.full_name)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
@@ -66,4 +66,4 @@ async def waitlist_signup(
                                      "success": False, "status_code": 500})
 
     logger.info(f"User signed up successfully: {user.email}")
-    return {"message": "You are all signed up!"}
+    return JSONResponse(content={"message": "You are all signed up!"}, status_code=201)
