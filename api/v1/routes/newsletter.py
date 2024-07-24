@@ -9,9 +9,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from api.v1.models.newsletter import Newsletter
 from api.v1.schemas.newsletter import EMAILSCHEMA
-from api.db.database import get_db, Base, engine, create_database
+from api.db.database import get_db, Base, engine
 from api.v1.services.newsletter import NewsletterService
-create_database()
 
 class CustomException(HTTPException):
     """
