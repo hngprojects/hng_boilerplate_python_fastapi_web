@@ -9,7 +9,7 @@ os.environ['MAIL_FROM'] = 'no-reply@example.com'
 os.environ['MAIL_PORT'] = '587'
 os.environ['MAIL_SERVER'] = 'smtp.example.com'
 os.environ['SECRET_KEY'] = 'your_secret_key'
-os.environ['DB_URL'] = 'sqlite:///./test.db'
+os.environ['DB_URL'] = 'postgresql+psycopg2://postgres:Akanking43.43@localhost:5432/another_db'
 
 import warnings
 
@@ -22,7 +22,7 @@ from api.v1.models.job import Job
 from api.v1.services.user import UserService
 from datetime import datetime, timedelta
 import jwt
-import uuid
+from uuid_extensions import uuid7
 
 client = TestClient(app)
 user_service = UserService()
@@ -48,12 +48,15 @@ def db():
 def create_test_admin_user(db: Session):
     hashed_password = user_service.hash_password(password="adminpassword")
     admin_user = User(
-        id=uuid.uuid4(),
+        id=str(uuid7()),
+        first_name="user",
+        last_name="admin",
         username="adminuser",
         email="adminuser@example.com",
         password=hashed_password,
         is_active=True,
-        is_admin=True
+        is_admin=True,
+        is_deleted=False
     )
     db.add(admin_user)
     db.commit()
@@ -63,12 +66,15 @@ def create_test_admin_user(db: Session):
 def create_test_user(db: Session):
     hashed_password = user_service.hash_password(password="userpassword")
     test_user = User(
-        id=uuid.uuid4(),
+        id=str(uuid7()),
+        first_name="test",
+        last_name="user",
         username="testuser",
         email="testuser@example.com",
         password=hashed_password,
         is_active=True,
-        is_admin=False
+        is_admin=False,
+        is_deleted=False
     )
     db.add(test_user)
     db.commit()
