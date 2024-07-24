@@ -9,7 +9,7 @@ from uuid import UUID
 from fastapi import HTTPException
 
 
-class BlogService(Service):
+class BlogService:
     '''Blog service functionality'''
 
     def create(self, db: Session, schema):
@@ -49,3 +49,20 @@ class BlogService(Service):
 
     def delete(self, db: Session, id: int):
         '''Deletes a blog post'''
+
+
+# class BlogService:
+#     '''Blog service functionality'''
+
+#     def __init__(self, db: Session):
+#         self.db = db
+
+#     def fetch(self, blog_id: str):
+#         '''Fetch a blog post by its ID'''
+#         blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
+#         if not blog_post:
+#             raise HTTPException(status_code=404, detail="Post not Found")
+#         return blog_post
+
+#     def update(self, blog_id: str, title: Optional[str] = None, content: Optional[str] = None, current_user: User = None):
+#         '''Updates a blog post'''
