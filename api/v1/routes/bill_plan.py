@@ -8,12 +8,13 @@ from api.v1.models.user import User
 from api.v1.services.plan import billing_plan_service
 from api.db.database import get_db
 from api.utils.json_response import JsonResponseDict
-from api.utils.dependencies import get_current_user
+from api.v1.services.user import user_service
 
 bill_plan = APIRouter(prefix='/api/v1/organizations', tags=['Billing-Plan'])
 
-@bill_plan.post('/12345/billing-plans')
+@bill_plan.get('/12345/billing-plans')
 async def retrieve_all_billing_plans(
+                     current_user: User = Depends(user_service.get_current_user),
                                      db: Session = Depends(get_db)):
     """
     Get All Billing Plan endpoint

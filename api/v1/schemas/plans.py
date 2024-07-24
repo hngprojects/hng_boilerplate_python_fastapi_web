@@ -16,12 +16,3 @@ class SubscriptionPlanResponse(CreateSubscriptionPlan):
     class Config:
         orm_mode = True
 
-
-class BillingPlanDisplay(BaseModel):
-    id: int
-    name: str
-    price: int
-    features: List[str]
-    
-    class Config:
-        from_attributes=True
