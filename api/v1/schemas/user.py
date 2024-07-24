@@ -15,6 +15,12 @@ class UserBase(BaseModel):
     email: EmailStr
     created_at: datetime
 
+class UserLogin(BaseModel):
+    '''Schema to login a user'''
+    
+    username: str
+    password: str
+
 class UserCreate(BaseModel):
     '''Schema to create a user'''
     

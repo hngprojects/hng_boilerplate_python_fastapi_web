@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 import jwt
+from jwt.exceptions import DecodeError, ExpiredSignatureError, InvalidSignatureError
 from typing import Optional
 from datetime import datetime, timedelta
 from api.v1.models.user import User
@@ -23,13 +24,13 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("username")
-        if username is None:
+        user_id: str = payload.get("user_id")
+        if user_id is None or user_id == "":
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+        token_data = TokenData(user_id=user_id)
+    except (JWTError, DecodeError, ExpiredSignatureError,  InvalidSignatureError):
         raise credentials_exception
-    user = db.query(User).filter(User.username == token_data.username).first()
+    user = db.query(User).get(user_id)
     if user is None:
         raise credentials_exception
     return user
