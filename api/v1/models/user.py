@@ -43,6 +43,7 @@ class User(BaseTableModel, Base):
     token_login = relationship("TokenLogin", back_populates="user", uselist=False, cascade="all, delete-orphan")
     oauth = relationship("OAuth", back_populates="user", uselist=False, cascade="all, delete-orphan")
     testimonials = relationship("Testimonial", back_populates="author", cascade="all, delete-orphan")
+    payments = relationship("Payment", back_populates="user", cascade="all, delete-orphan")  # Added relationship
     
     def to_dict(self):
         obj_dict = super().to_dict()
