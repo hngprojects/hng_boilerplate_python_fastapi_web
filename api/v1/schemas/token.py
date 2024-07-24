@@ -15,3 +15,6 @@ from pydantic import BaseModel
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class OAuthToken(BaseModel):
+    access_token: str

@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = config("ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
     JWT_REFRESH_EXPIRY: int = config("JWT_REFRESH_EXPIRY")
-
+    
     # Database configurations
     DB_HOST: str = config("DB_HOST")
     DB_PORT: int = config("DB_PORT", cast=int)
@@ -31,5 +31,7 @@ class Settings(BaseSettings):
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
 
+    # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
+    # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
 
 settings = Settings()
