@@ -42,6 +42,7 @@ class User(BaseTableModel, Base):
     jobs = relationship("Job", back_populates="author", cascade="all, delete-orphan")
     token_login = relationship("TokenLogin", back_populates="user", uselist=False, cascade="all, delete-orphan")
     oauth = relationship("OAuth", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    testimonials = relationship("Testimonial", back_populates="author", cascade="all, delete-orphan")
     
     def to_dict(self):
         obj_dict = super().to_dict()

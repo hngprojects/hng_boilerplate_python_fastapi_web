@@ -7,6 +7,9 @@ from api.v1.models.notifications import Notification
 # from api.v1.models.subscription import Subscription
 # from api.v1.models.blog import Blog
 from api.v1.models.job import Job
+from api.v1.models.testimonial import Testimonial
+from api.v1.models.token_login import TokenLogin
+from api.v1.models.oauth import OAuth
 # from api.v1.models.invitation import Invitation
 # from api.v1.models.role import Role
 # from api.v1.models.permission import Permission
