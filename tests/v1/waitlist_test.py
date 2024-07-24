@@ -38,7 +38,8 @@ def test_duplicate_email(client_with_mocks):
         "/api/v1/waitlist/join", json={"email": "duplicate@gmail.com", "full_name": "Test User"}
     )
     data = response.json()
-    assert data['message']['message'] == 'Email already registered'
+    message = data['message']['message']
+    assert message == 'Email already registered'
     assert data['status_code'] == 400
     assert data['success'] == False
 
