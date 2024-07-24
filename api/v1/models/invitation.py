@@ -1,7 +1,8 @@
 from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime
 from api.v1.models.base_model import BaseTableModel
+from uuid_extensions import uuid7
+from sqlalchemy.dialects.postgresql import UUID
 
-# Invitation model
 class Invitation(BaseTableModel):
     __tablename__ = 'invitations'
 
@@ -9,3 +10,6 @@ class Invitation(BaseTableModel):
     organization_id = Column(String, ForeignKey('organizations.id', ondelete='CASCADE'), nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_valid = Column(Boolean, default=True)
+
+    user = relationship("User", back_populates="invitations")
+    organization = relationship("Organization", back_populates="invitations")

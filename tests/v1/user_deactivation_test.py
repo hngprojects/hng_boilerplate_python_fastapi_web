@@ -1,8 +1,8 @@
-import sys, os
-import warnings
+# import sys, os
+# import warnings
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# warnings.filterwarnings("ignore", category=DeprecationWarning)
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import pytest
 from fastapi.testclient import TestClient
@@ -23,9 +23,9 @@ LOGIN_ENDPOINT = 'api/v1/auth/login'
 
 @pytest.fixture
 def mock_db_session():
-    """Fixture to create a mock database session."""
+    """Fixture to create a mock database session. api.v1.services.user.get_db"""
 
-    with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
+    with patch("api.db.database.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
         # mock_get_db.return_value.__enter__.return_value = mock_db
         app.dependency_overrides[get_db] = lambda: mock_db
@@ -51,7 +51,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_admin=False,
+        is_super_admin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -141,7 +141,7 @@ def test_user_inactive(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=False,
-        is_admin=False,
+        is_super_admin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
