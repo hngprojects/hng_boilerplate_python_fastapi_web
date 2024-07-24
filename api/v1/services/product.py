@@ -52,10 +52,10 @@ class ProductService(Service):
         check_user_in_org(user=user, organization=organization)
 
         # calculating offset value from page and limit given
-        offset_value = (page -1) * limit
+        offset_value = (page - 1) * limit
 
         # Filter to return only products of the org_id
-        products = db.query(Product).filter(Product.org_id == org_id).offset(offset_value).limit(page).all()
+        products = db.query(Product).filter(Product.org_id == org_id).offset(offset_value).limit(limit).all()
 
         return products
 

@@ -26,7 +26,7 @@ def get_organization_products(
     Endpoint to retrieve a paginated list of products of an organization.
 
     Query parameter: 
-        - limit: Number of customer per page (default: 10, minimum: 1)
+        - limit: Number of product per page (default: 10, minimum: 1)
         - page: Page number (starts from 1)
     '''
 
