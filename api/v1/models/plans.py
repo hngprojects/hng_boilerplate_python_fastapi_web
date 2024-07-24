@@ -5,7 +5,6 @@ from sqlalchemy import (
         Text,
         ARRAY
         )
-from api.v1.models.base import Base
 from api.v1.models.base_model import BaseTableModel
 
 

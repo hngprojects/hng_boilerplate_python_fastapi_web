@@ -1,7 +1,7 @@
 import datetime
 from uuid_extensions import uuid7
 from api.db.database import create_database, get_db
-from api.utils.auth import hash_password
+from api.v1.services.user import user_service
 from api.v1.models.user import User, WaitlistUser
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
@@ -21,9 +21,9 @@ from api.v1.models.base import role_permission_association as RolePermission
 db = next(get_db())
 
 # Add sample organizations
-org_1 = Organization(id=uuid7(), name="Python Org", description="An organization for Python developers")
-org_2 = Organization(id=uuid7(), name="JavaScript Org", description="An organization for JavaScript developers")
-org_3 = Organization(id=uuid7(), name="GoLang Org", description="An organization for GoLang developers")
+org_1 = Organization(name="Python Org", description="An organization for Python developers")
+org_2 = Organization(name="JavaScript Org", description="An organization for JavaScript developers")
+org_3 = Organization(name="GoLang Org", description="An organization for GoLang developers")
 
 db.add_all([org_1, org_2, org_3])
 db.commit()
@@ -33,7 +33,7 @@ user_1 = User(
     id=uuid7(),
     username="user1",
     email="user1@example.com",
-    password=hash_password("password1"),
+    password=user_service.hash_password("password1"),
     first_name="User",
     last_name="One",
     is_active=True,
@@ -44,7 +44,7 @@ user_2 = User(
     id=uuid7(),
     username="user2",
     email="user2@example.com",
-    password=hash_password("password2"),
+    password=user_service.hash_password("password2"),
     first_name="User",
     last_name="Two",
     is_active=True,
@@ -55,7 +55,7 @@ user_3 = User(
     id=uuid7(),
     username="user3",
     email="user3@example.com",
-    password=hash_password("password3"),
+    password=user_service.hash_password("password3"),
     first_name="User",
     last_name="Three",
     is_active=True,

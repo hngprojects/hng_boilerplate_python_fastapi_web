@@ -3,20 +3,14 @@
 """
 from sqlalchemy import (
         Column,
-        Integer,
         String,
-        Text,
-        Date,
         ForeignKey,
         DateTime,
         func,
         Boolean
         )
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from api.v1.models.base import Base
 from api.v1.models.base_model import BaseTableModel
-from sqlalchemy.dialects.postgresql import UUID
 
 
 class Subscription(BaseTableModel):

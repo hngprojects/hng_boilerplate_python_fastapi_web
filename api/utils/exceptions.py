@@ -1,38 +1,46 @@
-# from fastapi import HTTPException, Request
-# from fastapi.exceptions import RequestValidationError
-# from fastapi.responses import JSONResponse
-# from main import app
+from fastapi import HTTPException, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from api.utils.json_response import JsonResponseDict
 
-# @app.exception_handler(HTTPException)
-# async def http_exception(request: Request, exc: HTTPException):
-#     return JSONResponse(
-#         status_code=exc.status_code,
-#         content={
-#             "success": False,
-#             "status_code": exc.status_code,
-#             "message": exc.detail
-#         }
-#     )
+class CustomException(HTTPException):
+    """
+    Custom error handling
+    """
+    def __init__(self, status_code: int, detail: dict):
+        super().__init__(status_code=status_code, detail=detail)
+        self.message = detail.get("message")
+        self.success = detail.get("success")
+        self.status_code = detail.get("status_code")
 
-# @app.exception_handler(RequestValidationError)
-# async def validation_exception(request: Request, exc: RequestValidationError):
-#     return JSONResponse(
-#         status_code=422,
-#         content={
-#             "success": False,
-#             "status_code": 422,
-#             "message": "Invalid input",
-#             "errors": exc.errors()
-#         }
-#     )
+async def custom_exception_handler(request: Request, exc: CustomException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "message": exc.message,
+            "success": exc.success,
+            "status_code": exc.status_code
+        }
+    )
 
-# @app.exception_handler(Exception)
-# async def exception(request: Request, exc: Exception):
-#     return JSONResponse(
-#         status_code=500,
-#         content={
-#             "success": False,
-#             "status_code": 500,
-#             "message": "An unexpected error occurred"
-#         }
-#     )
+class CustomWaitlistException(HTTPException):
+    """
+    Custom error handling
+    """
+
+    def __init__(self, detail: dict, status_code: int):
+        super().__init__(detail=detail, status_code=status_code)
+        self.message = detail.get("message")
+        self.error = detail.get("error")
+        self.status_code = status_code
+
+
+def custom_waitlist_exception_handler(
+    request: Request, exc: CustomWaitlistException
+):
+    content = {
+        "message": exc.message,
+        "error": exc.error,
+        "status_code": exc.status_code,
+    }
+    return JsonResponseDict(**content)

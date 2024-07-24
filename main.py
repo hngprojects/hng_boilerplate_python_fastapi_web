@@ -1,4 +1,5 @@
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 import uvicorn
 from fastapi import HTTPException, Request
 from fastapi.exceptions import RequestValidationError
@@ -10,9 +11,11 @@ from starlette.requests import Request
 from api.utils.json_response import JsonResponseDict
 
 from api.utils.logger import logger
-from api.v1.routes.newsletter import (
+from api.utils.exceptions import (
     CustomException,
-    custom_exception_handler
+    custom_exception_handler,
+    CustomWaitlistException,
+    custom_waitlist_exception_handler
 )
 from api.v1.routes import api_version_one
 
@@ -37,6 +40,7 @@ app.add_middleware(
 )
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
+app.add_exception_handler(CustomWaitlistException, custom_waitlist_exception_handler) #Waitlist custom exception registration
 app.include_router(api_version_one)
 
 
@@ -53,6 +57,8 @@ async def get_root(request: Request) -> dict:
 
 @app.exception_handler(HTTPException)
 async def http_exception(request: Request, exc: HTTPException):
+    '''HTTP exception handler'''
+
     return JSONResponse(
         status_code=exc.status_code,
         content={
@@ -64,18 +70,22 @@ async def http_exception(request: Request, exc: HTTPException):
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception(request: Request, exc: RequestValidationError):
+    '''Validation exception handler'''
+
     return JSONResponse(
         status_code=422,
         content={
             "success": False,
             "status_code": 422,
             "message": "Invalid input",
-            "errors": exc.errors()
+            "errors": jsonable_encoder(exc.errors())
         }
     )
 
 @app.exception_handler(Exception)
 async def exception(request: Request, exc: Exception):
+    '''Other exception handlers'''
+    
     logger.exception(f'Exception occured; {exc}')
 
     return JSONResponse(

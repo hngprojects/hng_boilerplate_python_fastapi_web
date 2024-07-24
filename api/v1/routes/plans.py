@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing_extensions import Annotated
 from api.v1.models.plans import SubscriptionPlan
 from api.v1.schemas.plans import CreateSubscriptionPlan, SubscriptionPlanResponse
 from api.db.database import get_db

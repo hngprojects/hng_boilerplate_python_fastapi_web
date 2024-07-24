@@ -1,5 +1,4 @@
-from fastapi import Depends, HTTPException, APIRouter, Request, Response, status
-from jose import JWTError
+from fastapi import Depends, APIRouter, Request, status
 from sqlalchemy.orm import Session
 
 from api.core.dependencies.email import mail_service
@@ -31,20 +30,6 @@ async def deactivate_account(request: Request, schema: DeactivateUserSchema, db:
         message='User deactivation successful',
         data={'reactivation_link': reactivation_link}
     )
-
-
-# @user.get('/current-user/delete', status_code=200)
-# async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-#     '''Endpoint to delete a user account'''
-
-#     # Delete current user
-#     user_service.delete(db=db)
-
-#     return success_response(
-#         status_code=200,
-#         message='User deleted successfully',
-#     )
-
 
 @user.get('/reactivation', status_code=200)
 async def reactivate_account(request: Request, db: Session = Depends(get_db)):

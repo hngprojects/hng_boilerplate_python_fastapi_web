@@ -4,6 +4,7 @@ from api.v1.routes.roles import role
 from api.v1.routes.plans import plans
 from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user
+from api.v1.routes.waitlist import waitlist as waitlist_router
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -12,3 +13,4 @@ api_version_one.include_router(role)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(plans)
 api_version_one.include_router(user)
+api_version_one.include_router(waitlist_router)
