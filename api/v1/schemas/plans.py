@@ -15,3 +15,10 @@ class SubscriptionPlanResponse(CreateSubscriptionPlan):
     
     class Config:
         orm_mode = True
+
+
+class SubscriptionPlanDisplay(CreateSubscriptionPlan):
+    id: uuid.UUID
+    name: str
+    price: int
+    features: List[str]
