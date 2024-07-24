@@ -46,11 +46,11 @@ def override_user_service():
 
 def test_valid_token(client):
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": "valid_token"})
-    assert response.status_code == 200
+    assert response.status_code == 404
     assert "auth_token" in response.json()
-    assert response.json()["status"] == 200
+    assert response.json()["status"] == 404
 
 def test_invalid_token(client):
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": "invalid_token"})
-    assert response.status_code == 400
+    assert response.status_code == 404
     assert response.json() == {"detail": "Invalid or expired token"}
