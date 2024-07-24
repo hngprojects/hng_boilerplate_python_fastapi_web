@@ -24,8 +24,8 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
     )
 
     # Generate access and refresh tokens
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
+    access_token = user_service.create_access_token(username=user.username)
+    refresh_token = user_service.create_refresh_token(username=user.username)
 
     response = success_response(
         status_code=200,

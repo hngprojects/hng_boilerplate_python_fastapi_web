@@ -131,12 +131,12 @@ class UserService(Service):
         return pwd_context.verify(secret=password, hash=hash) 
     
 
-    def create_access_token(self, user_id: str) -> str:
+    def create_access_token(self, username: str) -> str:
         '''Function to create access token'''
         
         expires = dt.datetime.utcnow() + dt.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         data = {
-            'user_id': user_id,
+            'username': username,
             'exp': expires,
             'type': 'access'
         }
@@ -145,13 +145,13 @@ class UserService(Service):
         return encoded_jwt
 
 
-    def create_refresh_token(self, user_id: str) -> str:
+    def create_refresh_token(self, username: str) -> str:
         '''Function to create access token'''
                 
         expires = dt.datetime.utcnow() + dt.timedelta(days=settings.JWT_REFRESH_EXPIRY)
         
         data = {
-            'user_id': user_id,
+            'username': username,
             'exp': expires,
             'type': 'refresh'
         }
@@ -165,16 +165,16 @@ class UserService(Service):
         
         try:
             payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-            user_id = payload.get('user_id')
+            username = payload.get('username')
             token_type = payload.get('type')
             
-            if user_id is None:
+            if username is None:
                 raise credentials_exception
             
             if token_type == 'refresh':
                 raise HTTPException(detail='Refresh token not allowed', status_code=400)
             
-            token_data = user.TokenData(id=user_id)
+            token_data = user.TokenData(id=username)
         
         except JWTError:
             raise credentials_exception
@@ -187,16 +187,16 @@ class UserService(Service):
         
         try:
             payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-            user_id = payload.get('user_id')
+            username = payload.get('username')
             token_type = payload.get('type')
             
-            if user_id is None:
+            if username is None:
                 raise credentials_exception
             
             if token_type == 'access':
                 raise HTTPException(detail='Access token not allowed', status_code=400)
             
-            token_data = user.TokenData(id=user_id)
+            token_data = user.TokenData(id=username)
         
         except JWTError:
             raise credentials_exception
@@ -215,8 +215,8 @@ class UserService(Service):
         token = self.verify_refresh_token(current_refresh_token, credentials_exception)
         
         if token:
-            access = self.create_access_token(user_id=token.id)
-            refresh = self.create_refresh_token(user_id=token.id)
+            access = self.create_access_token(username=token.id)
+            refresh = self.create_refresh_token(username=token.id)
             
             return access, refresh
         else:
@@ -245,7 +245,7 @@ class UserService(Service):
         user.is_active = False
 
         # Create reactivation token
-        token = self.create_access_token(user_id=user.id)
+        token = self.create_access_token(username=user.id)
         reactivation_link = f'https://{request.url.hostname}/api/v1/users/accounts/reactivate?token={token}'
 
         # mail_service.send_mail(
@@ -265,15 +265,15 @@ class UserService(Service):
         # Validate the token
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-            user_id = payload.get('user_id')
+            username = payload.get('username')
 
-            if user_id is None:
+            if username is None:
                 raise HTTPException(400, 'Invalid token')
             
         except JWTError:
             raise HTTPException(400, 'Invalid token')
         
-        user = db.query(User).filter(User.id == user_id).first()
+        user = db.query(User).filter(User.id == username).first()
 
         if user.is_active:
             raise HTTPException(400, 'User is already active')
