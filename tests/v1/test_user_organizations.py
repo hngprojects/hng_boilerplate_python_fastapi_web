@@ -1,20 +1,12 @@
-import sys, os
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
 from uuid import uuid4
-from datetime import datetime, timezone, timedelta
-
-from ...main import app
-from api.v1.models import Organization, User
+from main import app
+from api.v1.models.org import Organization
+from api.v1.models.user import User
 from api.v1.routes.organization import get_db
-
 
 # Mock database dependency
 @pytest.fixture
@@ -35,23 +27,26 @@ def test_get_user_organizations_success(client, db_session_mock):
     org_id = uuid4()
     org_name = "Test Organization"
     org_description = "Test Description"
-    
+
     organization = Organization(
         id=org_id,
         name=org_name,
         description=org_description
     )
-    
+
     user = User(
         id=user_id,
         organizations=[organization]
     )
-    
+
     # Mock the return value for the user retrieval
     db_session_mock.query().filter().first.return_value = user
 
+    # Mock valid JWT token
+    headers = {"Authorization": "Bearer validtoken"}
+
     # Call the endpoint with a valid Authorization header
-    response = client.get("/api/v1/organizations/current-user", headers={"Authorization": "Bearer valid_token"})
+    response = client.get("/api/v1/organizations/current-user", headers=headers)
 
     # Assert the response
     assert response.status_code == 200
@@ -67,15 +62,26 @@ def test_get_user_organizations_no_credentials(client, db_session_mock):
 
     # Assert the response
     assert response.status_code == 401
-    assert response.json() == {"detail": "Not authenticated"}
+    assert response.json() == {
+        "message": "Not authenticated",
+        "status_code": 401,
+        "success": False
+    }
 
 def test_get_user_organizations_server_error(client, db_session_mock):
     # Mock the user retrieval to raise an exception
     db_session_mock.query().filter().first.side_effect = Exception("Database error")
 
+    # Mock valid JWT token
+    headers = {"Authorization": "Bearer validtoken"}
+
     # Call the endpoint with a valid Authorization header
-    response = client.get("/api/v1/organizations/current-user", headers={"Authorization": "Bearer valid_token"})
+    response = client.get("/api/v1/organizations/current-user", headers=headers)
 
     # Assert the response
     assert response.status_code == 500
-    assert response.json() == {"detail": "Internal Server Error"}
+    assert response.json() == {
+        "message": "Internal server error",
+        "status_code": 500,
+        "success": False
+    }
