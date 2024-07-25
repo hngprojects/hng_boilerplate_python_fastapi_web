@@ -12,10 +12,9 @@ from api.v1.schemas.blog import (BlogRequest, BlogResponse,
                                  BlogUpdateResponseModel)
 from api.v1.services.blog import BlogService
 
-blogs = APIRouter(prefix="/blogs", tags=["Blog"])
-blog = APIRouter(prefix="/blog", tags=["Blog"])
+blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
-@blogs.get("/", response_model=List[BlogResponse])
+@blog.get("/", response_model=List[BlogResponse])
 def get_all_blogs(db: Session = Depends(get_db)):
     blogs = db.query(Blog).filter(Blog.is_deleted == False).all()
     if not blogs:
@@ -43,8 +42,10 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
         "message": "Blog post updated successfully",
         "data": {"post": jsonable_encoder(updated_blog_post)}
     }
+    
 @blog.delete("/{id}", status_code=status.HTTP_200_OK)
-def delete_blog(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
+def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
+    print("Deleting.........")
     if not current_user:
         return {"status_code":403, "message":"Unauthorized User"}
     post = db.query(Blog).filter_by(Blog.id == id, Blog.is_deleted == False).first()

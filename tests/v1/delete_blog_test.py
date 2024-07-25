@@ -30,10 +30,10 @@ def client(db_session_mock):
     app.dependency_overrides[get_db] = lambda: db_session_mock
     client = TestClient(app)
     yield client
-    app.dependency_overrides = {}
+    
 
 
-app.dependency_overrides[get_db] = mock_get_db
+# app.dependency_overrides[get_db] = mock_get_db
 app.dependency_overrides[get_super_admin] = mock_get_super_admin
 
 
@@ -45,7 +45,9 @@ def test_delete_blog_success(client, db_session_mock):
 
     db_session_mock.query(Blog).filter(blog_id).first.return_value.id = [mock_blog]
 
-    response = client.delete(f"/api/v1/blog/{mock_blog.id}")
+    response = client.delete(f"/api/v1/blogs/{mock_blog.id}")
+    
+    print(response.__dict__)
         
     assert response.status_code == 200
     assert response.json() == {
@@ -59,7 +61,9 @@ def test_delete_blog_unauthorized(client, db_session_mock):
                      content="Test Content", is_deleted=False)
     app.dependency_overrides[get_super_admin] = lambda: None
 
-    response = client.delete(f"/api/v1/blog/{mock_blog.id}")
+    response = client.delete(f"/api/v1/blogs/{mock_blog.id}")
+    
+    print(response.__dict__)
 
     assert response.status_code == 200
     assert response.json()["message"] == "Unauthorized User"
