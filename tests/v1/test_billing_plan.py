@@ -26,7 +26,6 @@ def mock_db_session():
 
     with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
-        # mock_get_db.return_value.__enter__.return_value = mock_db
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
     app.dependency_overrides = {}
