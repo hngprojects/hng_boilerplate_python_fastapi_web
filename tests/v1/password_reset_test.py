@@ -9,8 +9,20 @@ from api.v1.services.user import user_service
 from unittest.mock import patch
 import uuid
 
+
+from api.utils.settings import settings, BASE_DIR
+
+
+DB_HOST = settings.DB_HOST
+DB_PORT = settings.DB_PORT
+DB_USER = settings.DB_USER
+DB_PASSWORD = settings.DB_PASSWORD
+DB_NAME = settings.DB_NAME
+DB_TYPE = settings.DB_TYPE
+
+
 # Database setup for testing
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:4253@localhost:5432/hng_task_6"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
