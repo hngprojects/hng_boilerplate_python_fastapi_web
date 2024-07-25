@@ -30,22 +30,6 @@ class UserCreate(BaseModel):
             raise ValueError('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character.')
         return value
 
-# class SuccessResponseData(BaseModel):
-
-#     token: str
-#     user: UserBase
-
-# class SuccessResponse(BaseModel):
-#     statusCode: int = Field(201, example=201)
-#     message: str
-#     data: SuccessResponseData
-
-# class ErrorResponse(BaseModel):
-#     message: str
-#     error: str
-#     statusCode: int
-
-
 class Token(BaseModel):
     access_token: str
     token_type: str
