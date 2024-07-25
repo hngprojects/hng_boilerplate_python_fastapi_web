@@ -17,20 +17,14 @@ async def get_single_payment(payment_id: str, db: Session = Depends(get_db), cur
     return payment
 
 
-@payment.get('/', status_code=status.HTTP_200_OK)
-async def get_all_payments(db: Session = Depends(get_db)) -> List[PaymentSchema]:
-    payments = PaymentService.fetch_all(db)
-    return payments
+# @payment.post('/create', status_code=status.HTTP_201_CREATED)
+# async def post_single_payments(request: CreatePaymentSchema, db: Session = Depends(get_db), current_user: TokenData = Depends(get_current_user)):
+#     print('Current User: ', current_user)
+#     request.user_id = current_user.id
+#     PaymentService.create(db, request)
 
-
-@payment.post('/create', status_code=status.HTTP_201_CREATED)
-async def post_single_payments(request: CreatePaymentSchema, db: Session = Depends(get_db), current_user: TokenData = Depends(get_current_user)):
-    print('Current User: ', current_user)
-    request.user_id = current_user.id
-    PaymentService.create(db, request)
-
-    return {
-        "message": "Payment successfully created",
-        "success": True,
-        "status": status.HTTP_201_CREATED
-    }
+#     return {
+#         "message": "Payment successfully created",
+#         "success": True,
+#         "status": status.HTTP_201_CREATED
+#     }
