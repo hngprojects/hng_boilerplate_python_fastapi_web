@@ -13,7 +13,7 @@ notifications = APIRouter(prefix="/notifications", tags=["notifications"])
 
 @notifications.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
-    notification_id: int,
+    notification_id: str,
     current_user = Depends(user_service.get_current_user),
     db: Session = Depends(get_db)
     ):

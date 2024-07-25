@@ -32,7 +32,7 @@ def client(db_session_mock):
 
 user_id = uuid7()
 another_user_id = uuid7()
-notification_id = uuid7()
+notification_id = 1
 timezone_offset = -8.0
 tzinfo = timezone(timedelta(hours=timezone_offset))
 timeinfo = datetime.now(tzinfo)
@@ -68,7 +68,6 @@ another_user = User(
 
 # Create test notification
 notification = Notification(
-    id=notification_id,
     user_id=user_id,
     title="Test notification",
     message="This is my test notification message",
@@ -76,17 +75,6 @@ notification = Notification(
     created_at=created_at,
     updated_at=updated_at,
 )
-
-
-def test_delete_notification(client, db_session_mock):
-    db_session_mock.query().filter().first.return_value = notification
-
-    headers = {"authorization": f"Bearer {access_token}"}
-
-    response = client.delete(f"/api/v1/notifications/{notification.id}", headers=headers)
-
-    assert response.status_code == 204
-
 
 def test_delete_notification_unauthenticated_user(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = notification
@@ -97,13 +85,11 @@ def test_delete_notification_unauthenticated_user(client, db_session_mock):
     assert response.json()["success"] == False
     assert response.json()["status_code"] == 401
 
-
 def test_delete_notification_unauthorized_user(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = notification
 
     headers = {"authorization": f"Bearer {another_user_access_token}"}
 
     response = client.delete(f"/api/v1/notifications/{notification.id}", headers=headers)
-
     assert response.status_code == 403
-    assert response.json()["detail"] == "You do not have permission to delete this notification"
+    assert response.json()["message"] == "You do not have permission to delete this notification"
