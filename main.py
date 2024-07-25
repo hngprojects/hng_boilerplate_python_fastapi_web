@@ -15,9 +15,6 @@ from api.v1.routes.newsletter import (
     custom_exception_handler
 )
 from api.v1.routes import api_version_one
-from api.utils.settings import settings
-from starlette.middleware.sessions import SessionMiddleware   # required by google oauth
-
 
 
 @asynccontextmanager
@@ -38,8 +35,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.include_router(api_version_one)
