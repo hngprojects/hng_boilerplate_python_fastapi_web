@@ -3,18 +3,15 @@ from fastapi.testclient import TestClient
 from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
-import sys
-from pathlib import Path
+from uuid import UUID
 
-# Add the project root directory to the Python path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from main import app
 from api.utils.dependencies import get_db, get_current_user
 from api.v1.models.user import User
-from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogRequest
-from fastapi.encoders import jsonable_encoder
+from api.v1.models.product import Product
+from api.v1.schemas.product import ProductUpdate
+
 
 @pytest.fixture(scope="module")
 def client():
@@ -31,76 +28,78 @@ def current_user():
     return User(id=f'{uuid7()}', username="testuser", email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
 
 @pytest.fixture
-def valid_blog_post():
-    return BlogRequest(title="Updated Title", content="Updated Content")
+def valid_product_update():
+    return ProductUpdate(product_name="Updated Product", price=150, description="Updated Description", tag="Updated Tag")
 
 @pytest.fixture
-def existing_blog_post(mock_db_session, current_user):
-    blog = Blog(id=f'{uuid7()}', title="Original Title", content="Original Content", author_id=current_user.id)
-    mock_db_session.query(Blog).filter(Blog.id == blog.id).first.return_value = blog
-    return blog
+def existing_product(mock_db_session, current_user):
+    product = Product(id=f'{uuid7()}', name="Original Product", price=100, description="Original Description", tag="Original Tag", author_id=current_user.id)
+    mock_db_session.query(Product).filter(Product.id == product.id).first.return_value = product
+    return product
 
 @pytest.mark.asyncio
-async def test_update_blog_success(client, mock_db_session, current_user, valid_blog_post, existing_blog_post):
+async def test_update_product_success(client, mock_db_session, current_user, valid_product_update, existing_product):
     # Mock the dependencies
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json=valid_blog_post.model_dump())
+    response = client.put(f"/product/{existing_product.id}", json=valid_product_update.model_dump())
 
     assert response.status_code == 200
     assert response.json() == {
         "status": "200",
-        "message": "Blog post updated successfully",
-        "data": {"post": jsonable_encoder(existing_blog_post)}
+        "message": "Product updated successfully",
+        "data": {"product": jsonable_encoder(existing_product)}
     }
-    assert existing_blog_post.title == valid_blog_post.title
-    assert existing_blog_post.content == valid_blog_post.content
+    assert existing_product.name == valid_product_update.product_name
+    assert existing_product.price == valid_product_update.price
+    assert existing_product.description == valid_product_update.description
+    assert existing_product.tag == valid_product_update.tag
 
 @pytest.mark.asyncio
-async def test_update_blog_not_found(client, mock_db_session, current_user, valid_blog_post):
-    mock_db_session.query(Blog).filter(Blog.id == f'{uuid7()}').first.return_value = None
+async def test_update_product_not_found(client, mock_db_session, current_user, valid_product_update):
+    mock_db_session.query(Product).filter(Product.id == f'{uuid7()}').first.return_value = None
 
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blogs/{uuid7()}", json=valid_blog_post.model_dump())
+    response = client.put(f"/product/{uuid7()}", json=valid_product_update.model_dump())
 
     assert response.status_code == 404
-    assert response.json() == {'message': 'Post not Found', 'status_code': 404, 'success': False}
+    assert response.json() == {'message': 'Product not Found', 'status_code': 404, 'success': False}
 
 @pytest.mark.asyncio
-async def test_update_blog_forbidden(client, mock_db_session, current_user, valid_blog_post, existing_blog_post):
+async def test_update_product_forbidden(client, mock_db_session, current_user, valid_product_update, existing_product):
     # Simulate a different user
     different_user = User(id=f'{uuid7()}', username="otheruser", email="other@example.com", password="hashedpassword1", first_name="other", last_name="user")
 
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: different_user
 
-    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json=valid_blog_post.model_dump())
+    response = client.put(f"/product/{existing_product.id}", json=valid_product_update.model_dump())
 
     assert response.status_code == 403
-    assert response.json() == {'message': 'Not authorized to update this blog', 'status_code': 403, 'success': False}
+    assert response.json() == {'message': 'Not authorized to update this product', 'status_code': 403, 'success': False}
 
 @pytest.mark.asyncio
-async def test_update_blog_empty_fields(client, mock_db_session, current_user, existing_blog_post):
+async def test_update_product_empty_fields(client, mock_db_session, current_user, existing_product):
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json={"title": "", "content": ""})
+    response = client.put(f"/product/{existing_product.id}", json={"product_name": "", "price": 0, "description": "", "tag": ""})
 
     assert response.status_code == 400
-    assert response.json() == {'message': 'Title and content cannot be empty', 'status_code': 400, 'success': False}
+    assert response.json() == {'message': 'Product name, price, description, and tag cannot be empty', 'status_code': 400, 'success': False}
 
 @pytest.mark.asyncio
-async def test_update_blog_internal_error(client, mock_db_session, current_user, valid_blog_post, existing_blog_post):
+async def test_update_product_internal_error(client, mock_db_session, current_user, valid_product_update, existing_product):
     # Simulate a database error
     mock_db_session.commit.side_effect = Exception("Database error")
 
     app.dependency_overrides[get_db] = lambda: mock_db_session
     app.dependency_overrides[get_current_user] = lambda: current_user
 
-    response = client.put(f"api/v1/blogs/{existing_blog_post.id}", json=valid_blog_post.model_dump())
+    response = client.put(f"/product/{existing_product.id}", json=valid_product_update.model_dump())
 
     assert response.status_code == 500
-    assert response.json() == {'message': 'An error occurred while updating the blog post', 'status_code': 500, 'success': False}
+    assert response.json() == {'message': 'An error occurred while updating the product', 'status_code': 500, 'success': False}
