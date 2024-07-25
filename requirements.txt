@@ -44,7 +44,6 @@ pytest-asyncio==0.23.8
 pytest-mock==3.14.0
 python-decouple==3.8
 python-dotenv==1.0.1
-python-jose==3.3.0
 python-multipart==0.0.9
 PyYAML==6.0.1
 requests==2.32.3
