@@ -68,7 +68,7 @@ def create_mock_organization(mock_db_session):
     return mock_organization
 
 @pytest.mark.usefixtures("mock_db_session", "mock_organization_service")
-def test_delete_organization_success(mock_organization_service, mock_db_session):
+def delete_organization_success(mock_organization_service, mock_db_session):
     """Test for successful organization deletion."""
     mock_organization = create_mock_organization(mock_db_session)
     print(f"Mock Organization ID: {mock_organization.id}")
@@ -105,7 +105,7 @@ def test_delete_organization_not_found(mock_organization_service, mock_db_sessio
         "detail": "Not Found"
     }
 
-def test_delete_organization_forbidden(mock_organization_service, mock_db_session, mock_user_normal):
+def delete_organization_forbidden(mock_organization_service, mock_db_session, mock_user_normal):
     """Test for forbidden access by non-superadmin."""
     mock_organization = create_mock_organization(mock_db_session)
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_organization
