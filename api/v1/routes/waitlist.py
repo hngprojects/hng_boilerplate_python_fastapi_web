@@ -57,6 +57,7 @@ def add_user_to_waitlist(
         raise HTTPException(status_code=400, detail=detail)
 
     resp = {
+        "success": True,
         "message": "User added to waitlist successfully",
         "status_code": 201,
         "data": {"email": item.email, "full_name": item.full_name},
