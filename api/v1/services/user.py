@@ -240,8 +240,6 @@ class UserService(Service):
             refresh = self.create_refresh_token(user_id=token.id)
 
             return access, refresh
-        else:
-            pass
 
     def get_current_user(
         self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
