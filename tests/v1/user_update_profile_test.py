@@ -1,3 +1,5 @@
+# test_user_update_profile.py
+
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -11,7 +13,7 @@ from fastapi import status
 from datetime import datetime, timezone
 
 client = TestClient(app)
-PROFILE_UPDATE_ENDPOINT = "api/v1/profile/current-user"
+PROFILE_UPDATE_ENDPOINT = "/api/v1/profile/current-user"
 
 @pytest.fixture
 def mock_db_session():
@@ -35,31 +37,32 @@ def create_mock_user(mock_user_service, mock_db_session):
         username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
-        first_name="Test",
-        last_name="User",
+        first_name='Test',
+        last_name='User',
         is_active=True,
         is_super_admin=False,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
     return mock_user
 
-def create_mock_profile(mock_db_session, user_id):
-    """Create a mock profile in the mock database session."""
+def create_mock_user_profile(mock_user_service, mock_db_session):
+    '''Create a new user profile'''
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
     mock_profile = Profile(
         id=str(uuid7()),
-        user_id=user_id,
-        pronouns="they/them",
-        job_title="Software Engineer",
-        department="Engineering",
-        social='{"linkedin": "test"}',
-        bio="Test bio",
-        phone_number="+1234567890",
-        avatar_url="http://example.com/avatar.png",
-        recovery_email="test.recovery@example.com",
+        pronouns="he/him",
+        job_title="developer",
+        department="backend",
+        social="facebook",
+        bio="a foody",
+        phone_number="17045060889999",
+        avatar_url="avatalink",
+        recovery_email="user@gmail.com",
+        user_id=mock_user.id,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_profile
     return mock_profile
@@ -68,9 +71,9 @@ def create_mock_profile(mock_db_session, user_id):
 def test_success_profile_update(mock_user_service, mock_db_session):
     """Test for successful profile update."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
-    create_mock_profile(mock_db_session, user_id=mock_user.id)
-
-    access_token = user_service.create_access_token(user_id=mock_user.id)
+    mock_profile = create_mock_user_profile(mock_user_service, mock_db_session)
+    
+    access_token = user_service.create_access_token(user_id=mock_user.id)  # Create a valid access token
 
     profile_update_data = {
         "pronouns": "they/them",
@@ -83,11 +86,12 @@ def test_success_profile_update(mock_user_service, mock_db_session):
         "recovery_email": "test.recovery_updated@example.com",
     }
 
-    response = client.put(
-        PROFILE_UPDATE_ENDPOINT,
-        json=profile_update_data,
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+    with patch.object(user_service, "get_current_user", return_value=mock_user):
+        response = client.put(
+            PROFILE_UPDATE_ENDPOINT,
+            json=profile_update_data,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
 
     assert response.status_code == status.HTTP_200_OK
     response_data = response.json()
@@ -124,7 +128,7 @@ def test_profile_update_not_found(mock_user_service, mock_db_session):
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     mock_db_session.query.return_value.filter.return_value.first.return_value = None
 
-    access_token = user_service.create_access_token(user_id=mock_user.id)
+    access_token = user_service.create_access_token(user_id=mock_user.id)  # Create a valid access token
 
     profile_update_data = {
         "pronouns": "they/them",
@@ -137,11 +141,12 @@ def test_profile_update_not_found(mock_user_service, mock_db_session):
         "recovery_email": "test.recovery_updated@example.com",
     }
 
-    response = client.put(
-        PROFILE_UPDATE_ENDPOINT,
-        json=profile_update_data,
-        headers={"Authorization": f"Bearer {access_token}"},
-    )
+    with patch.object(user_service, "get_current_user", return_value=mock_user):
+        response = client.put(
+            PROFILE_UPDATE_ENDPOINT,
+            json=profile_update_data,
+            headers={"Authorization": f"Bearer {access_token}"},
+        )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     response_data = response.json()

@@ -21,10 +21,6 @@ class ProfileBase(BaseModel):
     avatar_url: str
     recovery_email: Optional[EmailStr]
     user: UserBase
-    
-    class config:
-        orm_mode = True
-        from_attributes = True
 
 
 class ProfileCreateUpdate(BaseModel):
@@ -44,7 +40,3 @@ class ProfileCreateUpdate(BaseModel):
         if not re.match(r"^\+?[1-9]\d{1,14}$", value):
             raise ValueError("Please use a valid phone number format")
         return value
-
-    class config:
-        orm_mode = True
-        from_attributes = True
