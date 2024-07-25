@@ -18,8 +18,8 @@ superadmin = APIRouter(prefix="/superadmin", tags=["superadmin"])
 
 @superadmin.delete("/users/{user_id}")
 def delete_user(
-    user_id: UUID,
-    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    user_id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     db: Session = Depends(get_db),
 ):
     """Endpoint for user deletion (soft-delete)"""
@@ -38,14 +38,8 @@ def delete_user(
     Returns:
         JSONResponse: 204 NO CONTENT (successful user deletion)
     """
-    # check if current user is an admin
-    if not current_user.is_super_admin:
-        raise HTTPException(
-            detail="Access denied, Superadmin only",
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
 
-    user = user_service.fetch(db=db, id=str(user_id))
+    user = user_service.fetch(db=db, id=user_id)
 
     # check if the user_id points to a valid user
     if not user:
@@ -54,7 +48,7 @@ def delete_user(
         )
 
     # soft-delete the user
-    user_service.delete(db=db, id=str(user_id))
+    user_service.delete(db=db, id=user_id)
 
     return success_response(
         status_code=status.HTTP_200_OK, message="user deleted successfully"

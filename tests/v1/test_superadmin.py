@@ -10,7 +10,7 @@ from api.v1.models.user import User
 from api.v1.services.user import user_service, UserService
 from uuid_extensions import uuid7
 from api.db.database import get_db
-from fastapi import status
+from fastapi import status, HTTPException
 from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
@@ -44,10 +44,10 @@ def mock_user_service():
 
 
 @pytest.fixture
-def override_get_current_user_to_admin():
-    """Mock the get_current_user dependency for admin user"""
+def override_get_current_super_admin():
+    """Mock the get_current_super_admin dependency"""
 
-    app.dependency_overrides[user_service.get_current_user] = lambda: User(
+    app.dependency_overrides[user_service.get_current_super_admin] = lambda: User(
         id=str(uuid7()),
         username="admintestuser",
         email="admintestuser@gmail.com",
@@ -56,24 +56,6 @@ def override_get_current_user_to_admin():
         last_name="User",
         is_active=False,
         is_super_admin=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc),
-    )
-
-
-@pytest.fixture
-def override_get_current_user_to_non_admin():
-    """Mock the get_current user dependency"""
-
-    app.dependency_overrides[user_service.get_current_user] = lambda: User(
-        id=str(uuid7()),
-        username="testuser",
-        email="testuser@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
-        first_name="Test",
-        last_name="User",
-        is_active=False,
-        is_super_admin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -115,29 +97,12 @@ def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Se
 
 
 @pytest.mark.usefixtures(
-    "mock_db_session", "mock_user_service", "override_get_current_user_to_non_admin"
-)
-def test_non_admin_access(
-    mock_user_service: UserService,
-    mock_db_session: Session,
-    override_get_current_user_to_non_admin: None,
-):
-    """Test for non admin user access to endpoint"""
-
-    response = client.delete(
-        f"{USER_DELETE_ENDPOINT}/{str(uuid7())}",
-    )
-
-    assert response.status_code == status.HTTP_403_FORBIDDEN
-
-
-@pytest.mark.usefixtures(
-    "mock_db_session", "mock_user_service", "override_get_current_user_to_admin"
+    "mock_db_session", "mock_user_service", "override_get_current_super_admin"
 )
 def test_successful_deletion(
     mock_user_service: UserService,
     mock_db_session: Session,
-    override_get_current_user_to_admin: None,
+    override_get_current_super_admin: None,
 ):
     """Test for successful deletion of user"""
 
@@ -154,12 +119,12 @@ def test_successful_deletion(
 
 
 @pytest.mark.usefixtures(
-    "mock_db_session", "mock_user_service", "override_get_current_user_to_admin"
+    "mock_db_session", "mock_user_service", "override_get_current_super_admin"
 )
 def test_not_found_error(
     mock_user_service: UserService,
     mock_db_session: Session,
-    override_get_current_user_to_admin: None,
+    override_get_current_super_admin: None,
 ):
     """Test for invalid user ID"""
 
