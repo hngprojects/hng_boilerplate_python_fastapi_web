@@ -14,9 +14,9 @@ from api.utils.success_response import success_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
 
-testmonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
+testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
-@testmonial.delete("/{testimonial_id}")
+@testimonial.delete("/{testimonial_id}")
 def delete_testimonial(
     testimonial_id: UUID,
     current_user: User = Depends(get_super_admin),
@@ -43,7 +43,7 @@ def delete_testimonial(
     )
 
       
-@testmonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
+@testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
 def get_testimonial(testimonial_id, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     '''Endpoint to get testimonial by id'''
 
