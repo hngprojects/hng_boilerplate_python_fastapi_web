@@ -52,10 +52,10 @@ def test_customer():
 def access_token_admin(test_admin):
     return user_service.create_admin_access_token(test_admin.username)
 
-
 # Test successful customer update
 def test_update_customer_success(mock_db_session, test_customer, access_token_admin, test_admin):
     mock_db_session.query.return_value.filter.return_value.first.side_effect = [test_admin, test_customer, test_customer.profile]
+
     headers = {'Authorization': f'Bearer {access_token_admin}'}
     update_data = {
         "first_name": "Jane",
@@ -72,6 +72,7 @@ def test_update_customer_success(mock_db_session, test_customer, access_token_ad
 # Test missing fields in update
 def test_update_customer_partial_success(mock_db_session, test_customer, access_token_admin, test_admin):
     mock_db_session.query.return_value.filter.return_value.first.side_effect = [test_admin, test_customer, test_customer.profile]
+
     headers = {'Authorization': f'Bearer {access_token_admin}'}
     update_data = {
         "phone_number": "0987654321",

@@ -10,6 +10,7 @@ from typing import Annotated, Optional
 customers = APIRouter(prefix="/customers", tags=["customers"])
 
 
+
 @customers.put("/{customer_id}", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
 def update_customer(
     customer_id: str,
@@ -40,7 +41,6 @@ def update_customer(
 
     # Fetch the customer and profile from the database
     customer = db.query(User).filter(User.id == customer_id).first()
-
     customer_profile = db.query(Profile).filter(Profile.user_id == customer_id).first()
 
     if not customer:

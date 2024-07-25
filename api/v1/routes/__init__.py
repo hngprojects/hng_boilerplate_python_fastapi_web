@@ -7,7 +7,6 @@ from api.v1.routes.testimonial import testimonial
 from api.v1.routes.blog import blog
 from api.v1.routes.customers import customers
 
-
 api_version_one = APIRouter(prefix="/api/v1")
 
 api_version_one.include_router(auth)
