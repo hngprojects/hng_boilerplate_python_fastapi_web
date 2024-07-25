@@ -168,3 +168,9 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
             "token_type": "bearer"
         }
     )
+
+# Protected route example: test route
+@auth.get("/admin")
+def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
+    return {"message": "Hello, admin!"}
+
