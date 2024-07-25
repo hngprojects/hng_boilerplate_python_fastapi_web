@@ -12,10 +12,13 @@ class Settings(BaseSettings):
 
     # API_V1_STR: str = "/api/v1"
     # APP_NAME: str = "TicketHub"
-    SECRET_KEY: str = config("SECRET_KEY")
-    ALGORITHM: str = config("ALGORITHM")
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
-    JWT_REFRESH_EXPIRY: int = config("JWT_REFRESH_EXPIRY")
+    DATABASE_URL: str
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    JWT_REFRESH_EXPIRY: int = 5
+    MAIL_PORT: int = 5432
+    MAIL_SERVER: str = "smtp.gmail.com"
 
     # Database configurations
     DB_HOST: str = config("DB_HOST")
