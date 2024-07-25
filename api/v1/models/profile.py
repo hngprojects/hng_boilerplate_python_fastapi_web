@@ -11,7 +11,6 @@ from api.v1.models.base import Base
 from api.v1.models.base_model import BaseTableModel
 
 
-
 class Profile(BaseTableModel):
     __tablename__ = 'profiles'
 
