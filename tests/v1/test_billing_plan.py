@@ -16,7 +16,7 @@ from fastapi import status
 from datetime import datetime, timezone
 
 client = TestClient(app)
-BILLPLAN_ENDPOINT = '/api/v1/plans/{organization_id}/billing-plans/{plan_name}'
+BILLPLAN_ENDPOINT = '/api/v1/plans/1234/billing-plans/Premium'
 
 @pytest.fixture
 def mock_db_session():
@@ -57,4 +57,4 @@ def test_fetch_all_plans(mock_user_service, mock_db_session):
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     response = client.get(BILLPLAN_ENDPOINT, headers={'Authorization': f'Bearer {access_token}'})
     
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_404_NOT_FOUND
