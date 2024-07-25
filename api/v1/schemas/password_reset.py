@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 
 
-class EMAILSCHEMA(BaseModel):
+class EmailSchema(BaseModel):
     """
     pydantic model for data validation and serialization
     """
