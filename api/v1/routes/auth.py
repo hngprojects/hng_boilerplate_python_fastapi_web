@@ -11,11 +11,9 @@ from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
-from fastapi import BackgroundTasks
-from fastapi_mail import FastMail, MessageSchema
 
-from fastapi import BackgroundTasks
-from fastapi_mail import ConnectionConfig
+# from fastapi import BackgroundTasks
+# from fastapi_mail import ConnectionConfig
 from pydantic import BaseModel, EmailStr
 from api.utils.settings import settings, BASE_DIR
 import uuid
@@ -61,7 +59,7 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
     return response
 
 
-  
+
 @auth.post("/register", status_code=status.HTTP_201_CREATED)
 def register(response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
@@ -178,7 +176,7 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
             "token_type": "bearer"
         }
     )
-    
+
 
 # Protected route example: test route
 @auth.get("/admin")
@@ -186,16 +184,16 @@ def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_curr
     return {"message": "Hello, admin!"}
 
 
-conf = ConnectionConfig(
-    MAIL_USERNAME=settings.MAIL_USERNAME,
-    MAIL_PASSWORD=settings.MAIL_PASSWORD,
-    MAIL_FROM=settings.MAIL_FROM,
-    MAIL_PORT=settings.MAIL_PORT,
-    MAIL_SERVER=settings.MAIL_SERVER,
-    MAIL_STARTTLS=settings.MAIL_STARTTLS,
-    MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-    USE_CREDENTIALS=True
-)
+# conf = ConnectionConfig(
+#     MAIL_USERNAME=settings.MAIL_USERNAME,
+#     MAIL_PASSWORD=settings.MAIL_PASSWORD,
+#     MAIL_FROM=settings.MAIL_FROM,
+#     MAIL_PORT=settings.MAIL_PORT,
+#     MAIL_SERVER=settings.MAIL_SERVER,
+#     MAIL_STARTTLS=settings.MAIL_STARTTLS,
+#     MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
+#     USE_CREDENTIALS=True
+# )
 
 
 def generate_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -231,7 +229,7 @@ class EmailRequest(BaseModel):
 
 
 @auth.post("/password-reset-email/", status_code=status.HTTP_200_OK)
-async def send_reset_password_email(background_tasks: BackgroundTasks, email: EmailRequest, db: Session = Depends(get_db)):
+async def send_reset_password_email(email: EmailRequest, db: Session = Depends(get_db)):
     """
     Getting the user from the database, the email in the db since the email schema in the db is unique, it picks the 1st
     """
@@ -246,17 +244,8 @@ async def send_reset_password_email(background_tasks: BackgroundTasks, email: Em
 
     email_body = (f"Dear {user.username}!\nYou requested for email reset on our site.\n"
                   f"To reset your password, click the following link: {reset_password_url}")
-
-    message: MessageSchema = MessageSchema(
-        subject="Reset Password",
-        recipients=[email.email],
-        body=email_body,
-        subtype="plain"
-    )
-    fm = FastMail(conf)
-
     try:
-        background_tasks.add_task(fm.send_message, message)
+        send_mail(to=email.email, subject="Reset Password", body=email_body)
         return {
             "message": "Password reset email sent successfully.",
             "reset_link": reset_password_url

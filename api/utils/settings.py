@@ -30,8 +30,8 @@ class Settings(BaseSettings):
     MAIL_FROM: str = config('MAIL_FROM')
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
-    MAIL_STARTTLS: bool = config('MAIL_TLS')
-    MAIL_SSL_TLS: bool = config('MAIL_SSL')
+    # MAIL_STARTTLS: bool = config('MAIL_TLS')
+    # MAIL_SSL_TLS: bool = config('MAIL_SSL')
 
     # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
     # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
