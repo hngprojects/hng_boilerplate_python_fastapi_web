@@ -20,9 +20,12 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: "user"
-          POSTGRES_PASSWORD: "password"
-          POSTGRES_DB: "hng_fast_api"
+          DB_USER: "username"
+          DB_PASSWORD: "password"
+          DB_TYPE: "postgresql"
+          DB_HOST: "localhost"
+          DB_URL: "postgresql://username:password@localhost:5432/hng_fast_api"
+
         ports:
           - 5432:5432
 
