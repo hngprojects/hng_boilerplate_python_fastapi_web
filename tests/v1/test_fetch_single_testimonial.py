@@ -74,48 +74,48 @@ def create_testimonial(mock_user_service, mock_db_session):
     return mock_testimonial
 
 
-# @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-# def test_success_retrieval(mock_user_service, mock_db_session):
-#     """Test if the testimonial is fetched."""
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_success_retrieval(mock_user_service, mock_db_session):
+    """Test if the testimonial is fetched."""
 
-#     # get auth credentials
-#     create_mock_user(mock_user_service, mock_db_session)
-#     login = client.post(LOGIN_ENDPOINT, data={
-#         "username": "testuser",
-#         "password": "Testpassword@123"
-#     })
-#     response = login.json()
-#     access_token = response.get('data').get('access_token')
+    # get auth credentials
+    create_mock_user(mock_user_service, mock_db_session)
+    login = client.post(LOGIN_ENDPOINT, data={
+        "username": "testuser",
+        "password": "Testpassword@123"
+    })
+    response = login.json()
+    access_token = response.get('data').get('access_token')
 
-#     # ensure testimonial is already created
-#     testimonial = create_testimonial(mock_user_service, mock_db_session)
+    # ensure testimonial is already created
+    testimonial = create_testimonial(mock_user_service, mock_db_session)
 
-#     # retrieve testimonial
-#     response = client.get(f'/api/v1/testimonials/{testimonial.id}', headers={'Authorization': f'Bearer {access_token}'})
-#     print(response.json())
-#     assert response.status_code == status.HTTP_200_OK
-#     assert response.json().get("message") == 'Testimonial {} retrieved successfully'.format(testimonial.id)
-#     assert response.json().get("data").get("content") == testimonial.content
+    # retrieve testimonial
+    response = client.get(f'/api/v1/testimonials/{testimonial.id}', headers={'Authorization': f'Bearer {access_token}'})
+    print(response.json())
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json().get("message") == 'Testimonial {} retrieved successfully'.format(testimonial.id)
+    assert response.json().get("data").get("content") == testimonial.content
 
 
-# @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-# def test_invalid_testimonial(mock_user_service, mock_db_session):
-#     """Test for invalid testimonial id"""
-#     create_mock_user(mock_user_service, mock_db_session)
-#     login = client.post(LOGIN_ENDPOINT, data={
-#         "username": "testuser",
-#         "password": "Testpassword@123"
-#     })
-#     response = login.json()
-#     access_token = response.get('data').get('access_token')
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_invalid_testimonial(mock_user_service, mock_db_session):
+    """Test for invalid testimonial id"""
+    create_mock_user(mock_user_service, mock_db_session)
+    login = client.post(LOGIN_ENDPOINT, data={
+        "username": "testuser",
+        "password": "Testpassword@123"
+    })
+    response = login.json()
+    access_token = response.get('data').get('access_token')
 
-#     testimonial = create_testimonial(mock_user_service, mock_db_session)
+    testimonial = create_testimonial(mock_user_service, mock_db_session)
 
-#     # retrieve invalid testimonial
-#     response = client.get(f'/api/v1/testimonials/234', headers={'Authorization': f'Bearer {access_token}'})
+    # retrieve invalid testimonial
+    response = client.get(f'/api/v1/testimonials/234', headers={'Authorization': f'Bearer {access_token}'})
 
-#     assert response.status_code == status.HTTP_404_NOT_FOUND
-#     assert response.json().get("message") == 'Testimonial 234 not found'
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.json().get("message") == 'Testimonial 234 not found'
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")

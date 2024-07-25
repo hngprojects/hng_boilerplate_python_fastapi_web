@@ -28,15 +28,15 @@ def client(db_session_mock):
     yield client
     app.dependency_overrides = {}
 
-# def test_request_signin_token(client, db_session_mock):
-#     # Mock user
-#     user = User(email="user@example.com")
-#     db_session_mock.query().filter().first.return_value = user
+def test_request_signin_token(client, db_session_mock):
+    # Mock user
+    user = User(email="user@example.com")
+    db_session_mock.query().filter().first.return_value = user
 
-#     response = client.post("/api/v1/auth/request-token", json={"email": "user@example.com"})
+    response = client.post("/api/v1/auth/request-token", json={"email": "user@example.com"})
 
-#     assert response.status_code == 200
-#     assert response.json()["message"] == "Sign-in token sent to email"
+    assert response.status_code == 200
+    assert response.json()["message"] == "Sign-in token sent to email"
     
 
 def test_verify_signin_token(client, db_session_mock):
