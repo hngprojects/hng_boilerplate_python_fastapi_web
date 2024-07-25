@@ -58,15 +58,21 @@ def test_fetch_blog_by_id(client, db_session_mock):
     response_data = response.json()
 
     expected_response = {
-        "author_id": author_id,
-        "title": "Test Title",
-        "content": "Test Content",
-        "image_url": "http://example.com/image.png",
-        "tags": 'test,blog',
-        "is_deleted": False,
-        "excerpt": "Test Excerpt",
-        "created_at": mock_blog["created_at"],
-        "updated_at": mock_blog["updated_at"]
+        "success": True,
+        "status_code": 200,
+        "message": "Blog post retrieved successfully",
+        "data": {
+            "id": id,
+            "author_id": author_id,
+            "title": "Test Title",
+            "content": "Test Content",
+            "image_url": "http://example.com/image.png",
+            "tags": 'test,blog',
+            "is_deleted": False,
+            "excerpt": "Test Excerpt",
+            "created_at": mock_blog["created_at"],
+            "updated_at": mock_blog["updated_at"]
+        }
     }
 
     # Adjust the expected response to match the actual response structure

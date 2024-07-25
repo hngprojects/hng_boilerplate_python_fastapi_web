@@ -51,7 +51,15 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
             }
         )
 
-    return blog_post
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "success": True,
+            "status_code": status.HTTP_200_OK,
+            "message": "Blog post retrieved successfully",
+            "data": jsonable_encoder(blog_post)
+        }
+    )
 
 
 @blog.put("/{id}", response_model=BlogUpdateResponseModel)
