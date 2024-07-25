@@ -12,4 +12,4 @@ class Testimonial(BaseTableModel):
     content = Column(Text, nullable=False)
     ratings = Column(Float, nullable=True)
 
-     author = relationship("User", back_populates="testimonials")
+    author = relationship("User", back_populates="testimonials")
