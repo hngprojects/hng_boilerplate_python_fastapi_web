@@ -44,7 +44,7 @@ productupdate = APIRouter(prefix="/product", tags=["Products"])
     Example:
         PUT /product/123e4567-e89b-12d3-a456-426614174000
         {
-            "product_name": "New Product Name",
+            "name": "New Product Name",
             "price": 29.99,
             "description": "Updated description",
         }
@@ -54,11 +54,18 @@ productupdate = APIRouter(prefix="/product", tags=["Products"])
 
 @productupdate.put("/{id}", response_model=ResponseModel)
 async def update_product(
-    id: UUID,
+    id: str,
     product_update: ProductUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    
+    # Convert id to UUID
+    try:
+        id = UUID(id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid UUID format")
+    
     # Retrieve the product from the database using the provided ID
     db_product = db.query(ProductModel).filter(ProductModel.id == str(id)).first()
     
