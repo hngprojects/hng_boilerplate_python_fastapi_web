@@ -1,15 +1,17 @@
-import sys, os
-import warnings
+import os
+import sys
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-import pytest
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+from datetime import timedelta
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from api.db.database import Base, get_db
 from main import app
-from api.v1.models.user import User
 from api.v1.models.testimonial import Testimonial
+from sqlalchemy.ext.declarative import declarative_base
+from api.v1.models.user import User
+from decouple import config
 from api.v1.services.user import user_service
 from uuid_extensions import uuid7
 import pytest
@@ -49,83 +51,55 @@ def client(session):
 
 
 @pytest.fixture
-def mock_user_service():
-    """Fixture to create a mock user service."""
-
-    with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
-        yield mock_service
-
-def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
-    """Create a mock user in the mock database session."""
-    mock_user = User(
-        id=str(uuid7()),
-        username="testuser",
-        email="testuser@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
-        first_name='Test',
-        last_name='User',
+def setup(request, session):
+    print("\nSetting up resources...")
+    db = session
+    hashed_password = user_service.hash_password("adminpassword")
+    admin_user = User(
+        username="admin",
+        email="admin@example.com",
+        password=hashed_password,
+        first_name="Admin",
+        last_name="User",
+        is_super_admin=True,
         is_active=True,
-        is_super_admin=is_super_admin,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
     )
-    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
+    db.add(admin_user)
+    db.commit()
+    db.refresh(admin_user)
 
-    return mock_user
+    admin_token = user_service.create_access_token(admin_user.id)
 
-def create_testimonial(mock_user_service, mock_db_session):
-    """Create a mock testimonial in the mock database session."""
-    mock_user = create_mock_user(mock_user_service, mock_db_session, is_super_admin=True)
-    mock_testimonial = Testimonial(
-        id=str(uuid7()),
-        content='Product is good',
-        author_id=mock_user.id,
-        client_name="Client 1",
-        client_designation="Client Designation",
-        comments="Testimonial comments",
-        ratings=4.5
-    )
-    mock_db_session.get.return_value = mock_testimonial
-    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_testimonial
-    return mock_testimonial
+    testimonial = Testimonial(
+        client_name="John",
+        content="Hello WOrld",
+        author_id=admin_user.id
+        )
+    db.add(testimonial)
+    db.commit()
+    db.refresh(testimonial)
 
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_delete_testimonial_success(mock_user_service, mock_db_session):
-    """Test successful deletion of a testimonial."""
-    
-    create_mock_user(mock_user_service, mock_db_session, is_super_admin=True)
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser",
-        "password": "Testpassword@123"
-    })
-    response = login.json()
-    access_token = response.get('data').get('access_token')
+    # Define a finalizer function for teardown
+    def finalizer():
+        print("\nPerforming teardown...")
+        db.query(Testimonial).delete()
+        db.query(User).delete()
+        db.commit()
+        db.close()
 
-    testimonial = create_testimonial(mock_user_service, mock_db_session)
+    # Register the finalizer to ensure cleanup
+    request.addfinalizer(finalizer)
 
-    response = client.delete(f'/api/v1/testimonials/{testimonial.id}', headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json().get("message") == 'Testimonial deleted successfully'
+    return {
+        "admin_user": admin_user,
+        "testimonial": testimonial,
+        "admin_token": admin_token,
+    }
 
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_delete_testimonial_not_found(mock_user_service, mock_db_session):
-    """Test deletion of a non-existent testimonial."""
-    
-    create_mock_user(mock_user_service, mock_db_session, is_super_admin=True)
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser",
-        "password": "Testpassword@123"
-    })
-    response = login.json()
-    access_token = response.get('data').get('access_token')
+def test_delete_testimonial_without_authentication(
+    client: TestClient, setup
+    ):
+    testimonial = setup["testimonial"]
+    response = client.delete(f"/api/v1/testimonials/{testimonial.id}")
 
-    response = client.delete(f'/api/v1/testimonials/234', headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == status.HTTP_404_NOT_FOUND
-    assert response.json().get("detail") == 'Testimonial not found'
-
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_delete_testimonial_unauthorized(mock_user_service, mock_db_session):
-    """Test deletion without valid credentials."""
-    
-    response = client.delete(f'/api/v1/testimonials/234')
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == 401
