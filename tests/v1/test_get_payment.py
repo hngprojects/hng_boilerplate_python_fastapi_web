@@ -60,22 +60,15 @@ def create_mock_payment(mock_db_session, user_id):
 
     return mock_payment
 
-def test_post_payment(client, db_session_mock):
-    """Create a mock user in the mock database session."""
+
+def test_get_payment(client, db_session_mock):
     mock_user = create_mock_user(db_session_mock)
+    mock_payment = create_mock_payment(db_session_mock, mock_user.id)
+
     token = user_service.create_access_token(user_id=str(uuid7()))
 
-    response = client.post("/api/v1/payments/create", headers={
+    response = client.get(f"/api/v1/payments/{mock_payment.id}", headers={
         "Authorization": f"Bearer {token}"
-    }, json={
-        "amount": "5000",
-        "currency": "NGN",
-        "status": "pending",
-        "method": "credit card",
-        "transaction_id": "c6842ef66071455645e107479c28674b"
     })
 
-    assert response.status_code == 201
-    data = response.json()
-    assert data["message"] == "Payment successfully created"
-
+    assert response.status_code == 200

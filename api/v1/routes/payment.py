@@ -13,10 +13,10 @@ from typing import List
 payment = APIRouter(prefix='/payments', tags=['Payment'])
 
 
-# @payment.get('/{payment_id}', status_code=status.HTTP_200_OK)
-# async def get_single_payment(payment_id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-#     payment = PaymentService.fetch(db, payment_id)
-#     return payment
+@payment.get('/{payment_id}', status_code=status.HTTP_200_OK)
+async def get_single_payment(payment_id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+    payment = PaymentService.fetch(db, payment_id)
+    return payment
 
 
 @payment.post('/create', status_code=status.HTTP_201_CREATED)
