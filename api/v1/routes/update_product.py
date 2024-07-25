@@ -6,7 +6,7 @@ from sqlalchemy.future import select
 from pydantic import BaseModel, validator
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from api.v1.models.product import Product as ProductModel
-from api.v1.schemas.product import ProductUpdate
+from api.v1.schemas.product import ProductUpdate, ResponseModel
 from api.db.database import engine, get_db
 from api.v1.models.product import Product
 from api.v1.models.user import User
@@ -50,7 +50,9 @@ productupdate = APIRouter(prefix="/product", tags=["Products"])
         }
     """
 
-@productupdate.put("/{id}", response_model=ProductUpdate)
+    
+
+@productupdate.put("/{id}", response_model=ResponseModel)
 async def update_product(
     id: UUID,
     product_update: ProductUpdate,
@@ -75,4 +77,18 @@ async def update_product(
     db.commit()
     db.refresh(db_product)
 
-    return db_product
+    # Response
+    response = ResponseModel(
+        success=True,
+        status_code=200,
+        message="Product updated successfully",
+        data={
+            "id": db_product.id,
+            "name": db_product.name,
+            "price": db_product.price,
+            "description": db_product.description,
+            "updated_at": db_product.updated_at
+        }
+    )
+
+    return response

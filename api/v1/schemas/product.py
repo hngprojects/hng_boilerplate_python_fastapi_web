@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, PositiveFloat
-from typing import List, Optional
+from typing import List, Optional, Any, Dict
 from datetime import datetime
 
 
@@ -29,6 +29,21 @@ class ProductUpdate(BaseModel):
         orm_mode = True
         allow_population_by_field_name = True
 
+
+class ResponseModel(BaseModel):
+    """
+    A model to structure the response for the Product Update endpoint
+    
+    Attributes:
+        success (bool): Indicates if the request was successful.
+        status_code (int): HTTP status code of the response.
+        message (str): A message describing the result.
+        data (Optional[Dict[str, Any]]): Optional data payload of the respons
+    """
+    success: bool
+    status_code: int
+    message: str
+    data: Optional[Dict[str, Any]] = None
 
 
 class ProductBase(BaseModel):
