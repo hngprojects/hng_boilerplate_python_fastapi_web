@@ -59,10 +59,11 @@ def create_mock_user(mock_user_service, mock_db_session):
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_error_user_deactivation(mock_user_service, mock_db_session):
+def test_fetch_all_plans(mock_user_service, mock_db_session):
     """Test for user deactivation errors."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
-    missing_field = client.get(BILLPLAN_ENDPOINT
+    response = client.get(BILLPLAN_ENDPOINT
                                , headers={'Authorization': f'Bearer {access_token}'})
-    assert missing_field.status_code == status.HTTP_200_OK
+    
+    assert response.status_code == status.HTTP_200_OK
