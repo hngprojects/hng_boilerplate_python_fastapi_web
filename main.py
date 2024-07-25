@@ -16,6 +16,7 @@ from api.v1.routes.newsletter import (
 )
 from api.v1.routes import api_version_one
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
@@ -45,7 +46,7 @@ async def get_root(request: Request) -> dict:
         message="Welcome to API",
         status_code=status.HTTP_200_OK,
         data={"URL": ""}
-	)
+        )
 
 
 # REGISTER EXCEPTION HANDLERS
@@ -82,7 +83,7 @@ async def validation_exception(request: Request, exc: RequestValidationError):
 @app.exception_handler(Exception)
 async def exception(request: Request, exc: Exception):
     '''Other exception handlers'''
-    
+
     logger.exception(f'Exception occured; {exc}')
 
     return JSONResponse(
