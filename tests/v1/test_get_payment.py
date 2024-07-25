@@ -77,7 +77,6 @@ def test_post_payment(client, db_session_mock):
 
     assert response.status_code == 201
     data = response.json()
-    print('1 Data: ', data)
     assert data["message"] == "Payment successfully created"
 
 
@@ -92,6 +91,3 @@ def test_get_payment(client, db_session_mock):
     })
 
     assert response.status_code == 200
-
-    data = response.json()
-    print('Data: ', data)
