@@ -77,8 +77,7 @@ async def google_oauth2_callback(request: Request,
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Authentication Failed")
         google_oauth_serivce = GoogleOauthServices()
-        oauth_response = google_oauth_serivce.create(google_response, db)
-        return oauth_response
+        return google_oauth_serivce.create(google_response, db)
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                             detail="Authentication Failed")
