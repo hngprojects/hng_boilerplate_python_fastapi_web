@@ -19,7 +19,7 @@ def mock_user_service(mocker):
 
 def test_verify_magic_link_success(mocker, mock_user_service):
     """Test successful verification of the magic link."""
-    mocker.patch("api.v1.routers.verify_magic_link.UserService", return_value=mock_user_service)
+    mocker.patch("api.v1.routers.user.UserService", return_value=mock_user_service)
     
     response = client.post("/auth/verify-magic-link", json={"token": "valid_token"})
     
