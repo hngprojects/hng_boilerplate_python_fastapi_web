@@ -17,6 +17,8 @@ from api.v1.models.user import User
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
+import uuid
+
 
 oauth2_scheme = OAuth2PasswordBearer('/api/v1/auth/login')
 pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
@@ -54,7 +56,7 @@ class UserService(Service):
             raise HTTPException(status_code=404, detail='User not found')
         
         return user
-    
+
 
     def fetch_by_username(self, db: Session, username):
         '''Fetches a user by their username'''
@@ -334,7 +336,6 @@ class UserService(Service):
     def generate_token(self):
         '''Generate a 6-digit token'''
         return ''.join(random.choices(string.digits, k=6)), datetime.utcnow() + timedelta(minutes=10)
-
 
 
 user_service = UserService()

@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     MAIL_FROM: str = config('MAIL_FROM')
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
+    MAIL_STARTTLS: bool = config('MAIL_TLS')
+    MAIL_SSL_TLS: bool = config('MAIL_SSL')
 
 
 settings = Settings()

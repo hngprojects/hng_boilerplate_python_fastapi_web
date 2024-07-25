@@ -15,6 +15,7 @@ from api.v1.routes.newsletter import (
     custom_exception_handler
 )
 from api.v1.routes import api_version_one
+from api.v1.routes.auth import auth
 
 
 @asynccontextmanager
@@ -38,7 +39,7 @@ app.add_middleware(
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.include_router(api_version_one)
-
+app.include_router(auth)
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:

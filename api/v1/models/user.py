@@ -19,7 +19,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime
 from api.v1.models.base import Base, user_organization_association, user_newsletter_association
 from api.v1.models.base_model import BaseTableModel
-
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 
 class User(BaseTableModel):

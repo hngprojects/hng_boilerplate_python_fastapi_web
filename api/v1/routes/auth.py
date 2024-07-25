@@ -1,9 +1,9 @@
-from fastapi import Depends, status, APIRouter, Response, Request
+from fastapi import Depends, status, APIRouter, Response, Request, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
 from api.v1.models import User
-from typing import Annotated
+from typing import Annotated, Optional
 from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
@@ -11,6 +11,16 @@ from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
+from fastapi import BackgroundTasks
+from fastapi_mail import FastMail, MessageSchema
+
+from fastapi import BackgroundTasks
+from fastapi_mail import ConnectionConfig
+from pydantic import BaseModel, EmailStr
+from api.utils.settings import settings, BASE_DIR
+import uuid
+import jwt
+from urllib.parse import urlencode
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -175,3 +185,81 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
 
+
+conf = ConnectionConfig(
+    MAIL_USERNAME=settings.MAIL_USERNAME,
+    MAIL_PASSWORD=settings.MAIL_PASSWORD,
+    MAIL_FROM=settings.MAIL_FROM,
+    MAIL_PORT=settings.MAIL_PORT,
+    MAIL_SERVER=settings.MAIL_SERVER,
+    MAIL_STARTTLS=settings.MAIL_STARTTLS,
+    MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
+    USE_CREDENTIALS=True
+)
+
+
+def generate_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return encoded_jwt
+
+
+def generate_password_reset_token(user_id: uuid, generate_access_token) -> str:
+    expires_delta = timedelta(minutes=30)
+    data = {"sub": str(user_id)}
+    return generate_access_token(data=data, expires_delta=expires_delta)
+
+
+def generate_reset_password_url(user_id: uuid, token: str) -> str:
+    base_url = f"http://localhost:7001"
+    path = "/reset-password"
+    query_params = urlencode({"token": token, "user_id": str(user_id)})
+    return f"{base_url}{path}?{query_params}"
+
+
+def get_user_by_email(db: Session, email: str):
+    return db.query(User).filter(User.email == email).first()
+
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+
+@auth.post("/password-reset-email/", status_code=status.HTTP_200_OK)
+async def send_reset_password_email(background_tasks: BackgroundTasks, email: EmailRequest, db: Session = Depends(get_db)):
+    """
+    Getting the user from the database, the email in the db since the email schema in the db is unique, it picks the 1st
+    """
+
+    # user = get_user_by_email(db, email.email)
+    user = get_user_by_email(db, email.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="We don't have user with the provided email in our database.")
+    # Generate password reset token
+    password_reset_token = generate_password_reset_token(user_id=user.id, generate_access_token=generate_access_token)
+    reset_password_url = generate_reset_password_url(user_id=user.id, token=password_reset_token)
+
+    email_body = (f"Dear {user.username}!\nYou requested for email reset on our site.\n"
+                  f"To reset your password, click the following link: {reset_password_url}")
+
+    message: MessageSchema = MessageSchema(
+        subject="Reset Password",
+        recipients=[email.email],
+        body=email_body,
+        subtype="plain"
+    )
+    fm = FastMail(conf)
+
+    try:
+        background_tasks.add_task(fm.send_message, message)
+        return {
+            "message": "Password reset email sent successfully.",
+            "reset_link": reset_password_url
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error sending email: {e}")
