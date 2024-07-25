@@ -8,10 +8,12 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.utils.json_response import JsonResponseDict
+from starlette.middleware.sessions import SessionMiddleware   # required by google oauth
 
 from api.utils.logger import logger
 from api.v1.routes.newsletter import CustomException, custom_exception_handler
 from api.v1.routes import api_version_one
+from api.utils.settings import settings
 
 
 @asynccontextmanager
@@ -25,6 +27,8 @@ origins = [
     "http://localhost:3000",
     "http://localhost:3001",
 ]
+
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 app.add_middleware(
     CORSMiddleware,
