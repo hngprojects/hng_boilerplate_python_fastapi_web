@@ -5,18 +5,40 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="7f86f3bf-d7e1-4a89-bb37-30a883c4fed0" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/tests/v1/password_reset_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/README" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/env.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/script.py.mako" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/versions/910a7c73019a_added_blog_and_blog_dislike_table.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/alembic/versions/eca40a718b7a_added_users_invitation_waitlist_and_.py" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/routes/facebook_login.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/routes/notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/routes/product.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/routes/superadmin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/schemas/product.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/services/facebook.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/api/v1/services/notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/org_products_test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/test_admincreate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/test_facebook_auth.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/test_get_blogs_by_id.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/test_notification.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/test_signin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/v1/test_signup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.env.sample" beforeDir="false" afterPath="$PROJECT_DIR$/.env.sample" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/utils/db_validators.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/utils/db_validators.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/utils/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/utils/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/models/blog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/models/blog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/models/newsletter.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/models/newsletter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/v1/models/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/models/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/routes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/routes/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/v1/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/routes/auth.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/routes/blog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/routes/blog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/routes/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/routes/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/schemas/blog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/schemas/blog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/schemas/token.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/schemas/token.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/schemas/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/schemas/user.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/services/blog.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/services/blog.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/v1/services/product.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/services/product.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/v1/services/user.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/services/user.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/seed.py" beforeDir="false" afterPath="$PROJECT_DIR$/seed.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/database.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,15 +67,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/request-password-email&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/mac/Desktop/hng_boilerplate_python_fastapi_web&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Merging feat/request-password-email",
+    "last_opened_file_path": "/Users/mac/Desktop/hng_boilerplate_python_fastapi_web",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
