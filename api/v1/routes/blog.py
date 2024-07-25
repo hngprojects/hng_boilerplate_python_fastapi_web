@@ -89,15 +89,15 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
     
 @blog.delete("/{id}", status_code=status.HTTP_200_OK)
 def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
+    blog_service = BlogService(db=db)
     if not current_user:
         return {"status_code":403, "message":"Unauthorized User"}
-    post = db.query(Blog).filter_by(Blog.id == id, Blog.is_deleted == False).first()
+    # post = db.query(Blog).filter_by(Blog.id == id, Blog.is_deleted == False).first()
+    
+    post = blog_service.fetch(id)
     
     if not  post:
         return {"status_code":status.HTTP_404_NOT_FOUND, "message": "Blog with the given ID does not exist"}
     
-    post.is_deleted = True
-    # db.delete(post)
-    db.commit()
-    
+    blog_service.delete(id)
     return {"message": "Blog post deleted successfully", "status_code": 200}
