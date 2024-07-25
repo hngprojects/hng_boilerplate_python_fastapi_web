@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 client = TestClient(app)
 DEACTIVATION_ENDPOINT = '/api/v1/users/deactivation'
 LOGIN_ENDPOINT = 'api/v1/auth/login'
+MAGIC_ENDPOINT = '/api/v1/auth/request-magic-link'
 
 
 @pytest.fixture
@@ -163,3 +164,48 @@ def test_user_inactive(mock_user_service, mock_db_session):
 
     assert user_already_deactivated.status_code == 403
     assert user_already_deactivated.json().get('message') == 'User is not active'
+
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_request_magic_link(mock_user_service, mock_db_session):
+    """Test for requesting magic link"""
+
+    # Create a mock user
+    mock_user = User(
+        id=str(uuid7()),
+        username="testuser1",
+        email="testuser1@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name='Test',
+        last_name='User',
+        is_active=False,
+        is_super_admin=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
+
+    with patch("api.utils.send_mail.smtplib.SMTP") as mock_smtp:
+        # Configure the mock SMTP server
+        mock_smtp_instance = MagicMock()
+        mock_smtp.return_value = mock_smtp_instance
+
+
+        # Test for requesting magic link for an existing user
+        magic_login = client.post(MAGIC_ENDPOINT, json={
+            "email": mock_user.email
+        })
+        assert magic_login.status_code == status.HTTP_200_OK
+        response = magic_login.json()
+        #assert response.get("status_code") == status.HTTP_200_OK  # check for the right response before proceeding
+        assert response.get("message") == f"Magic link sent to {mock_user.email}"
+
+        # Ensure the SMTP server was called correctly
+        #mock_smtp_instance.send_magic_link.assert_called_once()
+        # Test for requesting magic link for a non-existing user
+        mock_db_session.query.return_value.filter.return_value.first.return_value = None
+        magic_login = client.post(MAGIC_ENDPOINT, json={
+            "email": "notauser@gmail.com"
+        })
+        response = magic_login.json()
+        assert response.get("status_code") == status.HTTP_404_NOT_FOUND  # check for the right response before proceeding
+        assert response.get("message") == "User not found"

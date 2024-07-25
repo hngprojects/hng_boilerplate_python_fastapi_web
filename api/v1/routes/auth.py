@@ -2,10 +2,11 @@ from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
+from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from typing import Annotated
 from datetime import timedelta
-from api.v1.schemas.user import UserCreate
+from api.v1.schemas.user import UserCreate, MagicLinkRequest
 from api.db.database import get_db
 from api.utils.dependencies import get_current_admin
 from api.v1.services.user import user_service
@@ -135,4 +136,20 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
 @auth.get("/admin")
 def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
     return {"message": "Hello, admin!"}
+
+
+@auth.post("/request-magic-link", status_code=status.HTTP_200_OK)
+def request_magic_link(request: MagicLinkRequest, response: Response, db: Session = Depends(get_db)):
+    user = user_service.fetch_by_email(
+        db=db,
+        email=request.email
+    )
+    access_token = user_service.create_access_token(user_id=user.id)
+    send_magic_link(user.email, access_token)
+
+    response = success_response(
+        status_code=200,
+        message=f"Magic link sent to {user.email}"
+    )
+    return response
 

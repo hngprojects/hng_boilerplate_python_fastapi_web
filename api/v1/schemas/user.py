@@ -62,3 +62,13 @@ class DeactivateUserSchema(BaseModel):
 
     reason: Optional[str] = None
     confirmation: bool
+
+class MagicLinkRequest(BaseModel):
+    '''Schema for magic link creation'''
+
+    email: EmailStr
+
+class MagicLinkResponse(BaseModel):
+    '''Schema for magic link respone'''
+
+    message: str
