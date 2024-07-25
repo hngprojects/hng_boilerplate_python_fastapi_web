@@ -25,11 +25,11 @@ class Settings(BaseSettings):
     DB_NAME: str = config("DB_NAME")
     DB_TYPE: str = config("DB_TYPE")
 
-    MAIL_USERNAME: str = config("MAIL_USERNAME")
-    MAIL_PASSWORD: str = config('MAIL_PASSWORD')
-    MAIL_FROM: str = config('MAIL_FROM')
-    MAIL_PORT: int = config('MAIL_PORT')
-    MAIL_SERVER: str = config('MAIL_SERVER')
+    # MAIL_USERNAME: str = config("MAIL_USERNAME")
+    # MAIL_PASSWORD: str = config('MAIL_PASSWORD')
+    # MAIL_FROM: str = config('MAIL_FROM')
+    # MAIL_PORT: int = config('MAIL_PORT')
+    # MAIL_SERVER: str = config('MAIL_SERVER')
 
     # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
     # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")

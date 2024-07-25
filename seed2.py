@@ -2,20 +2,20 @@ import datetime
 from uuid_extensions import uuid7
 from api.db.database import create_database, get_db
 from api.utils.auth import hash_password
-from api.v1.models.user import User, WaitlistUser
+from api.v1.models.user import User
 from api.v1.models.org import Organization
 from api.v1.models.profile import Profile
 from api.v1.models.product import Product
 from api.v1.models.base import Base
-from api.v1.models.subscription import Subscription
+# from api.v1.models.subscription import Subscription
 from api.v1.models.blog import Blog
 from api.v1.models.job import Job
 from api.v1.models.invitation import Invitation
-from api.v1.models.role import Role
-from api.v1.models.permission import Permission
+# from api.v1.models.role import Role
+# from api.v1.models.permission import Permission
 from api.v1.models.base import user_organization_association as UserOrganization
-from api.v1.models.base import user_role_association as UserRole
-from api.v1.models.base import role_permission_association as RolePermission
+# from api.v1.models.base import user_role_association as UserRole
+# from api.v1.models.base import role_permission_association as RolePermission
 
 # create_database()
 db = next(get_db())
@@ -37,7 +37,7 @@ user_1 = User(
     first_name="User",
     last_name="One",
     is_active=True,
-    organizations=[org_1, org_2]
+    # organizations=[org_1, org_2]
 )
 
 user_2 = User(
@@ -48,7 +48,7 @@ user_2 = User(
     first_name="User",
     last_name="Two",
     is_active=True,
-    organizations=[org_2, org_3]
+    # organizations=[org_2, org_3]
 )
 
 user_3 = User(
@@ -59,44 +59,44 @@ user_3 = User(
     first_name="User",
     last_name="Three",
     is_active=True,
-    organizations=[org_1, org_3]
+    # organizations=[org_1, org_3]
 )
 
 db.add_all([user_1, user_2, user_3])
 db.commit()
 
-# Add sample roles
-role_1 = Role(id=uuid7(), role_name="Admin", organization_id=org_1.id)
-role_2 = Role(id=uuid7(), role_name="Member", organization_id=org_1.id)
-role_3 = Role(id=uuid7(), role_name="Admin", organization_id=org_2.id)
-role_4 = Role(id=uuid7(), role_name="Member", organization_id=org_2.id)
+# # Add sample roles
+# role_1 = Role(id=uuid7(), role_name="Admin", organization_id=org_1.id)
+# role_2 = Role(id=uuid7(), role_name="Member", organization_id=org_1.id)
+# role_3 = Role(id=uuid7(), role_name="Admin", organization_id=org_2.id)
+# role_4 = Role(id=uuid7(), role_name="Member", organization_id=org_2.id)
 
-db.add_all([role_1, role_2, role_3, role_4])
-db.commit()
+# db.add_all([role_1, role_2, role_3, role_4])
+# db.commit()
 
-# Add sample permissions
-perm_1 = Permission(id=uuid7(), name="read")
-perm_2 = Permission(id=uuid7(), name="write")
-perm_3 = Permission(id=uuid7(), name="delete")
+# # Add sample permissions
+# perm_1 = Permission(id=uuid7(), name="read")
+# perm_2 = Permission(id=uuid7(), name="write")
+# perm_3 = Permission(id=uuid7(), name="delete")
 
-db.add_all([perm_1, perm_2, perm_3])
-db.commit()
+# db.add_all([perm_1, perm_2, perm_3])
+# db.commit()
 
-# Add sample user roles
-user_role_1 = UserRole(user_id=user_1.id, role_id=role_1.id)
-user_role_2 = UserRole(user_id=user_2.id, role_id=role_3.id)
-user_role_3 = UserRole(user_id=user_3.id, role_id=role_2.id)
+# # Add sample user roles
+# user_role_1 = UserRole(user_id=user_1.id, role_id=role_1.id)
+# user_role_2 = UserRole(user_id=user_2.id, role_id=role_3.id)
+# user_role_3 = UserRole(user_id=user_3.id, role_id=role_2.id)
 
-db.add_all([user_role_1, user_role_2, user_role_3])
-db.commit()
+# db.add_all([user_role_1, user_role_2, user_role_3])
+# db.commit()
 
-# Add sample role permissions
-role_perm_1 = RolePermission(role_id=role_1.id, permission_id=perm_1.id)
-role_perm_2 = RolePermission(role_id=role_1.id, permission_id=perm_2.id)
-role_perm_3 = RolePermission(role_id=role_3.id, permission_id=perm_3.id)
+# # Add sample role permissions
+# role_perm_1 = RolePermission(role_id=role_1.id, permission_id=perm_1.id)
+# role_perm_2 = RolePermission(role_id=role_1.id, permission_id=perm_2.id)
+# role_perm_3 = RolePermission(role_id=role_3.id, permission_id=perm_3.id)
 
-db.add_all([role_perm_1, role_perm_2, role_perm_3])
-db.commit()
+# db.add_all([role_perm_1, role_perm_2, role_perm_3])
+# db.commit()
 
 # Add sample profiles
 profile_1 = Profile(
