@@ -20,9 +20,9 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: "username"
+          POSTGRES_USER: "user"
           POSTGRES_PASSWORD: "password"
-          POSTGRES_DB: "test"
+          POSTGRES_DB: "hng_fast_api"
         ports:
           - 5432:5432
 
