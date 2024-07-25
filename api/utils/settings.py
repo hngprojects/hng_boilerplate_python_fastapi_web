@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 class Settings(BaseSettings):
     """ Class to hold application's config values."""
-
+    
     # API_V1_STR: str = "/api/v1"
     # APP_NAME: str = "TicketHub"
     SECRET_KEY: str = config("SECRET_KEY")
@@ -31,5 +31,7 @@ class Settings(BaseSettings):
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
 
+    # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
+    # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
 
 settings = Settings()
