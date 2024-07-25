@@ -2,17 +2,29 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from typing import List
-
-from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest, BlogResponse, BlogPostResponse
-from api.v1.services.blog import BlogService
-from api.utils.dependencies import get_current_user
 from api.db.database import get_db
 from api.v1.models.user import User
+from api.utils.dependencies import get_current_user, get_super_admin
+from api.v1.services.blog import BlogService
+from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
+from api.v1.models.blog import Blog
+from api.v1.schemas.blog import BlogResponse, BlogCreate, BlogPostResponse, BlogRequest, BlogUpdateResponseModel
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
+@blog.post("/api/v1/blogs")
+def create_blog(blog: BlogCreate, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="You are not Authorized")
+    blog_service = BlogService(db)
+    new_blogpost = blog_service.create(db=db, schema=blog, author_id=current_user.id)
+
+    return {
+        "message": "Post Created Successfully!",
+        "status_code": 200,
+        "data": new_blogpost
+}
 
 @blog.get("/", response_model=List[BlogResponse])
 def get_all_blogs(db: Session = Depends(get_db)):
