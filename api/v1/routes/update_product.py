@@ -21,7 +21,7 @@ import jwt
 
 
 # Create a router for product-related endpoints
-productupdate = APIRouter(prefix="/product", tags=["Products"])
+productupdate = APIRouter(prefix="/products", tags=["Products"])
 
 """
     Update the details of an existing product.
