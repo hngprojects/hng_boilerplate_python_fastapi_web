@@ -15,6 +15,35 @@ from api.utils.json_response import JsonResponseDict
 testimonial = APIRouter(prefix='/testimonials', tags=['Testimonials'])
 
 
+@testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
+def get_testimonial(testimonial_id, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+    '''Endpoint to get testimonial by id'''
+
+    testimonial = testimonial_service.fetch(db, testimonial_id)
+    if testimonial and testimonial_id == testimonial.id:
+        return success_response(
+            status_code=200,
+            message=f'Testimonial {testimonial_id} retrieved successfully',
+            data={
+                'id': testimonial.id,
+                'client_designation': testimonial.client_designation,
+                'client_name': testimonial.client_name,
+                'author_id': testimonial.author_id,
+                'comments': testimonial.comments,
+                'content': testimonial.content,
+                'ratings': testimonial.ratings, 
+            }
+        )
+    return JSONResponse(
+        status_code=404,
+        content={
+            "success": False,
+            "status_code": 404,
+            "message": f'Testimonial {testimonial_id} not found'
+        }
+    )
+
+
 @testimonial.delete("/", response_class=JsonResponseDict)
 async def delete_all_testimonials(db: Session = Depends(get_db)):
     """
