@@ -80,4 +80,4 @@ def test_user_login(db_session_mock):
         "password": "Testpassword@123"
     })
     response = login.json()
-    assert response.get("status_code") == status.HTTP_200_OK
+    assert login.status_code == status.HTTP_200_OK
