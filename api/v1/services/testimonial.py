@@ -32,6 +32,11 @@ class TestimonialService(Service):
 
     def delete(self, db: Session, id: str):
         '''Deletes a specific testimonial'''
-        pass
+        testimonial = db.query(Testimonial).filter(Testimonial.id == id).first()
+        if not testimonial:
+            return False
+        db.delete(testimonial)
+        db.commit()
+        return True
 
 testimonial_service = TestimonialService()

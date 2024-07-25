@@ -7,7 +7,6 @@ from sqlalchemy.orm import Session
 from api.utils.dependencies import get_super_admin
 from api.v1.models.user import User
 from api.v1.models.testimonial import Testimonial
-from uuid import UUID
 from fastapi import Depends, HTTPException, APIRouter, Request, Response, status
 from fastapi.responses import JSONResponse
 from api.utils.success_response import success_response
@@ -18,21 +17,18 @@ testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
 @testimonial.delete("/{testimonial_id}")
 def delete_testimonial(
-    testimonial_id: UUID,
+    testimonial_id: str,
     current_user: User = Depends(get_super_admin),
     db: Session = Depends(get_db)
 ):
     """
     Function for deleting a testimonial based on testimonial id
     """
-    testimonial = db.query(Testimonial).filter(Testimonial.id == testimonial_id).first()
-    if not testimonial:
+    if not testimonial_service.delete(db, testimonial_id):
         raise HTTPException(
             detail="Testimonial not found",
             status_code=status.HTTP_404_NOT_FOUND
-        )
-    db.delete(testimonial)
-    db.commit()
+            )
     return JSONResponse(
         content={
             "success": True,
@@ -41,7 +37,6 @@ def delete_testimonial(
         },
         status_code=status.HTTP_200_OK
     )
-
       
 @testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
 def get_testimonial(testimonial_id, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
