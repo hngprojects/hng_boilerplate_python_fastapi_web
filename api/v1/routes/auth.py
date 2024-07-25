@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
 from api.v1.models import User
-from typing import Annotated
+from typing_extensions import Annotated
 from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
@@ -11,11 +11,14 @@ from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
+from api.v1.schemas.token import Token
+
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
-def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(response: Response,
+    login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     '''Endpoint to log in a user'''
 
     # Authenticate the user
@@ -29,15 +32,6 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    response = success_response(
-        status_code=200,
-        message='Login successful',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-        }
-    )
-
     # Add refresh token to cookies
     response.set_cookie(
         key="refresh_token",
@@ -48,8 +42,7 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
         samesite="none",
     )
 
-    return response
-
+    return Token(access_token=access_token, token_type='bearer')
 
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED)

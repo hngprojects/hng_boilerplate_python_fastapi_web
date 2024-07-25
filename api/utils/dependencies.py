@@ -11,7 +11,7 @@ from jose import JWTError
 import bcrypt
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
-from .config import SECRET_KEY, ALGORITHM
+from .settings import settings
 # Initialize OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
@@ -22,14 +22,14 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("username")
-        if username is None:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id: str = payload.get("user_id")
+        if user_id is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        token_data = TokenData(user_id=user_id)
     except JWTError:
         raise credentials_exception
-    user = db.query(User).filter(User.username == token_data.username).first()
+    user = db.query(User).filter(User.id == token_data.user_id).first()
     if user is None:
         raise credentials_exception
     return user
