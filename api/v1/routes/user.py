@@ -87,3 +87,4 @@ async def change_password(
         "status_code": 200,
         "message": "Password Changed successfully",
     }
+

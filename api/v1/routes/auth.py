@@ -77,7 +77,7 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        expires=timedelta(days=30),
+        expires=timedelta(days=60),
         httponly=True,
         secure=True,
         samesite="none",
