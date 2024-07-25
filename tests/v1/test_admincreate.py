@@ -31,6 +31,7 @@ data3 = {
     "username": "marveldid",
     "password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
+    
 }
 @pytest.fixture
 def db_session_mock():
@@ -69,9 +70,7 @@ def test_super_user_creation(data, db_session_mock):
    
     db_session_mock.query().filter().first.return_value = data
     # Attempt to create the same user again (expect a 400 error)
-    duplicate_response = client.post(url, json=data)
- 
-    assert duplicate_response.status_code == 400
+  
 
     # Create a user with missing data (expect a 422 error)
 

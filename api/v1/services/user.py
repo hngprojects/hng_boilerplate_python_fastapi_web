@@ -84,6 +84,26 @@ class UserService(Service):
 
         return user
     
+    def create_admin(self, db:Session , schema : user.UserCreate):
+          if db.query(User).filter(User.email == schema.email).first() or db.query(User).filter(User.username == schema.username).first():
+             user = db.query(User).filter(User.email == schema.email or User.username == schema.username).first() 
+             user.is_super_admin = True
+             db.commit()
+             db.refresh(user)
+             return user
+          #Hash password
+        #Create new admin
+          user = self.create(db=db , schema=schema)
+          user.is_super_admin = True
+          db.commit()
+          db.refresh(user)
+
+          return user
+
+         
+
+
+    
     
     def update(self, db: Session):
         return super().update()

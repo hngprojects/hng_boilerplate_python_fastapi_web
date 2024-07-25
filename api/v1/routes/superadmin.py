@@ -23,10 +23,7 @@ db_dependency = Annotated[Session , Depends(get_db)]
 
 def register_admin(user : UserCreate , db : db_dependency):
    
-    user_created = user_service.create(db=db, schema=user)
-    user_created.is_super_admin = True
-    db.commit()
-   
+    user_created = user_service.create_admin(db=db, schema=user)
     return success_response(
         status_code=201,
         message= 'User Created Successfully',
