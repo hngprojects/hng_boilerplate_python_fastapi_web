@@ -80,7 +80,7 @@ def delete_organization_success(mock_organization_service, mock_db_session):
     print(f"Response Status Code: {response.status_code}")
     print(f"Response Content: {response.content}")
 
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_200_OK
     
     expected_response = {
         "status": 200,
