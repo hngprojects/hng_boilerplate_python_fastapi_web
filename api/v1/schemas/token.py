@@ -9,7 +9,8 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    user_id: str
+    username: str = None
+    user_id: str = None
 
 
 class LoginRequest(BaseModel):
