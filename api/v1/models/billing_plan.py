@@ -10,6 +10,6 @@ class BillingPlan(BaseTableModel):
     name = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
     currency = Column(String, nullable=False)
-    features = Column(ARRAY(String), nullable=False)
+    # features = Column(ARRAY(String), nullable=False)
 
     organization = relationship("Organization", back_populates="billing_plans")
