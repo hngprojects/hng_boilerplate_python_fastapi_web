@@ -1,4 +1,4 @@
-"""added testimonial table
+"""added Rate Limits table
 
 Revision ID: 2d0f5c131dba
 Revises: eca40a718b7a
