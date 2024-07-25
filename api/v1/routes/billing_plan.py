@@ -5,7 +5,7 @@ from fastapi import (
     )
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
-from api.v1.services.plan import billing_plan_service
+from api.v1.services.billing_plan import billing_plan_service
 from api.db.database import get_db
 from api.utils.json_response import JsonResponseDict
 from api.v1.services.user import user_service
