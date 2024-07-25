@@ -230,7 +230,7 @@ class UserService(Service):
         
         credentials_exception = HTTPException(
             status_code=401, 
-            detail='Could not validate crenentials',
+            detail='Could not validate credentials',
             headers={'WWW-Authenticate': 'Bearer'}
         )
         
