@@ -13,7 +13,9 @@ from starlette.middleware.sessions import SessionMiddleware   # required by goog
 from api.utils.logger import logger
 from api.v1.routes.newsletter import CustomException, custom_exception_handler
 from api.v1.routes import api_version_one
+from api.v1.routes.activity_log import router as activity_log_router
 from api.utils.settings import settings
+
 
 
 @asynccontextmanager
@@ -42,7 +44,7 @@ app.add_exception_handler(
     CustomException, custom_exception_handler
 )  # Newsletter custom exception registration
 app.include_router(api_version_one)
-
+app.include_router(activity_log_router, prefix="/api/v1", tags=["Activity-logs"])
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:

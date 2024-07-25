@@ -25,8 +25,12 @@ jobs:
           DB_TYPE: "postgresql"
           DB_HOST: "localhost"
           DB_URL: "postgresql://username:password@localhost:5432/hng_fast_api"
+
         ports:
           - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql+psycopg2://user:password@localhost:5432/hng_fast_api
 
     steps:
       - name: Checkout code
