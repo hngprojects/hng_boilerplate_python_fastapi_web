@@ -12,7 +12,7 @@ from api.v1.services.user import user_service
 from api.utils.json_response import JsonResponseDict
 
 
-testimonial = APIRouter(prefix='/testimonials', tags=['Testimonials'])
+testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
 
 @testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
