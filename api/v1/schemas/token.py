@@ -25,3 +25,6 @@ class TokenRequest(BaseModel):
     email: EmailStr
     token: str
     
+
+class OAuthToken(BaseModel):
+    access_token: str

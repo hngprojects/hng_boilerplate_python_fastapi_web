@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, PositiveFloat
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class ProductUpdate(BaseModel):
@@ -25,3 +25,22 @@ class ProductUpdate(BaseModel):
     class Config:
         orm_mode = True
         allow_population_by_field_name = True
+
+
+class ProductBase(BaseModel):
+    name: str
+    description: float
+    price: float
+
+class ProductData(BaseModel):
+    current_page: int
+    total_pages: int
+    limit: int
+    total_items: int
+    products: List[ProductBase]
+
+class ProductList(BaseModel):
+    status_code: int = 200
+    success: bool
+    message: str
+    data: ProductData
