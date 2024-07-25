@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 from tests.database import session as test_session, client as test_client
 from api.v1.routes.verify_magic_link import router
-from api.db.database import Base
+from api.db.database import Base, get_db
 from api.v1.services.token_service import TokenService
 import logging
 
