@@ -12,8 +12,7 @@ class JobUpdate(BaseModel):
     company_name: Optional[str]
 
     class Config:
-        orm_mode = True
-
+        from_attributes = True
 class JobResponse(BaseModel):
     title: str
     description: str
