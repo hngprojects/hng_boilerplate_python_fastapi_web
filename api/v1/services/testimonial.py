@@ -24,11 +24,9 @@ class TestimonialService(Service):
 
         return check_model_existence(db, Testimonial, id)
 
-
     def update(self, db: Session, id: str, schema):
         '''Updates a testimonial'''
         pass
-
 
     def delete(self, db: Session, id: str):
         '''Deletes a specific testimonial'''
