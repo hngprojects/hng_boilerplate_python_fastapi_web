@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from api.main import app
+from ...main import app
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 
