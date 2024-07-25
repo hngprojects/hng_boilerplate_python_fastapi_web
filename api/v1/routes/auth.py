@@ -1,4 +1,6 @@
 from fastapi import Depends, status, APIRouter, Response, Request, HTTPException
+
+from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
@@ -182,19 +184,6 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 @auth.get("/admin")
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
-
-
-# conf = ConnectionConfig(
-#     MAIL_USERNAME=settings.MAIL_USERNAME,
-#     MAIL_PASSWORD=settings.MAIL_PASSWORD,
-#     MAIL_FROM=settings.MAIL_FROM,
-#     MAIL_PORT=settings.MAIL_PORT,
-#     MAIL_SERVER=settings.MAIL_SERVER,
-#     MAIL_STARTTLS=settings.MAIL_STARTTLS,
-#     MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-#     USE_CREDENTIALS=True
-# )
-
 
 def generate_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
