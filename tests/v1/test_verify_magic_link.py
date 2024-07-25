@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from fastapi import FastAPI, HTTPException
 import pytest
-from api.v1.routes.verify_magic_link import router
+#from api.v1.routes.verify_magic_link import router
 from api.v1.services.user import UserService
 
 app = FastAPI()
