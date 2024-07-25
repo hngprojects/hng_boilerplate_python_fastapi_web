@@ -29,7 +29,6 @@ def mock_db_session():
 
     with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
-        # mock_get_db.return_value.__enter__.return_value = mock_db
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
     app.dependency_overrides = {}
@@ -53,19 +52,12 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name="Test",
         last_name="User",
         is_active=True,
-        # is_super_admin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = (
         mock_user
     )
-
-    # mock_db_session.return_value.__enter__.return_value = mock_user
-    # mock_user_service.hash_password.return_value = "hashed_password"
-    # mock_db_session.add.return_value = None
-    # mock_db_session.commit.return_value = None
-    # mock_db_session.refresh.return_value = None
 
     return mock_user
 

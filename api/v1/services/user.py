@@ -42,7 +42,6 @@ class UserService(Service):
         """Fetches a user by their id"""
 
         return check_model_existence(db, User, id)
-        
 
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
@@ -86,31 +85,36 @@ class UserService(Service):
         db.refresh(user)
 
         return user
-    
-    def create_admin(self, db:Session , schema : user.UserCreate):
-          if db.query(User).filter(User.email == schema.email).first() or db.query(User).filter(User.username == schema.username).first():
-             user = db.query(User).filter(User.email == schema.email or User.username == schema.username).first() 
-             if not user.is_super_admin:
+
+    def create_admin(self, db: Session, schema: user.UserCreate):
+        if (
+            db.query(User).filter(User.email == schema.email).first()
+            or db.query(User).filter(User.username == schema.username).first()
+        ):
+            user = (
+                db.query(User)
+                .filter(User.email == schema.email or User.username == schema.username)
+                .first()
+            )
+            if not user.is_super_admin:
                 user.is_super_admin = True
                 db.commit()
                 db.refresh(user)
                 return user
-             else :
-                 raise HTTPException(status_code=400, detail='User is already registered and is a superuser')
-          #Hash password
-        #Create new admin
-          user = self.create(db=db , schema=schema)
-          user.is_super_admin = True
-          db.commit()
-          db.refresh(user)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="User is already registered and is a superuser",
+                )
+        # Hash password
+        # Create new admin
+        user = self.create(db=db, schema=schema)
+        user.is_super_admin = True
+        db.commit()
+        db.refresh(user)
 
-          return user
+        return user
 
-         
-
-
-    
-    
     def update(self, db: Session):
         return super().update()
 
@@ -165,8 +169,7 @@ class UserService(Service):
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         data = {"user_id": user_id, "exp": expires, "type": "access"}
-        return  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-
+        return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
 
     def create_refresh_token(self, user_id: str) -> str:
         """Function to create access token"""
@@ -178,7 +181,6 @@ class UserService(Service):
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
 
         return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
@@ -311,14 +313,6 @@ class UserService(Service):
 
         user.is_active = True
 
-        # Send aail to user
-        # mail_service.send_mail(
-        #     to=user.email,
-        #     subject='Account reactivation',
-        #     body=f'Hello, {user.first_name},\n\nYour account has been reactivated successfully'
-        # )
-
-        # Commit changes to deactivate the user
         db.commit()
 
     def change_password(
