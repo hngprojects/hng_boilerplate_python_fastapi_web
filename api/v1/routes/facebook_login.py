@@ -10,7 +10,7 @@ from api.v1.services.user import user_service
 from api.v1.schemas.token import OAuthToken
 from api.v1.models import *
 
-fb_auth = APIRouter(prefix="/auth", tags=["auth"])
+fb_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 @fb_auth.post("/facebook-login")
