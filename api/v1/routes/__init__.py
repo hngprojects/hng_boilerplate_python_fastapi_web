@@ -8,6 +8,7 @@ from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
 from api.v1.routes.blog import blog
+from api.v1.routes.google_login import google_auth
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -20,3 +21,4 @@ api_version_one.include_router(testimonial)
 api_version_one.include_router(fb_auth)
 api_version_one.include_router(blog)
 api_version_one.include_router(superadmin)
+api_version_one.include_router(google_auth)
