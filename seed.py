@@ -6,12 +6,6 @@ from api.v1.models.base import Base
 from api.v1.services.user import user_service
 from api.db.database import create_database, get_db
 
-
-
-
-
-
-
 # create_database()
 db = next(get_db())
 
@@ -34,13 +28,15 @@ org_2.users.extend([user_1, user_3])
 org_3.users.extend([user_2, user_1])
 db.commit()
 
-product_1 = Product(name="bed", price=400000, org_id=org_1.id)
-product_2 = Product(name="shoe", price=150000, org_id=org_2.id)
+product_1 = Product(name="bed", price=400000, description="test product 1", org_id=org_1.id)
+product_2 = Product(name="shoe", price=150000, description="test product 2", org_id=org_2.id)
+product_3 = Product(name="choco", price=2000, description="test product 3", org_id=org_3.id)
+product_4 = Product(name="Latte", price=29000, description="test product 4", org_id=org_3.id)
 
 profile_1 = Profile(bio='My name is John Doe', phone_number='09022112233')
 user_1.profile = profile_1
 
-db.add_all([product_1, product_2])
+db.add_all([product_1, product_2, product_3, product_4])
 db.commit()
 users = db.query(Organization).first().users
 print("Seed data succesfully")
