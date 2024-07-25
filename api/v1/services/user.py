@@ -177,8 +177,8 @@ class UserService(Service):
 
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
 
-        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-        return encoded_jwt
+        return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
