@@ -9,39 +9,36 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.services.user import user_service
-from api.v1.schemas.user import UserCreate,UserBase
-# from uuid import UUID
+from api.v1.schemas.user import UserCreate, UserBase
 
 superadmin = APIRouter(prefix="/superadmin", tags=["superadmin"])
 
-db_dependency = Annotated[Session , Depends(get_db)]
+db_dependency = Annotated[Session, Depends(get_db)]
 
 
-
-@superadmin.post(path='/register', status_code=status.HTTP_201_CREATED)
-def register_admin(user : UserCreate , db : db_dependency):
-    """The Endpoint created is for the creation of super admins 
-    """
+@superadmin.post(path="/register", status_code=status.HTTP_201_CREATED)
+def register_admin(user: UserCreate, db: db_dependency):
+    """Endpoint for super admin creation"""
     user_created = user_service.create_admin(db=db, schema=user)
     return success_response(
         status_code=201,
-        message= 'User Created Successfully',
-        data=user_created.to_dict()
+        message="User Created Successfully",
+        data=user_created.to_dict(),
     )
 
-  
-@superadmin.delete("/users/{user_id}")
+
+@superadmin.delete(path="/users/{user_id}")
 def delete_user(
     user_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-    db: Session = Depends(get_db),
+    db: db_dependency,
 ):
     """Endpoint for user deletion (soft-delete)"""
 
     """
 
     Args:
-        user_id (UUID): User ID
+        user_id (str): User ID
         current_user (User): Current logged in user
         db (Session, optional): Database Session. Defaults to Depends(get_db).
 
