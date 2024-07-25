@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from main import app
 from api.v1.services.user import user_service
 from api.v1.models.user import User
+from api.v1.models.profile import Profile  # Import the Profile model
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 
@@ -21,6 +22,7 @@ def mock_db_session(mocker):
 @pytest.fixture
 def test_admin():
     return User(
+        id="admin_id",  # Ensure the admin has an ID
         username="admin",
         email="admin@example.com",
         is_super_admin=True,
@@ -29,19 +31,26 @@ def test_admin():
 
 @pytest.fixture
 def test_customer():
-    return User(
+    user = User(
+        id="customer_id",  # Ensure the customer has an ID
         username="customer",
         email="customer@example.com",
         first_name="John",
         last_name="Doe",
-        phone="1234567890",
-        address="123 Main St",
     )
+    profile = Profile(
+        user_id=user.id,  # Link profile to the user
+        phone_number="1234567890",
+        bio="Customer biography",
+        avatar_url="http://example.com/avatar.jpg"
+    )
+    user.profile = profile
+    return user
 
 
 @pytest.fixture
 def access_token_admin(test_admin):
-    return user_service.create_access_token(data={"username": test_admin.username})
+    return user_service.create_access_token({"sub": test_admin.username})
 
 
 # Test successful customer update
@@ -51,13 +60,13 @@ def test_update_customer_success(mock_db_session, test_customer, access_token_ad
     update_data = {
         "first_name": "Jane",
         "last_name": "Smith",
-        "phone": "0987654321",
+        "phone_number": "0987654321",  # Updated to match the `Profile` schema
     }
     response = client.put(f"/api/v1/customers/{test_customer.id}", json=update_data, headers=headers)
     assert response.status_code == 200
-    assert response.json()['customer']['first_name'] == "Jane"
-    assert response.json()['customer']['last_name'] == "Smith"
-    assert response.json()['customer']['phone'] == "0987654321"
+    assert response.json()['data']['first_name'] == "Jane"
+    assert response.json()['data']['last_name'] == "Smith"
+    assert response.json()['data']['phone_number'] == "0987654321"
 
 
 # Test missing fields in update
@@ -65,12 +74,12 @@ def test_update_customer_partial_success(mock_db_session, test_customer, access_
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_customer
     headers = {'Authorization': f'Bearer {access_token_admin}'}
     update_data = {
-        "phone": "0987654321",
+        "phone_number": "0987654321",
     }
     response = client.put(f"/api/v1/customers/{test_customer.id}", json=update_data, headers=headers)
     assert response.status_code == 200
-    assert response.json()['customer']['phone'] == "0987654321"
-    assert response.json()['customer']['first_name'] == test_customer.first_name  # Check that other fields remain unchanged
+    assert response.json()['data']['phone_number'] == "0987654321"
+    assert response.json()['data']['first_name'] == test_customer.first_name  # Check that other fields remain unchanged
 
 
 # Test unauthorized access
@@ -81,4 +90,4 @@ def test_update_customer_unauthorized(mock_db_session, test_customer):
         "last_name": "Smith",
     }
     response = client.put(f"/api/v1/customers/{test_customer.id}", json=update_data)
-    assert response.status_code == 401
+    assert response.status_code == 401  # Expecting 401 Unauthorized
