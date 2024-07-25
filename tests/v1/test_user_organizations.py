@@ -7,6 +7,12 @@ from main import app
 from api.v1.models.org import Organization
 from api.v1.models.user import User
 from api.v1.routes.organization import get_db
+from api.v1.schemas.user import UserCreate
+from api.v1.services.user import user_service
+from jose import JWTError
+import jwt
+from datetime import datetime, timedelta
+from .config import SECRET_KEY, ALGORITHM
 
 # Mock database dependency
 @pytest.fixture
@@ -20,6 +26,13 @@ def client(db_session_mock):
     client = TestClient(app)
     yield client
     app.dependency_overrides = {}
+
+def generate_token(user_id: str, expires_delta: timedelta = timedelta(minutes=30)):
+    to_encode = {"sub": user_id}
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 def test_get_user_organizations_success(client, db_session_mock):
     # Mock the user and their organizations
@@ -43,7 +56,8 @@ def test_get_user_organizations_success(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = user
 
     # Mock valid JWT token
-    headers = {"Authorization": "Bearer validtoken"}
+    token = generate_token(user_id=user_id)
+    headers = {"Authorization": f"Bearer {token}"}
 
     # Call the endpoint with a valid Authorization header
     response = client.get("/api/v1/organizations/current-user", headers=headers)
@@ -73,7 +87,8 @@ def test_get_user_organizations_server_error(client, db_session_mock):
     db_session_mock.query().filter().first.side_effect = Exception("Database error")
 
     # Mock valid JWT token
-    headers = {"Authorization": "Bearer validtoken"}
+    token = generate_token(user_id="test_id")
+    headers = {"Authorization": f"Bearer {token}"}
 
     # Call the endpoint with a valid Authorization header
     response = client.get("/api/v1/organizations/current-user", headers=headers)
