@@ -24,23 +24,39 @@ class NotificationService(Service):
             raise HTTPException(status_code=404, detail="Notification not found")
 
         # check if the notification is marked as read
-
         if notification.status == "read":
             return
 
         # update notification status
-
         notification.status = "read"
 
         # commit changes
-
         db.commit()
+
+    def delete(
+        self,
+        notification_id: str,
+        user: User,
+        db: Session = Depends(get_db),
+    ):
+        notification = (
+            db.query(Notification)
+            .filter(Notification.id == notification_id)
+            .first()
+        )
+
+        if not notification:
+            raise HTTPException(status_code=404, detail="Notification not found")
+
+        if notification.user_id != user.id:
+            raise HTTPException(status_code=403, detail="You do not have permission to delete this notification")
+
+        db.delete(notification)
+        db.commit()
+        db.refresh()
 
     def create(self):
         super().create()
-
-    def delete(self):
-        super().delete()
 
     def fetch(self, db: Session):
         super().fetch()
@@ -50,6 +66,5 @@ class NotificationService(Service):
 
     def update(self):
         super().update()
-
 
 notification_service = NotificationService()
