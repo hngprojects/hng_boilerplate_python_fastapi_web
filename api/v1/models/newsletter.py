@@ -14,7 +14,7 @@ class Newsletter(BaseTableModel):
     __tablename__ = 'newsletters'
 
     email = Column(String(150), unique=True, nullable=False)
-    title = Column(String, nullable=False)
-    content = Column(Text, nullable=False)
+    title = Column(String, nullable=True)
+    content = Column(Text, nullable=True)
 
     subscribers = relationship("User", secondary=user_newsletter_association, back_populates="newsletters")
