@@ -1,45 +1,48 @@
-from fastapi.testclient import TestClient
-from fastapi import FastAPI, HTTPException
-import pytest
-from api.v1.routes.verify_magic_link import router
+import os
+import logging
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel, constr
+from sqlalchemy.orm import Session
 from api.v1.services.user import UserService
+from api.db.database import get_db
 
-# Initialize FastAPI app and include the router
-app = FastAPI()
-app.include_router(router)
+router = APIRouter()
 
-# Create a TestClient instance for making requests
-client = TestClient(app)
+# Log setup
+log_folder = 'logs'
+if not os.path.exists(log_folder):
+    os.makedirs(log_folder)
 
-@pytest.fixture
-def mock_user_service(mocker):
-    """Fixture to mock the UserService dependency."""
-    mock_service = mocker.Mock()
-    mock_service.verify_access_token.return_value = mocker.Mock(id=1)
-    mock_service.create_access_token.return_value = "new_auth_token"
-    return mock_service
+log_filename = os.path.join(log_folder, 'verify_magic_link.log')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
-def test_verify_magic_link_success(mocker, mock_user_service):
-    """Test successful verification of the magic link."""
-    # Mock the UserService methods
-    mocker.patch.object(UserService, 'verify_access_token', return_value=mock_user_service.verify_access_token.return_value)
-    mocker.patch.object(UserService, 'create_access_token', return_value=mock_user_service.create_access_token.return_value)
+# Model for magic link verify
+class MagicLinkVerify(BaseModel):
+    token: constr(strip_whitespace=True, min_length=1)
 
-    # Simulate a successful token verification
-    response = client.post("/auth/verify-magic-link", json={"token": "valid_token"})
-    
-    # Assert the response status code and content
-    assert response.status_code == 200
-    assert response.json() == {"auth_token": "new_auth_token", "status": 200}
-
-def test_verify_magic_link_invalid_token(mocker, mock_user_service):
-    """Test verification failure with an invalid token."""
-    # Mock the UserService methods to simulate an invalid token scenario
-    mocker.patch.object(UserService, 'verify_access_token', side_effect=HTTPException(status_code=400, detail="Invalid or expired token"))
-
-    # Simulate a failed token verification
-    response = client.post("/auth/verify-magic-link", json={"token": "invalid_token"})
-    
-    # Assert the response status code and content
-    assert response.status_code == 400
-    assert response.json() == {"detail": "Invalid or expired token"}
+@router.post("/auth/verify-magic-link")
+async def verify_magic_link(
+    data: MagicLinkVerify,
+    db: Session = Depends(get_db),
+    user_service: UserService = Depends(UserService)
+):
+    token = data.token
+    try:
+        # Use UserService to verify the token
+        user = user_service.verify_access_token(token, HTTPException(
+            status_code=400, detail="Invalid or expired token"
+        ))
+        # Token verified, generate a new authentication token
+        auth_token = user_service.create_access_token(user.id)
+        return {"auth_token": auth_token, "status": 200}
+    except HTTPException as e:
+        logger.error(f"Token verification failed: {e.detail}")
+        raise e
