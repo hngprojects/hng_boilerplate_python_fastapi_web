@@ -3,11 +3,19 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
 from api.v1.models import User
+<<<<<<< HEAD
 from typing_extensions import Annotated
 from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import TokenRequest, EmailRequest
+=======
+from typing import Annotated
+from datetime import datetime, timedelta
+
+from api.v1.schemas.user import UserCreate
+from api.v1.schemas.token import EmailRequest, TokenRequest
+>>>>>>> 2bd974da833822be8b559f36c20da28935547ab3
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -77,7 +85,7 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        expires=timedelta(days=30),
+        expires=timedelta(days=60),
         httponly=True,
         secure=True,
         samesite="none",
