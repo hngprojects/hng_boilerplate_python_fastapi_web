@@ -33,5 +33,7 @@ class Settings(BaseSettings):
     MAIL_STARTTLS: bool = config('MAIL_TLS')
     MAIL_SSL_TLS: bool = config('MAIL_SSL')
 
+    # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
+    # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
 
 settings = Settings()
