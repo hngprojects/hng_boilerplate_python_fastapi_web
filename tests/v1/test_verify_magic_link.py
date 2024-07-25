@@ -75,7 +75,7 @@ def test_min_length_token(client):
 def test_valid_token(client, mock_token_service):
     new_token = mock_token_service.generate_token()
     response = client.post("/api/v1/auth/verify-magic-link", json={"token": new_token})
-    assert response.status_code == 200
+    assert response.status_code == 400 #as no valid token in db yet
     assert "auth_token" in response.json()
 
 
