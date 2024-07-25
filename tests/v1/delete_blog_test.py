@@ -32,11 +32,13 @@ def client(db_session_mock):
     yield client
     
 
-app.dependency_overrides[get_super_admin] = mock_get_super_admin
+
 
 
 
 def test_delete_blog_success(client, db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    app.dependency_overrides[get_super_admin] = lambda: mock_get_super_admin
     blog_id = uuid7()
     mock_blog = Blog(id=blog_id, title="Test Blog",
                      content="Test Content", is_deleted=False)
