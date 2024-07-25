@@ -14,7 +14,7 @@ from api.v1.services.user import user_service
 user = APIRouter(prefix="/users", tags=["Users"])
 
 
-@user.get("/current-user", status_code=status.HTTP_200_OK, response_model=UserBase)
+@user.get("/me", status_code=status.HTTP_200_OK, response_model=UserBase)
 def get_current_user_details(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
