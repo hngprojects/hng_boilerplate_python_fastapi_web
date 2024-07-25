@@ -66,5 +66,6 @@ class ChangePasswordSchema(BaseModel):
 class ChangePwdRet(BaseModel):
     """schema for returning change password response"""
 
-    status: int
+    success: bool
+    status_code: int
     message: str

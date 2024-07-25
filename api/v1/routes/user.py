@@ -90,6 +90,7 @@ async def change_password(
 
     return JSONResponse(
         content={
+            "success": True,
             "status_code": 200,
             "message": "Password Changed successfully",
         }
