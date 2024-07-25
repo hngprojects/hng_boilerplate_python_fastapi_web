@@ -27,6 +27,7 @@ class ProductUpdate(BaseModel):
         allow_population_by_field_name = True
 
 
+
 class ProductBase(BaseModel):
     name: str
     description: float

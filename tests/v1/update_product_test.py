@@ -93,8 +93,6 @@ def test_update_product_with_valid_token(db_session_mock, mock_get_current_user,
     
     
     
-    
-
 def test_update_product_with_invalid_token(db_session_mock, mock_get_current_user, mocker):
     """Test product update with an invalid token."""
     mocker.patch('jwt.decode', side_effect=JWTError("Invalid token"))
