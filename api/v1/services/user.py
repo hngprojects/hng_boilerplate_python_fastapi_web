@@ -254,9 +254,7 @@ class UserService(Service):
 
         token = self.verify_access_token(access_token, credentials_exception)
 
-        user = db.query(User).filter(User.id == token.id).first()
-
-        return user
+        return db.query(User).filter(User.id == token.id).first()
 
     def deactivate_user(
         self,
