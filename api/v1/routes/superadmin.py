@@ -22,7 +22,9 @@ def delete_user(
     current_user: Annotated[User, Depends(user_service.get_current_user)],
     db: Session = Depends(get_db),
 ):
-    """Endpoint for user deletion (soft-delete)
+    """Endpoint for user deletion (soft-delete)"""
+
+    """
 
     Args:
         user_id (UUID): User ID
