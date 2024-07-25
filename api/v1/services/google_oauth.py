@@ -181,11 +181,10 @@ class GoogleOauthServices(Service):
                             refresh_token=refresh_token,
                             token_type="bearer")
 
-            success_response = StatusResponse(message="Authentication was successful",
+            return StatusResponse(message="Authentication was successful",
                                               status="successful",
                                               statusCode=200,
                                               tokens=tokens,
                                               user=user_response)
-            return success_response
         except Exception as exc:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
