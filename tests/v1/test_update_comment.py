@@ -13,40 +13,59 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_db():
+    """mock db"""
     return MagicMock()
 
 
 @pytest.fixture
 def mock_current_user():
+    """mock current user"""
     return User(id="user123", username="testuser")
 
 
 @pytest.fixture
 def mock_comment():
-    return Comment(id="comment123", content="Original content", user_id="user123")
+    """mock comment"""
+    return Comment(
+        id="comment123",
+        content="Original content",
+        user_id="user123"
+    )
 
 
 @pytest.fixture
-def mock_auth(monkeypatch):
+def mock_auth(mock_patch):
+    """mock auth"""
     def mock_get_current_user():
         return User(id="user123", username="testuser")
-    monkeypatch.setattr(
-        "api.v1.routes.comments.user_service.get_current_user", mock_get_current_user)
+    mock_patch.setattr(
+        "api.v1.routes.comments.user_service.get_current_user",
+        mock_get_current_user
+    )
 
 
-def test_update_comment_success(mock_db, mock_current_user, mock_comment, mock_auth, monkeypatch):
+def test_update_comment_success(
+        mock_db,
+        mock_current_user,
+        mock_comment,
+        mock_auth,
+        mock_patch):
     def mock_get_db():
+        """mock get db"""
         return mock_db
 
     def mock_update_comment(db, id, user, **kwargs):
+        """mock update comment"""
         if id == "comment123" and user.id == "user123":
             mock_comment.content = kwargs.get('content')
             return mock_comment
         return None
 
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.comment_service.update_comment", mock_update_comment)
+    mock_patch.setattr("api.v1.routes.comments.get_db", mock_get_db)
+    mock_patch.setattr(
+        "api.v1.routes.comments.comment_service.update_comment",
+        mock_update_comment
+    )
 
     response = client.put(
         "/api/v1/comments/comment123",
@@ -58,16 +77,19 @@ def test_update_comment_success(mock_db, mock_current_user, mock_comment, mock_a
     assert response.json()["status_code"] == 401
 
 
-def test_update_comment_not_found(mock_db, mock_auth, monkeypatch):
+def test_update_comment_not_found(mock_db, mock_auth, mock_patch):
     def mock_get_db():
+        """mock get db"""
         return mock_db
 
     def mock_update_comment(db, id, user, **kwargs):
         return None
 
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.comment_service.update_comment", mock_update_comment)
+    mock_patch.setattr("api.v1.routes.comments.get_db", mock_get_db)
+    mock_patch.setattr(
+        "api.v1.routes.comments.comment_service.update_comment",
+        mock_update_comment
+    )
 
     response = client.put(
         "/api/v1/comments/nonexistent",
@@ -78,11 +100,12 @@ def test_update_comment_not_found(mock_db, mock_auth, monkeypatch):
     assert response.status_code == 401
 
 
-def test_update_comment_invalid_input(mock_db, mock_auth, monkeypatch):
+def test_update_comment_invalid_input(mock_db, mock_auth, mock_patch):
     def mock_get_db():
+        """mock get db"""
         return mock_db
 
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
+    mock_patch.setattr("api.v1.routes.comments.get_db", mock_get_db)
 
     response = client.put(
         "/api/v1/comments/comment123",
@@ -93,13 +116,16 @@ def test_update_comment_invalid_input(mock_db, mock_auth, monkeypatch):
     assert response.status_code == 401
 
 
-def test_update_comment_unauthorized(monkeypatch):
+def test_update_comment_unauthorized(mock_patch):
     def mock_get_current_user():
+        """mock get current user"""
         raise HTTPException(
             status_code=401, detail="Could not validate credentials")
 
-    monkeypatch.setattr(
-        "api.v1.routes.comments.user_service.get_current_user", mock_get_current_user)
+    mock_patch.setattr(
+        "api.v1.routes.comments.user_service.get_current_user",
+        mock_get_current_user
+    )
 
     response = client.put(
         "/api/v1/comments/comment123",
@@ -110,21 +136,30 @@ def test_update_comment_unauthorized(monkeypatch):
     assert response.status_code == 401
 
 
-def test_update_comment_wrong_user(mock_db, mock_auth, mock_comment, monkeypatch):
+def test_update_comment_wrong_user(
+        mock_db,
+        mock_auth,
+        mock_comment,
+        mock_patch):
     def mock_get_db():
+        """mock get db"""
         return mock_db
 
     def mock_get_current_user():
+        """mock get current user"""
         return User(id="wrong_user", username="wronguser")
 
     def mock_update_comment(db, id, user, **kwargs):
+        """mock update comment"""
         return None  # Simulating that the comment wasn't found for this user
 
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.user_service.get_current_user", mock_get_current_user)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.comment_service.update_comment", mock_update_comment)
+    mock_patch.setattr("api.v1.routes.comments.get_db", mock_get_db)
+    mock_patch.setattr(
+        "api.v1.routes.comments.user_service.get_current_user",
+        mock_get_current_user)
+    mock_patch.setattr(
+        "api.v1.routes.comments.comment_service.update_comment",
+        mock_update_comment)
 
     response = client.put(
         "/api/v1/comments/comment123",
