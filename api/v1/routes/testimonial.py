@@ -40,6 +40,7 @@ def delete_testimonial(
             "status_code": status.HTTP_200_OK
         },
         status_code=status.HTTP_200_OK
+    )
 
       
 @testmonial_route.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
