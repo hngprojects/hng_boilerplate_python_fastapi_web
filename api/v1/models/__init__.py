@@ -19,3 +19,5 @@ from api.v1.models.oauth import OAuth
 from api.v1.models.invitation import Invitation
 from api.v1.models.newsletter import Newsletter
 from api.v1.models.blog import Blog
+from api.v1.models.blog_dislike import BlogDislike
+from api.v1.models.blog_like import BlogLike
