@@ -9,6 +9,7 @@ from api.v1.models.product import Product as ProductModel
 from api.v1.schemas.product import ProductUpdate, ResponseModel
 from api.db.database import engine, get_db
 from api.v1.models.product import Product
+from api.v1.services.product import product_service
 from api.v1.models.user import User
 from api.utils.dependencies import get_current_user
 from uuid import UUID
@@ -58,44 +59,24 @@ async def update_product(
     product_update: ProductUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
-):
-    
-    # Convert id to UUID
+):  
     try:
-        id = UUID(id)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid UUID format")
-    
-    # Retrieve the product from the database using the provided ID
-    db_product = db.query(ProductModel).filter(ProductModel.id == str(id)).first()
-    
-    # If the product is not found, raise a 404 HTTPException
-    if not db_product:
-        raise HTTPException(status_code=404, detail="Product not found")
+        updated_product = product_service.update(db=db, id=str(id), schema=product_update)
+    except HTTPException as e:
+        raise e
 
-    # Update the product's fields with the values from the request
-    db_product.name = product_update.name
-    db_product.price = product_update.price
-    db_product.description = product_update.description
-    db_product.updated_at = datetime.utcnow()  
-
-    # Add the updated product back to the session
-    db.add(db_product)
-    db.commit()
-    db.refresh(db_product)
-
-    # Response
+    # Prepare the response
     response = ResponseModel(
         success=True,
         status_code=200,
         message="Product updated successfully",
         data={
-            "id": db_product.id,
-            "name": db_product.name,
-            "price": db_product.price,
-            "description": db_product.description,
-            "updated_at": db_product.updated_at
+            "id": updated_product.id,
+            "name": updated_product.name,
+            "price": updated_product.price,
+            "description": updated_product.description,
+            "updated_at": updated_product.updated_at
         }
     )
-
+    
     return response
