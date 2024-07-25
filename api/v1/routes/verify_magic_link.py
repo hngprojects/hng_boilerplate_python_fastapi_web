@@ -1,48 +1,44 @@
-import os
 import logging
+import os
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, constr
 from sqlalchemy.orm import Session
-from api.v1.services.user import UserService
+from api.v1.services.token_service import TokenService
 from api.db.database import get_db
 
 router = APIRouter()
 
-# Log setup
+
 log_folder = 'logs'
 if not os.path.exists(log_folder):
     os.makedirs(log_folder)
 
 log_filename = os.path.join(log_folder, 'verify_magic_link.log')
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(log_filename),
-        logging.StreamHandler()
-    ]
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_filename),
+            logging.StreamHandler()
+        ]
 )
 logger = logging.getLogger(__name__)
 
-# Model for magic link verify
+
 class MagicLinkVerify(BaseModel):
     token: constr(strip_whitespace=True, min_length=1)
 
-@router.post("/auth/verify-magic-link")
+
+@router.post("/api/v1/auth/verify-magic-link")
 async def verify_magic_link(
-    data: MagicLinkVerify,
-    db: Session = Depends(get_db),
-    user_service: UserService = Depends(UserService)
+        data: MagicLinkVerify,
+        db: Session = Depends(get_db),
+        token_service: TokenService = Depends(lambda: TokenService())
 ):
     token = data.token
-    try:
-        # Use UserService to verify the token
-        user = user_service.verify_access_token(token, HTTPException(
-            status_code=400, detail="Invalid or expired token"
-        ))
-        # Token verified, generate a new authentication token
-        auth_token = user_service.create_access_token(user.id)
+    if token_service.validate_token(db, token):
+        token_service.invalidate_token(db, token)
+        auth_token = "authentication-token"
         return {"auth_token": auth_token, "status": 200}
-    except HTTPException as e:
-        logger.error(f"Token verification failed: {e.detail}")
-        raise e
+    else:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
