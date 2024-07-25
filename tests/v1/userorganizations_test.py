@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
@@ -25,10 +25,7 @@ def client(db_session_mock):
 
 # Helper function to simulate authenticated requests
 def get_authenticated_client(client: TestClient, token: str):
-    with patch("api.v1.routes.user.decode_token") as mock_decode_token:
-        mock_decode_token.return_value = {"user_id": "mock_user_id"}
-        response = client.get("/api/v1/organizations/current-user", headers={"Authorization": f"Bearer {token}"})
-    return response
+    return client.get("/api/v1/organizations/current-user", headers={"Authorization": f"Bearer {token}"})
 
 def test_get_organizations_for_current_user_empty(client, db_session_mock):
     # Mock the return value for the query
