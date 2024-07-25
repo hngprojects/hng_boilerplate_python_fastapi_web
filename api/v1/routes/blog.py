@@ -17,7 +17,7 @@ blog = APIRouter(prefix="/blogs", tags=["Blog"])
 @blog.get("/", response_model=List[BlogResponse])
 def get_all_blogs(db: Session = Depends(get_db)):
 
-    blogs = blog_service.fetch_all()  # Assuming you have this implemented
+    blogs = db.query(Blog).filter(Blog.is_deleted == False).all()
     if not blogs:
         return []
     return blogs
