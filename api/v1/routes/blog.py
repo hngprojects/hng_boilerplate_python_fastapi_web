@@ -39,6 +39,7 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
         HTTPException: If the blog post is not found.
     """
     blog_service = BlogService(db)
+
     blog_post = blog_service.fetch(id)
     if not blog_post:
         return JSONResponse(
@@ -46,7 +47,7 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
             content={
                 "success": False,
                 "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "Blog post not found"
+                "message": "Post not Found"
             }
         )
 
