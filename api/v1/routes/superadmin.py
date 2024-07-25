@@ -48,7 +48,7 @@ def delete_user(
     # check if the user_id points to a valid user
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="user not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User does not exist"
         )
 
     # soft-delete the user
