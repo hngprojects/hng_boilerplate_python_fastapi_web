@@ -1,8 +1,8 @@
 """initial migration
 
-Revision ID: 48a9dc40b094
+Revision ID: eb99f589e63c
 Revises: 
-Create Date: 2024-07-24 23:54:40.900003
+Create Date: 2024-07-25 19:23:32.646284
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '48a9dc40b094'
+revision: str = 'eb99f589e63c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,8 +33,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_contact_us_id'), 'contact_us', ['id'], unique=False)
     op.create_table('newsletters',
     sa.Column('email', sa.String(length=150), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('title', sa.String(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -57,10 +57,10 @@ def upgrade() -> None:
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('is_super_admin', sa.Boolean(), nullable=True),
-    sa.Column('is_deleted', sa.Boolean(), nullable=True),
-    sa.Column('is_verified', sa.Boolean(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_verified', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -108,7 +108,7 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('image_url', sa.String(), nullable=True),
-    sa.Column('is_deleted', sa.Boolean(), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('excerpt', sa.Text(), nullable=True),
     sa.Column('tags', sa.Text(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
