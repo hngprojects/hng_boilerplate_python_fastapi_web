@@ -59,6 +59,7 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
     return success_response(
         status_code=200,
         message='User reactivation successful',
+
     )
 
 
@@ -68,3 +69,5 @@ def delete_current_user(
     current_user: User = Depends(user_service.get_current_user)
 ):
     user_service.delete(db, access_token=None)
+
+
