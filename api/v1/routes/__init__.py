@@ -19,6 +19,7 @@ api_version_one = APIRouter(prefix="/api/v1")
 api_version_one.include_router(auth)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(user)
+api_version_one.include_router(superadmin)
 api_version_one.include_router(notifications)
 api_version_one.include_router(product)
 api_version_one.include_router(notification)
@@ -26,8 +27,3 @@ api_version_one.include_router(testimonial)
 api_version_one.include_router(fb_auth)
 api_version_one.include_router(blog)
 api_version_one.include_router(waitlist)
-api_version_one.include_router(superadmin)
-
-
-api_version_one.include_router(superadmin)
-
