@@ -1,16 +1,8 @@
-<<<<<<< HEAD:alembic/versions/3523564e7706_initial_migration.py
-"""Initial migration
-
-Revision ID: 3523564e7706
-Revises: 
-Create Date: 2024-07-24 21:54:46.696227
-=======
 """generated new migrations
 
 Revision ID: 05faae41758c
 Revises: 
 Create Date: 2024-07-24 21:19:41.591722
->>>>>>> 2bd974da833822be8b559f36c20da28935547ab3:alembic/versions/05faae41758c_generated_new_migrations.py
 
 """
 from typing import Sequence, Union
@@ -20,11 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-<<<<<<< HEAD:alembic/versions/3523564e7706_initial_migration.py
-revision: str = '3523564e7706'
-=======
 revision: str = '05faae41758c'
->>>>>>> 2bd974da833822be8b559f36c20da28935547ab3:alembic/versions/05faae41758c_generated_new_migrations.py
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -69,17 +57,10 @@ def upgrade() -> None:
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
-<<<<<<< HEAD:alembic/versions/3523564e7706_initial_migration.py
-    sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('is_super_admin', sa.Boolean(), nullable=True),
-    sa.Column('is_deleted', sa.Boolean(), nullable=True),
-    sa.Column('is_verified', sa.Boolean(), nullable=True),
-=======
     sa.Column('is_active', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_verified', sa.Boolean(), server_default=sa.text('false'), nullable=True),
->>>>>>> 2bd974da833822be8b559f36c20da28935547ab3:alembic/versions/05faae41758c_generated_new_migrations.py
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
