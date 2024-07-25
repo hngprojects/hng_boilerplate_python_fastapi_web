@@ -39,7 +39,7 @@ app.add_middleware(
 
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 app.include_router(api_version_one)
-app.include_router(activity_log_router, prefix="/api/v1")
+app.include_router(activity_log_router, prefix="/api/v1", tags=["Activity-logs"])
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
