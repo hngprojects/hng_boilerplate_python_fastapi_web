@@ -89,25 +89,35 @@ class UserService(Service):
         db.refresh(user)
 
         return user
-    
-    def create_admin(self, db:Session , schema : user.UserCreate):
-          if db.query(User).filter(User.email == schema.email).first() or db.query(User).filter(User.username == schema.username).first():
-             user = db.query(User).filter(User.email == schema.email or User.username == schema.username).first() 
-             if not user.is_super_admin:
+
+    def create_admin(self, db: Session, schema: user.UserCreate):
+        if (
+            db.query(User).filter(User.email == schema.email).first()
+            or db.query(User).filter(User.username == schema.username).first()
+        ):
+            user = (
+                db.query(User)
+                .filter(User.email == schema.email or User.username == schema.username)
+                .first()
+            )
+            if not user.is_super_admin:
                 user.is_super_admin = True
                 db.commit()
                 db.refresh(user)
                 return user
-             else :
-                 raise HTTPException(status_code=400, detail='User is already registered and is a superuser')
-          #Hash password
-        #Create new admin
-          user = self.create(db=db , schema=schema)
-          user.is_super_admin = True
-          db.commit()
-          db.refresh(user)
+            else:
+                raise HTTPException(
+                    status_code=400,
+                    detail="User is already registered and is a superuser",
+                )
+        # Hash password
+        # Create new admin
+        user = self.create(db=db, schema=schema)
+        user.is_super_admin = True
+        db.commit()
+        db.refresh(user)
 
-          return user
+        return user
 
     def update(self, db: Session):
         return super().update()
@@ -324,11 +334,12 @@ class UserService(Service):
 
         # Commit changes to deactivate the user
         db.commit()
-        
-        
-    def get_current_super_admin(self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+
+    def get_current_super_admin(
+        self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    ):
         """Get the current super admin"""
-        user = self.get_current_user(db, token)
+        user = self.get_current_user(db=db, access_token=token)
         if not user.is_super_admin:
             raise HTTPException(
                 status_code=403,
@@ -336,8 +347,10 @@ class UserService(Service):
             )
         return user
 
-    def save_login_token(self, db: Session, user: User, token: str, expiration: datetime):
-        '''Save the token and expiration in the user's record'''
+    def save_login_token(
+        self, db: Session, user: User, token: str, expiration: datetime
+    ):
+        """Save the token and expiration in the user's record"""
         db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
 
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
@@ -345,24 +358,25 @@ class UserService(Service):
         db.commit()
         db.refresh(token)
 
-    def verify_login_token(self, db: Session, schema:token.TokenRequest):
-        '''Verify the token and email combination'''
+    def verify_login_token(self, db: Session, schema: token.TokenRequest):
+        """Verify the token and email combination"""
         user = db.query(User).filter(User.email == schema.email).first()
-        
+
         if not user:
             raise HTTPException(status_code=401, detail="Invalid email or token")
-        
+
         token = db.query(TokenLogin).filter(TokenLogin.user_id == user.id).first()
 
         if token.token != schema.token or token.expiry_time < datetime.utcnow():
             raise HTTPException(status_code=401, detail="Invalid email or token")
 
         return user
-    
-    def generate_token(self):
-        '''Generate a 6-digit token'''
-        return ''.join(random.choices(string.digits, k=6)), datetime.utcnow() + timedelta(minutes=10)
 
+    def generate_token(self):
+        """Generate a 6-digit token"""
+        return "".join(
+            random.choices(string.digits, k=6)
+        ), datetime.utcnow() + timedelta(minutes=10)
 
 
 user_service = UserService()
