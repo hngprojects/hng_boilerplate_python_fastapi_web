@@ -86,15 +86,15 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
         "data": {"post": jsonable_encoder(updated_blog_post)}
     }
     
-@blog.delete("/{id}", status_code=status.HTTP_200_OK)
-def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
+@blog.delete("/{id}")
+async def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
     blog_service = BlogService(db=db)
     if not current_user:
         return {"status_code":403, "message":"Unauthorized User"}
-    post = blog_service.fetch(id)
+    post = blog_service.fetch_post(blog_id=id)
+
+    if not post:
+        return {"message": "Blog with the given ID does not exist", "status_code": 404}
     
-    if not  post:
-        return {"status_code":status.HTTP_404_NOT_FOUND, "message": "Blog with the given ID does not exist"}
-    
-    blog_service.delete(id)
+    blog_service.delete(blog_id=id)
     return {"message": "Blog post deleted successfully", "status_code": 200}

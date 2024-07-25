@@ -41,11 +41,11 @@ def test_delete_blog_success(client, db_session_mock):
     mock_blog = Blog(id=blog_id, title="Test Blog",
                      content="Test Content", is_deleted=False)
 
-    db_session_mock.query(Blog).filter(blog_id).first.return_value.id = [mock_blog]
+    db_session_mock.query(Blog).filter(id==blog_id).first.return_value.id = [mock_blog]
 
     response = client.delete(f"/api/v1/blogs/{mock_blog.id}")
 
-        
+
     assert response.status_code == 200
     assert response.json() == {
         "message": "Blog post deleted successfully", "status_code": 200}
@@ -60,20 +60,21 @@ def test_delete_blog_unauthorized(client, db_session_mock):
     response = client.delete(f"/api/v1/blogs/{mock_blog.id}")
 
 
-    assert response.status_code == 200
+    assert response.json()["status_code"] == 403
     assert response.json()["message"] == "Unauthorized User"
 
+    
+def test_delete_blog_not_found(client, db_session_mock):
+    db_session_mock.query(Blog).filter(Blog.id == f'{uuid7()}').first.return_value = None
 
-# def test_delete_blog_not_found(client, db_session_mock):
-#     blog_id = "non_existent_id"
-#     app.dependency_overrides[get_super_admin] = mock_get_super_admin
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    app.dependency_overrides[get_super_admin] = lambda: mock_get_super_admin
 
-#     db_session_mock.query().filter.first.return_value =  None
+    response = client.delete(f"api/v1/blogs/{uuid7()}")
 
-#     response = client.delete(f"/api/v1/blog/{blog_id}")
-
-#     assert response.status_code == 200
-#     assert response.json()["message"] == "Blog with the given ID does not exist"
+    assert response.json()["status_code"] == 404
+    assert response.json()["message"] == "Blog with the given ID does not exist"
+    
 
 
 if __name__ == "__main__":
