@@ -1,5 +1,3 @@
-
-
 # Dependencies:
 # pip install pytest-mock
 import pytest
@@ -30,19 +28,15 @@ class TestCodeUnderTest:
 
     # Successfully adding a user to the waitlist with valid email and full name
     
-    @patch('api.v1.routes.waitlist.db')
-    def test_add_user_to_waitlist_success(self, mock_db, client):
+    @patch('api.v1.routes.waitlist.waitlist_service')
+    def test_add_user_to_waitlist_success(self, mock_service, client):
+        
         app.dependency_overrides[get_super_admin] = mock_deps
 
-        mock_where = MagicMock()
-        mock_first= MagicMock()
+        mock_service.fetch_by_email.return_value = None
+        
+        response = client.post("/api/v1/waitlist/admin", json={"email": "test@example.com", "full_name": "Here"})
 
-        mock_db.query.return_value = mock_where
-        mock_where.where.return_value = mock_first
-        mock_first.first.return_value = None 
-
-        response = client.post("/api/v1/waitlist/admin", json={"email": "tes@example.com", "full_name": "Test User"})
-    
         assert response.status_code == 201
         assert response.json()["message"] == "User added to waitlist successfully"
 
@@ -62,14 +56,13 @@ class TestCodeUnderTest:
         assert response.status_code == 422
 
     # # Handling duplicate email entries and raising IntegrityError
-    @patch('api.v1.routes.waitlist.db')
-    def test_add_user_to_waitlist_duplicate_email(self, mock_db, client):
+    @patch('api.v1.routes.waitlist.waitlist_service')
+    def test_add_user_to_waitlist_duplicate_email(self, mock_service, client):
 
         client = TestClient(app)
-        mock_db.return_value=MagicMock()
+        mock_service.fetch.return_value=MagicMock()
     
         # Simulate IntegrityError when adding duplicate email
-        mock_db.add.side_effect = IntegrityError("Duplicate entry", {}, None)
 
         response = client.post("/api/v1/waitlist/admin", json={"email": "duplicate@example.com", "full_name": "Test User"})
     

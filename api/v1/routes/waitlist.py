@@ -9,11 +9,11 @@ from api.utils.dependencies import get_super_admin
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.utils.json_response import JsonResponseDict
 from fastapi.exceptions import HTTPException
-from fastapi.requests import Request
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from api.v1.services.waitlist import waitlist_service
 
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
-db = next(get_db())
 
 @waitlist.post(
     "/admin",
@@ -22,7 +22,9 @@ db = next(get_db())
 )
 def add_user_to_waitlist(
     item: WaitlistAddUserSchema,
-    admin=Depends(get_super_admin)
+    admin=Depends(get_super_admin),
+    db: Session = Depends(get_db)
+
 ):
     """
     Manually adds a user to the waitlist.
@@ -44,12 +46,12 @@ def add_user_to_waitlist(
             detail = "full_name field cannot be blank"
             raise HTTPException(status_code=400, detail=detail)
         
-        if obj:= db.query(Waitlist).where(Waitlist.email==item.email).first() != None:
+        if obj:= waitlist_service.fetch_by_email(db, item.email):
+            print(obj)
             raise IntegrityError("Duplicate entry", {}, None)
-        
-        new_waitlist_user = Waitlist(email=item.email, full_name=item.full_name)
-        db.add(new_waitlist_user)
-        db.commit()
+        print(f'Her!!{obj}')
+
+        new_waitlist_user = waitlist_service.create(db, item)
     except IntegrityError:
         detail = "Email already added"
         raise HTTPException(status_code=400, detail=detail)
