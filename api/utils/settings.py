@@ -27,12 +27,23 @@ class Settings(BaseSettings):
     DB_PASSWORD: str = config("DB_PASSWORD")
     DB_NAME: str = config("DB_NAME")
     DB_TYPE: str = config("DB_TYPE")
+    DB_TYPE: str = "postgresql"
+    DB_NAME: str = "dbname"
+    DB_USER: str = "username"
+    DB_PASSWORD: str = "password"
+    DB_HOST: str = "localhost"
+    DB_PORT: int = 5432
+    PYTHON_ENV: str = "development"  # Example value
 
     MAIL_USERNAME: str = config("MAIL_USERNAME")
     MAIL_PASSWORD: str = config('MAIL_PASSWORD')
     MAIL_FROM: str = config('MAIL_FROM')
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
+    
+    class Config:
+        env_file = ".env"
+        extra = "forbid"  # Prevent extra fields not defined in the model
 
 
 settings = Settings()
