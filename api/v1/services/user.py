@@ -41,11 +41,13 @@ class UserService(Service):
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
 
+
         user = check_model_existence(db, User, id)
 
         # return user if user is not deleted
         if not user.is_deleted:
             return user
+
 
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
@@ -126,6 +128,7 @@ class UserService(Service):
         """Function to soft delete a user"""
 
         # Get user from access token if provided, otherwise fetch user by id
+
         # user = self.get_current_user(access_token, db) if id is not None else check_model_existence(db, User, id)
 
         if id is not None:
@@ -175,8 +178,8 @@ class UserService(Service):
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         data = {"user_id": user_id, "exp": expires, "type": "access"}
-        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-        return encoded_jwt
+        return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+
 
     def create_refresh_token(self, user_id: str) -> str:
         """Function to create access token"""
@@ -187,8 +190,8 @@ class UserService(Service):
 
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
 
-        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-        return encoded_jwt
+        return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
@@ -250,8 +253,7 @@ class UserService(Service):
             refresh = self.create_refresh_token(user_id=token.id)
 
             return access, refresh
-        else:
-            pass
+
 
     def get_current_user(
         self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
@@ -266,9 +268,7 @@ class UserService(Service):
 
         token = self.verify_access_token(access_token, credentials_exception)
 
-        user = db.query(User).filter(User.id == token.id).first()
-
-        return user
+        return db.query(User).filter(User.id == token.id).first()
 
     def deactivate_user(
         self,
@@ -325,14 +325,22 @@ class UserService(Service):
 
         user.is_active = True
 
-        # Send aail to user
-        # mail_service.send_mail(
-        #     to=user.email,
-        #     subject='Account reactivation',
-        #     body=f'Hello, {user.first_name},\n\nYour account has been reactivated successfully'
-        # )
+        db.commit()
 
-        # Commit changes to deactivate the user
+    def change_password(
+        self,
+        old_password: str,
+        new_password: str,
+        user: User,
+        db: Session,
+    ):
+        """Endpoint to change the user's password"""
+
+
+        if not self.verify_password(old_password, user.password):
+            raise HTTPException(status_code=400, detail="Incorrect old password")
+
+        user.password = self.hash_password(new_password)
         db.commit()
 
     def get_current_super_admin(
