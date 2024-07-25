@@ -1,5 +1,5 @@
 from fastapi import Depends, HTTPException, APIRouter, Request, Response, status
-from jose import JWTError
+import jwt
 from sqlalchemy.orm import Session
 
 from api.core.dependencies.email import mail_service

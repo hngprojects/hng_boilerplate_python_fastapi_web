@@ -1,7 +1,7 @@
 from typing import Any, Optional, Dict
 import bcrypt, datetime as dt
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
