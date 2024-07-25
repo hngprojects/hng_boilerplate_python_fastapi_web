@@ -1,9 +1,11 @@
-from datetime import datetime
-from fastapi import HTTPException
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Any, Optional
-from uuid_extensions import uuid7
 import re
+from datetime import datetime
+from typing import Any, Optional
+
+from fastapi import HTTPException
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from uuid_extensions import uuid7
+
 
 class UserBase(BaseModel):
     '''Base user schema'''

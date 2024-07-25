@@ -77,7 +77,6 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
     except HTTPException as e:
         raise e
     except Exception as e:
-        # Catch any other exceptions and raise an HTTP 500 error
         raise HTTPException(
             status_code=500, detail="An unexpected error occurred")
 
@@ -92,8 +91,6 @@ def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User 
     blog_service = BlogService(db=db)
     if not current_user:
         return {"status_code":403, "message":"Unauthorized User"}
-    # post = db.query(Blog).filter_by(Blog.id == id, Blog.is_deleted == False).first()
-    
     post = blog_service.fetch(id)
     
     if not  post:

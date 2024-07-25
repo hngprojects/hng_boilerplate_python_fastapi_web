@@ -32,8 +32,6 @@ def client(db_session_mock):
     yield client
     
 
-
-# app.dependency_overrides[get_db] = mock_get_db
 app.dependency_overrides[get_super_admin] = mock_get_super_admin
 
 
@@ -51,7 +49,6 @@ def test_delete_blog_success(client, db_session_mock):
     assert response.status_code == 200
     assert response.json() == {
         "message": "Blog post deleted successfully", "status_code": 200}
-    # assert mock_blog.is_deleted == True
 
 
 def test_delete_blog_unauthorized(client, db_session_mock):
