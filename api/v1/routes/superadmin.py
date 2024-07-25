@@ -55,5 +55,5 @@ def delete_user(
     user_service.delete(db=db, id=str(user_id))
 
     return success_response(
-        status_code=status.HTTP_204_NO_CONTENT, message="user deleted successfully"
+        status_code=status.HTTP_200_OK, message="user deleted successfully"
     )
