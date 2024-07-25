@@ -1,0 +1,8 @@
+modules = ["python-3.12", "python-3.10"]
+run = "uvicorn main:app --host 0.0.0.0 --port 3000"
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+run = ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 3000"]

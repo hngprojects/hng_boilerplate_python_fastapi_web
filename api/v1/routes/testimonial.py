@@ -1,8 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import Depends, HTTPException, APIRouter, Request, Response, status
 from sqlalchemy.orm import Session
+from fastapi.responses import JSONResponse
+
+from api.utils.success_response import success_response
 from api.v1.models.testimonial import Testimonial
-from api.utils.json_response import JsonResponseDict
+from api.v1.models.user import User
+# from api.v1.schemas.user import DeactivateUserSchema, UserBase
 from api.db.database import get_db
+from api.v1.services.testimonial import testimonial_service
+from api.v1.services.user import user_service
+from api.utils.json_response import JsonResponseDict
+
 
 testimonial = APIRouter(prefix='/testimonials', tags=['Testimonials'])
 
