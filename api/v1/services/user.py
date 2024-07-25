@@ -2,6 +2,7 @@ from typing import Any, Optional, Dict
 import bcrypt, datetime as dt
 from fastapi.security import OAuth2PasswordBearer
 import jwt
+from jwt import PyJWTError  # Correct import for PyJWTError
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
@@ -52,8 +53,10 @@ class UserService(Service):
 
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
-        if (db.query(User).filter(User.email == schema.email).first() or
-            db.query(User).filter(User.username == schema.username).first()):
+        if (
+            db.query(User).filter(User.email == schema.email).first()
+            or db.query(User).filter(User.username == schema.username).first()
+        ):
             raise HTTPException(
                 status_code=400,
                 detail="User with this email or username already exists",
@@ -70,7 +73,12 @@ class UserService(Service):
 
     def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
         """Function to soft delete a user"""
-        user = self.get_current_user(access_token, db) if id is not None else check_model_existence(db, User, id)
+        # Get user from access token if provided, otherwise fetch user by id
+        user = (
+            self.get_current_user(access_token, db)
+            if id is not None
+            else check_model_existence(db, User, id)
+        )
         user.is_deleted = True
         db.commit()
         return super().delete()
@@ -100,15 +108,20 @@ class UserService(Service):
 
     def create_access_token(self, user_id: str) -> str:
         """Function to create access token"""
-        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-        data = {'user_id': user_id, 'exp': expires, 'type': 'access'}
+        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
+            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
+        )
+        data = {"user_id": user_id, "exp": expires, "type": "access"}
         encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
     def create_refresh_token(self, user_id: str) -> str:
-        """Function to create refresh token"""
-        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=settings.JWT_REFRESH_EXPIRY)
-        data = {'user_id': user_id, 'exp': expires, 'type': 'refresh'}
+        """Function to create access token"""
+        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
+            days=settings.JWT_REFRESH_EXPIRY
+        )
+
+        data = {"user_id": user_id, "exp": expires, "type": "refresh"}
         encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
@@ -123,7 +136,8 @@ class UserService(Service):
             if token_type == "refresh":
                 raise HTTPException(detail="Refresh token not allowed", status_code=400)
             token_data = user.TokenData(id=user_id)
-        except JWTError:
+
+        except PyJWTError:
             raise credentials_exception
         return token_data
 
@@ -138,13 +152,16 @@ class UserService(Service):
             if token_type == "access":
                 raise HTTPException(detail="Access token not allowed", status_code=400)
             token_data = user.TokenData(id=user_id)
-        except JWTError:
+
+        except PyJWTError:
             raise credentials_exception
         return token_data
 
     def refresh_access_token(self, current_refresh_token: str):
         """Function to generate new access token and rotate refresh token"""
-        credentials_exception = HTTPException(status_code=401, detail="Refresh token expired")
+        credentials_exception = HTTPException(
+            status_code=401, detail="Refresh token expired"
+        )
         token = self.verify_refresh_token(current_refresh_token, credentials_exception)
         if token:
             access = self.create_access_token(user_id=token.id)
@@ -158,6 +175,7 @@ class UserService(Service):
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
+        
         token = self.verify_access_token(access_token, credentials_exception)
         user = db.query(User).filter(User.id == token.id).first()
         return user
@@ -177,17 +195,28 @@ class UserService(Service):
 
     def reactivate_user(self, db: Session, token: str):
         """This function reactivates a user account"""
+        # Validate the token
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
             user_id = payload.get("user_id")
             if user_id is None:
                 raise HTTPException(400, "Invalid token")
-        except JWTError:
+
+        except PyJWTError:
             raise HTTPException(400, "Invalid token")
         user = db.query(User).filter(User.id == user_id).first()
         if user.is_active:
             raise HTTPException(400, "User is already active")
         user.is_active = True
+
+        # Send email to user
+        # mail_service.send_mail(
+        #     to=user.email,
+        #     subject='Account reactivation',
+        #     body=f'Hello, {user.first_name},\n\nYour account has been reactivated successfully'
+        # )
+
+        # Commit changes to deactivate the user
         db.commit()
 
     def get_current_super_admin(
@@ -207,7 +236,6 @@ class UserService(Service):
     ):
         """Save the token and expiration in the user's record"""
         db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
-
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
         db.add(token)
         db.commit()
@@ -216,15 +244,12 @@ class UserService(Service):
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
         user = db.query(User).filter(User.email == schema.email).first()
-
         if not user:
             raise HTTPException(status_code=401, detail="Invalid email or token")
 
         token = db.query(TokenLogin).filter(TokenLogin.user_id == user.id).first()
-
         if token.token != schema.token or token.expiry_time < datetime.utcnow():
             raise HTTPException(status_code=401, detail="Invalid email or token")
-
         return user
 
     def generate_token(self):

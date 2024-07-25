@@ -2,7 +2,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 import jwt
-from datetime import datetime, timezone
+from jwt import PyJWTError
+from datetime import datetime, timedelta
 from api.v1.models.user import User
 from api.v1.schemas.token import TokenData
 from api.db.database import get_db
@@ -26,12 +27,12 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     try:
         logger.debug("Decoding JWT token")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id: str = payload.get("sub")
+        user_id: str = payload.get("user_id")
         if user_id is None:
             logger.error("User ID not found in token")
             raise credentials_exception
         logger.debug(f"Token decoded successfully, user ID: {user_id}")
-    except JWTError as e:
+    except PyJWTError as e:
         logger.error(f"JWT error: {e}")
         raise credentials_exception
 

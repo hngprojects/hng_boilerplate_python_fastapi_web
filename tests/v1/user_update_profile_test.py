@@ -9,8 +9,11 @@ from uuid_extensions import uuid7
 from api.db.database import get_db
 from fastapi import status
 from datetime import datetime, timezone
-import logging
 import jwt
+import logging
+
+# Import PyJWTError for error handling
+from jwt import PyJWTError
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -18,7 +21,7 @@ logger = logging.getLogger(__name__)
 client = TestClient(app)
 PROFILE_UPDATE_ENDPOINT = "/api/v1/profile/current-user"
 
-SECRET_KEY = "your-secret-key"  # This should match the real secret key used in your app
+SECRET_KEY = "your-secret-key"  # Ensure this matches your application settings
 ALGORITHM = "HS256"
 
 @pytest.fixture
@@ -46,7 +49,7 @@ def mock_user_service():
             updated_at=datetime.now(timezone.utc)
         )
         mock_instance.get_current_user.return_value = mock_user
-        mock_instance.create_access_token.return_value = jwt.encode({"sub": mock_user.id}, SECRET_KEY, algorithm=ALGORITHM)
+        mock_instance.create_access_token.return_value = jwt.encode({"user_id": mock_user.id}, SECRET_KEY, algorithm=ALGORITHM)
         yield mock_instance
 
 def create_mock_profile(mock_db_session, user_id):
@@ -150,7 +153,8 @@ def test_token_generation(mock_user_service):
     mock_user = mock_user_service.get_current_user()
     access_token = mock_user_service.create_access_token(user_id=mock_user.id)
     logger.debug(f"Generated access token: {access_token}")
-    assert access_token == jwt.encode({"sub": mock_user.id}, SECRET_KEY, algorithm=ALGORITHM)
+    expected_token = jwt.encode({"user_id": mock_user.id}, SECRET_KEY, algorithm=ALGORITHM)
+    assert access_token == expected_token
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_get_current_user(mock_user_service, mock_db_session):
