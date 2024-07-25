@@ -17,7 +17,7 @@ from uuid_extensions import uuid7
 import pytest
 
 
-DATABASE_URL = config("DATABASE_URL_TEST")
+DATABASE_URL = "sqlite:///:memory:"
 
 engine = create_engine(DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
