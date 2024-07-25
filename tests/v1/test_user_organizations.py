@@ -13,8 +13,7 @@ from datetime import datetime, timezone, timedelta
 
 from ...main import app
 from api.v1.models import Organization, User
-# from api.v1.routes.organization import get_db
-from api.db.database import get_db
+from api.v1.routes.organization import get_db
 
 
 # Mock database dependency
