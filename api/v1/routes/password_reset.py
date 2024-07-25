@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.models.user import User  # Assuming User model exists in models folder
 from api.v1.models.password_reset import OTP  # Import the new OTP model
-from api.v1.schemas.password_reset import EMAILSCHEMA
+from api.v1.schemas.password_reset import EmailSchema
 from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
@@ -37,7 +37,7 @@ password_reset = APIRouter(prefix='/api/v1/auth', tags=['Password Reset'])
 
 # Endpoint to Reset Password
 @password_reset.post('/password/reset')
-async def reset_password(request: EMAILSCHEMA, db: Session = Depends(get_db)):
+async def reset_password(request: EmailSchema, db: Session = Depends(get_db)):
     """
     Password reset endpoint
     """
