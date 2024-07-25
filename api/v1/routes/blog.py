@@ -89,7 +89,6 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
     
 @blog.delete("/{id}", status_code=status.HTTP_200_OK)
 def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
-    print("Deleting.........")
     if not current_user:
         return {"status_code":403, "message":"Unauthorized User"}
     post = db.query(Blog).filter_by(Blog.id == id, Blog.is_deleted == False).first()
