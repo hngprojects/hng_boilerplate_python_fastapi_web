@@ -3,10 +3,15 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from api.core.dependencies.email import mail_service
-
+from fastapi.responses import JSONResponse
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.user import DeactivateUserSchema, UserBase, ChangePasswordSchema
+from api.v1.schemas.user import (
+    DeactivateUserSchema,
+    UserBase,
+    ChangePasswordSchema,
+    ChangePwdRet,
+)
 from api.db.database import get_db
 from api.v1.services.user import user_service
 
@@ -73,7 +78,7 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
     )
 
 
-@user.patch("/me/password", status_code=200)
+@user.patch("/me/password", status_code=200, response_model=ChangePwdRet)
 async def change_password(
     schema: ChangePasswordSchema,
     db: Session = Depends(get_db),
@@ -83,8 +88,9 @@ async def change_password(
 
     user_service.change_password(schema.old_password, schema.new_password, user, db)
 
-    return {
-        "status_code": 200,
-        "message": "Password Changed successfully",
-    }
-
+    return JSONResponse(
+        content={
+            "status_code": 200,
+            "message": "Password Changed successfully",
+        }
+    )
