@@ -44,6 +44,15 @@ def mock_user_service():
 
 
 @pytest.fixture
+def mock_get_current_user():
+    """Fixture to create a mock current user"""
+    with patch(
+        "api.v1.services.user.UserService.get_current_user", autospec=True
+    ) as mock_get_current_user:
+        yield mock_get_current_user
+
+
+@pytest.fixture
 def override_get_current_super_admin():
     """Mock the get_current_super_admin dependency"""
 
@@ -94,6 +103,33 @@ def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Se
     response = client.delete(f"{USER_DELETE_ENDPOINT}/{str(uuid7())}")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_non_admin_access(
+    mock_get_current_user, mock_user_service: UserService, mock_db_session: Session
+):
+    """Test for non admin user access to endpoint"""
+
+    mock_get_current_user.return_value = User(
+        id=str(uuid7()),
+        username="admintestuser",
+        email="admintestuser@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="AdminTest",
+        last_name="User",
+        is_active=False,
+        is_super_admin=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+
+    response = client.delete(
+        f"{USER_DELETE_ENDPOINT}/{str(uuid7())}",
+        headers={"Authorization": "Bearer dummy_token"},
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
 @pytest.mark.usefixtures(
