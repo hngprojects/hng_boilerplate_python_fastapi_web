@@ -41,7 +41,13 @@ class UserService(Service):
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
 
-        return check_model_existence(db, User, id)
+
+        user = check_model_existence(db, User, id)
+
+        # return user if user is not deleted
+        if not user.is_deleted:
+            return user
+
 
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
@@ -122,11 +128,14 @@ class UserService(Service):
         """Function to soft delete a user"""
 
         # Get user from access token if provided, otherwise fetch user by id
-        user = (
-            self.get_current_user(access_token, db)
-            if id is not None
-            else check_model_existence(db, User, id)
-        )
+
+        # user = self.get_current_user(access_token, db) if id is not None else check_model_existence(db, User, id)
+
+        if id is not None:
+            user = check_model_existence(db, User, id)
+        else:
+            user = self.get_current_user(access_token, db)
+
         user.is_deleted = True
         db.commit()
 
@@ -171,6 +180,7 @@ class UserService(Service):
         data = {"user_id": user_id, "exp": expires, "type": "access"}
         return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
 
+
     def create_refresh_token(self, user_id: str) -> str:
         """Function to create access token"""
 
@@ -181,6 +191,7 @@ class UserService(Service):
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
 
         return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
@@ -242,6 +253,7 @@ class UserService(Service):
             refresh = self.create_refresh_token(user_id=token.id)
 
             return access, refresh
+
 
     def get_current_user(
         self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
@@ -324,6 +336,7 @@ class UserService(Service):
     ):
         """Endpoint to change the user's password"""
 
+
         if not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
 
@@ -334,7 +347,7 @@ class UserService(Service):
         self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
     ):
         """Get the current super admin"""
-        user = self.get_current_user(db, token)
+        user = self.get_current_user(db=db, access_token=token)
         if not user.is_super_admin:
             raise HTTPException(
                 status_code=403,
