@@ -74,5 +74,5 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
 
     return success_response(
         status_code=200,
-        message="User reactivation successful",
+        message='User reactivation successful',
     )
