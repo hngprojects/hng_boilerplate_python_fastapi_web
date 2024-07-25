@@ -46,7 +46,7 @@ def test_update_product_with_valid_token(mock_db, mocker):
     assert response.json()["name"] == "Updated Product"
     assert response.json()["price"] == 25.0
     assert response.json()["description"] == "Updated Description"
-
+ 
 
 def test_update_product_without_token(mock_db, mocker):
     response = client.put("/product/e65c9f26-696a-42df-a4b9-4da21426734c", json={"name": "Product"})
