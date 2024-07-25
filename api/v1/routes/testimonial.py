@@ -4,7 +4,7 @@ Module contains CRUD routes for testimonial
 """
 from api.db.database import get_db
 from sqlalchemy.orm import Session
-from api.utils.dependencies import get_current_admin
+from api.utils.dependencies import get_super_admin
 from api.v1.models.user import User
 from api.v1.models.testimonial import Testimonial
 from uuid import UUID
@@ -19,7 +19,7 @@ testmonial_route = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 @testmonial_route.delete("/{testimonial_id}")
 def delete_testimonial(
     testimonial_id: UUID,
-    current_user: User = Depends(get_current_admin),
+    current_user: User = Depends(get_super_admin),
     db: Session = Depends(get_db)
 ):
     """
