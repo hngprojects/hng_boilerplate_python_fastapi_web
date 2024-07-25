@@ -17,7 +17,7 @@ from uuid_extensions import uuid7
 import pytest
 
 
-DATABASE_URL = "postgresql://user:password@localhost:5432/test"
+DATABASE_URL = "postgresql://username:password@localhost:5432/test"
 
 engine = create_engine(DATABASE_URL)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
