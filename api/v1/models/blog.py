@@ -13,17 +13,14 @@ from sqlalchemy.dialects.postgresql import UUID
 
 class Blog(BaseTableModel, Base):
     __tablename__ = "blogs"
-    
-    author_id = Column(
-        String,
-        ForeignKey("users.id"),
-        nullable=False,
-    )
-    title = Column(String(100), nullable=False)
-    content = Column(Text)
-    image_url = Column(String(100), nullable=True)
-    tags = Column(ARRAY(String(20)), nullable=True)
-    is_deleted = Column(Boolean, default=False, nullable=False)
-    excerpt = Column(String(500), nullable=True)
-    
-    author = relationship("User", backref="blogs")
+
+    author_id = Column(String, ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    image_url = Column(String, nullable=True)
+    is_deleted = Column(Boolean, default=False)
+    excerpt = Column(Text, nullable=True)
+    tags = Column(Text, nullable=True)  # Assuming tags are stored as a comma-separated string
+
+    author = relationship("User", back_populates="blogs")
+    comments = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
