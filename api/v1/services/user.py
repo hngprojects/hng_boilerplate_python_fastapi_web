@@ -41,8 +41,8 @@ class UserService(Service):
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
 
-        user = check_model_existence(db, User, id)
-        return user
+        return check_model_existence(db, User, id)
+        
 
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
