@@ -1,3 +1,4 @@
+
 from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
@@ -174,4 +175,3 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 @auth.get("/admin")
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
-
