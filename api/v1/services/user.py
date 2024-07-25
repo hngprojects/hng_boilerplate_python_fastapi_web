@@ -87,10 +87,13 @@ class UserService(Service):
     def create_admin(self, db:Session , schema : user.UserCreate):
           if db.query(User).filter(User.email == schema.email).first() or db.query(User).filter(User.username == schema.username).first():
              user = db.query(User).filter(User.email == schema.email or User.username == schema.username).first() 
-             user.is_super_admin = True
-             db.commit()
-             db.refresh(user)
-             return user
+             if not user.is_super_admin:
+                user.is_super_admin = True
+                db.commit()
+                db.refresh(user)
+                return user
+             else :
+                 raise HTTPException(status_code=400, detail='User is already registered and is a superuser')
           #Hash password
         #Create new admin
           user = self.create(db=db , schema=schema)
