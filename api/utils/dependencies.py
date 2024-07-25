@@ -23,9 +23,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        print(f"Token received: {token}")
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        print(f"Decoded Payload: {payload}")
 
         username = payload.get("username")
         user_id = payload.get("user_id")
@@ -39,7 +37,6 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
             token_data = TokenData(user_id=user_id)
 
     except JWTError as e:
-        print(f"JWTError: {e}")
         raise credentials_exception
     
     if token_data.username:
@@ -51,6 +48,10 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
 
     return user
+
+
+
+
 
 def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     user = get_current_user(db, token)
