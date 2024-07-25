@@ -21,3 +21,6 @@ class Product(BaseTableModel):
     org_id = Column(String, ForeignKey('organizations.id', ondelete="CASCADE"), nullable=False)
 
     organization = relationship("Organization", back_populates="products")
+    
+    
+    
