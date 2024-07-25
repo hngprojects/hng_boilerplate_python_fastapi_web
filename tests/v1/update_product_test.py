@@ -85,11 +85,10 @@ def test_update_product_with_valid_token(db_session_mock, mock_get_current_user,
     print("Update response:", response.json())  # Debugging output
 
     assert response.status_code == 200
-    assert response.json()["name"] == "Updated Product"
-    assert response.json()["price"] == 25.0
-    assert response.json()["description"] == "Updated Description"
-    assert response.json()["updated_at"] is not None
-    
+    assert response.json()["data"]["name"] == "Updated Product"
+    assert response.json()["data"]["price"] == 25.0
+    assert response.json()["data"]["description"] == "Updated Description"
+    assert response.json()["data"]["updated_at"] is not None
     
     
     
@@ -168,7 +167,7 @@ def test_update_product_with_special_characters(db_session_mock, mock_get_curren
     
     print(f"Special characters response: {response.json()}")  # Debugging output
     assert response.status_code == 200
-    assert response.json()["name"] == "Updated @Product! #2024"
-    assert response.json()["price"] == 99.99
-    assert response.json()["description"] == "Updated & Description!"
-    assert response.json()["updated_at"] is not None
+    assert response.json()["data"]["name"] == "Updated @Product! #2024"
+    assert response.json()["data"]["price"] == 99.99
+    assert response.json()["data"]["description"] == "Updated & Description!"
+    assert response.json()["data"]["updated_at"] is not None
