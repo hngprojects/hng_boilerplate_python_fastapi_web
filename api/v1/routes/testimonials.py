@@ -8,12 +8,10 @@ from sqlalchemy.orm import Session
 from api.v1.services.rate_limiter import rate_limiter
 from api.v1.models.testimonial import Testimonial
 from api.v1.schemas.testimonial import PaginatedTestimonials
+from api.v1.routes.testimonial import testimonial
 
 
-testimonial_router = APIRouter(tags=["testimonials"])
-
-
-@testimonial_router.get("/testimonials", response_model=PaginatedTestimonials,
+@testimonial.get("/", response_model=PaginatedTestimonials,
                         dependencies=[Depends(rate_limiter)])
 async def get_testimonials(page: int = Query(1, ge=1),
                            current_user: str = Depends(
