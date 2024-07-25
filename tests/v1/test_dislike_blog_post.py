@@ -1,11 +1,8 @@
 import jwt
 import time
 import pytest
-# from uuid import UUID
 from decouple import config
-# from datetime import datetime
 from sqlalchemy import create_engine
-# from datetime import datetime, timezone
 from sqlalchemy.orm import sessionmaker
 from fastapi.testclient import TestClient
 
@@ -14,11 +11,8 @@ from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.base import Base
 from api.v1.models.blog import Blog
-# from api.utils.auth import hash_password
 from api.v1.services.user import user_service
 from api.v1.models.blog_dislike import BlogDislike
-# from api.v1.models.blog import Blog, LikesDislikes
-# from api.v1.services.blog import likes_dislikes_service as dislike_service
 
 SQLALCHEMY_DATABASE_URL = config('DB_URL')
 
@@ -92,13 +86,10 @@ def random_token(user_id: str):
 
 def test_failure_and_success_disliking(test_db):
     """Test failue and success disliking"""
-    if not test_db.query(User).count():
-        user1 = create_user(test_db, 'testuser1', True)
-        blog1 = create_blog_post(test_db, user1.id)
-        test_db.commit()
-    else:
-        user1 = test_db.query(User).filter_by(username='testuser1').first()
-        blog1 = test_db.query(Blog).filter_by(author_id=user1.id).first()
+    
+    user1 = create_user(test_db, 'testuser1', True)
+    blog1 = create_blog_post(test_db, user1.id)
+    test_db.commit()
 
     assert test_db.query(User).count() == 1
     assert test_db.query(Blog).count() == 1
@@ -109,6 +100,7 @@ def test_failure_and_success_disliking(test_db):
             headers={"Authorization": f"Bearer {token}"}
         )
 
+
     # DO LOG IN
     login = client.post('/api/v1/auth/login', data={
         "username": "testuser1",
@@ -118,13 +110,14 @@ def test_failure_and_success_disliking(test_db):
     assert login.status_code == 200
     access_token = login.json()['data']['access_token']
 
+
     ### TEST REQUEST WITH WRONG blog_id ###
     ### using user1.id instead of blog1.id  ###
     print(access_token)
     resp = make_request(user1.id, access_token)
-    print(f"Wrong blog {resp.json()}")
     assert resp.status_code == 404
     assert resp.json()['message'] == "Blog post not found"
+
 
     # DO SUCCESSFUL DISLIKING FROM Blog AUTHOR
     resp = make_request(blog1.id, access_token)
@@ -132,8 +125,15 @@ def test_failure_and_success_disliking(test_db):
     assert resp.json()['message'] == "Dislike recorded successfully."
     test_db.refresh(blog1)
 
+
+    # CHECK BlogDislike obj AND relationships
     dislike = test_db.query(BlogDislike).filter_by(user_id=user1.id, blog_id=blog1.id).first()
     assert dislike
+    assert len(user1.blog_dislikes) == 1
+    assert len(blog1.dislikes) == 1
+    assert user1.blog_dislikes == [dislike]
+    assert blog1.dislikes == [dislike]
+
 
     ### TEST ATTEMPT FOR MULTIPLE DISLIKING... ###
     resp = make_request(blog1.id, access_token)
@@ -141,12 +141,12 @@ def test_failure_and_success_disliking(test_db):
     assert resp.status_code == 403
     assert resp.json()['message'] == "You have already disliked this blog post"
 
-    ### TEST ATTEMPT FOR MULTIPLE DISLIKING... ###
+
+    ### TEST ATTEMPT WITH INVALID AUTH... ###
     resp = make_request(blog1.id, random_token("gdhdhdjj366448jagss55333"))
     print(f"Unauth {resp.json()}")
-    # assert resp.status_code == 403
+    assert resp.status_code == 401
     assert resp.json()['message'] == "Could not validate credentials"
-
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
-from typing import List, Annotated
+from typing import List
 
 from api.db.database import get_db
 from api.v1.models.user import User
@@ -8,7 +8,6 @@ from api.v1.models.blog import Blog
 from api.v1.schemas.blog import BlogResponse
 from api.v1.services.user import user_service
 from api.v1.models.blog_dislike import BlogDislike
-from api.utils.dependencies import get_current_user
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -29,7 +28,7 @@ def dislike_blog_post(blog_id: str,
     
     try:
         if not current_user:
-            response.status_code = status.HTTP_404_NOT_FOUND
+            response.status_code = status.HTTP_401_UNAUTHORIZED
             return {
                 "status_code": f"{status.HTTP_401_UNAUTHORIZED}", 
                 "message": "Could not validate credentials"
