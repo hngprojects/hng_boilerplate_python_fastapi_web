@@ -34,4 +34,3 @@ api_version_one.include_router(waitlist_router)
 api_version_one.include_router(superadmin)
 api_version_one.include_router(google_auth)
 api_version_one.include_router(profile)
-
