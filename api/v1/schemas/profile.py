@@ -6,9 +6,6 @@ from uuid_extensions import uuid7
 import re
 from api.v1.schemas.user import UserBase
 
-class UserResponse(BaseModel):
-    id: str
-
 class ProfileBase(BaseModel):
     '''Base profile schema'''
 
@@ -22,7 +19,7 @@ class ProfileBase(BaseModel):
     phone_number:str
     avatar_url:str
     recovery_email:Optional[EmailStr]
-    user: UserResponse
+    user: UserBase
 
 
 class ProfileCreateUpdate(BaseModel):

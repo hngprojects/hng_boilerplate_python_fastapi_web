@@ -8,6 +8,8 @@ from api.v1.schemas.profile import ProfileBase,ProfileCreateUpdate
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.profile import profile_service
+from api.utils.success_response import success_response
+
 
 
 profile = APIRouter(prefix='/profile', tags=['Profiles'])
@@ -23,4 +25,7 @@ def create_user_profile(schema: ProfileCreateUpdate, db: Session = Depends(get_d
     '''Endpoint to create user profile from the frontend'''
 
     user_profile = profile_service.create(db, schema=schema, user_id=current_user.id)
-    return user_profile
+    
+    response = success_response(status_code=status.HTTP_201_CREATED,message="User profile create successfully", data=user_profile.to_dict())
+
+    return response
