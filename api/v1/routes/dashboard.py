@@ -50,6 +50,7 @@ async def get_product_dashboard(
         )
     
     return DashboardProductResponse(
+        success=True,
         status_code=status.HTTP_200_OK,
         message="Product retrieved successfully",
         data=DashboardProductData.model_validate(product)

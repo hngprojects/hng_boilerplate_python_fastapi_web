@@ -91,6 +91,7 @@ def test_dashboard_get_product_success(monkeypatch, product_data):
     assert response.status_code == status.HTTP_200_OK
     print(response.json())
     assert response.json() == {
+        "success": True,
         "status_code": status.HTTP_200_OK,
         "message": "Product retrieved successfully",
         "data": {

@@ -80,6 +80,7 @@ class DashboardProductResponse(BaseModel):
     """
     Pydantic model for the Product API response.
     """
+    success: bool
     status_code: int = Field(..., description="The HTTP status code of the response")
     message: str = Field(..., description="A message describing the result of the operation")
     data: DashboardProductData
