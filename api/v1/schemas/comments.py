@@ -2,7 +2,7 @@
 """Defines request and response schemas for comments endpoints"""
 
 
-from typing import Dict
+from typing import Dict, Optional
 from pydantic import BaseModel
 
 
@@ -17,10 +17,11 @@ class Comment(BaseModel):
     content: str
     created_at: str
     updated_at: str
-    user: Dict
+    user: Optional[Dict]
 
 
 class CommentResponse(BaseModel):
     """Response schema for a comment"""
     status_code: int
-    comment: Comment
+    message: str
+    data: Comment

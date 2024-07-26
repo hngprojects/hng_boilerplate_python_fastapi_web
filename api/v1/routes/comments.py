@@ -35,11 +35,12 @@ async def update_comment(
 
     return CommentResponse(
         status_code=200,
-        comment=Comment(
+        message="Comment fetch successfully",
+        data=Comment(
             id=str(comment.id),
             content=str(comment.content),
             created_at=str(comment.created_at),
             updated_at=str(comment.updated_at),
-            user=comment.user.to_dict()
+            user=comment.user.to_dict() if comment.user.to_dict() else None
         )
     )
