@@ -1,8 +1,8 @@
-import sys, os
-import warnings
+# import sys, os
+# import warnings
 
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+# warnings.filterwarnings("ignore", category=DeprecationWarning)
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 import pytest
 from fastapi.testclient import TestClient
@@ -24,9 +24,9 @@ MAGIC_ENDPOINT = '/api/v1/auth/request-magic-link'
 
 @pytest.fixture
 def mock_db_session():
-    """Fixture to create a mock database session."""
+    """Fixture to create a mock database session. api.v1.services.user.get_db"""
 
-    with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
+    with patch("api.db.database.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
         # mock_get_db.return_value.__enter__.return_value = mock_db
         app.dependency_overrides[get_db] = lambda: mock_db
