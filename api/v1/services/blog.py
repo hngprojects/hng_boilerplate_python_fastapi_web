@@ -1,13 +1,14 @@
-from api.v1.models.user import User
 from typing import Any, Optional
+from uuid import UUID
+
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
+
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.blog import Blog
 from api.v1.models.user import User
 from api.v1.schemas.blog import BlogCreate
-from uuid import UUID
-from fastapi import HTTPException
 
 
 class BlogService:
@@ -57,3 +58,22 @@ class BlogService:
                 status_code=500, detail="An error occurred while updating the blog post")
 
         return blog_post
+
+
+    def fetch_post(self, blog_id: str):
+        '''Fetch a blog post by its ID'''
+        blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
+        return blog_post
+    
+    def delete(self, blog_id: str):
+        post = self.fetch_post(blog_id=blog_id)
+
+        if post:
+            try:
+                post.is_deleted = True
+                self.db.commit()
+                self.db.refresh(post)
+            except Exception as e:
+                self.db.rollback()
+                raise HTTPException(
+                    status_code=400, detail="An error occurred while updating the blog post")
