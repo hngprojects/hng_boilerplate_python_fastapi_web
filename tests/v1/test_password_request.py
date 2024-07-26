@@ -81,7 +81,6 @@ def test_send_email_failure(test_client):
     email = {"email": "yonwatodejulius@gmail.com"}
     response = test_client.post("/auth/password-reset-email/", json=email)
     response_json = response.json()
-    print(response_json)
     assert response.status_code == 404
     assert "message" in response_json
 
