@@ -12,6 +12,7 @@ from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
 from api.v1.routes.blog import blog
+from api.v1.routes.waitlist import waitlist as waitlist_router
 from api.v1.routes.billing_plan import bill_plan
 
 
@@ -27,8 +28,10 @@ api_version_one.include_router(notification)
 api_version_one.include_router(testimonial)
 api_version_one.include_router(fb_auth)
 api_version_one.include_router(blog)
+api_version_one.include_router(waitlist_router)
+api_version_one.include_router(superadmin)
 api_version_one.include_router(bill_plan)
-api_version_one.include_router(waitlist)
+api_version_one.include_router(waitlist_router)
 api_version_one.include_router(superadmin)
 api_version_one.include_router(google_auth)
 api_version_one.include_router(comment)
