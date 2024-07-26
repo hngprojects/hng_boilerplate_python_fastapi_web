@@ -13,7 +13,7 @@ from api.v1.routes.waitlist import waitlist as waitlist_router
 from api.v1.routes.billing_plan import bill_plan
 from api.v1.routes.google_login import google_auth
 from api.v1.routes.notifications import notifications
-
+from api.v1.routes.activity_log import router as activity_log_router
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -33,3 +33,4 @@ api_version_one.include_router(bill_plan)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(superadmin)
 api_version_one.include_router(google_auth)
+api_version_one.include_router(activity_log_router)
