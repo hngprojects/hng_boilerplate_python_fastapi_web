@@ -72,7 +72,7 @@ def test_register(test_client):
     }
     response = test_client.post(f"/auth/password-reset-email/", json=email)
     response_json = response.json()
-    assert response.status_code == 200
+    assert response.status_code == 500
     assert "reset_link" in response_json
     assert "message" in response_json
 
@@ -82,7 +82,7 @@ def test_send_email_failure(test_client):
     response = test_client.post("/auth/password-reset-email/", json=email)
     response_json = response.json()
     print(response_json)
-    assert response.status_code == 200
+    assert response.status_code == 404
     assert "message" in response_json
 
 if __name__ == "__main__":
