@@ -17,7 +17,7 @@ def send_magic_link(email: str, token: str):
     message["To"] = receiver_email
 
     text = f"Use the following link to log in: http://{url}/magic-link?token={token}"
-    html = f"<html><body><p>Use the following link to log in: <a href='http://{url}/magic-link?token={token}'>Magic Link</a></p></body></html>"
+    html = f"<html><body><p>Use the following link to log in: <a href='http://{url}/verify-magic-link?token={token}'>Magic Link</a></p></body></html>"
 
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
