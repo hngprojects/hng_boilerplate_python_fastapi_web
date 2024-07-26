@@ -3,8 +3,6 @@ from typing import List, Optional, Any, Dict
 from datetime import datetime
 
 
-
-
 class ProductUpdate(BaseModel):
     """
     Pydantic model for updating a product.

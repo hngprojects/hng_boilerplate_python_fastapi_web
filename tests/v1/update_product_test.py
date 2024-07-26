@@ -1,16 +1,12 @@
-import warnings
 from datetime import datetime
 from unittest.mock import MagicMock
 from fastapi import HTTPException
-from jose import JWTError, jwt
+from jose import JWTError
 import pytest
 from fastapi.testclient import TestClient
 from main import app
-from api.v1.models.product import Product as ProductModel
 from api.v1.models.user import User
 from api.db.database import get_db
-from fastapi import status
-from uuid import UUID
 
 client = TestClient(app)
 
