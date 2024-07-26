@@ -55,7 +55,7 @@ def generate_short_uuid(length=8):
 
 @patch("api.utils.email_service.send_mail")
 def test_send_reset_password_email_success(mock_send_mail, db_session_mock):
-    unique_email = f"testuser_success_{generate_short_uuid()}@example.com"
+    unique_email = f"testuser_success_{generate_short_uuid()}@gmail.com"
     unique_username = f"testuser_success_{generate_short_uuid()}"
     user_data = {"email": unique_email, "username": unique_username}
     user = User(**user_data, password=user_service.hash_password("testpassword"))
@@ -78,7 +78,7 @@ def test_send_reset_password_email_success(mock_send_mail, db_session_mock):
 
 @patch("api.utils.email_service.send_mail")
 def test_send_reset_password_email_failure(mock_send_mail, db_session_mock):
-    unique_email = f"testuser_failure{generate_short_uuid()}@example.com"
+    unique_email = f"testuser_failure{generate_short_uuid()}@gmail.com"
     unique_username = f"testuser_failure{generate_short_uuid()}"
     user_data = {"email": unique_email, "username": unique_username}
     user = User(**user_data, password=user_service.hash_password("testpassword"))
