@@ -19,6 +19,7 @@ def client_with_mocks():
 
         yield client, mock_db
 
+
 def test_waitlist_signup(client_with_mocks):
     client, mock_db = client_with_mocks
     email = f"test{uuid.uuid4()}@gmail.com"
