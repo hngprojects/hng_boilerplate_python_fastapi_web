@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent
 
 class Settings(BaseSettings):
     """ Class to hold application's config values."""
-
+    
     # API_V1_STR: str = "/api/v1"
     # APP_NAME: str = "TicketHub"
     SECRET_KEY: str = config("SECRET_KEY")
