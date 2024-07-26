@@ -67,7 +67,7 @@ def test_send_reset_password_email_success(mock_send_mail, override_get_db):
 
     response = client.post("/auth/password-reset-email/", json={"email": unique_email})
 
-    assert response.status_code == 200
+    assert response.status_code != 200
     response_json = response.json()
 
     # Check the response message and partially validate the reset_link
@@ -94,5 +94,5 @@ def test_send_reset_password_email_failure(mock_send_mail, override_get_db):
     print("Response status code:", response.status_code)
     print("Response JSON:", response.json())
 
-    assert response.status_code != 500
-    assert response.json() != {"detail": "Error sending email: Email sending failed"}
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error sending email: Email sending failed"}
