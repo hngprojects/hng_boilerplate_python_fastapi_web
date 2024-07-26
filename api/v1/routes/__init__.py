@@ -1,7 +1,4 @@
 from api.v1.routes.comments import comment
-from api.v1.routes.notifications import notifications
-from api.v1.routes.waitlist import waitlist
-from api.v1.routes.google_login import google_auth
 from fastapi import APIRouter
 from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
@@ -13,7 +10,10 @@ from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
 from api.v1.routes.blog import blog
 from api.v1.routes.waitlist import waitlist as waitlist_router
+
 from api.v1.routes.billing_plan import bill_plan
+from api.v1.routes.google_login import google_auth
+from api.v1.routes.notifications import notifications
 
 
 api_version_one = APIRouter(prefix="/api/v1")
