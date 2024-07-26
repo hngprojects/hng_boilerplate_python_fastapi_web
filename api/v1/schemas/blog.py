@@ -54,3 +54,8 @@ class BlogPostResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class BlogDislikeResponse(BaseModel):
+    status: str
+    message: str
