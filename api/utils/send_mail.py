@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from api.utils.settings import settings
 
+url = "deployment.api-python.boilerplate.hng.tech"
 def send_magic_link(email: str, token: str):
     '''Sends magic-kink to user email'''
     sender_email = settings.MAIL_USERNAME
@@ -15,8 +16,8 @@ def send_magic_link(email: str, token: str):
     message["From"] = sender_email
     message["To"] = receiver_email
 
-    text = f"Use the following link to log in: http://localhost:8000/magic-link?token={token}"
-    html = f"<html><body><p>Use the following link to log in: <a href='http://localhost:8000/magic-link?token={token}'>Magic Link</a></p></body></html>"
+    text = f"Use the following link to log in: http://{url}/magic-link?token={token}"
+    html = f"<html><body><p>Use the following link to log in: <a href='http://{url}/magic-link?token={token}'>Magic Link</a></p></body></html>"
 
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
