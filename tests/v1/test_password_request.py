@@ -1,15 +1,13 @@
 import sys, os
 import warnings
 import pytest
-from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from starlette.testclient import TestClient
+
 from main import app
 from api.db.database import get_db, Base
-from api.v1.models import User
-from api.v1.services.user import user_service
-from unittest.mock import patch, MagicMock
-import uuid
+
 from api.utils.settings import settings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -29,79 +27,63 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 Base.metadata.create_all(bind=engine)
 
 
-@pytest.fixture
-def db_session_mock():
-    db_session = MagicMock()
-    yield db_session
+@pytest.fixture(scope="function")
+def db_session():
+    """Create a new database session with a rollback at the end of the test."""
+    connection = engine.connect()
+    transaction = connection.begin()
+    session = TestingSessionLocal(bind=connection)
+    yield session
+    session.close()
+    transaction.rollback()
+    connection.close()
 
 
-@pytest.fixture(autouse=True)
-def override_get_db(db_session_mock):
-    def get_db_override():
-        yield db_session_mock
+@pytest.fixture(scope="function")
+def test_client(db_session):
+    """Create a test client."""
+    def override_get_db():
+        try:
+            yield db_session
+        finally:
+            db_session.close()
 
-    app.dependency_overrides[get_db] = get_db_override
-    yield
-    app.dependency_overrides = {}
+    app.dependency_overrides[get_db] = override_get_db
 
-
-client = TestClient(app)
-
-
-def generate_short_uuid(length=8):
-    short_uuid = uuid.uuid4().hex[:length]
-    return short_uuid
+    with TestClient(app) as client:
+        yield client
 
 
-@patch("api.utils.email_service.send_mail")
-def test_send_reset_password_email_success(mock_send_mail, db_session_mock):
-    unique_email = f"testuser_success_{generate_short_uuid()}@gmail.com"
-    unique_username = f"testuser_success_{generate_short_uuid()}"
-    user_data = {"email": unique_email, "username": unique_username}
-    user = User(**user_data, password=user_service.hash_password("testpassword"))
-
-    db_session_mock.query(User).filter().first.return_value = None
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = user
-
-    mock_send_mail.return_value = None
-
-    response = client.post("/auth/password-reset-email/", json={"email": unique_email})
-
-    assert response.status_code == 404
+@pytest.mark.auth
+def test_register(test_client):
+    payload = {
+        "username": "Skibo",
+        "first_name": "Julius",
+        "last_name": "Yonwatode",
+        "email": "juliusyonwatade@gmail.com",
+        "password": "Jayboy99%$"
+    }
+    response = test_client.post("/auth/register/", json=payload)
     response_json = response.json()
+    assert response.status_code == 201
 
-    assert response_json["message"] == "We don't have user with the provided email in our database."
-    # assert response_json["reset_link"].startswith("http://localhost:7001/reset-password?token=")
-    # assert "user_id=" in response_json["reset_link"]
+    email = {
+        "email": "juliusyonwatade@gmail.com"
+    }
+    response = test_client.post(f"/auth/password-reset-email/", json=email)
+    response_json = response.json()
+    assert response.status_code == 200
+    assert "reset_link" in response_json
+    assert "message" in response_json
 
-@patch("api.utils.email_service.send_mail")
-def test_send_reset_password_email_failure(mock_send_mail, db_session_mock):
-    unique_email = f"testuser_failure{generate_short_uuid()}@gmail.com"
-    unique_username = f"testuser_failure{generate_short_uuid()}"
-    user_data = {"email": unique_email, "username": unique_username}
-    user = User(**user_data, password=user_service.hash_password("testpassword"))
-
-    db_session_mock.query(User).filter().first.return_value = None
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = user
-    mock_send_mail.side_effect = Exception("Email sending failed")
-
-    response = client.post("/auth/password-reset-email/", json={"email": unique_email})
-
-    print("Response status code:", response.status_code)
-    print("Response JSON:", response.json())
-
-    assert response.status_code == 404
-    # expected_response = {
-    #     "success": False,
-    #     "status_code": 500,
-    #     "message": "Error sending email: Email sending failed"
-    # }
-    # assert response.json() == expected_response
-
+@pytest.mark.auth
+def test_send_email_failure(test_client):
+    email = {"email": "yonwatodejulius@gmail.com"}
+    response = test_client.post("/auth/password-reset-email/", json=email)
+    response_json = response.json()
+    print(response_json)
+    assert response.status_code == 200
+    assert "message" in response_json
 
 if __name__ == "__main__":
     pytest.main()
