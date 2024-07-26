@@ -76,7 +76,6 @@ def test_send_reset_password_email_success(mock_send_mail, db_session_mock):
     # assert response_json["reset_link"].startswith("http://localhost:7001/reset-password?token=")
     # assert "user_id=" in response_json["reset_link"]
 
-
 @patch("api.utils.email_service.send_mail")
 def test_send_reset_password_email_failure(mock_send_mail, db_session_mock):
     unique_email = f"testuser_failure{generate_short_uuid()}@example.com"
@@ -88,7 +87,6 @@ def test_send_reset_password_email_failure(mock_send_mail, db_session_mock):
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = user
-
     mock_send_mail.side_effect = Exception("Email sending failed")
 
     response = client.post("/auth/password-reset-email/", json={"email": unique_email})
