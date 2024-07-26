@@ -33,5 +33,23 @@ class TestimonialService(Service):
     def delete(self, db: Session, id: str):
         '''Deletes a specific testimonial'''
         pass
+    
+    def get_paginated_testimonials(self, db: Session, page: int, per_page: int):
+        # Calculate start and end points for pagination
+        start = (page - 1) * per_page
+        end = start + per_page
+
+        # Retrieve testimonials from database
+        testimonials = db.query(Testimonial).all()
+
+        # Total testimonials pages
+        total_pages = (len(testimonials) + per_page - 1) // per_page
+        # Total testimonials
+        total_testimonial = len(testimonials)
+
+        # Get needed data only
+        paginated_testimonials = testimonials[start:end]
+
+        return paginated_testimonials, total_testimonial, total_pages
 
 testimonial_service = TestimonialService()

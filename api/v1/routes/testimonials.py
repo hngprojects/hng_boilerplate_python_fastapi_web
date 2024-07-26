@@ -1,18 +1,20 @@
-from fastapi import Depends, Query, APIRouter, status, HTTPException
+"""
+All Testimonials Retrieval Module
+"""
+from fastapi import Depends, Query
 from api.v1.services.user import user_service
 from api.utils.json_response import JsonResponseDict
 from fastapi.responses import JSONResponse
 from api.db.database import get_db
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from api.v1.services.rate_limiter import rate_limiter
-from api.v1.models.testimonial import Testimonial
 from api.v1.schemas.testimonial import PaginatedTestimonials
 from api.v1.routes.testimonial import testimonial
+from api.v1.services.testimonial import TestimonialService
+
+testimonial_service = TestimonialService()
 
 
-@testimonial.get("", response_model=PaginatedTestimonials,
-                        dependencies=[Depends(rate_limiter)])
+@testimonial.get("", response_model=PaginatedTestimonials)
 async def get_testimonials(page: int = Query(1, ge=1),
                            current_user: str = Depends(
                                user_service.get_current_user),
@@ -27,31 +29,21 @@ async def get_testimonials(page: int = Query(1, ge=1),
         db (Session, optional): Current database session.
             Defaults to Depends(get_db).
 
-
     Returns:
         clients testimonials
     """
-    # calculate start and end points for pagination
     per_page = 3
-    start = (page - 1) * per_page
-    end = start + per_page
 
     try:
-        # Retrieve testimonials from database
-        testimonials = db.query(Testimonial).all()
+        # Use service to get paginated testimonials
+        testimonials, total_testimonial, total_pages = testimonial_service.get_paginated_testimonials(
+            db, page, per_page)
 
-        # Total testimonials pages
-        total_pages = (len(testimonials) + per_page - 1) // per_page
-        # Total testimonial
-        total_testimonial = len(testimonials)
-
-        # get needed data only
-        testimonials = testimonials[start:end]
         if not testimonials:
             return JSONResponse(status_code=404, content={
                 'status_code': 404, 'message': "No testimonials found"})
 
-        # paginated response
+        # Paginated response
         response = {
             "message": "Testimonials retrieved successfully",
             "status_code": 200,
