@@ -1,14 +1,13 @@
-from typing import Any, Optional
-from uuid import UUID
-
+from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from api.core.base.services import Service
-from api.utils.db_validators import check_model_existence
 from api.v1.models.blog import Blog
 from api.v1.models.user import User
 from api.v1.schemas.blog import BlogCreate
+from api.core.base.services import Service
+from api.v1.models.blog_dislike import BlogDislike
+from api.utils.db_validators import check_model_existence
 
 
 class BlogService:
@@ -59,11 +58,16 @@ class BlogService:
 
         return blog_post
 
-
     def fetch_post(self, blog_id: str):
         '''Fetch a blog post by its ID'''
         blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
         return blog_post
+
+    def fetch_blog_dislike(self, blog_id: str, user_id: str):
+        '''Fetch a blog dislike by blog ID & ID of user who disliked it'''
+        blog_dislike = self.db.query(BlogDislike).filter_by(
+            blog_id=blog_id, user_id=user_id).first()
+        return blog_dislike
     
     def delete(self, blog_id: str):
         post = self.fetch_post(blog_id=blog_id)

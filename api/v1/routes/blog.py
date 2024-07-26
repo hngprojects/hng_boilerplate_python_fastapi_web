@@ -47,6 +47,8 @@ def dislike_blog_post(
     ):
     
     try:
+        blog_service = BlogService(db)
+
         if not current_user:
             return JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -57,7 +59,7 @@ def dislike_blog_post(
             )
 
         # GET blog post
-        blog_p = db.query(Blog).filter(Blog.id == blog_id).first()
+        blog_p = blog_service.fetch_post(blog_id)
         if not isinstance(blog_p, Blog):
             return JSONResponse(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -68,8 +70,7 @@ def dislike_blog_post(
             )
         
         # CONFIRM current user has NOT disliked before
-        blog_dislike = db.query(BlogDislike).filter_by(
-            user_id=current_user.id, blog_id=blog_p.id).first()
+        blog_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
         if isinstance(blog_dislike, BlogDislike):
             return JSONResponse(
                 status_code=status.HTTP_403_FORBIDDEN,
