@@ -62,7 +62,7 @@ class ProductService(Service):
     def update(self, db: Session, id: str, schema):
         '''Updates a product'''
 
-        product = self.fetch(id=id)
+        product = self.fetch(db=db, id=id)
         
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
