@@ -6,10 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="7f86f3bf-d7e1-4a89-bb37-30a883c4fed0" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/core/dependencies/email.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/core/dependencies/email.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/utils/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/utils/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/v1/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/v1/routes/auth.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tests/v1/password_reset_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/v1/password_reset_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,6 +105,10 @@
           <url>file://$PROJECT_DIR$/api/v1/models/user.py</url>
           <line>25</line>
           <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/api/v1/services/user.py</url>
+          <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
