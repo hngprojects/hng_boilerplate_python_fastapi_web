@@ -3,7 +3,7 @@ from typing import List
 
 
 class Testimonial(BaseModel):
-    id: int
+    id: str
     client_name: str
     client_designation: str
     testimonial: str
