@@ -1,11 +1,16 @@
 from fastapi import Depends, status, APIRouter, Response, Request, HTTPException
 
-from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
 from api.v1.models import User
 from typing import Annotated, Optional
+from typing_extensions import Annotated
+from datetime import datetime, timedelta
+
+from api.v1.schemas.user import UserCreate
+from api.v1.schemas.token import TokenRequest, EmailRequest
+
 from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
