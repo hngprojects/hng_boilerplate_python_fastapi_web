@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from api.v1.schemas import invitations
 from api.db.database import get_db as get_session
 from api.v1.services import invite
+from api.v1.models.user import User
+from api.v1.services.user import user_service
 import logging
 
 invites = APIRouter(prefix='/invite', tags=["Invitation Management"])
@@ -20,7 +22,7 @@ async def generate_invite_link(invite_schema: invitations.InvitationCreate, requ
 
 # Add user to organization
 @invites.post("/accept", tags=["Invitation Management"])
-async def add_user_to_organization(request: Request, user_data: invitations.UserAddToOrganization, session: Session = Depends(get_session)):
+async def add_user_to_organization(request: Request, user_data: invitations.UserAddToOrganization, session: Session = Depends(get_session), current_user: User = Depends(user_service.get_current_user)):
     logging.info("Received request to accept invitation.")
     query_params = parse_qs(urlparse(user_data.invitation_link).query)
     invite_id = query_params.get('invitation_id', [None])[0]

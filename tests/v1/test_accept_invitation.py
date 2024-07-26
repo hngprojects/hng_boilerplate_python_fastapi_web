@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from uuid_extensions import uuid7
 from fastapi import status
 from fastapi import HTTPException
+from api.v1.services.user import user_service
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -18,9 +19,9 @@ from api.v1.models.org import Organization
 from api.v1.services.invite import InviteService
 from api.db.database import get_db
 
-
 INVITE_CREATE_ENDPOINT = '/api/v1/invite/create'
 INVITE_ACCEPT_ENDPOINT = '/api/v1/invite/accept'
+LOGIN_ENDPOINT = 'api/v1/auth/login'
 
 client = TestClient(app)
 
@@ -83,12 +84,13 @@ def test_accept_invitation_valid_link(mock_db_session, mock_invite_service):
     create_mock_user(mock_db_session, user_id)
     create_mock_organization(mock_db_session, org_id)
     create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid=True)
-
+    access_token = user_service.create_access_token(str(user_id))
     mock_db_session.execute.return_value.fetchall.return_value = []
+
 
     response = client.post(INVITE_ACCEPT_ENDPOINT, json={
         "invitation_link": f"http://testserver/api/v1/invite/accept?invitation_id={invitation_id}"
-    })
+    }, headers={'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -105,7 +107,7 @@ def test_accept_invitation_expired_link(mock_db_session, mock_invite_service):
     org_id = str(uuid7())
     invitation_id = str(uuid7())
     expiration = datetime.now(timezone.utc) - timedelta(days=1)
-
+    access_token = user_service.create_access_token(str(user_id))
     create_mock_user(mock_db_session, user_id)
     create_mock_organization(mock_db_session, org_id)
     create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid=True)
@@ -114,7 +116,8 @@ def test_accept_invitation_expired_link(mock_db_session, mock_invite_service):
 
     response = client.post(INVITE_ACCEPT_ENDPOINT, json={
         "invitation_link": f"http://testserver/api/v1/invite/accept?invitation_id={invitation_id}"
-    })
+    }, headers={'Authorization': f'Bearer {access_token}'})
+
     
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'success': False, 'status_code': 400, 'message': 'Expired invitation link'}
@@ -123,11 +126,18 @@ def test_accept_invitation_expired_link(mock_db_session, mock_invite_service):
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_accept_invitation_malformed_link(mock_db_session):
     """Test for accepting a malformed invitation link."""
+    user_id = str(uuid7())
+    org_id = str(uuid7())
+    invitation_id = str(uuid7())
+    expiration = datetime.now(timezone.utc) - timedelta(days=1)
+    access_token = user_service.create_access_token(str(user_id))
+    create_mock_user(mock_db_session, user_id)
+    create_mock_organization(mock_db_session, org_id)
+    create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid=True)
     response = client.post(INVITE_ACCEPT_ENDPOINT, json={
         "invitation_link": "http://testserver/api/v1/invite/accept?wrong_param=123"
-    })
+    }, headers={'Authorization': f'Bearer {access_token}'})
 
-    print(response.json())
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json() == {'success': False, 'status_code': 400, 'message': 'Invalid invitation link'}
 
@@ -143,14 +153,14 @@ def test_load_testing(mock_db_session, mock_invite_service):
     create_mock_user(mock_db_session, user_id)
     create_mock_organization(mock_db_session, org_id)
     create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid=True)
-
+    access_token = user_service.create_access_token(str(user_id))
 
     mock_db_session.execute.return_value.fetchall.return_value = []
     responses = []
     for _ in range(100):  # Simulate 100 concurrent requests
         response = client.post(INVITE_ACCEPT_ENDPOINT, json={
             "invitation_link": f"http://testserver/api/v1/invite/accept?invitation_id={invitation_id}"
-        })
+        }, headers={'Authorization': f'Bearer {access_token}'})
         responses.append(response)
 
     success_count = sum(1 for r in responses if r.status_code == 200)
