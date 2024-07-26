@@ -1,10 +1,9 @@
 from fastapi import Depends, status, APIRouter, HTTPException, Header
 from sqlalchemy.orm import Session
 from api.db.database import get_db
-from api.v1.models.user import User
-from api.v1.models.profile import Profile
 from api.v1.schemas.customer import CustomerUpdate, SuccessResponse
 from api.utils.dependencies import get_super_admin
+from api.v1.services.customers import get_user, get_user_profile
 from typing import Annotated, Optional
 
 customers = APIRouter(prefix="/customers", tags=["customers"])
@@ -40,8 +39,8 @@ def update_customer(
     get_super_admin(db=db, token=token)
 
     # Fetch the customer and profile from the database
-    customer = db.query(User).filter(User.id == customer_id).first()
-    customer_profile = db.query(Profile).filter(Profile.user_id == customer_id).first()
+    customer = get_user(db, customer_id)
+    customer_profile = get_user_profile(db, customer_id)
 
     if not customer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found.")

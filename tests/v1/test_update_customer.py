@@ -50,7 +50,7 @@ def test_customer():
 
 @pytest.fixture
 def access_token_admin(test_admin):
-    return user_service.create_admin_access_token(test_admin.username)
+    return user_service.create_access_token(test_admin.id)
 
 # Test successful customer update
 def test_update_customer_success(mock_db_session, test_customer, access_token_admin, test_admin):
