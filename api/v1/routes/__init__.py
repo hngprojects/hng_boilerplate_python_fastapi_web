@@ -9,7 +9,6 @@ from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
 from api.v1.routes.blog import blog
 from api.v1.routes.waitlist import waitlist as waitlist_router
-
 from api.v1.routes.billing_plan import bill_plan
 from api.v1.routes.google_login import google_auth
 from api.v1.routes.notifications import notifications
