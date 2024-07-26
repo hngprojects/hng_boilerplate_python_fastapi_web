@@ -7,7 +7,10 @@ from api.v1.models import User, ActivityLog
 from api.db.database import get_db
 from api.v1.schemas.activity_log import ActivityLogCreate, ActivityLogResponse, GetActivityLogResponse
 from datetime import datetime
-
+"""
+Router module for activity-logs
+POST, GET
+"""
 
 router = APIRouter()
 
