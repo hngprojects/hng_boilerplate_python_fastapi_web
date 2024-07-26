@@ -72,7 +72,7 @@ def test_send_reset_password_email_success(mock_send_mail, db_session_mock):
     assert response.status_code == 404
     response_json = response.json()
 
-    # assert response_json["message"] == "We don't have user with the provided email in our database."
+    assert response_json["message"] == "We don't have user with the provided email in our database."
     # assert response_json["reset_link"].startswith("http://localhost:7001/reset-password?token=")
     # assert "user_id=" in response_json["reset_link"]
 
