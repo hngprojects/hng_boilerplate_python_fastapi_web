@@ -77,7 +77,7 @@ def test_update_product_with_valid_token(db_session_mock, mock_get_current_user,
     }
 
     response = client.put(
-        "/api/v1/product/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
+        "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json=product_update,
         headers={"Authorization": "Bearer valid_token"}
     )
@@ -99,7 +99,7 @@ def test_update_product_with_invalid_token(db_session_mock, mock_get_current_use
     mocker.patch('api.utils.dependencies.get_current_user', side_effect=HTTPException(status_code=401, detail="Invalid credentials"))
     
     response = client.put(
-        "/api/v1/product/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
+        "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json={"name": "Product"},
         headers={"Authorization": "Bearer invalid_token"}
     )
@@ -116,7 +116,7 @@ def test_update_product_with_missing_fields(db_session_mock, mock_get_current_us
     mocker.patch('jwt.decode', return_value={"user_id": "user_id"})
     
     response = client.put(
-        "/api/v1/product/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
+        "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json={},
         headers={"Authorization": "Bearer valid_token"}
     )
@@ -160,7 +160,7 @@ def test_update_product_with_special_characters(db_session_mock, mock_get_curren
     }
     
     response = client.put(
-        "/api/v1/product/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
+        "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json=product_update,
         headers={"Authorization": "Bearer valid_token"}
     )
