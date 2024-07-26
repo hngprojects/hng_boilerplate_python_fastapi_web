@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
-from api.db.database import get_db
-from api.v1.models.user import User
-from api.utils.dependencies import get_current_user, get_super_admin
-from api.v1.services.blog import BlogService
-from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
+from sqlalchemy.orm import Session
+
+from api.db.database import get_db
+from api.utils.dependencies import get_current_user, get_super_admin
 from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogResponse, BlogCreate, BlogPostResponse, BlogRequest, BlogUpdateResponseModel
+from api.v1.models.user import User
+from api.v1.schemas.blog import (BlogCreate, BlogPostResponse, BlogRequest,
+                                 BlogResponse, BlogUpdateResponseModel)
+from api.v1.services.blog import BlogService
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -87,7 +89,6 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
     except HTTPException as e:
         raise e
     except Exception as e:
-        # Catch any other exceptions and raise an HTTP 500 error
         raise HTTPException(
             status_code=500, detail="An unexpected error occurred")
 
@@ -96,3 +97,16 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
         "message": "Blog post updated successfully",
         "data": {"post": jsonable_encoder(updated_blog_post)}
     }
+    
+@blog.delete("/{id}")
+async def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(get_super_admin)):
+    blog_service = BlogService(db=db)
+    if not current_user:
+        return {"status_code":403, "message":"Unauthorized User"}
+    post = blog_service.fetch_post(blog_id=id)
+
+    if not post:
+        return {"message": "Blog with the given ID does not exist", "status_code": 404}
+    
+    blog_service.delete(blog_id=id)
+    return {"message": "Blog post deleted successfully", "status_code": 200}
