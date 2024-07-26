@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, PositiveFloat
+from pydantic import BaseModel, Field, PositiveFloat, ConfigDict
 from typing import List, Optional, Any, Dict
 from datetime import datetime
 
@@ -62,3 +62,26 @@ class ProductList(BaseModel):
     message: str
     data: ProductData
     
+
+class DashboardProductData(BaseModel):
+    """
+    Pydantic model for Product data.
+    """
+    
+    id: str = Field(..., description="The unique identifier of the product")
+    name: str = Field(..., description="The name of the product")
+    description: Optional[str] = Field(None, description="The description of the product")
+    price: float = Field(..., description="The price of the product")
+    org_id: str = Field(..., description="The ID of the organization that owns the product")
+
+    model_config = ConfigDict(from_attributes=True)
+
+class DashboardProductResponse(BaseModel):
+    """
+    Pydantic model for the Product API response.
+    """
+    status_code: int = Field(..., description="The HTTP status code of the response")
+    message: str = Field(..., description="A message describing the result of the operation")
+    data: DashboardProductData
+
+    model_config = ConfigDict(from_attributes=True)
