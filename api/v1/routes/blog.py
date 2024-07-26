@@ -42,16 +42,17 @@ def dislike_blog_post(blog_id: str,
             }
 
         # GET blog post
-        blog_p = db.query(Blog).filter_by(id=blog_id).first()
-        if not blog_p:
+        blog_p = db.query(Blog).filter(Blog.id == blog_id).first()
+        if not isinstance(blog_p, Blog):
             response.status_code = status.HTTP_404_NOT_FOUND
             return {
                 "status_code": f"{status.HTTP_404_NOT_FOUND}", 
                 "message": "Blog post not found"
             }
         
-        # CONFIRM current user has not disliked before
-        if db.query(BlogDislike).filter_by(user_id=current_user.id, blog_id=blog_p.id).first():
+        # CONFIRM current user has NOT disliked before
+        blog_dislike = db.query(BlogDislike).filter_by(user_id=current_user.id, blog_id=blog_p.id).first()
+        if isinstance(blog_dislike, BlogDislike):
             response.status_code = status.HTTP_403_FORBIDDEN
             return {
                 "status_code": f"{status.HTTP_403_FORBIDDEN}", 
