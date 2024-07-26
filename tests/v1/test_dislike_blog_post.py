@@ -3,8 +3,8 @@ from main import app
 from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from api.db.database import get_db
-from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
 from api.v1.services.user import user_service
 from api.v1.models import User, Blog, BlogDislike
 
@@ -15,8 +15,17 @@ client = TestClient(app)
 def mock_db_session(mocker):
     db_session_mock = mocker.MagicMock(spec=Session)
     app.dependency_overrides[get_db] = lambda: db_session_mock
-    db_session_mock.user_service = user_service
+    # db_session_mock.user_service = user_service
+    # ``user_service mock`` above is replaced with ``mock_user_service`` 
+    # fixture below, cos it's failing some tests in `test_superadmin`
     return db_session_mock
+
+
+@pytest.fixture
+def mock_user_service():
+    with patch("api.v1.services.user.user_service", autospec=True) as user_service_mock:
+        yield user_service_mock
+
 
 # Test User
 @pytest.fixture
@@ -64,12 +73,11 @@ def test_successful_dislike(
     test_blog,
     access_token_user1,
 ):
-    mock_db_session.user_service.get_current_user = test_user
+    mock_user_service.get_current_user = test_user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_blog
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = None
 
     resp = make_request(test_blog.id, access_token_user1)
-    print(resp.json())
     assert resp.status_code == 200
     assert resp.json()['message'] == "Dislike recorded successfully."
 
@@ -82,13 +90,12 @@ def test_double_dislike(
     test_blog_dislike,
     access_token_user1,
 ):
-    mock_db_session.user_service.get_current_user = test_user
+    mock_user_service.get_current_user = test_user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_blog
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = test_blog_dislike
 
     ### TEST ATTEMPT FOR MULTIPLE DISLIKING... ###
     resp = make_request(test_blog.id, access_token_user1)
-    print(f"Unauth {resp.json()}")
     assert resp.status_code == 403
     assert resp.json()['message'] == "You have already disliked this blog post"
 
@@ -98,12 +105,11 @@ def test_wrong_blog_id(
     test_user,
     access_token_user1,
 ):
-    mock_db_session.user_service.get_current_user = test_user
+    mock_user_service.get_current_user = test_user
 
     ### TEST REQUEST WITH WRONG blog_id ###
     ### using random uuid instead of blog1.id  ###
     resp = make_request(str(uuid7()), access_token_user1)
-    print(f"Wrong ID {resp.json()}")
     assert resp.status_code == 404
     assert resp.json()['message'] == "Blog post not found"
 
@@ -113,13 +119,13 @@ def test_wrong_auth_token(
     mock_db_session,
     test_blog
 ):
-    mock_db_session.user_service.get_current_user = None
+    mock_user_service.get_current_user = None
 
     ### TEST ATTEMPT WITH INVALID AUTH... ###
     resp = make_request(test_blog.id, None)
-    print(f"Unauth {resp.json()}")
     assert resp.status_code == 401
     assert resp.json()['message'] == 'Could not validate crenentials'
+
 
 # import jwt
 # import time
