@@ -50,7 +50,7 @@ def test_update_job_not_found(client, mocker):
         headers={"Authorization": "Bearer valid_token"}
     )
     assert response.status_code == 404
-    assert response.json()["detail"] == "Job not found"  # Ensure this matches your app's error message
+    assert response.json()["detail"] == "Job not found"
 
 def test_update_job_invalid_id(client, mocker):
     response = client.put(
@@ -65,7 +65,7 @@ def test_update_job_invalid_id(client, mocker):
         },
         headers={"Authorization": "Bearer valid_token"}
     )
-    assert response.status_code == 422  # Ensure the app is configured to return 422 for invalid ID
+    assert response.status_code == 422  
 
 def test_update_job_invalid_body(client, mocker):
     mock_job = MagicMock(spec=Job)
