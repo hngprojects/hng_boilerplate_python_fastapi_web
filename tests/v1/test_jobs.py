@@ -1,4 +1,3 @@
-# tests/test_jobs.py
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
@@ -11,7 +10,6 @@ def client():
     return TestClient(app)
 
 def test_update_job_success(client, mocker):
-    # Mock the database call to get the job and to update it
     mock_job = MagicMock(spec=Job)
     mock_job.id = "1"
     mock_job.user_id = "user1"
