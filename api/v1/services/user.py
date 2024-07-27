@@ -1,12 +1,11 @@
 from typing import Any, Optional, Dict
-import bcrypt, datetime as dt
 from fastapi.security import OAuth2PasswordBearer
 import jwt
-from jwt import PyJWTError  # Correct import for PyJWTError
+from jwt import PyJWTError
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from api.core.base.services import Service
 from api.db.database import get_db
@@ -16,7 +15,13 @@ from api.v1.models.user import User
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 
-oauth2_scheme = OAuth2PasswordBearer("/api/v1/auth/login")
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -108,52 +113,67 @@ class UserService(Service):
 
     def create_access_token(self, user_id: str) -> str:
         """Function to create access token"""
-        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
+        expires = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         data = {"user_id": user_id, "exp": expires, "type": "access"}
-        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        logger.debug(f"Access token created with payload: {data}")
         return encoded_jwt
 
     def create_refresh_token(self, user_id: str) -> str:
         """Function to create access token"""
-        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
+        expires = datetime.now(timezone.utc) + timedelta(
             days=settings.JWT_REFRESH_EXPIRY
         )
-
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
-        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        logger.debug(f"Refresh token created with payload: {data}")
         return encoded_jwt
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Function to decode and verify access token"""
         try:
-            payload = jwt.decode(access_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            logger.debug(f"Decoding access token: {access_token}")
+            payload = jwt.decode(
+                access_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
             user_id = payload.get("user_id")
             token_type = payload.get("type")
             if user_id is None:
+                logger.error("User ID is None in token payload")
                 raise credentials_exception
             if token_type == "refresh":
+                logger.error("Token type is refresh, which is not allowed for access token")
                 raise HTTPException(detail="Refresh token not allowed", status_code=400)
             token_data = user.TokenData(id=user_id)
+            logger.debug(f"Token decoded successfully with data: {token_data}")
 
-        except PyJWTError:
+        except PyJWTError as e:
+            logger.error(f"Error decoding token: {e}")
             raise credentials_exception
         return token_data
 
     def verify_refresh_token(self, refresh_token: str, credentials_exception):
         """Function to decode and verify refresh token"""
         try:
-            payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            logger.debug(f"Decoding refresh token: {refresh_token}")
+            payload = jwt.decode(
+                refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
             user_id = payload.get("user_id")
             token_type = payload.get("type")
             if user_id is None:
+                logger.error("User ID is None in token payload")
                 raise credentials_exception
             if token_type == "access":
+                logger.error("Token type is access, which is not allowed for refresh token")
                 raise HTTPException(detail="Access token not allowed", status_code=400)
             token_data = user.TokenData(id=user_id)
+            logger.debug(f"Token decoded successfully with data: {token_data}")
 
-        except PyJWTError:
+        except PyJWTError as e:
+            logger.error(f"Error decoding token: {e}")
             raise credentials_exception
         return token_data
 
@@ -178,9 +198,22 @@ class UserService(Service):
         
         token = self.verify_access_token(access_token, credentials_exception)
         user = db.query(User).filter(User.id == token.id).first()
+        
+        if user is None:
+            logger.error("User not found with the given token")
+            raise credentials_exception
+        
+        logger.debug(f"Current user fetched: {user}")
         return user
-    
-    def deactivate_user(self, request: Request, db: Session, schema: user.DeactivateUserSchema, user: User):
+
+
+    def deactivate_user(
+        self,
+        request: Request,
+        db: Session,
+        schema: user.DeactivateUserSchema,
+        user: User,
+    ):
         """Function to deactivate a user"""
         if not schema.confirmation:
             raise HTTPException(
@@ -197,12 +230,16 @@ class UserService(Service):
         """This function reactivates a user account"""
         # Validate the token
         try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+            logger.debug(f"Decoding reactivation token: {token}")
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
             user_id = payload.get("user_id")
             if user_id is None:
                 raise HTTPException(400, "Invalid token")
 
-        except PyJWTError:
+        except PyJWTError as e:
+            logger.error(f"Error decoding token: {e}")
             raise HTTPException(400, "Invalid token")
         user = db.query(User).filter(User.id == user_id).first()
         if user.is_active:
