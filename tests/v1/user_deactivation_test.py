@@ -19,7 +19,6 @@ from datetime import datetime, timezone
 client = TestClient(app)
 DEACTIVATION_ENDPOINT = '/api/v1/users/deactivation'
 LOGIN_ENDPOINT = 'api/v1/auth/login'
-MAGIC_ENDPOINT = '/api/v1/auth/request-magic-link'
 
 
 @pytest.fixture
