@@ -179,6 +179,7 @@ def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_curr
     return {"message": "Hello, admin!"}
 
 
+
 @auth.post("/request-magic-link", status_code=status.HTTP_200_OK)
 def request_magic_link(request: MagicLinkRequest, response: Response, db: Session = Depends(get_db)):
     user = user_service.fetch_by_email(
