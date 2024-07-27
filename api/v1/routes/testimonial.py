@@ -91,7 +91,7 @@ async def delete_all_testimonials(db: Session = Depends(get_db)):
             detail=str(e)
         )
 
-@testimonial.get("/api/testimonials")
+@testimonial.get("/")
 async def get_testimonials(
     db: Session = Depends(get_db),
     params: Params = Depends(),
