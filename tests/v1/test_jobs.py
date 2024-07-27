@@ -46,7 +46,6 @@ MOCK_USER.is_admin = False
 @pytest.fixture(scope="module")
 def client():
     with TestClient(app) as client:
-        # Override the dependency that fetches the current user
         app.dependency_overrides[get_current_user] = lambda: MOCK_USER
         yield client
 
@@ -59,7 +58,6 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture):
         salary="Original Salary",
         job_type="Original Job Type",
         company_name="Original Company"
-    
     )
     mock_job.user_id = MOCK_USER.id
     
@@ -75,11 +73,12 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture):
             "salary": "Updated Salary",
             "job_type": "Updated Job Type",
             "company_name": "Updated Company Name"
-        }
+        },
+        headers={"Authorization": "Bearer mocktoken"}
     )
     assert response.status_code == 200
     assert response.json()["message"] == "Job details updated successfully"
-
+    
 def test_update_job_not_found(client: TestClient, mocker: MockerFixture):
     mocker.patch.object(JobService, "get_job_by_id", return_value=None)
 
