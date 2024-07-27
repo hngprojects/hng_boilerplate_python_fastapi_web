@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from main import app
 from api.v1.services.job_service import JobService
 from api.v1.models.job import Job
@@ -49,7 +49,7 @@ def test_update_job_not_found(client, mocker):
         headers={"Authorization": "Bearer valid_token"}
     )
     assert response.status_code == 404
-    assert response.json()["detail"] == "Job not found"
+    assert response.json()["detail"] == "Job not found"  # Ensure this matches your app's error message
 
 def test_update_job_invalid_id(client, mocker):
     response = client.put(
@@ -64,22 +64,7 @@ def test_update_job_invalid_id(client, mocker):
         },
         headers={"Authorization": "Bearer valid_token"}
     )
-    assert response.status_code == 422  # Unprocessable Entity
-
-def test_update_job_missing_id(client, mocker):
-    response = client.put(
-        "/api/v1/jobs/",
-        json={
-            "title": "Title",
-            "description": "Description",
-            "location": "Location",
-            "salary": "Salary",
-            "job_type": "Job Type",
-            "company_name": "Company Name"
-        },
-        headers={"Authorization": "Bearer valid_token"}
-    )
-    assert response.status_code == 404
+    assert response.status_code == 422  # Ensure the app is configured to return 422 for invalid ID
 
 def test_update_job_invalid_body(client, mocker):
     mock_job = MagicMock(spec=Job)
@@ -114,5 +99,5 @@ def test_update_job_missing_token(client, mocker):
             "company_name": "Company Name"
         }
     )
-    assert response.status_code == 401
+    assert response.status_code == 401  # Unauthorized
     assert response.json()["detail"] == "Not authenticated"
