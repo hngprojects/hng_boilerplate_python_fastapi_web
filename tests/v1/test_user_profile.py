@@ -71,8 +71,8 @@ def test_errors(mock_user_service, mock_db_session):
         "password": "Testpassword@123"
     })
     response = login.json()
-    assert response.get("status_code") == status.HTTP_200_OK
-    access_token = response.get('data').get('access_token')
+    assert login.status_code == status.HTTP_200_OK
+    access_token = response.get('access_token')
     missing_field = client.post(PROFILE_ENDPOINT, json={
         "job_title": "developer",
         "department": "backend",
@@ -103,8 +103,8 @@ def test_user_profile_exists(mock_user_service, mock_db_session):
         "password": "Testpassword@123"
     })
     response = login.json()
-    assert response.get("status_code") == status.HTTP_200_OK
-    access_token = response.get('data').get('access_token')
+    assert login.status_code == status.HTTP_200_OK
+    access_token = response.get('access_token')
     profile_exists = client.post(PROFILE_ENDPOINT, json={
         "pronouns": "he/him",
         "job_title": "developer",
