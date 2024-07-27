@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from main import app
 from api.v1.services.job_service import JobService
 from api.v1.models.job import Job
+from api.v1.models.job import Job
 from unittest.mock import MagicMock
 
 @pytest.fixture(scope="module")
@@ -20,7 +21,7 @@ def test_update_job_success(client, mocker):
     mocker.patch.object(JobService, "update_job", return_value=mock_job)
 
     response = client.put(
-        "/api/v1",
+        "/api/v1/jobs/1",
         json={
             "title": "Updated Title",
             "description": "Updated Description",
