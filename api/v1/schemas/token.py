@@ -10,6 +10,7 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     user_id: Optional[str] = None
+    username: Optional[str] = None
 
 
 class LoginRequest(BaseModel):
@@ -24,3 +25,6 @@ class TokenRequest(BaseModel):
     email: EmailStr
     token: str
     
+
+class OAuthToken(BaseModel):
+    access_token: str

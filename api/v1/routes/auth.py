@@ -7,6 +7,11 @@ from typing_extensions import Annotated
 from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
+from api.v1.schemas.token import TokenRequest, EmailRequest
+from typing import Annotated
+from datetime import datetime, timedelta
+
+from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
