@@ -66,4 +66,3 @@ watchfiles==0.22.0
 websockets==12.0
 pytz==2024.1
 utils
-utils.json_response
