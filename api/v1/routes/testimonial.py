@@ -12,10 +12,9 @@ from api.utils.success_response import success_response
 from api.utils.json_response import JsonResponseDict
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
-from fastapi_pagination import Page, Params
+from fastapi_pagination import Page, Params, paginate
 from datetime import datetime
 from api.v1.services.user import UserService
-from fastapi_pagination.ext.sqlalchemy import paginate
 
 testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
@@ -116,24 +115,4 @@ async def get_testimonials(
     if created_at:
         query = query.filter(Testimonial.created_at == created_at)
 
-    total = query.count()
-    total_pages = (total + params.size - 1) // params.size
-
-    if params.page > total_pages:
-        params.page = total_pages
-
-    query = query.offset((params.page - 1) * params.size).limit(params.size)
-    testimonials = query.all()
-
-    return paginate ({
-        "message": "Testimonials retrieved successfully",
-        "status_code": 200,
-        "data": testimonials,
-        "pagination": {
-            "current_page": params.page,
-            "per_page": params.size,
-            "total_pages": total_pages,
-            "total_testimonials": total
-        }
-    })
-
+    return paginate(query, params)
