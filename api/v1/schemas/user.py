@@ -55,19 +55,7 @@ class DeactivateUserSchema(BaseModel):
     """Schema for deactivating a user"""
 
     reason: Optional[str] = None
-    confirmation: bool
-
-
-class ChangePasswordSchema(BaseModel):
-    """Schema for changing password of a user"""
-
-    old_password: str
-    new_password: str
-
-
-class ChangePwdRet(BaseModel):
-    """schema for returning change password response"""
-
-    success: bool
-    status_code: int
-    message: str
+    
+    
+    
+    
