@@ -47,4 +47,4 @@ def test_verify_signin_token(client, db_session_mock):
     response = client.post("/api/v1/auth/verify-token", json={"email": "user@example.com", "token": "123456"})
 
     assert response.status_code == 200
-    assert "access_token" in response.json()["data"]
+    assert "access_token" in response.json()

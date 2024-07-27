@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import TokenRequest, EmailRequest
-from typing import Annotated
 from datetime import datetime, timedelta
 
 from api.v1.schemas.user import UserCreate
@@ -109,15 +108,6 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     # Create new access and refresh tokens
     access_token, refresh_token = user_service.refresh_access_token(current_refresh_token=current_refresh_token)
 
-    response = success_response(
-        status_code=200,
-        message='Tokens refreshed cuccessfully',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-        }
-    )
-
     # Add refresh token to cookies
     response.set_cookie(
         key="refresh_token",
@@ -128,7 +118,7 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
         samesite="none",
     )
 
-    return response
+    return Token(access_token=access_token, token_type='bearer')
 
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
 async def request_signin_token(email_schema: EmailRequest, db: Session = Depends(get_db)):
@@ -158,14 +148,7 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
     # Generate JWT token
     access_token = user_service.create_access_token(user_id=user.id)
 
-    return success_response(
-        status_code=200,
-        message="Sign-in successful",
-        data={
-            "access_token": access_token,
-            "token_type": "bearer"
-        }
-    )
+    return Token(access_token=access_token, token_type='bearer')
     
 
 # Protected route example: test route
