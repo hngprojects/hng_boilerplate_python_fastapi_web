@@ -4,8 +4,40 @@ from unittest.mock import MagicMock
 from main import app
 from api.v1.services.job_service import JobService
 from api.v1.models.job import Job
-from api.v1.models.job import Job
+from api.db.database import get_db
+from api.v1.models.user import User
 from unittest.mock import MagicMock
+
+client = TestClient(app)
+
+# Mock the database dependency
+@pytest.fixture
+def db_session_mock():
+    db_session = MagicMock()
+    yield db_session
+
+# Override the dependency with the mock
+@pytest.fixture(autouse=True)
+def override_get_db(db_session_mock):
+    def get_db_override():
+        yield db_session_mock
+    
+    app.dependency_overrides[get_db] = get_db_override
+    yield
+    # Clean up after the test by removing the override
+    app.dependency_overrides = {}
+
+# Mock jwt.decode
+@pytest.fixture
+def mock_jwt_decode(mocker):
+    return mocker.patch('jwt.decode', return_value={"user_id": "user_id"})    
+    
+
+@pytest.fixture
+def mock_get_current_user(mocker):
+    user = User(id='user_id', is_super_admin=False)
+    mock = mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
+    return mock
 
 @pytest.fixture(scope="module")
 def client():
