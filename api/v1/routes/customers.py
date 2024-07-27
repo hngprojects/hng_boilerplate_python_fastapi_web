@@ -3,11 +3,10 @@ from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.schemas.customer import CustomerUpdate, SuccessResponse
 from api.utils.dependencies import get_super_admin
-from api.v1.services.customers import get_user, get_user_profile
+from api.v1.services.customers import CustomerServices
 from typing import Annotated, Optional
 
 customers = APIRouter(prefix="/customers", tags=["customers"])
-
 
 
 @customers.put("/{customer_id}", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
@@ -38,9 +37,12 @@ def update_customer(
     # Use the token to check if the user is a super admin
     get_super_admin(db=db, token=token)
 
+
     # Fetch the customer and profile from the database
-    customer = get_user(db, customer_id)
-    customer_profile = get_user_profile(db, customer_id)
+    customer_services = CustomerServices()
+
+    customer = customer_services.get_user(db, customer_id)
+    customer_profile = customer_services.get_user_profile(db, customer_id)
 
     if not customer:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Customer not found.")
