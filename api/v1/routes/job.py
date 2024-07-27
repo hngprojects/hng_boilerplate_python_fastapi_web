@@ -8,9 +8,9 @@ from api.v1.models.user import User
 from api.v1.schemas.job import JobUpdate
 from api.v1.services.job_service import JobService
 
-job = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
+job_router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
-@job.patch("/{job_id}", response_model=dict, status_code=status.HTTP_200_OK)
+@job_router.patch("/{job_id}", response_model=dict, status_code=status.HTTP_200_OK)
 async def update_job_post(
     job_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -21,11 +21,9 @@ async def update_job_post(
     if not db_job_post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job post not found")
 
-    # Check if the current user is the owner of the job post or an admin
     if str(current_user.id) != str(db_job_post.user_id) and not current_user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this job post")
 
-    # Use the service to update the job post
     updated_job = JobService.update_job(db, db_job_post, job_update)
 
     return {
