@@ -8,7 +8,7 @@ from api.v1.models.user import User
 from api.v1.schemas.job import JobUpdate
 from api.v1.services.job_service import JobService
 
-job_router = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
+job_router = APIRouter(prefix="/api/v1", tags=["jobs"])
 
 @job_router.patch("/{job_id}", response_model=dict, status_code=status.HTTP_200_OK)
 async def update_job_post(

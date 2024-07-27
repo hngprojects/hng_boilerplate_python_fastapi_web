@@ -20,7 +20,7 @@ def test_update_job_success(client, mocker):
     mocker.patch.object(JobService, "update_job", return_value=mock_job)
 
     response = client.put(
-        "/api/v1/jobs",
+        "/api/v1",
         json={
             "title": "Updated Title",
             "description": "Updated Description",
