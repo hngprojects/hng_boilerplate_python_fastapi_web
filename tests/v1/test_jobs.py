@@ -1,33 +1,25 @@
 # tests/test_jobs.py
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from unittest.mock import MagicMock, patch
 from main import app
-from api.db.database import Base, get_db
-from api.utils.config import settings
+from api.v1.services.job_service import JobService
 from api.v1.models.job import Job
-
-SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
-
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base.metadata.create_all(bind=engine)
 
 @pytest.fixture(scope="module")
 def client():
-    def override_get_db():
-        try:
-            db = TestingSessionLocal()
-            yield db
-        finally:
-            db.close()
-    app.dependency_overrides[get_db] = override_get_db
-    yield TestClient(app)
-    Base.metadata.drop_all(bind=engine)
+    return TestClient(app)
 
-def test_update_job_success(client):
+def test_update_job_success(client, mocker):
+    # Mock the database call to get the job and to update it
+    mock_job = MagicMock(spec=Job)
+    mock_job.id = "1"
+    mock_job.user_id = "user1"
+    mock_job.title = "Original Title"
+
+    mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
+    mocker.patch.object(JobService, "update_job", return_value=mock_job)
+
     response = client.put(
         "/api/v1/jobs/1",
         json={
@@ -43,7 +35,9 @@ def test_update_job_success(client):
     assert response.status_code == 200
     assert response.json()["message"] == "Job details updated successfully"
 
-def test_update_job_not_found(client):
+def test_update_job_not_found(client, mocker):
+    mocker.patch.object(JobService, "get_job_by_id", return_value=None)
+
     response = client.put(
         "/api/v1/jobs/9999",
         json={
@@ -59,7 +53,7 @@ def test_update_job_not_found(client):
     assert response.status_code == 404
     assert response.json()["detail"] == "Job not found"
 
-def test_update_job_invalid_id(client):
+def test_update_job_invalid_id(client, mocker):
     response = client.put(
         "/api/v1/jobs/invalid_id",
         json={
@@ -73,9 +67,8 @@ def test_update_job_invalid_id(client):
         headers={"Authorization": "Bearer valid_token"}
     )
     assert response.status_code == 422  # Unprocessable Entity
-    # Further assertions for the specific validation error can be added
 
-def test_update_job_missing_id(client):
+def test_update_job_missing_id(client, mocker):
     response = client.put(
         "/api/v1/jobs/",
         json={
@@ -90,7 +83,10 @@ def test_update_job_missing_id(client):
     )
     assert response.status_code == 404
 
-def test_update_job_invalid_body(client):
+def test_update_job_invalid_body(client, mocker):
+    mock_job = MagicMock(spec=Job)
+    mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
+
     response = client.put(
         "/api/v1/jobs/1",
         json={
@@ -104,9 +100,11 @@ def test_update_job_invalid_body(client):
         headers={"Authorization": "Bearer valid_token"}
     )
     assert response.status_code == 422  # Unprocessable Entity
-    # Further assertions for the specific validation error can be added
 
-def test_update_job_missing_token(client):
+def test_update_job_missing_token(client, mocker):
+    mock_job = MagicMock(spec=Job)
+    mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
+
     response = client.put(
         "/api/v1/jobs/1",
         json={
