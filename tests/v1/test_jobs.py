@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 from main import app
 from api.v1.services.job_service import JobService
 from api.v1.models.job import Job
+from api.v1.routes.job import Job
 
 @pytest.fixture(scope="module")
 def client():
