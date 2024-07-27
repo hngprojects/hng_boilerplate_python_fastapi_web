@@ -6,12 +6,16 @@ from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
 from api.v1.models.testimonial import Testimonial
-from fastapi import Depends, HTTPException, APIRouter, Request, Response, status
+from fastapi import Depends, HTTPException, APIRouter, Request, Response, status, Security, Query
 from fastapi.responses import JSONResponse
 from api.utils.success_response import success_response
 from api.utils.json_response import JsonResponseDict
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
+from fastapi_pagination import Page, Params
+from datetime import datetime
+from api.v1.services.user import UserService
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
@@ -86,3 +90,50 @@ async def delete_all_testimonials(db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=str(e)
         )
+
+@testimonial.get("/api/testimonials")
+async def get_testimonials(
+    db: Session = Depends(get_db),
+    params: Params = Depends(),
+    current_user: User = Security(UserService().get_current_user),
+    ratings: int = Query(None, ge=1, le=5, description="Rating of the testimonial (1-5)"),
+    created_at: str = Query(None, description="Date of the testimonial in YYYY-MM-DD format")
+):
+    if ratings is not None and (ratings < 1 or ratings > 5):
+        raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+
+    if created_at:
+        try:
+            datetime.strptime(created_at, '%Y-%m-%d')
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Date must be in YYYY-MM-DD format")
+
+    query = db.query(Testimonial)
+
+    if ratings:
+        query = query.filter(Testimonial.ratings == ratings)
+    
+    if created_at:
+        query = query.filter(Testimonial.created_at == created_at)
+
+    total = query.count()
+    total_pages = (total + params.size - 1) // params.size
+
+    if params.page > total_pages:
+        params.page = total_pages
+
+    query = query.offset((params.page - 1) * params.size).limit(params.size)
+    testimonials = query.all()
+
+    return paginate ({
+        "message": "Testimonials retrieved successfully",
+        "status_code": 200,
+        "data": testimonials,
+        "pagination": {
+            "current_page": params.page,
+            "per_page": params.size,
+            "total_pages": total_pages,
+            "total_testimonials": total
+        }
+    })
+
