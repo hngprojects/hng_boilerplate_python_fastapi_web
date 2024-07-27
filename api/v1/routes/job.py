@@ -9,6 +9,7 @@ from api.v1.models.user import User
 from api.v1.schemas.job import JobUpdate
 from api.v1.services.job_service import JobService
 from utils.json_response import JsonResponseDict
+from api.v1.routes.job import job
 
 job = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
