@@ -40,9 +40,8 @@ def mock_get_current_user(mocker):
     mock = mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
     return mock
 
-# Adjust MOCK_USER based on actual User model attributes
 MOCK_USER = User(id="user1", email="user@example.com")
-MOCK_USER.is_admin = False
+MOCK_USER.is_admin = False  # Ensure is_admin is set correctly
 
 @pytest.fixture(scope="module")
 def client():
@@ -52,11 +51,17 @@ def client():
         yield client
 
 def test_update_job_success(client: TestClient, mocker: MockerFixture):
-    mock_job = MagicMock(spec=Job)
-    mock_job.id = "1"
-    mock_job.user_id = MOCK_USER.id
-    mock_job.title = "Original Title"
-
+    mock_job = Job(
+        id="1",
+        title="Original Title",
+        description="Original Description",
+        location="Original Location",
+        salary="Original Salary",
+        job_type="Original Job Type",
+        company_name="Original Company",
+        user_id=MOCK_USER.id
+    )
+    
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
     mocker.patch.object(JobService, "update_job", return_value=mock_job)
 
@@ -106,7 +111,17 @@ def test_update_job_invalid_id(client: TestClient):
     assert response.status_code == 422  # Unprocessable Entity
 
 def test_update_job_invalid_body(client: TestClient, mocker: MockerFixture):
-    mock_job = MagicMock(spec=Job)
+    mock_job = Job(
+        id="1",
+        title="Original Title",
+        description="Original Description",
+        location="Original Location",
+        salary="Original Salary",
+        job_type="Original Job Type",
+        company_name="Original Company",
+        user_id=MOCK_USER.id
+    )
+    
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
 
     response = client.patch(
