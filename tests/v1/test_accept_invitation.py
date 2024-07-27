@@ -6,7 +6,8 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timedelta, timezone
 from uuid_extensions import uuid7
 from fastapi import status
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
+from urllib.parse import urlencode
 from api.v1.services.user import user_service
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -14,6 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from main import app
 from api.v1.models.user import User
+from api.v1.models.base import user_organization_association
 from api.v1.models.invitation import Invitation
 from api.v1.models.org import Organization
 from api.v1.services.invite import InviteService
@@ -63,6 +65,7 @@ def create_mock_organization(mock_db_session, org_id):
     mock_db_session.query(Organization).filter_by(id=org_id).first.return_value = mock_org
     return mock_org
 
+
 def create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid):
     mock_invitation = Invitation(
         id=invitation_id,
@@ -73,6 +76,48 @@ def create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expi
     )
     mock_db_session.query(Invitation).filter_by(id=invitation_id, is_valid=True).first.return_value = mock_invitation
     return mock_invitation
+
+@pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
+def test_create_invitation_valid_userid(mock_db_session, mock_invite_service):
+    user_id = str(uuid7())
+    org_id = str(uuid7())
+
+    create_mock_user(mock_db_session, user_id)
+    create_mock_organization(mock_db_session, org_id)
+
+    access_token = user_service.create_access_token(str(user_id))
+    mock_db_session.execute.return_value.fetchall.return_value = []
+
+    paylod = {
+        "user_id" : user_id,
+        "organization_id" : org_id
+    }
+
+    response = client.post(INVITE_CREATE_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
+    assert response.status_code == 200
+    assert response.json()['message'] == 'Invitation link created successfully'
+
+
+@pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
+def test_create_invitation_invalid_id(mock_db_session, mock_invite_service):
+    user_id = 12345
+    org_id = str(uuid7())
+    
+    create_mock_user(mock_db_session, user_id)
+    create_mock_organization(mock_db_session, org_id)
+
+    access_token = user_service.create_access_token(str(user_id))
+    mock_db_session.execute.return_value.fetchall.return_value = []
+
+    paylod = {
+        "user_id" : user_id,
+        "organization_id" : org_id
+    }
+
+    response = client.post(INVITE_CREATE_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
+    assert response.status_code == 422
+    assert response.json()['message'] == "Invalid input"
+
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_accept_invitation_valid_link(mock_db_session, mock_invite_service):

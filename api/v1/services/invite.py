@@ -3,7 +3,12 @@ from datetime import datetime, timedelta
 from pytz import utc
 from sqlalchemy.orm import Session
 from sqlalchemy import insert
-from fastapi import HTTPException, Request
+from fastapi import (
+    HTTPException,
+    Request,
+    Depends,
+    status
+    )
 from collections import OrderedDict
 from fastapi.responses import JSONResponse
 from api.db.database import get_db
@@ -14,6 +19,28 @@ from api.v1.models.base import user_organization_association
 from api.v1.schemas import invitations
 from urllib.parse import urlencode
 
+
+class CustomException(HTTPException):
+    """
+    Custom error handling
+    """
+    def __init__(self, status_code: int, detail: dict):
+        super().__init__(status_code=status_code, detail=detail)
+        self.message = detail.get("message")
+        self.success = detail.get("success")
+        self.status_code = detail.get("status_code")
+
+async def custom_exception_handler(request: Request, exc: CustomException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "message": exc.message,
+            "success": exc.success,
+            "status_code": exc.status_code
+        }
+    )
+
+
 class InviteService:
     @staticmethod
     def create(invite: invitations.InvitationCreate, request: Request, session: Session):
@@ -21,7 +48,23 @@ class InviteService:
         org = session.query(Organization).filter_by(id=invite.organization_id).first()
 
         if not user or not org:
-            raise HTTPException(status_code=400, detail="Invalid user or organization ID")
+            exceptions = HTTPException(status_code=404, detail="invalid user id or organization id")
+            print(exceptions)
+            raise exceptions
+            # raise HTTPException(status_code=400, detail="Invalid user or organization ID")
+        
+
+        user_organizations = session.execute(
+            user_organization_association.select().where(
+                user_organization_association.c.user_id == user.id,
+                user_organization_association.c.organization_id == org.id
+            )
+        ).fetchall()
+
+
+        if user_organizations:
+            logging.warning(f"User {user.id} already in organization {org.id}")
+            raise HTTPException(status_code=400, detail="User already in organization")
 
         expiration = datetime.now(utc) + timedelta(days=1)
         new_invite = Invitation(user_id=invite.user_id, organization_id=invite.organization_id, expires_at=expiration)
@@ -29,11 +72,12 @@ class InviteService:
         session.add(new_invite)
         session.commit()
         session.refresh(new_invite)
-
+        
         base_url = request.base_url
         invite_link = f'{base_url}api/v1/invite/accept?{urlencode({"invitation_id": str(new_invite.id)})}'
         
-        return {"invitation_link": invite_link}
+        response = {"message": "Invitation link created successfully", "data" : {"invitation_link": invite_link, "success": True, "status_code": status.HTTP_201_CREATED} }
+        return response
 
     @staticmethod
     def add_user_to_organization(invite_id: str, session: Session):
