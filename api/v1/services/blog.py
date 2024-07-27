@@ -5,9 +5,7 @@ from sqlalchemy.orm import Session
 from api.v1.models.blog import Blog
 from api.v1.models.user import User
 from api.v1.schemas.blog import BlogCreate
-from api.core.base.services import Service
 from api.v1.models.blog_dislike import BlogDislike
-from api.utils.db_validators import check_model_existence
 
 
 class BlogService:
@@ -63,11 +61,23 @@ class BlogService:
         blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
         return blog_post
 
+    def create_blog_dislike(self, db: Session, blog_id: str, user_id: str, ip_address: str = None):
+        """Create new blog dislike."""
+        blog_dislike = BlogDislike(blog_id=blog_id, user_id=user_id, ip_address=ip_address)
+        db.add(blog_dislike)
+        db.commit()
+        db.refresh(blog_dislike)
+        return blog_dislike
+
     def fetch_blog_dislike(self, blog_id: str, user_id: str):
         '''Fetch a blog dislike by blog ID & ID of user who disliked it'''
         blog_dislike = self.db.query(BlogDislike).filter_by(
             blog_id=blog_id, user_id=user_id).first()
         return blog_dislike
+    
+    def num_of_dislikes(self, blog_id: str) -> int:
+        '''Get the number of dislikes a blog post has'''
+        return self.db.query(BlogDislike).filter_by(blog_id=blog_id).count()
     
     def delete(self, blog_id: str):
         post = self.fetch_post(blog_id=blog_id)

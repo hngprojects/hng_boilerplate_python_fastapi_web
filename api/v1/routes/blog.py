@@ -10,6 +10,8 @@ from api.v1.models.user import User
 from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
 from api.v1.models.blog_dislike import BlogDislike
+from api.utils.json_response import JsonResponseDict
+from api.utils.success_response import success_response
 from api.utils.dependencies import get_current_user, get_super_admin
 from api.v1.schemas.blog import (BlogCreate, BlogPostResponse, BlogRequest,
                                  BlogResponse, BlogUpdateResponseModel, 
@@ -46,65 +48,45 @@ def dislike_blog_post(
     current_user: User = Depends(user_service.get_current_user)
     ):
     
-    try:
-        blog_service = BlogService(db)
+    blog_service = BlogService(db)
 
-        if not current_user:
-            return JSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content={
-                    "status_code": f"{status.HTTP_401_UNAUTHORIZED}", 
-                    "message": "Could not validate credentials"
-                }
-            )
-
-        # GET blog post
-        blog_p = blog_service.fetch_post(blog_id)
-        if not isinstance(blog_p, Blog):
-            return JSONResponse(
-                status_code=status.HTTP_404_NOT_FOUND,
-                content={
-                    "status_code": f"{status.HTTP_404_NOT_FOUND}", 
-                    "message": "Blog post not found"
-                }
-            )
-        
-        # CONFIRM current user has NOT disliked before
-        blog_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
-        if isinstance(blog_dislike, BlogDislike):
-            return JSONResponse(
-                status_code=status.HTTP_403_FORBIDDEN,
-                content={
-                    "status_code": f"{status.HTTP_403_FORBIDDEN}", 
-                    "message": "You have already disliked this blog post"
-                }
-            )
-
-        # UPDATE disikes
-        dislike = BlogDislike(
-            user_id=current_user.id,
-            blog_id=blog_p.id,
+    if not current_user:
+        return JsonResponseDict(
+            message="Could not validate credentials",
+            status_code=status.HTTP_401_UNAUTHORIZED
         )
-        db.add(dislike)
-        db.commit()
-        db.refresh(dislike)
 
-        # Return success response
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                "status_code": f"{status.HTTP_200_OK}", 
-                "message": "Dislike recorded successfully."
-            }
+    # GET blog post
+    blog_p = blog_service.fetch_post(blog_id)
+    if not isinstance(blog_p, Blog):
+        return JsonResponseDict(
+            message="Blog post not found",
+            status_code=status.HTTP_404_NOT_FOUND
         )
-    except HTTPException:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={
-                "status_code": f"{status.HTTP_400_BAD_REQUEST}", 
-                "message": "Unable to record dislike."
-            }
+    
+    # CONFIRM current user has NOT disliked before
+    existing_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
+    if isinstance(existing_dislike, BlogDislike):
+        return JsonResponseDict(
+            message="You have already disliked this blog post",
+            status_code=status.HTTP_403_FORBIDDEN
         )
+
+    # UPDATE disikes
+    new_dislike = blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
+
+    if not isinstance(new_dislike, BlogDislike):
+        return JsonResponseDict(
+            message="Unable to record dislike.",
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Return success response
+    return success_response(
+        status_code=status.HTTP_200_OK, 
+        message="Dislike recorded successfully.", 
+        data=new_dislike.to_dict()
+    )
 
 
 @blog.get("/{id}", response_model=BlogPostResponse)
