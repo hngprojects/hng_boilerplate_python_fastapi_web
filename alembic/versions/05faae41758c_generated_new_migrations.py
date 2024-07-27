@@ -1,8 +1,8 @@
-"""added users, invitation, waitlist and other  table
+"""generated new migrations
 
-Revision ID: eca40a718b7a
+Revision ID: 05faae41758c
 Revises: 
-Create Date: 2024-07-24 08:46:08.212541
+Create Date: 2024-07-24 21:19:41.591722
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'eca40a718b7a'
+revision: str = '05faae41758c'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -33,8 +33,8 @@ def upgrade() -> None:
     op.create_index(op.f('ix_contact_us_id'), 'contact_us', ['id'], unique=False)
     op.create_table('newsletters',
     sa.Column('email', sa.String(length=150), nullable=False),
-    sa.Column('title', sa.String(), nullable=False),
-    sa.Column('content', sa.Text(), nullable=False),
+    sa.Column('title', sa.String(), nullable=True),
+    sa.Column('content', sa.Text(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -57,8 +57,10 @@ def upgrade() -> None:
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), nullable=True),
-    sa.Column('is_super_admin', sa.Boolean(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_verified', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -106,7 +108,7 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('content', sa.Text(), nullable=False),
     sa.Column('image_url', sa.String(), nullable=True),
-    sa.Column('is_deleted', sa.Boolean(), nullable=True),
+    sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('excerpt', sa.Text(), nullable=True),
     sa.Column('tags', sa.Text(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
@@ -223,9 +225,6 @@ def upgrade() -> None:
     op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
     op.create_table('profiles',
     sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('username', sa.String(), nullable=True),
-    sa.Column('first_name', sa.String(), nullable=True),
-    sa.Column('last_name', sa.String(), nullable=True),
     sa.Column('pronouns', sa.String(), nullable=True),
     sa.Column('job_title', sa.String(), nullable=True),
     sa.Column('department', sa.String(), nullable=True),
@@ -283,6 +282,30 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'organization_id')
     )
+    op.create_table('blog_dislikes',
+    sa.Column('blog_id', sa.String(), nullable=False),
+    sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('ip_address', sa.String(), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['blog_id'], ['blogs.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_blog_dislikes_id'), 'blog_dislikes', ['id'], unique=False)
+    op.create_table('blog_likes',
+    sa.Column('blog_id', sa.String(), nullable=False),
+    sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('ip_address', sa.String(), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['blog_id'], ['blogs.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_blog_likes_id'), 'blog_likes', ['id'], unique=False)
     op.create_table('comments',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('blog_id', sa.String(), nullable=False),
@@ -302,6 +325,10 @@ def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_index(op.f('ix_comments_id'), table_name='comments')
     op.drop_table('comments')
+    op.drop_index(op.f('ix_blog_likes_id'), table_name='blog_likes')
+    op.drop_table('blog_likes')
+    op.drop_index(op.f('ix_blog_dislikes_id'), table_name='blog_dislikes')
+    op.drop_table('blog_dislikes')
     op.drop_table('user_organization')
     op.drop_table('user_newsletter_association')
     op.drop_index(op.f('ix_token_logins_id'), table_name='token_logins')

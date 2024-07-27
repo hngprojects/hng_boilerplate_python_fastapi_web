@@ -3,6 +3,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session, relationship
 from api.utils.success_response import success_response
 from api.v1.models import User
+from typing_extensions import Annotated
+from datetime import datetime, timedelta
+
+from api.v1.schemas.user import UserCreate
+from api.v1.schemas.token import TokenRequest, EmailRequest
 from typing import Annotated
 from datetime import datetime, timedelta
 
@@ -77,7 +82,7 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        expires=timedelta(days=30),
+        expires=timedelta(days=60),
         httponly=True,
         secure=True,
         samesite="none",
@@ -174,4 +179,5 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 @auth.get("/admin")
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
+
 
