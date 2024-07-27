@@ -4,7 +4,7 @@ from typing import Any, Optional
 import bcrypt
 import datetime as dt
 from fastapi.security import OAuth2PasswordBearer
-import JWTError
+from jwt.exceptions import JWTError
 import jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
