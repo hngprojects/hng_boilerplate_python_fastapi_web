@@ -16,7 +16,7 @@ from fastapi import status
 from datetime import datetime, timezone
 
 client = TestClient(app)
-BILLPLAN_ENDPOINT = '/api/v1/plans/1234/billing-plans/Premium'
+BILLPLAN_ENDPOINT = 'api/v1/organizations/1234/billing-plans/Premium'
 
 @pytest.fixture
 def mock_db_session():
