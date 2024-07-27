@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from main import app
 from api.v1.models.user import User
 from api.v1.models.invitation import Invitation
-from api.v1.models.org import Organization
+from api.v1.models.organization import Organization
 from api.v1.services.invite import InviteService
 from api.db.database import get_db
 

@@ -37,7 +37,6 @@ class User(BaseTableModel):
 
     profile = relationship("Profile", uselist=False, back_populates="user", cascade="all, delete-orphan")
     organizations = relationship("Organization", secondary=user_organization_association, back_populates="users")
-    roles = relationship("OrgRole", back_populates="user", cascade="all, delete-orphan")
     notifications = relationship("Notification", back_populates="user", cascade="all, delete-orphan")
     activity_logs = relationship("ActivityLog", back_populates="user", cascade="all, delete-orphan")
     jobs = relationship("Job", back_populates="author", cascade="all, delete-orphan")

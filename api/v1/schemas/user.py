@@ -48,7 +48,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Schema to structure token data"""
 
-    id: Optional[Any]
+    id: Optional[str]
 
 
 class DeactivateUserSchema(BaseModel):
@@ -68,6 +68,5 @@ class ChangePasswordSchema(BaseModel):
 class ChangePwdRet(BaseModel):
     """schema for returning change password response"""
 
-    success: bool
     status_code: int
     message: str

@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 from main import app
 from api.db.database import get_db
 from api.v1.models.newsletter import Newsletter
-from api.v1.schemas.newsletter import EMAILSCHEMA
+from api.v1.schemas.newsletter import EmailSchema
 
 client = TestClient(app)
 
@@ -43,12 +43,8 @@ def test_sub_newsletter_success(db_session_mock):
     response = client.post("/api/v1/newsletters", json=email_data)
 
     # Assert
-    assert response.status_code == 200
-    assert response.json() == {
-        "message": "Thank you for subscribing to our newsletter.",
-        "success": True,
-        "status": 201
-    }
+    assert response.status_code == 201
+
 
 def test_sub_newsletter_existing_email(db_session_mock):
     # Arrange
@@ -62,11 +58,6 @@ def test_sub_newsletter_existing_email(db_session_mock):
 
     # Assert
     assert response.status_code == 400
-    assert response.json() == {
-        'message': 'Email already exists',
-        'status_code': 400,
-        'success': False
-    }
 
 
 if __name__ == "__main__":

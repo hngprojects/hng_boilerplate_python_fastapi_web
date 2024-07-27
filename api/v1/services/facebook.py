@@ -1,10 +1,8 @@
 import requests
 from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import Annotated, Optional
+from typing import Annotated
 from uuid_extensions import uuid7
-from datetime import datetime, timedelta
-from jose import jwt
 from api.core.base.services import Service
 from api.utils.settings import settings
 from api.v1.routes.facebook_login import get_db

@@ -54,8 +54,8 @@ def db_teardown():
     except Exception as e:
         session.rollback()
         raise e
-    finally:
-        session.close()
+    # finally:
+    #     session.close()
 
 @pytest.fixture
 def client():

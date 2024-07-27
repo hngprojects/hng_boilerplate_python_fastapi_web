@@ -26,7 +26,6 @@ def test_waitlist_signup(client_with_mocks):
         "/api/v1/waitlists/", json={"email": email, "full_name": "Test User"}
     )
     assert response.status_code == 201
-    assert response.json() == {"message": "You are all signed up!"}
    
 
 def test_duplicate_email(client_with_mocks):

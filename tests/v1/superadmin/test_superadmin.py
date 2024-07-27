@@ -147,7 +147,8 @@ def test_successful_deletion(
     response = client.delete(
         f"{USER_DELETE_ENDPOINT}/{mock_id}",
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
+
     response = client.delete(
         f"{USER_DELETE_ENDPOINT}/{mock_id}",
     )

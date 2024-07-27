@@ -119,4 +119,4 @@ def test_user_password(mock_db_session, mock_user_service):
     )
 
     assert user_pwd_change.status_code == 200
-    assert user_pwd_change.json()["message"] == "Password Changed successfully"
+    assert user_pwd_change.json()["message"] == "Password changed successfully"

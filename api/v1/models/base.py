@@ -5,11 +5,9 @@ from sqlalchemy import (
         ForeignKey,
         String,
         Table,
-        Integer,
         DateTime,
         func
     )
-from sqlalchemy.dialects.postgresql import UUID
 from api.db.database import Base
 
 
@@ -17,7 +15,6 @@ user_organization_association = Table('user_organization', Base.metadata,
 	Column('user_id', String, ForeignKey('users.id',  ondelete='CASCADE'), primary_key=True),
 	Column('organization_id', String, ForeignKey('organizations.id',  ondelete='CASCADE'), primary_key=True),
     Column('status', String(20), nullable=False, default="member")
-
 )
 
 user_newsletter_association = Table(

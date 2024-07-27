@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from unittest.mock import MagicMock, patch, ANY
 from datetime import datetime, timezone, timedelta
 
-from ...main import app
+from ....main import app
 from api.v1.models.token_login import TokenLogin
 from api.v1.models.user import User
 from api.v1.routes.auth import get_db
@@ -36,7 +36,7 @@ def test_request_signin_token(client, db_session_mock):
     response = client.post("/api/v1/auth/request-token", json={"email": "user@example.com"})
 
     assert response.status_code == 200
-    assert response.json()["message"] == "Sign-in token sent to email"
+    assert response.json()["message"] == f"Sign-in token sent to {user.email}"
     
 
 def test_verify_signin_token(client, db_session_mock):
