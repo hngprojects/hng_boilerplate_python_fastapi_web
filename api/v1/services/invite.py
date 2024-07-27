@@ -20,54 +20,34 @@ from api.v1.schemas import invitations
 from urllib.parse import urlencode
 
 
-class CustomException(HTTPException):
-    """
-    Custom error handling
-    """
-    def __init__(self, status_code: int, detail: dict):
-        super().__init__(status_code=status_code, detail=detail)
-        self.message = detail.get("message")
-        self.success = detail.get("success")
-        self.status_code = detail.get("status_code")
-
-async def custom_exception_handler(request: Request, exc: CustomException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={
-            "message": exc.message,
-            "success": exc.success,
-            "status_code": exc.status_code
-        }
-    )
-
 
 class InviteService:
     @staticmethod
     def create(invite: invitations.InvitationCreate, request: Request, session: Session):
-        user = session.query(User).filter_by(id=invite.user_id).first()
+
+        user_email = session.query(User).filter_by(email=invite.user_email).first()
+        #user = session.query(User).filter_by(id=invite.user_id).first()
         org = session.query(Organization).filter_by(id=invite.organization_id).first()
 
-        if not user or not org:
-            exceptions = HTTPException(status_code=404, detail="invalid user id or organization id")
+        if not user_email or not org:
+            exceptions = HTTPException(status_code=404, detail="invalid user or organization id")
             print(exceptions)
             raise exceptions
-            # raise HTTPException(status_code=400, detail="Invalid user or organization ID")
-        
 
         user_organizations = session.execute(
             user_organization_association.select().where(
-                user_organization_association.c.user_id == user.id,
+                user_organization_association.c.user_id == user_email.id,
                 user_organization_association.c.organization_id == org.id
             )
         ).fetchall()
 
 
         if user_organizations:
-            logging.warning(f"User {user.id} already in organization {org.id}")
+            logging.warning(f"User {user_email.id} already in organization {org.id}")
             raise HTTPException(status_code=400, detail="User already in organization")
 
         expiration = datetime.now(utc) + timedelta(days=1)
-        new_invite = Invitation(user_id=invite.user_id, organization_id=invite.organization_id, expires_at=expiration)
+        new_invite = Invitation(user_id=user_email.id, organization_id=invite.organization_id, expires_at=expiration)
         
         session.add(new_invite)
         session.commit()

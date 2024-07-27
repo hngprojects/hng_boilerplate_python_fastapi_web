@@ -79,17 +79,17 @@ def create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expi
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_create_invitation_valid_userid(mock_db_session, mock_invite_service):
-    user_id = str(uuid7())
+    user_email = "mike@example.com"
     org_id = str(uuid7())
 
-    create_mock_user(mock_db_session, user_id)
+    create_mock_user(mock_db_session, user_email)
     create_mock_organization(mock_db_session, org_id)
 
-    access_token = user_service.create_access_token(str(user_id))
+    access_token = user_service.create_access_token(str(user_email))
     mock_db_session.execute.return_value.fetchall.return_value = []
 
     paylod = {
-        "user_id" : user_id,
+        "user_email" : user_email,
         "organization_id" : org_id
     }
 
