@@ -1,22 +1,21 @@
+from main import app
+from api.v1.services.user import user_service
+from api.v1.models.user import User
+from api.db.database import get_db
+from uuid_extensions import uuid7
+from fastapi.testclient import TestClient
+from fastapi import status
+import pytest
+from unittest.mock import MagicMock, patch
+from datetime import datetime, timezone
 import os
 import sys
 import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.append(os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "../..")))
 
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-
-import pytest
-from fastapi import status
-from fastapi.testclient import TestClient
-from uuid_extensions import uuid7
-
-from api.db.database import get_db
-from api.v1.models.user import User
-from api.v1.services.user import user_service
-from main import app
 
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
@@ -38,8 +37,9 @@ def mock_db_session():
 def mock_user_service():
     """Fixture to create a mock user service."""
 
-    with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
-        yield mock_service
+    with patch("api.v1.services.user.user_service", autospec=True) as mock_service_class:
+        mock_service_instance = mock_service_class.return_value
+        yield mock_service_instance
 
 
 def create_mock_user(mock_user_service, mock_db_session):
@@ -75,7 +75,8 @@ def test_autheniticated_user(mock_db_session, mock_user_service):
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassword@123", "new_password": "Ojobonandom@123"},
+        json={"old_password": "Testpassword@123",
+              "new_password": "Ojobonandom@123"},
     )
     assert user_pwd_change.status_code == 401
     assert user_pwd_change.json()["message"] == "Not authenticated"
@@ -94,7 +95,8 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassw23", "new_password": "Ojobonandom@123"},
+        json={"old_password": "Testpassw23",
+              "new_password": "Ojobonandom@123"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
     assert user_pwd_change.status_code == 400
@@ -114,7 +116,8 @@ def test_user_password(mock_db_session, mock_user_service):
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassword@123", "new_password": "Ojobonandom@123"},
+        json={"old_password": "Testpassword@123",
+              "new_password": "Ojobonandom@123"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
 

@@ -15,9 +15,10 @@ from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
-from api.v1.services.user import UserService as user_service
+from api.v1.services.user import user_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
+
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
 def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -56,7 +57,6 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
     return response
 
 
-  
 @auth.post("/register", status_code=status.HTTP_201_CREATED)
 def register(response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
@@ -114,7 +114,8 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     current_refresh_token = request.cookies.get('refresh_token')
 
     # Create new access and refresh tokens
-    access_token, refresh_token = user_service.refresh_access_token(current_refresh_token=current_refresh_token)
+    access_token, refresh_token = user_service.refresh_access_token(
+        current_refresh_token=current_refresh_token)
 
     response = success_response(
         status_code=200,
@@ -137,6 +138,7 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
 
     return response
 
+
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
 async def request_signin_token(email_schema: EmailRequest, db: Session = Depends(get_db)):
     '''Generate and send a 6-digit sign-in token to the user's email'''
@@ -156,6 +158,7 @@ async def request_signin_token(email_schema: EmailRequest, db: Session = Depends
         message="Sign-in token sent to email"
     )
 
+
 @auth.post("/verify-token", status_code=status.HTTP_200_OK)
 async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(get_db)):
     '''Verify the 6-digit sign-in token and log in the user'''
@@ -173,11 +176,9 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
             "token_type": "bearer"
         }
     )
-    
+
 
 # Protected route example: test route
 @auth.get("/admin")
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
-
-

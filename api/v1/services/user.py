@@ -14,6 +14,7 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.user import User
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
+from api.v1.schemas.token import TokenRequest
 
 import logging
 
@@ -278,7 +279,7 @@ class UserService(Service):
         db.commit()
         db.refresh(token)
 
-    def verify_login_token(self, db: Session, schema: token.TokenRequest):
+    def verify_login_token(self, db: Session, schema: TokenRequest):
         """Verify the token and email combination"""
         user = db.query(User).filter(User.email == schema.email).first()
         if not user:

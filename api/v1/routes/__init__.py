@@ -3,7 +3,10 @@ from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user
 from api.v1.routes.blog import blog
-from api.v1.routes.profile import profile 
+from api.v1.routes.profiles import profile
+from api.v1.routes.billing_plan import bill_plan
+from api.v1.routes.facebook_login import fb_auth
+
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -12,3 +15,6 @@ api_version_one.include_router(newsletter)
 api_version_one.include_router(user)
 api_version_one.include_router(blog)
 api_version_one.include_router(profile)
+api_version_one.include_router(bill_plan)
+api_version_one.include_router(fb_auth)
+
