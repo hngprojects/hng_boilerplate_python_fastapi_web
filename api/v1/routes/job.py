@@ -1,4 +1,3 @@
-# api/v1/routes/job.py
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -11,6 +10,7 @@ from api.v1.services.job_service import JobService
 
 job = APIRouter(prefix="/api/v1/jobs", tags=["jobs"])
 
+@job.patch("/{job_id}", response_model=dict, status_code=status.HTTP_200_OK)
 async def update_job_post(
     job_id: str,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -31,5 +31,4 @@ async def update_job_post(
     return {
         "message": "Job details updated successfully",
         "data": updated_job,
-        "status_code": status.HTTP_200_OK
     }

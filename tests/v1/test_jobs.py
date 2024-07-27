@@ -4,15 +4,14 @@ from unittest.mock import MagicMock
 from main import app
 from api.v1.services.job_service import JobService
 from api.v1.models.job import Job
-from unittest.mock import MagicMock
 from api.v1.routes.job import Job
+from unittest.mock import MagicMock
 
 @pytest.fixture(scope="module")
 def client():
     return TestClient(app)
 
 def test_update_job_success(client, mocker):
-    # Setup for the test
     mock_job = MagicMock(spec=Job)
     mock_job.id = "1"
     mock_job.user_id = "user1"
@@ -35,7 +34,7 @@ def test_update_job_success(client, mocker):
     )
     assert response.status_code == 200
     assert response.json()["message"] == "Job details updated successfully"
-    
+
 def test_update_job_not_found(client, mocker):
     mocker.patch.object(JobService, "get_job_by_id", return_value=None)
 
