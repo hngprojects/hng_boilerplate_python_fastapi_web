@@ -1,7 +1,7 @@
 from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models import User
 from typing_extensions import Annotated

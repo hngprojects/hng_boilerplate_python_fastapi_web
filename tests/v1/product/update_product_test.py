@@ -44,8 +44,6 @@ def mock_get_current_user(mocker):
     return mock
 
 
-
-
 def test_update_product_with_valid_token(db_session_mock, mock_get_current_user, mocker):
     """Test product update with a valid token."""
     mocker.patch('jwt.decode', return_value={"user_id": "user_id"})

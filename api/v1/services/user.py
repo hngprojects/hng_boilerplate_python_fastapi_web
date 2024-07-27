@@ -1,7 +1,7 @@
 import random
 import string
 from typing import Any, Optional
-import bcrypt, datetime as dt
+import datetime as dt
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, Request

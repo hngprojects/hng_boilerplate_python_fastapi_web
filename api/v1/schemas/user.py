@@ -1,11 +1,8 @@
 import re
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from uuid_extensions import uuid7
-
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 class UserBase(BaseModel):

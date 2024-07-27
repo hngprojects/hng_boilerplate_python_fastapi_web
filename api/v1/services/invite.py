@@ -6,7 +6,6 @@ from sqlalchemy import insert
 from fastapi import HTTPException, Request
 from collections import OrderedDict
 from fastapi.responses import JSONResponse
-from api.db.database import get_db
 from api.v1.models.invitation import Invitation
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
