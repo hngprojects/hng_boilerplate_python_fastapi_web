@@ -5,6 +5,8 @@ from sqlalchemy import (
         String,
         Text,
         ForeignKey,
+        DateTime, 
+        func
         )
 from sqlalchemy.orm import relationship
 from api.v1.models.base import Base
@@ -24,5 +26,7 @@ class Profile(BaseTableModel):
     phone_number = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     recovery_email = Column(String, nullable=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="profile")

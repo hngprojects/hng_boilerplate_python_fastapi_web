@@ -76,3 +76,22 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
         status_code=200,
         message='User reactivation successful',
     )
+    
+    
+@user.patch("/me/password", status_code=200, response_model=ChangePwdRet)
+async def change_password(
+    schema: ChangePasswordSchema,
+    db: Session = Depends(get_db),
+    user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to change the user's password"""
+
+    user_service.change_password(schema.old_password, schema.new_password, user, db)
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "status_code": 200,
+            "message": "Password Changed successfully",
+        }
+    )
