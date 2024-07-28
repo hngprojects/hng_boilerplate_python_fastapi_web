@@ -1,7 +1,15 @@
-from pydantic import BaseModel, HttpUrl
-from typing import List, Optional
-from uuid import UUID
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
+
+
+class BlogCreate(BaseModel):
+    title: str = Field(..., max_length=100)
+    content: str
+    image_url: str = None
+    tags: list[str] = None
+    excerpt: str = Field(None, max_length=500)
 
 
 class BlogRequest(BaseModel):
@@ -16,8 +24,8 @@ class BlogUpdateResponseModel(BaseModel):
 
 
 class BlogResponse(BaseModel):
-    id: UUID
-    author_id: UUID
+    id: str
+    author_id: str
     title: str
     content: str
     image_url: Optional[str]

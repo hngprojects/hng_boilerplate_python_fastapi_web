@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import List, Optional
-import uuid
 
 class CreateSubscriptionPlan(BaseModel):
     name: str
@@ -11,7 +10,7 @@ class CreateSubscriptionPlan(BaseModel):
     
     
 class SubscriptionPlanResponse(CreateSubscriptionPlan):
-    id: uuid.UUID
+    id: str
     
     class Config:
         orm_mode = True
