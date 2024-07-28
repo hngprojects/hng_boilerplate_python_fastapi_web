@@ -11,7 +11,6 @@ from api.utils.json_response import JsonResponseDict
 from starlette.middleware.sessions import SessionMiddleware   # required by google oauth
 
 from api.utils.logger import logger
-from api.v1.routes.newsletter import CustomException, custom_exception_handler
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 
@@ -38,9 +37,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(
-    CustomException, custom_exception_handler
-)  # Newsletter custom exception registration
 app.include_router(api_version_one)
 
 
@@ -52,7 +48,6 @@ async def get_root(request: Request) -> dict:
 
 
 # REGISTER EXCEPTION HANDLERS
-
 
 @app.exception_handler(HTTPException)
 async def http_exception(request: Request, exc: HTTPException):

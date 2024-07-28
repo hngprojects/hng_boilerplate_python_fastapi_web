@@ -7,7 +7,6 @@ from sqlalchemy import (
         ForeignKey,
         )
 from sqlalchemy.orm import relationship
-from api.v1.models.base import Base
 from api.v1.models.base_model import BaseTableModel
 
 
