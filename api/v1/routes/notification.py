@@ -27,3 +27,17 @@ def mark_notification_as_read(
     )
 
     return success_response(status_code=200, message="Notifcation marked as read")
+
+
+@notification.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_notification(
+    notification_id: str,
+    current_user = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+    ):
+
+    notification_service.delete(
+        notification_id,
+        user=current_user,
+        db=db
+        )
