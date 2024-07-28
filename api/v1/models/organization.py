@@ -3,19 +3,12 @@
 """
 from sqlalchemy import (
         Column,
-        Integer,
         String,
-        Text,
-        Date,
-        ForeignKey,
-        Numeric,
-        DateTime,
-        func,
+        Text
         )
 from sqlalchemy.orm import relationship
 from api.v1.models.base import user_organization_association
 from api.v1.models.base_model import BaseTableModel
-from uuid_extensions import uuid7
 
 
 class Organization(BaseTableModel):
@@ -28,8 +21,7 @@ class Organization(BaseTableModel):
             "User",
             secondary=user_organization_association,
             back_populates="organizations"
-            )
-    roles = relationship("OrgRole", back_populates="organization", cascade="all, delete-orphan")
+        )
     billing_plans = relationship("BillingPlan", back_populates="organization", cascade="all, delete-orphan")
     invitations = relationship("Invitation", back_populates="organization", cascade="all, delete-orphan")
     products = relationship("Product", back_populates="organization", cascade="all, delete-orphan")

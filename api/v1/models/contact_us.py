@@ -1,5 +1,5 @@
 # app/models/contact_us.py
-from sqlalchemy import Column, String, Text, DateTime
+from sqlalchemy import Column, String, Text
 from sqlalchemy.sql import func
 from api.v1.models.base_model import BaseTableModel
 
