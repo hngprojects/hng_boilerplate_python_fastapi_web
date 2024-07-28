@@ -14,7 +14,7 @@ class Newsletter(BaseTableModel):
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
-    subscribers = relationship("NewsletterSubscriber", back_populates="newsletter")
+    newsletter_subscribers = relationship("NewsletterSubscriber", back_populates="newsletter")
 
 
 class NewsletterSubscriber(BaseTableModel):
