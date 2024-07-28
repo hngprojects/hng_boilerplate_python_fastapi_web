@@ -61,18 +61,18 @@ def valid_token():
     return "Bearer valid_token"
 
 def create_mock_job():
-    mock_job = MagicMock(spec=Job)
-    mock_job.id = "1"
-    mock_job.user_id = "user1"
-    mock_job.title = "Original Title"
-    mock_job.description = "Description"
-    mock_job.location = "Location"
-    mock_job.salary = "Salary"
-    mock_job.job_type = "Job Type"
-    mock_job.company_name = "Company Name"
-    mock_job.created_at = datetime(2021, 1, 1)
-    mock_job.updated_at = datetime(2021, 1, 2)
-    return mock_job
+    return {
+        "id": "1",
+        "user_id": "user1",
+        "title": "Original Title",
+        "description": "Description",
+        "location": "Location",
+        "salary": "Salary",
+        "job_type": "Job Type",
+        "company_name": "Company Name",
+        "created_at": datetime(2021, 1, 1),
+        "updated_at": datetime(2021, 1, 2)
+    }
 
 def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
     mock_job = create_mock_job()
