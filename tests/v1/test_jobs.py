@@ -91,7 +91,15 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_tok
         headers={"Authorization": valid_token}
     )
     assert response.status_code == 200
-    assert response.json()["message"] == "Job details updated successfully"
+    data = response.json()["data"]
+    assert data["title"] == "Original Title"
+    assert data["description"] == "Description"
+    assert data["location"] == "Location"
+    assert data["salary"] == "Salary"
+    assert data["job_type"] == "Job Type"
+    assert data["company_name"] == "Company Name"
+    assert data["created_at"] == "2021-01-01T00:00:00"
+    assert data["updated_at"] == "2021-01-01T00:00:00"
 
 def test_update_job_not_found(client: TestClient, mocker: MockerFixture, valid_token: str):
     mocker.patch.object(JobService, "get_job_by_id", return_value=None)
