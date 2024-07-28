@@ -13,12 +13,12 @@ payment = APIRouter(prefix='/payments', tags=['Payment'])
 # POST Request
 @payment.post('/create', status_code=status.HTTP_201_CREATED)
 async def create_payment(
-        request: CreatePaymentSchema, 
+        payment_schema: CreatePaymentSchema, 
         db: Session = Depends(get_db), 
         current_user: User = Depends(user_service.get_current_user)
     ):
-    request.user_id = current_user.id
-    PaymentService.create(db, request)
+    payment_schema.user_id = current_user.id
+    PaymentService.create(db, payment_schema)
 
     return {
         "message": "Payment successfully created",
