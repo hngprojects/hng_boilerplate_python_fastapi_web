@@ -116,7 +116,7 @@ def test_invalid_testimonial(mock_user_service, mock_db_session):
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
     assert response.json().get("message") == 'Testimonial 234 not found'
-    
+
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_invalid_cred(mock_user_service, mock_db_session):
