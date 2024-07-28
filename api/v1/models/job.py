@@ -23,4 +23,3 @@ class Job(BaseTableModel):
     company_name = Column(String, nullable=True)
 
     author = relationship("User", back_populates="jobs")
-
