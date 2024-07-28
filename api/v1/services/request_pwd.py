@@ -11,10 +11,11 @@ from fastapi import (
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi.responses import JSONResponse
 from api.db.database import get_db
+from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas import request_password_reset
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from fastapi.security import OAuth2PasswordRequestForm
+#from api.core.dependencies.email import mail_service
 from passlib.context import CryptContext
 from typing import Optional
 
@@ -59,8 +60,21 @@ class RequestPasswordService:
         reset_link = f'{base_url}api/v1/auth/reset-password?token={token}'
 
         # Send reset_link via email (mocked here)
-        print(f"Password reset link: {reset_link}")
-        return {"msg": "Password reset link sent"}
+        # send_email = mail_service.send_mail(email.user_email, "HNG11 password reset link", reset_link)
+        # if send_email:
+        #     return success_response(
+        #         message="Password reset link sent successfully",
+        #         data=reset_link,
+        #         status_code=status.HTTP_201_CREATED
+        #     )
+        # return send_email
+
+        return success_response(
+                message="Password reset link sent successfully",
+                data=reset_link,
+                status_code=status.HTTP_201_CREATED
+            )
+        #return {"msg": "Password reset link sent"}
 
     @staticmethod
     def process_reset_link(token: str = Query(...), session: Session = Depends(get_db)):
@@ -75,12 +89,14 @@ class RequestPasswordService:
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        return {"msg": "Token is valid", "email": email}
+        return success_response(
+                message=f"token is valid for user {email}",
+                status_code=status.HTTP_302_FOUND
+            )
     
     @staticmethod
     def reset_password(data: request_password_reset.ResetPassword = Depends(), token: str = Query(...), session: Session = Depends(get_db)):
         try:
-            print("TOKEN", token)
             email = verify_reset_token(token)
 
             if not email:
@@ -96,7 +112,10 @@ class RequestPasswordService:
             user.password = get_password_hash(data.new_password)
             session.commit()
 
-            return {"msg": "Password has been reset successfully"}
+            return success_response(
+                message="password has been reset successfully",
+                status_code=status.HTTP_201_CREATED
+            )
         
         except SQLAlchemyError as e:
             session.rollback()  # Rollback the session in case of an error
