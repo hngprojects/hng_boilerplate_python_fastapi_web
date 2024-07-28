@@ -27,7 +27,7 @@ client = TestClient(app)
 
 @pytest.fixture
 def mock_db_session():
-    with patch("api.v1.services.invite.get_db", autospec=True) as mock_get_db:
+    with patch("api.db.database.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
