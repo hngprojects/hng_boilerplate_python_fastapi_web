@@ -10,10 +10,13 @@ from api.v1.schemas.payment import CreatePaymentSchema
 payment = APIRouter(prefix='/payments', tags=['Payment'])
 
 
-
+# POST Request
 @payment.post('/create', status_code=status.HTTP_201_CREATED)
-async def post_single_payments(request: CreatePaymentSchema, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-    print('Current User: ', current_user)
+async def create_payment(
+        request: CreatePaymentSchema, 
+        db: Session = Depends(get_db), 
+        current_user: User = Depends(user_service.get_current_user)
+    ):
     request.user_id = current_user.id
     PaymentService.create(db, request)
 

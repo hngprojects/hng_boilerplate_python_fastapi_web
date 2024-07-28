@@ -14,5 +14,4 @@ class CreatePaymentSchema(BaseModel):
     currency: str
     status: str
     method: str
-    transaction_id: str
     user_id: Optional[str] = None

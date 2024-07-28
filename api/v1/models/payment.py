@@ -1,6 +1,7 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, DateTime, Enum
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
+import secrets
 
 class Payment(BaseTableModel):
     __tablename__ = "payments"
@@ -10,6 +11,6 @@ class Payment(BaseTableModel):
     currency = Column(String, nullable=False)
     status = Column(String, nullable=False)  # e.g., completed, pending
     method = Column(String, nullable=False)  # e.g., credit card, PayPal
-    transaction_id = Column(String, unique=True, nullable=False)
+    transaction_id = Column(String, unique=True, nullable=False, default=lambda: secrets.token_hex(16), index=True)
 
     user = relationship("User", back_populates="payments")

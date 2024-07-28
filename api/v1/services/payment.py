@@ -4,17 +4,18 @@ from api.v1.models.payment import Payment
 from api.db.database import get_db
 from api.v1.schemas.payment import CreatePaymentSchema
 from api.utils.db_validators import check_model_existence
-from fastapi import Depends
+from secrets import token_hex
 from typing import List, Optional, Any
 
 class PaymentService(Service):
-    '''Product service functionality'''
+    '''Payment service functionality'''
 
     @staticmethod
     def create(db: Session,  schema: CreatePaymentSchema):
-        '''Create a new product'''
+        '''Create a new payment'''
 
         new_payment = Payment(**schema.model_dump())
+        new_payment.transaction_id = token_hex(16)
         db.add(new_payment)
         db.commit()
         db.refresh(new_payment)
