@@ -1,12 +1,9 @@
-from fastapi import Depends, HTTPException, APIRouter, Request, Response, status, Query
+from fastapi import Depends, APIRouter, status, Query
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
-from datetime import datetime
-
 
 from api.utils.success_response import success_response
-from api.v1.models.product import Product
-from api.v1.schemas.user import DeactivateUserSchema, UserBase
 from api.db.database import get_db
 from api.v1.services.product import product_service
 from api.v1.schemas.product import ProductList
@@ -24,7 +21,7 @@ def get_organization_products(
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
     page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
     db: Session = Depends(get_db), 
-    ):
+):
     '''
     Endpoint to retrieve a paginated list of products of an organization.
 
@@ -60,11 +57,7 @@ def get_organization_products(
         status_code=200, 
         message="Successfully fetched organizations products", 
         data=data
-        )
-
-
-
-
+    )
 
 
 @product.put("/{id}", response_model=ResponseModel)
@@ -101,24 +94,12 @@ async def update_product(
             "description": "Updated description",
         }
     """  
-    try:
-        updated_product = product_service.update(db, id=str(id), schema=product_update)
-    except HTTPException as e:
-        raise e
+
+    updated_product = product_service.update(db, id=str(id), schema=product_update)
 
     # Prepare the response
-    response = ResponseModel(
-        success=True,
-        status_code=200,
-        message="Product updated successfully",
-        data={
-            "id": updated_product.id,
-            "name": updated_product.name,
-            "price": updated_product.price,
-            "description": updated_product.description,
-            "updated_at": updated_product.updated_at
-        }
+    return success_response(
+        status_code = 200,
+        message = "Product updated successfully",
+        data = jsonable_encoder(updated_product)
     )
-    
-    return response
-
