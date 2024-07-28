@@ -16,6 +16,7 @@ profile = APIRouter(prefix="/profile", tags=["Profiles"])
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
+
 @profile.get(
     "/current-user", status_code=status.HTTP_200_OK, response_model=ProfileBase
 )
@@ -26,6 +27,7 @@ def get_current_user_profile(
     """Endpoint to get current user profile details"""
     user_profile = profile_service.fetch_by_user_id(db, user_id=current_user.id)
     return jsonable_encoder(user_profile.to_dict())
+
 
 @profile.post("/", status_code=status.HTTP_201_CREATED, response_model=ProfileBase)
 def create_user_profile(
@@ -45,6 +47,7 @@ def create_user_profile(
 
     return response
 
+
 @profile.patch("/", status_code=status.HTTP_200_OK, response_model=ProfileBase)
 def update_user_profile(
     schema: ProfileCreateUpdate,
@@ -57,7 +60,5 @@ def update_user_profile(
         raise HTTPException(status_code=401, detail="User not authenticated")
     else:
         logger.debug(f"Current user ID: {current_user.id}")
-    updated_profile = profile_service.update(
-        db, schema=schema, user_id=current_user.id
-    )
+    updated_profile = profile_service.update(db, schema=schema, user_id=current_user.id)
     return updated_profile

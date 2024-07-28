@@ -1,8 +1,8 @@
 from datetime import datetime
-from fastapi import HTTPException
-from pydantic import BaseModel, Field, EmailStr, field_validator
-from typing import Any, Optional
-from uuid_extensions import uuid7
+# Remove the unused import statement
+from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional
+# Remove this commented out code
 import re
 from api.v1.schemas.user import UserBase
 
@@ -27,6 +27,7 @@ class ProfileBase(BaseModel):
 
 class ProfileCreateUpdate(BaseModel):
     """Schema to create a profile"""
+
     pronouns: str
     job_title: str
     department: str
