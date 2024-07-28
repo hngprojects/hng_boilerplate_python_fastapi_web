@@ -1,30 +1,28 @@
-#!/usr/bin/env python3
 """ The Profile model
 """
 from sqlalchemy import (
         Column,
-        Integer,
         String,
         Text,
-        Date,
         ForeignKey,
-        DateTime,
-        func,
         )
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
-from datetime import datetime
-from api.v1.models.base import Base
-from api.v1.models.base_model import BaseModel
+from api.v1.models.base_model import BaseTableModel
 
 
 
-class Profile(BaseModel, Base):
+class Profile(BaseTableModel):
     __tablename__ = 'profiles'
 
-    user_id = Column(UUID(as_uuid=True), ForeignKey('users.id'), unique=True, nullable=False)
+    user_id = Column(String, ForeignKey('users.id', ondelete="CASCADE"), unique=True, nullable=False)
+    pronouns = Column(String, nullable=True)
+    job_title = Column(String, nullable=True)
+    department = Column(String, nullable=True)
+    social = Column(Text, nullable=True)  # Assuming JSON or similar data type
     bio = Column(Text, nullable=True)
-    phone_number = Column(String(50), nullable=True)
-    avatar_url = Column(String(100), nullable=True)
+    phone_number = Column(String, nullable=True)
+    avatar_url = Column(String, nullable=True)
+    recovery_email = Column(String, nullable=True)
+
 
     user = relationship("User", back_populates="profile")
