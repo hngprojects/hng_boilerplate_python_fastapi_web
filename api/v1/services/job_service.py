@@ -24,7 +24,7 @@ class JobService:
         :param job_update: The new data for the job post
         :return: The updated Job instance
         """
-        update_data = job_update.job_type(exclude_unset=True)
+        update_data = job_update.JobResponse(exclude_unset=True)
         for key, value in update_data.items():
             setattr(db_job, key, value)
         db.commit()
