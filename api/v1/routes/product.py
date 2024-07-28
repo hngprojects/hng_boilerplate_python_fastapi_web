@@ -64,7 +64,7 @@ def get_organization_products(
 async def update_product(
     id: str,
     product_update: ProductUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(user_service.get_current_user),
     db: Session = Depends(get_db)
 ):
     """

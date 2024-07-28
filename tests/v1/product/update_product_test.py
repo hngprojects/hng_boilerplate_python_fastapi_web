@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock
 from fastapi import HTTPException
-from jose import JWTError
+from jose import JWTError, jwt
 import pytest
 from fastapi.testclient import TestClient
 from main import app
@@ -10,15 +10,11 @@ from api.db.database import get_db
 
 client = TestClient(app)
 
-
-# Mock the database dependency
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock()
     yield db_session
 
-
-# Override the dependency with the mock
 @pytest.fixture(autouse=True)
 def override_get_db(db_session_mock):
     def get_db_override():
@@ -26,15 +22,11 @@ def override_get_db(db_session_mock):
 
     app.dependency_overrides[get_db] = get_db_override
     yield
-    # Clean up after the test by removing the override
     app.dependency_overrides = {}
 
-
-# Mock jwt.decode
 @pytest.fixture
 def mock_jwt_decode(mocker):
-    return mocker.patch("jwt.decode", return_value={"user_id": "user_id"})
-
+    return mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
 
 @pytest.fixture
 def mock_get_current_user(mocker):
@@ -42,12 +34,16 @@ def mock_get_current_user(mocker):
     mock = mocker.patch("api.utils.dependencies.get_current_user", return_value=user)
     return mock
 
+def create_test_token(user_id: str) -> str:
+    expires = datetime.utcnow() + timedelta(minutes=30)
+    data = {"user_id": user_id, "exp": expires}
+    return jwt.encode(data, "secret", algorithm="HS256")
 
 def test_update_product_with_valid_token(
-    db_session_mock, mock_get_current_user, mocker
+    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
 ):
     """Test product update with a valid token."""
-    mocker.patch("jwt.decode", return_value={"user_id": "user_id"})
+    mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
 
     mock_product = MagicMock()
     mock_product.id = "c9752bcc-1cf4-4476-a1ee-84b19fd0c521"
@@ -71,26 +67,24 @@ def test_update_product_with_valid_token(
         "description": "Updated Description",
     }
 
+    token = create_test_token("user_id")
+
     response = client.put(
         "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json=product_update,
-        headers={"Authorization": "Bearer valid_token"},
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     print("Update response:", response.json())  # Debugging output
 
     assert response.status_code == 200
-    # assert response.json()["data"]["name"] == "Updated Product"
-    # assert response.json()["data"]["price"] == 25.0
-    # assert response.json()["data"]["description"] == "Updated Description"
-    # assert response.json()["data"]["updated_at"] is not None
-
+    assert response.json()["message"] == "Product updated successfully"
 
 def test_update_product_with_invalid_token(
-    db_session_mock, mock_get_current_user, mocker
+    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
 ):
     """Test product update with an invalid token."""
-    mocker.patch("jwt.decode", side_effect=JWTError("Invalid token"))
+    mocker.patch("jose.jwt.decode", side_effect=JWTError("Invalid token"))
 
     mocker.patch(
         "api.utils.dependencies.get_current_user",
@@ -105,18 +99,20 @@ def test_update_product_with_invalid_token(
 
     print("Invalid token response:", response.json())  # Debugging output
     assert response.status_code == 401
-
+    assert response.json()["message"] == "Could not validate crenentials"  # Adjusted assertion
 
 def test_update_product_with_missing_fields(
-    db_session_mock, mock_get_current_user, mocker
+    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
 ):
     """Test product update with missing fields."""
-    mocker.patch("jwt.decode", return_value={"user_id": "user_id"})
+    mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
+
+    token = create_test_token("user_id")
 
     response = client.put(
         "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json={},
-        headers={"Authorization": "Bearer valid_token"},
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     print(f"Missing fields response: {response.json()}")  # Debugging output
@@ -126,12 +122,11 @@ def test_update_product_with_missing_fields(
     assert isinstance(errors, list)
     assert any("Field required" in error.get("msg", "") for error in errors)
 
-
 def test_update_product_with_special_characters(
-    db_session_mock, mock_get_current_user, mocker
+    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
 ):
     """Test product update with special characters in the product name."""
-    mocker.patch("jwt.decode", return_value={"user_id": "user_id"})
+    mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
 
     mock_product = MagicMock()
     mock_product.id = "c9752bcc-1cf4-4476-a1ee-84b19fd0c521"
@@ -156,15 +151,14 @@ def test_update_product_with_special_characters(
         "description": "Updated & Description!",
     }
 
+    token = create_test_token("user_id")
+
     response = client.put(
         "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
         json=product_update,
-        headers={"Authorization": "Bearer valid_token"},
+        headers={"Authorization": f"Bearer {token}"},
     )
 
     print(f"Special characters response: {response.json()}")  # Debugging output
     assert response.status_code == 200
-    # assert response.json()["data"]["name"] == "Updated @Product! #2024"
-    # assert response.json()["data"]["price"] == 99.99
-    # assert response.json()["data"]["description"] == "Updated & Description!"
-    # assert response.json()["data"]["updated_at"] is not None
+    assert response.json()["message"] == "Product updated successfully"
