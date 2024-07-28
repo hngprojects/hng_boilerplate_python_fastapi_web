@@ -78,7 +78,6 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture):
     )
     assert response.status_code == 200
     assert response.json()["message"] == "Job details updated successfully"
-    
 def test_update_job_not_found(client: TestClient, mocker: MockerFixture):
     mocker.patch.object(JobService, "get_job_by_id", return_value=None)
 
