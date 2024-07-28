@@ -16,17 +16,17 @@ class ProfileService(Service):
         profile = db.query(Profile).filter(Profile.user_id == user_id).first()
 
         if profile:
-            raise HTTPException(status_code=400, detail="User profile already exist")
+            raise HTTPException(status_code=400, detail="User profile already exists")
 
-        new_Profile = Profile(**schema.model_dump(), user_id=user_id)
-        db.add(new_Profile)
+        new_profile = Profile(**schema.model_dump(), user_id=user_id)
+        db.add(new_profile)
         db.commit()
-        db.refresh(new_Profile)
+        db.refresh(new_profile)
 
-        return new_Profile
+        return new_profile
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all Profiles with option tto search using query parameters"""
+        """Fetch all Profiles with option to search using query parameters"""
 
         query = db.query(Profile)
 

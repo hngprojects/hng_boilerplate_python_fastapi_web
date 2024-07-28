@@ -29,3 +29,19 @@ class Profile(BaseTableModel):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     user = relationship("User", back_populates="profile")
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "pronouns": self.pronouns,
+            "job_title": self.job_title,
+            "department": self.department,
+            "social": self.social,
+            "bio": self.bio,
+            "phone_number": self.phone_number,
+            "avatar_url": self.avatar_url,
+            "recovery_email": self.recovery_email,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "user": self.user.to_dict() if self.user else None,
+        }

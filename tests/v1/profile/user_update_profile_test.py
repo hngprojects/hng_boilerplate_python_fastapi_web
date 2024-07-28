@@ -3,22 +3,24 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
-import jwt
 from main import app
 from api.v1.models.user import User
 from api.db.database import get_db
 from api.v1.schemas.profile import ProfileCreateUpdate
 from fastapi.encoders import jsonable_encoder
 from api.utils.dependencies import get_current_user
-from api.utils.config import SECRET_KEY, ALGORITHM
+from api.utils.settings import settings
+import jwt
 
 client = TestClient(app)
+
 
 # Mock the database dependency
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock()
     yield db_session
+
 
 # Override the dependency with the mock
 @pytest.fixture(autouse=True)
@@ -30,14 +32,11 @@ def override_get_db(db_session_mock):
     yield
     app.dependency_overrides = {}
 
-def create_test_token(user_id: str):
-    expiration = datetime.utcnow() + timedelta(minutes=30)
-    to_encode = {"user_id": user_id, "exp": expiration}
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 @pytest.fixture
 def mock_jwt_decode(mocker):
     return mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
+
 
 @pytest.fixture
 def mock_get_current_user(mocker):
@@ -45,7 +44,17 @@ def mock_get_current_user(mocker):
     mock = mocker.patch("api.utils.dependencies.get_current_user", return_value=user)
     return mock
 
-def test_success_profile_update(db_session_mock, mock_get_current_user, mock_jwt_decode, mocker):
+
+def create_test_token(user_id: str) -> str:
+    """Function to create a test token"""
+    expires = datetime.utcnow() + timedelta(minutes=30)
+    data = {"user_id": user_id, "exp": expires}
+    return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+def test_success_profile_update(
+    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
+):
     mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
 
     mock_profile = MagicMock()
@@ -64,7 +73,7 @@ def test_success_profile_update(db_session_mock, mock_get_current_user, mock_jwt
         "last_name": "Last",
         "username": "username",
         "email": "email@example.com",
-        "created_at": datetime.now().isoformat()
+        "created_at": datetime.now().isoformat(),
     }
     mock_profile.updated_at = datetime.now().isoformat()
     db_session_mock.query().filter().first.return_value = mock_profile
@@ -113,8 +122,8 @@ def test_success_profile_update(db_session_mock, mock_get_current_user, mock_jwt
             "last_name": "Last",
             "username": "username",
             "email": "email@example.com",
-            "created_at": datetime.now().isoformat()
-        }
+            "created_at": datetime.now().isoformat(),
+        },
     }
 
     profile_update = ProfileCreateUpdate(
@@ -139,10 +148,13 @@ def test_success_profile_update(db_session_mock, mock_get_current_user, mock_jwt
     print("Update response:", response.json())  # Debugging output
 
     assert response.status_code == 200
-    assert response.json()["bio"] == "Updated bio"
-    assert response.json()["updated_at"] is not None
+    assert response.json()["data"]["bio"] == "Updated bio"
+    assert response.json()["data"]["updated_at"] is not None
 
-def test_profile_update_not_found(db_session_mock, mock_get_current_user, mock_jwt_decode, mocker):
+
+def test_profile_update_not_found(
+    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
+):
     mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
 
     # Ensure the profile query returns None
@@ -170,4 +182,4 @@ def test_profile_update_not_found(db_session_mock, mock_get_current_user, mock_j
     print("Update response:", response.json())  # Debugging output
 
     assert response.status_code == 401
-    assert response.json()["message"] == "Could not validate credentials"
+    assert response.json()["message"] == "User not authenticated"

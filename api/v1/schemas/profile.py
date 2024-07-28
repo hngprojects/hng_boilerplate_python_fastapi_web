@@ -40,7 +40,8 @@ class ProfileCreateUpdate(BaseModel):
     recovery_email: Optional[EmailStr]
 
     @field_validator("phone_number")
-    def phone_number_validator(self, cls, value):
+    @classmethod
+    def phone_number_validator(cls, value):
         if not re.match(r"^\+?[1-9]\d{1,14}$", value):
             raise ValueError("Please use a valid phone number format")
         return value
