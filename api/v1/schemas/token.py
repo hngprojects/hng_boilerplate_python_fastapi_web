@@ -1,5 +1,4 @@
-from typing import List, Optional
-from api.v1.models.user import User
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 # Pydantic models for request and response
@@ -9,9 +8,18 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Optional[str] = None
-
-from pydantic import BaseModel
+    user_id: str = None
 
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class EmailRequest(BaseModel):
+    email: EmailStr
+
+class TokenRequest(BaseModel):
+    email: EmailStr
+    token: str
+    
+class OAuthToken(BaseModel):
+    access_token: str
