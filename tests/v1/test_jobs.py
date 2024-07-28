@@ -39,34 +39,39 @@ def mock_get_current_user(mocker):
     mock = mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
     return mock
 
-# Client for sending test requests
 @pytest.fixture(scope="module")
 def client():
     return TestClient(app)
 
-# Mock the get_current_user dependency with a mock user
 @pytest.fixture(autouse=True)
 def mock_get_current_user(mocker):
     user = User(id='user1', is_super_admin=False)
     mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
 
-# Mock the jwt.decode function to bypass actual JWT verification
 @pytest.fixture(autouse=True)
 def mock_jwt_decode(mocker):
     mocker.patch('jwt.decode', return_value={"user_id": "user1"})
 
-# A valid token, in a real scenario this should be a properly signed JWT
 @pytest.fixture
 def valid_token():
     return "Bearer valid_token"
 
-# Tests
-
-def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
+def create_mock_job():
     mock_job = MagicMock(spec=Job)
     mock_job.id = "1"
     mock_job.user_id = "user1"
     mock_job.title = "Original Title"
+    mock_job.description = "Description"
+    mock_job.location = "Location"
+    mock_job.salary = "Salary"
+    mock_job.job_type = "Job Type"
+    mock_job.company_name = "Company Name"
+    mock_job.created_at = "2021-01-01T00:00:00"
+    mock_job.updated_at = "2021-01-01T00:00:00"
+    return mock_job
+
+def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
+    mock_job = create_mock_job()
 
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
     mocker.patch.object(JobService, "update_job", return_value=mock_job)
@@ -102,7 +107,7 @@ def test_update_job_not_found(client: TestClient, mocker: MockerFixture, valid_t
         headers={"Authorization": valid_token}
     )
     assert response.status_code == 404
-    assert response.json()["detail"] == "Job post not found"
+    assert response.json().get("detail") == "Job post not found"
 
 def test_update_job_invalid_id(client: TestClient, valid_token: str):
     response = client.patch(
@@ -120,7 +125,7 @@ def test_update_job_invalid_id(client: TestClient, valid_token: str):
     assert response.status_code == 422
 
 def test_update_job_invalid_body(client: TestClient, mocker: MockerFixture, valid_token: str):
-    mock_job = MagicMock(spec=Job)
+    mock_job = create_mock_job()
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
 
     response = client.patch(
@@ -138,7 +143,7 @@ def test_update_job_invalid_body(client: TestClient, mocker: MockerFixture, vali
     assert response.status_code == 422
 
 def test_update_job_missing_token(client: TestClient, mocker: MockerFixture):
-    mock_job = MagicMock(spec=Job)
+    mock_job = create_mock_job()
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
 
     response = client.patch(
@@ -153,4 +158,3 @@ def test_update_job_missing_token(client: TestClient, mocker: MockerFixture):
         }
     )
     assert response.status_code == 401
-    
