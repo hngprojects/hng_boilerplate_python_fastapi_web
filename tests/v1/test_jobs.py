@@ -7,6 +7,7 @@ from api.v1.models.job import Job
 from api.db.database import get_db
 from api.v1.models.user import User
 from pytest_mock import MockerFixture
+from datetime import datetime
 
 client = TestClient(app)
 
@@ -69,13 +70,12 @@ def create_mock_job():
     mock_job.salary = "Salary"
     mock_job.job_type = "Job Type"
     mock_job.company_name = "Company Name"
-    mock_job.created_at = "2021-01-01T00:00:00"
-    mock_job.updated_at = "2021-01-01T00:00:00"
+    mock_job.created_at = datetime(2021, 1, 1)
+    mock_job.updated_at = datetime(2021, 1, 2)
     return mock_job
 
 def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
     mock_job = create_mock_job()
-
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
     mocker.patch.object(JobService, "update_job", return_value=mock_job)
 
@@ -100,7 +100,7 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_tok
     assert data["job_type"] == "Job Type"
     assert data["company_name"] == "Company Name"
     assert data["created_at"] == "2021-01-01T00:00:00"
-    assert data["updated_at"] == "2021-01-01T00:00:00"
+    assert data["updated_at"] == "2021-01-02T00:00:00"
 
 def test_update_job_not_found(client: TestClient, mocker: MockerFixture, valid_token: str):
     mocker.patch.object(JobService, "get_job_by_id", return_value=None)
