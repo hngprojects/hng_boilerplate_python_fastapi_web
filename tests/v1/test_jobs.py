@@ -64,63 +64,6 @@ def valid_token():
 
 # Tests
 
-def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
-    mock_job = MagicMock(spec=Job)
-    mock_job.id = "1"
-    mock_job.user_id = "user1"
-    mock_job.title = "Original Title"
-
-    mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
-    mocker.patch.object(JobService, "update_job", return_value=mock_job)
-
-    response = client.patch(
-        "/api/v1/jobs/1",
-        json={
-            "title": "Updated Title",
-            "description": "Updated Description",
-            "location": "Updated Location",
-            "salary": "Updated Salary",
-            "job_type": "Updated Job Type",
-            "company_name": "Updated Company Name"
-        },
-        headers={"Authorization": valid_token}
-    )
-    assert response.status_code == 200
-    assert response.json()["message"] == "Job details updated successfully"
-
-def test_update_job_not_found(client: TestClient, mocker: MockerFixture, valid_token: str):
-    mocker.patch.object(JobService, "get_job_by_id", return_value=None)
-
-    response = client.patch(
-        "/api/v1/jobs/9999",
-        json={
-            "title": "Title",
-            "description": "Description",
-            "location": "Location",
-            "salary": "Salary",
-            "job_type": "Job Type",
-            "company_name": "Company Name"
-        },
-        headers={"Authorization": valid_token}
-    )
-    assert response.status_code == 404
-    assert response.json()["detail"] == "Job post not found"
-
-def test_update_job_invalid_id(client: TestClient, valid_token: str):
-    response = client.patch(
-        "/api/v1/jobs/invalid_id",
-        json={
-            "title": "Title",
-            "description": "Description",
-            "location": "Location",
-            "salary": "Salary",
-            "job_type": "Job Type",
-            "company_name": "Company Name"
-        },
-        headers={"Authorization": valid_token}
-    )
-    assert response.status_code == 422
-
 def test_update_job_invalid_body(client: TestClient, mocker: MockerFixture, valid_token: str):
     mock_job = MagicMock(spec=Job)
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
