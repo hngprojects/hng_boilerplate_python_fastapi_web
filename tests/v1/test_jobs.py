@@ -45,7 +45,9 @@ def client():
 
 @pytest.fixture(autouse=True)
 def mock_get_current_user(mocker):
-    user = User(id='user1', is_super_admin=False)
+    user = MagicMock(spec=User)
+    user.id = 'user1'
+    user.is_super_admin = False
     mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
 
 @pytest.fixture(autouse=True)
@@ -57,18 +59,18 @@ def valid_token():
     return "Bearer valid_token"
 
 def create_mock_job():
-    return {
-        "id": "1",
-        "user_id": "user1",
-        "title": "Original Title",
-        "description": "Description",
-        "location": "Location",
-        "salary": "Salary",
-        "job_type": "Job Type",
-        "company_name": "Company Name",
-        "created_at": "2021-01-01T00:00:00",
-        "updated_at": "2021-01-01T00:00:00"
-    }
+    mock_job = MagicMock(spec=Job)
+    mock_job.id = "1"
+    mock_job.user_id = "user1"
+    mock_job.title = "Original Title"
+    mock_job.description = "Description"
+    mock_job.location = "Location"
+    mock_job.salary = "Salary"
+    mock_job.job_type = "Job Type"
+    mock_job.company_name = "Company Name"
+    mock_job.created_at = "2021-01-01T00:00:00"
+    mock_job.updated_at = "2021-01-01T00:00:00"
+    return mock_job
 
 def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
     mock_job = create_mock_job()
