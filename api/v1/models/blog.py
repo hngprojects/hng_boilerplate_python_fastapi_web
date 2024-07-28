@@ -3,10 +3,7 @@
 
 from sqlalchemy import Column, String, Text, ForeignKey, Boolean, text
 from sqlalchemy.orm import relationship
-# from api.v1.models.base import Base
 from api.v1.models.base_model import BaseTableModel
-from sqlalchemy.dialects.postgresql import UUID, ARRAY
-from uuid_extensions import uuid7
 
 
 class Blog(BaseTableModel):
@@ -24,3 +21,26 @@ class Blog(BaseTableModel):
     comments = relationship("Comment", back_populates="blog", cascade="all, delete-orphan")
     likes = relationship("BlogLike", back_populates="blog", cascade="all, delete-orphan")
     dislikes = relationship("BlogDislike", back_populates="blog", cascade="all, delete-orphan")
+
+
+class BlogDislike(BaseTableModel):
+    __tablename__ = "blog_dislikes"
+
+    blog_id = Column(String, ForeignKey("blogs.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    ip_address = Column(String, nullable=True)
+
+    # Relationships
+    blog = relationship("Blog", back_populates="dislikes")
+    user = relationship("User", back_populates="blog_dislikes")
+
+
+class BlogLike(BaseTableModel):
+    __tablename__ = "blog_likes"
+
+    blog_id = Column(String, ForeignKey("blogs.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    ip_address = Column(String, nullable=True)
+
+    blog = relationship("Blog", back_populates="likes")
+    user = relationship("User", back_populates="blog_likes")

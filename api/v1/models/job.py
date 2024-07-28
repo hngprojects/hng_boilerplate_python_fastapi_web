@@ -3,22 +3,12 @@
 """
 from sqlalchemy import (
         Column,
-        Integer,
         String,
         Text,
-        Date,
-        ForeignKey,
-        Numeric,
-        DateTime,
-        func,
+        ForeignKey
         )
 from sqlalchemy.orm import relationship
-from datetime import datetime
-from api.v1.models.base import Base
 from api.v1.models.base_model import BaseTableModel
-from uuid_extensions import uuid7
-from sqlalchemy.dialects.postgresql import UUID
-
 
 class Job(BaseTableModel):
     __tablename__ = 'jobs'
