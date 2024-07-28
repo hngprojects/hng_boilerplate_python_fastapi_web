@@ -19,10 +19,10 @@ user_organization_association = Table('user_organization', Base.metadata,
     Column('status', Enum('member', 'suspended', 'left', name='user_org_status'), nullable=False, default="member")
 )
 
-user_newsletter_association = Table(
-    'user_newsletter_association',
-    Base.metadata,
-    Column('user_id', String, ForeignKey('users.id'), primary_key=True),
-    Column('newsletter_id', String, ForeignKey('newsletters.id'), primary_key=True),
-    Column('created_at', DateTime(timezone=True), server_default=func.now())
-)
+# user_newsletter_association = Table(
+#     'user_newsletter_association',
+#     Base.metadata,
+#     Column('user_id', String, ForeignKey('users.id'), primary_key=True),
+#     Column('newsletter_id', String, ForeignKey('newsletters.id'), primary_key=True),
+#     Column('created_at', DateTime(timezone=True), server_default=func.now())
+# )

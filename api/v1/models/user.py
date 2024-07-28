@@ -37,7 +37,6 @@ class User(BaseTableModel):
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
     invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
     messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
-    newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
     blog_likes = relationship("BlogLike", back_populates="user", cascade="all, delete-orphan")
     blog_dislikes = relationship("BlogDislike", back_populates="user", cascade="all, delete-orphan")
     comment_likes = relationship("CommentLike", back_populates="user", cascade="all, delete-orphan")

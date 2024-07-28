@@ -1,6 +1,5 @@
 from sqlalchemy import Column, String, Text, Integer, DateTime, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-# from api.v1.models.base import user_newsletter_association
 from api.v1.models.base_model import BaseTableModel
 from datetime import datetime, timezone
 
