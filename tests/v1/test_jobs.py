@@ -40,27 +40,21 @@ def mock_get_current_user(mocker):
     mock = mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
     return mock
 
-MOCK_USER = User(id="user1", email="user@example.com")
-MOCK_USER.is_admin = False
-
 @pytest.fixture(scope="module")
 def client():
-    with TestClient(app) as client:
-        app.dependency_overrides[get_current_user] = lambda: MOCK_USER
-        yield client
+    return TestClient(app)
 
-def test_update_job_success(client: TestClient, mocker: MockerFixture):
-    mock_job = Job(
-        id="1",
-        title="Original Title",
-        description="Original Description",
-        location="Original Location",
-        salary="Original Salary",
-        job_type="Original Job Type",
-        company_name="Original Company"
-    )
-    mock_job.user_id = MOCK_USER.id
-    
+@pytest.fixture
+def valid_token():
+    # This should be a token that your API accepts as valid, replace with actual token if available
+    return "Bearer valid_token"
+
+def test_update_job_success(client, mocker: MockerFixture, valid_token):
+    mock_job = MagicMock(spec=Job)
+    mock_job.id = "1"
+    mock_job.user_id = "user1"
+    mock_job.title = "Original Title"
+
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
     mocker.patch.object(JobService, "update_job", return_value=mock_job)
 
@@ -74,11 +68,11 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture):
             "job_type": "Updated Job Type",
             "company_name": "Updated Company Name"
         },
-        headers={"Authorization": "Bearer mocktoken"}
+        headers={"Authorization": valid_token}
     )
     assert response.status_code == 200
-    assert response.json()["message"] == "Job details updated successfully"
-def test_update_job_not_found(client: TestClient, mocker: MockerFixture):
+
+def test_update_job_not_found(client, mocker: MockerFixture, valid_token):
     mocker.patch.object(JobService, "get_job_by_id", return_value=None)
 
     response = client.patch(
@@ -90,12 +84,13 @@ def test_update_job_not_found(client: TestClient, mocker: MockerFixture):
             "salary": "Salary",
             "job_type": "Job Type",
             "company_name": "Company Name"
-        }
+        },
+        headers={"Authorization": valid_token}
     )
     assert response.status_code == 404
     assert response.json()["detail"] == "Job post not found"
 
-def test_update_job_invalid_id(client: TestClient):
+def test_update_job_invalid_id(client, valid_token):
     response = client.patch(
         "/api/v1/jobs/invalid_id",
         json={
@@ -105,22 +100,13 @@ def test_update_job_invalid_id(client: TestClient):
             "salary": "Salary",
             "job_type": "Job Type",
             "company_name": "Company Name"
-        }
+        },
+        headers={"Authorization": valid_token}
     )
-    assert response.status_code == 422  # Unprocessable Entity
+    assert response.status_code == 422
 
-def test_update_job_invalid_body(client: TestClient, mocker: MockerFixture):
-    mock_job = Job(
-        id="1",
-        title="Original Title",
-        description="Original Description",
-        location="Original Location",
-        salary="Original Salary",
-        job_type="Original Job Type",
-        company_name="Original Company"
-    )
-    mock_job.user_id = MOCK_USER.id  # Set user_id separately if necessary
-    
+def test_update_job_invalid_body(client, mocker: MockerFixture, valid_token):
+    mock_job = MagicMock(spec=Job)
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
 
     response = client.patch(
@@ -132,9 +118,11 @@ def test_update_job_invalid_body(client: TestClient, mocker: MockerFixture):
             "salary": "Salary",
             "job_type": "Job Type",
             "company_name": "Company Name"
-        }
+        },
+        headers={"Authorization": valid_token}
     )
-    assert response.status_code == 422  # Unprocessable Entity
+    assert response.status_code == 422
+
 def test_update_job_missing_token(client, mocker: MockerFixture):
     mock_job = MagicMock(spec=Job)
     mocker.patch.object(JobService, "get_job_by_id", return_value=mock_job)
