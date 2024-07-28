@@ -1,5 +1,5 @@
 # app/models/billing_plan.py
-from sqlalchemy import Column, String, ARRAY, ForeignKey, Numeric, DateTime, JSON
+from sqlalchemy import Column, String, ARRAY, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
 

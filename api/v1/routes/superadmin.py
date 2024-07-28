@@ -9,9 +9,9 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.services.user import user_service
-from api.v1.schemas.user import UserCreate, UserBase
+from api.v1.schemas.user import UserCreate
 
-superadmin = APIRouter(prefix="/superadmin", tags=["superadmin"])
+superadmin = APIRouter(prefix="/superadmin", tags=["Superadmin"])
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
@@ -19,6 +19,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 @superadmin.post(path="/register", status_code=status.HTTP_201_CREATED)
 def register_admin(user: UserCreate, db: db_dependency):
     """Endpoint for super admin creation"""
+
     user_created = user_service.create_admin(db=db, schema=user)
     return success_response(
         status_code=201,
@@ -27,7 +28,7 @@ def register_admin(user: UserCreate, db: db_dependency):
     )
 
 
-@superadmin.delete(path="/users/{user_id}")
+@superadmin.delete(path="/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
     user_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
@@ -45,9 +46,6 @@ def delete_user(
     Raises:
         HTTPException: 403 FORBIDDEN (Current user is not a super admin)
         HTTPException: 404 NOT FOUND (User to be deleted cannot be found)
-
-    Returns:
-        JSONResponse: 204 NO CONTENT (successful user deletion)
     """
 
     user = user_service.fetch(db=db, id=user_id)
@@ -60,7 +58,3 @@ def delete_user(
 
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
-
-    return success_response(
-        status_code=status.HTTP_200_OK, message="user deleted successfully"
-    )
