@@ -39,6 +39,7 @@ def mock_get_current_user(mocker):
     mock = mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
     return mock
 
+
 @pytest.fixture(scope="module")
 def client():
     return TestClient(app)
