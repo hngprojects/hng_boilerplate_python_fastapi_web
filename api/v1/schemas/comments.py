@@ -23,5 +23,6 @@ class Comment(BaseModel):
 class CommentResponse(BaseModel):
     """Response schema for a comment"""
     status_code: int
+    status: bool
     message: str
     data: Comment

@@ -34,6 +34,7 @@ async def update_comment(
         raise HTTPException(status_code=404, detail="Comment not found")
 
     return CommentResponse(
+        success=True,
         status_code=200,
         message="Comment fetch successfully",
         data=Comment(
