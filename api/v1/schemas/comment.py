@@ -16,3 +16,9 @@ class CommentData(BaseModel):
 
     class Config:
         from_attributes = True
+
+class CommentSuccessResponse(BaseModel):
+    status_code: int = 201
+    message: str 
+    success: bool = True
+    data: CommentData
