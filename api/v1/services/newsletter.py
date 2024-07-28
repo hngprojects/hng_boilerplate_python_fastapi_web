@@ -1,5 +1,6 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from api.v1.schemas.newsletter import EMAILSCHEMA
+from api.v1.schemas.newsletter import EmailSchema
 from api.core.base.services import Service
 from api.v1.models.newsletter import Newsletter
 
@@ -8,7 +9,7 @@ class NewsletterService(Service):
     '''Newsletter service functionality'''
 
     @staticmethod
-    def create(db: Session, request: EMAILSCHEMA) -> Newsletter:
+    def create(db: Session, request: EmailSchema) -> Newsletter:
         '''add a new subscriber'''
 
         new_subscriber = Newsletter(
@@ -22,9 +23,13 @@ class NewsletterService(Service):
         return new_subscriber
 
     @staticmethod
-    def check_existing_subscriber(db: Session, request: EMAILSCHEMA) -> Newsletter:
+    def check_existing_subscriber(db: Session, request: EmailSchema) -> Newsletter:
         """
         Check if user with email already exist
         """
 
-        return db.query(Newsletter).filter(Newsletter.email==request.email).first()
+        newsletter = db.query(Newsletter).filter(Newsletter.email==request.email).first()
+        if newsletter:
+            raise HTTPException(status_code=400, detail='User already subscribed to newsletter')
+
+        return newsletter

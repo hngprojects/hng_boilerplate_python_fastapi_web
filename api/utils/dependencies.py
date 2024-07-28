@@ -15,6 +15,7 @@ from .config import SECRET_KEY, ALGORITHM
 # Initialize OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
+
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -23,16 +24,34 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("username")
-        if username is None:
+
+        username = payload.get("username")
+        user_id = payload.get("user_id")
+        
+        if username is None and user_id is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
+        
+        if username:
+            token_data = TokenData(username=username)
+        else:
+            token_data = TokenData(user_id=user_id)
+
+    except JWTError as e:
         raise credentials_exception
-    user = db.query(User).filter(User.username == token_data.username).first()
+    
+    if token_data.username:
+        user = db.query(User).filter(User.username == token_data.username).first()
+    else:
+        user = db.query(User).filter(User.id == token_data.user_id).first()
+
     if user is None:
         raise credentials_exception
+
     return user
+
+
+
+
 
 def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     user = get_current_user(db, token)

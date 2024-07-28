@@ -1,7 +1,6 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from api.v1.models import User, Organization
-from api.utils.dependencies import get_current_user
 
 def check_model_existence(db: Session, model, id):
     '''Checks if a model exists by its id'''
