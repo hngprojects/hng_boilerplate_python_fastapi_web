@@ -24,7 +24,7 @@ def test_get_payment(mocker):
 
     response = client.get(f"/api/v1/payments/{mock_payment['id']}")
     assert response.status_code == 200
-#    assert response.json() == PaymentResponse(**mock_payment).model_dump()
+    assert response.json() == PaymentResponse(**mock_payment).model_dump()
 
 def test_get_payment_not_found(mocker):
     mocker.patch.object(PaymentService, 'get_payment_by_id', return_value=None)
@@ -32,3 +32,4 @@ def test_get_payment_not_found(mocker):
     response = client.get("/api/v1/payments/non_existent_id")
     assert response.status_code == 404
     assert response.json() == {"success": False, "status_code": 404, "message": "Not Found"}
+
