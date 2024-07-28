@@ -42,17 +42,13 @@ async def add_jobs(
         raise HTTPException(status_code=400,
                             detail="Invalid request data"
                             )
-    try:
-        job_full = AddJobSchema(author_id=user.id, **job.model_dump())
-        new_job = job_service.create(db, job_full)
-        logger.info(f"Job Listing created successfully {new_job.id}")
+    
+    job_full = AddJobSchema(author_id=user.id, **job.model_dump())
+    new_job = job_service.create(db, job_full)
+    logger.info(f"Job Listing created successfully {new_job.id}")
 
-        return success_response(
-            message = "Job listing created successfully",
-            status_code = 201,
-            data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
+    return success_response(
+        message = "Job listing created successfully",
+        status_code = 201,
+        data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
         )
-
-    except Exception as e:
-        logger.error(f"Failed to post Job: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to post job")
