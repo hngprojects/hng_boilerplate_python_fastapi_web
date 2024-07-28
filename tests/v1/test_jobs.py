@@ -44,11 +44,16 @@ def mock_get_current_user(mocker):
 def client():
     return TestClient(app)
 
-# Override the get_current_user dependency with a mock user
+# Mock the get_current_user dependency with a mock user
 @pytest.fixture(autouse=True)
 def mock_get_current_user(mocker):
     user = User(id='user1', is_super_admin=False)
     mocker.patch('api.utils.dependencies.get_current_user', return_value=user)
+
+# Mock the jwt.decode function to bypass actual JWT verification
+@pytest.fixture(autouse=True)
+def mock_jwt_decode(mocker):
+    mocker.patch('jwt.decode', return_value={"user_id": "user1"})
 
 # A valid token, in a real scenario this should be a properly signed JWT
 @pytest.fixture
