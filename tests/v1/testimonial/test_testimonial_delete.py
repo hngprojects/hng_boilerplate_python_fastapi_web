@@ -1,9 +1,3 @@
-import sys, os
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -23,6 +17,7 @@ client = TestClient(app)
 @pytest.fixture
 def mock_db_session():
     """Fixture to create a mock database session."""
+
     with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
         app.dependency_overrides[get_db] = lambda: mock_db
@@ -32,12 +27,14 @@ def mock_db_session():
 @pytest.fixture
 def mock_user_service():
     """Fixture to create a mock user service."""
+
     with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
         yield mock_service
 
 @pytest.fixture
 def mock_current_admin():
     """Fixture to mock the get_super_admin dependency."""
+
     with patch("api.utils.dependencies.get_super_admin", autospec=True) as mock_admin:
         mock_admin.return_value = User(
             id=str(uuid7()),
@@ -55,6 +52,7 @@ def mock_current_admin():
 
 def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
     """Create a mock user in the mock database session."""
+
     mock_user = User(
         id=str(uuid7()),
         username="testuser",
@@ -72,6 +70,7 @@ def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
 
 def create_testimonial(mock_user_service, mock_db_session):
     """Create a mock testimonial in the mock database session."""
+
     mock_user = create_mock_user(mock_user_service, mock_db_session, is_super_admin=True)
     mock_testimonial = Testimonial(
         id=str(uuid7()),
@@ -89,5 +88,7 @@ def create_testimonial(mock_user_service, mock_db_session):
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_delete_testimonial_unauthorized(mock_user_service, mock_db_session):
     """Test deletion without valid credentials."""
+
+    app.dependency_overrides[user_service.get_current_user] = lambda: None
     response = client.delete(f'/api/v1/testimonials/234')
     assert response.status_code == status.HTTP_401_UNAUTHORIZED

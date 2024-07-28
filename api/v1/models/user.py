@@ -41,6 +41,8 @@ class User(BaseTableModel):
     newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
     blog_likes = relationship("BlogLike", back_populates="user", cascade="all, delete-orphan")
     blog_dislikes = relationship("BlogDislike", back_populates="user", cascade="all, delete-orphan")
+    comment_likes = relationship("CommentLike", back_populates="user", cascade="all, delete-orphan")
+    comment_dislikes = relationship("CommentDislike", back_populates="user", cascade="all, delete-orphan")
     
     def to_dict(self):
         obj_dict = super().to_dict()
