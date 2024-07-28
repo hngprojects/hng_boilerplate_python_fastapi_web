@@ -153,3 +153,4 @@ def test_update_job_missing_token(client: TestClient, mocker: MockerFixture):
         }
     )
     assert response.status_code == 401
+    
