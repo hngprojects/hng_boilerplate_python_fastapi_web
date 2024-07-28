@@ -10,6 +10,29 @@ from api.v1.schemas.plans import CreateBillingPlan, BillingPlanResponse
 
 bill_plan = APIRouter(prefix='/organizations', tags=['Billing-Plan'])
 
+@bill_plan.get('/billing-plans')
+async def retrieve_all_billing_plans(
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get All Billing Plan endpoint
+    """
+    billing_plans = [
+        {
+            "id": billing_plan.id,
+            "name": billing_plan.name,
+            "price": float(billing_plan.price),
+            "features": billing_plan.features,
+        } for billing_plan in billing_plan_service.fetch_all(db=db)
+    ]
+    
+    return JsonResponseDict(
+        status_code=status.HTTP_200_OK,
+        data={"plans": billing_plans},
+        message="plans fetched successfully"
+    )
+
 @bill_plan.post('/billing-plans', response_model=BillingPlanResponse)
 async def create_billing_plan(
     plan_data: CreateBillingPlan,
