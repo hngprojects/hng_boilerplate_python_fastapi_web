@@ -71,7 +71,7 @@ class RequestPasswordService:
 
         return success_response(
                 message="Password reset link sent successfully",
-                data=reset_link,
+                data={"reset_link":reset_link},
                 status_code=status.HTTP_201_CREATED
             )
         #return {"msg": "Password reset link sent"}
