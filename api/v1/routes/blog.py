@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from api.db.database import get_db
 from api.utils.success_response import success_response
-from api.utils.json_response import JsonResponseDict
 from api.v1.models.user import User
 from api.v1.models.blog import Blog, BlogDislike
 from api.v1.schemas.blog import (BlogCreate, BlogPostResponse, BlogRequest,
@@ -97,7 +96,7 @@ def dislike_blog_post(
     blog_service = BlogService(db)
 
     if not current_user:
-        return JsonResponseDict(
+        return success_response(
             message="Could not validate credentials",
             status_code=status.HTTP_401_UNAUTHORIZED
         )
@@ -105,7 +104,7 @@ def dislike_blog_post(
     # GET blog post
     blog_p = blog_service.fetch(blog_id)
     if not isinstance(blog_p, Blog):
-        return JsonResponseDict(
+        return success_response(
             message="Post not found",
             status_code=status.HTTP_404_NOT_FOUND
         )
@@ -113,7 +112,7 @@ def dislike_blog_post(
     # CONFIRM current user has NOT disliked before
     existing_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
     if isinstance(existing_dislike, BlogDislike):
-        return JsonResponseDict(
+        return success_response(
             message="You have already disliked this blog post",
             status_code=status.HTTP_403_FORBIDDEN
         )
@@ -122,7 +121,7 @@ def dislike_blog_post(
     new_dislike = blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
 
     if not isinstance(new_dislike, BlogDislike):
-        return JsonResponseDict(
+        return success_response(
             message="Unable to record dislike.",
             status_code=status.HTTP_400_BAD_REQUEST
         )
