@@ -1,4 +1,3 @@
-from typing import Any, Optional
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
@@ -30,12 +29,11 @@ class TestimonialService(Service):
 
     def delete(self, db: Session, id: str):
         '''Deletes a specific testimonial'''
-        testimonial = db.query(Testimonial).filter(Testimonial.id == id).first()
-        if not testimonial:
-            return False
+
+        testimonial = check_model_existence(db, Testimonial, id)
+        
         db.delete(testimonial)
         db.commit()
-        return True
 
     def delete_all(self, db: Session):
         '''Delete all testimonials'''

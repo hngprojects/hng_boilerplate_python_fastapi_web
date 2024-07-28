@@ -1,7 +1,9 @@
 from datetime import datetime
+
 # Remove the unused import statement
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
+
 # Remove this commented out code
 import re
 from api.v1.schemas.user import UserBase
@@ -38,7 +40,7 @@ class ProfileCreateUpdate(BaseModel):
     recovery_email: Optional[EmailStr]
 
     @field_validator("phone_number")
-    def phone_number_validator(cls, value):
+    def phone_number_validator(self, cls, value):
         if not re.match(r"^\+?[1-9]\d{1,14}$", value):
             raise ValueError("Please use a valid phone number format")
         return value

@@ -1,24 +1,19 @@
 from fastapi import Depends, status, APIRouter, Response, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models import User
 from typing_extensions import Annotated
-from datetime import datetime, timedelta
+from datetime import timedelta
 
 from api.v1.schemas.user import UserCreate
 from api.v1.schemas.token import TokenRequest, EmailRequest
-from typing import Annotated
-from datetime import datetime, timedelta
-
-from api.v1.schemas.user import UserCreate
-from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
-
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
 def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -56,7 +51,7 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
 
     return response
 
-
+  
 @auth.post("/register", status_code=status.HTTP_201_CREATED)
 def register(response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
@@ -74,7 +69,10 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
         data={
             'access_token': access_token,
             'token_type': 'bearer',
-            'user': user.to_dict()
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
         }
     )
 
@@ -114,8 +112,7 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
     current_refresh_token = request.cookies.get('refresh_token')
 
     # Create new access and refresh tokens
-    access_token, refresh_token = user_service.refresh_access_token(
-        current_refresh_token=current_refresh_token)
+    access_token, refresh_token = user_service.refresh_access_token(current_refresh_token=current_refresh_token)
 
     response = success_response(
         status_code=200,
@@ -138,7 +135,6 @@ def refresh_access_token(request: Request, response: Response, db: Session = Dep
 
     return response
 
-
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
 async def request_signin_token(email_schema: EmailRequest, db: Session = Depends(get_db)):
     '''Generate and send a 6-digit sign-in token to the user's email'''
@@ -155,9 +151,8 @@ async def request_signin_token(email_schema: EmailRequest, db: Session = Depends
 
     return success_response(
         status_code=200,
-        message="Sign-in token sent to email"
+        message=f"Sign-in token sent to {user.email}"
     )
-
 
 @auth.post("/verify-token", status_code=status.HTTP_200_OK)
 async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(get_db)):
@@ -167,16 +162,29 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 
     # Generate JWT token
     access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    return success_response(
+    response = success_response(
         status_code=200,
-        message="Sign-in successful",
+        message='Sign in successful',
         data={
-            "access_token": access_token,
-            "token_type": "bearer"
+            'access_token': access_token,
+            'token_type': 'bearer',
         }
     )
 
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+    
 
 # Protected route example: test route
 @auth.get("/admin")

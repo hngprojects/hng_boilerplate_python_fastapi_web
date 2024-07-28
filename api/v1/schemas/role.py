@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import List
 
-
 class RoleCreate(BaseModel):
     role_name: str
     organization_id: str
