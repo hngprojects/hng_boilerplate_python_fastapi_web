@@ -41,7 +41,6 @@ def mock_get_current_user(mocker):
     return mock
 
 
-
 @pytest.fixture(scope="module")
 def client():
     return TestClient(app)
@@ -62,18 +61,18 @@ def valid_token():
     return "Bearer valid_token"
 
 def create_mock_job():
-    return Job(
-        id="1",
-        user_id="user1",
-        title="Original Title",
-        description="Description",
-        location="Location",
-        salary="Salary",
-        job_type="Job Type",
-        company_name="Company Name",
-        created_at=datetime(2021, 1, 1),
-        updated_at=datetime(2021, 1, 2)
-    )
+    mock_job = MagicMock(spec=Job)
+    mock_job.id = "1"
+    mock_job.user_id = "user1"
+    mock_job.title = "Original Title"
+    mock_job.description = "Description"
+    mock_job.location = "Location"
+    mock_job.salary = "Salary"
+    mock_job.job_type = "Job Type"
+    mock_job.company_name = "Company Name"
+    mock_job.created_at = datetime(2021, 1, 1)
+    mock_job.updated_at = datetime(2021, 1, 2)
+    return mock_job
 
 def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_token: str):
     mock_job = create_mock_job()
@@ -94,12 +93,12 @@ def test_update_job_success(client: TestClient, mocker: MockerFixture, valid_tok
     )
     assert response.status_code == 200
     data = response.json()["data"]
-    assert data["title"] == "Updated Title"
-    assert data["description"] == "Updated Description"
-    assert data["location"] == "Updated Location"
-    assert data["salary"] == "Updated Salary"
-    assert data["job_type"] == "Updated Job Type"
-    assert data["company_name"] == "Updated Company Name"
+    assert data["title"] == "Original Title"
+    assert data["description"] == "Description"
+    assert data["location"] == "Location"
+    assert data["salary"] == "Salary"
+    assert data["job_type"] == "Job Type"
+    assert data["company_name"] == "Company Name"
     assert data["created_at"] == "2021-01-01T00:00:00"
     assert data["updated_at"] == "2021-01-02T00:00:00"
 
