@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import APIRouter, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
+from api.v1.services.waitlist import waitlist_service
 from api.v1.services.waitlist_email import send_confirmation_email, add_user_to_waitlist, find_existing_user
 from api.utils.logger import logger
 from api.db.database import get_db
@@ -96,3 +97,21 @@ def admin_add_user_to_waitlist(
     )
 
     return JsonResponseDict(**resp)
+
+@waitlist.get("/users", response_model=JsonResponseDict, status_code=200)
+def get_all_waitlist_emails(
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieves all waitlist user emails.
+
+    Returns:
+    - 200: A list of all waitlist user emails
+    """
+    emails = waitlist_service.fetch_all_emails(db)
+
+    return success_response(
+        message="waitlist retrieved successfully",
+        status_code=200,
+        data=emails
+    )

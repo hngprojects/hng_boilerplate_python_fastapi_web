@@ -60,4 +60,11 @@ class WaitListService(Service):
         db.delete(waitlist_user)
         db.commit()
 
+
+    def fetch_all_emails(self, db: Session):
+        '''Fetch all waitlist user emails'''
+
+        query = db.query(Waitlist.email)
+        return [email for (email,) in query.all()]
+
 waitlist_service = WaitListService()

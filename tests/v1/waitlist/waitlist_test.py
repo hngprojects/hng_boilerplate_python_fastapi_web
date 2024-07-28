@@ -61,3 +61,13 @@ def test_signup_with_empty_name(client_with_mocks):
     data = response.json()
     assert response.status_code == 422
     assert data['message']['message'] == 'Full name is required'
+
+def test_get_all_waitlist_emails(client_with_mocks):
+    client, mock_db = client_with_mocks
+    mock_db.query.return_value.all.return_value = [("email1@example.com",), ("email2@example.com",)]
+
+    response = client.get("/api/v1/waitlists/emails")
+    data = response.json()
+    assert response.status_code == 200
+    assert data['message'] == "waitlist retrieved successfully"
+    assert data['data'] == ["email1@example.com", "email2@example.com"]
