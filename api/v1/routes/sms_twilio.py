@@ -1,12 +1,20 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from api.v1.schemas.sms_twilio import SMSRequest
 from api.v1.services.sms_twilio import send_sms
 from api.utils.success_response import success_response
+from api.v1.services.user import user_service
+from api.v1.models.user import User
+from api.utils.dependencies import get_current_user
+from typing import Annotated
 
 sms = APIRouter(prefix="/sms/send", tags=["sms"])
 
-@sms.post("/", status_code=status.HTTP_200_OK, response_model=dict)
-def send_sms_endpoint(sms_request: SMSRequest):
+@sms.post("/", status_code=status.HTTP_200_OK, response_model=SMSRequest)
+def send_sms_endpoint(
+    sms_request: SMSRequest,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    
+    ):
     """
     Endpoint to send SMS using Twilio.
     
@@ -28,7 +36,6 @@ def send_sms_endpoint(sms_request: SMSRequest):
                     "message": "Failed to send SMS. Please try again later."
                 }
             )
-        print("🇦🇱", result['sid'])
         return success_response(
             status_code=200,
             message = "SMS sent successfully.", 
@@ -36,11 +43,7 @@ def send_sms_endpoint(sms_request: SMSRequest):
                 "sid": result['sid']
             } 
         )
-    except HTTPException as e:
-        # Re-raise HTTP exceptions for custom error messages
-        raise e
     except Exception as e:
-        # Handle unexpected errors
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail={
