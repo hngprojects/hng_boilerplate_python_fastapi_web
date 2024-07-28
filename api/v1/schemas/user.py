@@ -1,11 +1,8 @@
 import re
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from uuid_extensions import uuid7
-
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 class UserBase(BaseModel):
@@ -48,7 +45,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Schema to structure token data"""
 
-    id: Optional[Any]
+    id: Optional[str]
 
 
 class DeactivateUserSchema(BaseModel):
@@ -68,6 +65,5 @@ class ChangePasswordSchema(BaseModel):
 class ChangePwdRet(BaseModel):
     """schema for returning change password response"""
 
-    success: bool
     status_code: int
     message: str

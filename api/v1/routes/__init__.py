@@ -34,4 +34,3 @@ api_version_one.include_router(google_auth)
 api_version_one.include_router(invites)
 api_version_one.include_router(profile)
 api_version_one.include_router(job) 
-
