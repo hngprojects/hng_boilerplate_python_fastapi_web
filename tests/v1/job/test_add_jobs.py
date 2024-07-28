@@ -57,8 +57,9 @@ class TestCodeUnderTest:
                 assert response.json()['message'] == "Job listing created successfully"
 
                 assert response.json()['data']['title'] == test_job['title']
+                assert response.json()['success'] == True
 
-    # # # Handling empty title field and raising appropriate exception
+    # Handling empty title field and raising appropriate exception
     def test_add_jobs_empty_title(self, client):
         test_job = {"title": "",
                     "description": "A graphic artist",
@@ -68,10 +69,10 @@ class TestCodeUnderTest:
         response = client.post("/api/v1/jobs", json=test_job)
         assert response.status_code == 400
         assert response.json()['message'] == 'Invalid request data'
-
+        assert response.json()['success'] == False
 
     
-    # # # Handling absent description field and raising appropriate exception
+    # Handling absent description field and raising appropriate exception
     def test_add_jobs_absent_description(self, client):
         test_job = {"title": "Hala",
                     "company_name": "HNG"}
@@ -79,8 +80,7 @@ class TestCodeUnderTest:
         response = client.post("/api/v1/jobs", json=test_job)
         assert response.status_code == 422
 
-
-    # # # Handling unauthorized request
+    # Handling unauthorized request
     def test_add_jobs_unauthorized(self, client):
         test_job = {"title": "Hala",
                     "description": 'Work',
