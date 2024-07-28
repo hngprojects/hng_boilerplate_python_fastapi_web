@@ -1,5 +1,5 @@
 # app/models/message.py
-from sqlalchemy import Column, String, Text, ForeignKey, DateTime
+from sqlalchemy import Column, String, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from api.v1.models.base_model import BaseTableModel
