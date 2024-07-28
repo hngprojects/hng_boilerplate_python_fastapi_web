@@ -1,5 +1,6 @@
 from pydantic import EmailStr, BaseModel
 from typing import Optional
+from datetime import datetime
 
 class PostJobSchema(BaseModel):
     '''Pydantic Model for adding user to waitlist'''
@@ -16,6 +17,6 @@ class AddJobSchema(PostJobSchema):
 
 class JobCreateResponseSchema(PostJobSchema):
     id: str
-    created_at: str
+    created_at: datetime
     class Config:
         from_attributes = True
