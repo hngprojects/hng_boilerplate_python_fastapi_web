@@ -89,3 +89,28 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     assert response.status_code == 401
     assert response.json()["success"] == False
     assert response.json()["status_code"] == 401
+
+
+def test_get_all_notification_with_unauthenticated_user(client, db_session_mock):
+    # Create test notification
+
+    db_session_mock.query().filter().all.return_value = [notification]
+
+    response = client.patch(f"/api/v1/notifications/current-user")
+
+    assert response.status_code == 401
+    assert response.json()["success"] == False
+    assert response.json()["status_code"] == 401
+
+
+def test_get_notification_current_user(client, db_session_mock):
+
+    db_session_mock.query().filter().all.return_value = [user, notification]
+
+    headers = {"authorization": f"Bearer {access_token}"}
+
+    response = client.patch(f"/api/v1/notifications/current-user", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["success"] == True
+    assert response.json()["status_code"] == 200
