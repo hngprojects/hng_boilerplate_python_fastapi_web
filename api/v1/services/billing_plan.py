@@ -1,37 +1,14 @@
+# services/billing_plan.py
 from sqlalchemy.orm import Session
 from api.v1.models.billing_plan import BillingPlan
-from typing import Any, Optional
-from api.core.base.services import Service
+from api.v1.schemas.plans import CreateBillingPlan
 
+class BillingPlanService:
+    def create_billing_plan(self, db: Session, plan_data: CreateBillingPlan) -> BillingPlan:
+        billing_plan = BillingPlan(**plan_data.dict())
+        db.add(billing_plan)
+        db.commit()
+        db.refresh(billing_plan)
+        return billing_plan
 
-
-class BillingPlanService(Service):
-	'''Product service functionality'''
-
-	def create():
-		pass
-
-	def delete():
-		pass
-
-	def fetch():
-		pass
-
-	def update():
-		pass
-
-	def fetch_all(db: Session, **query_params: Optional[Any]):
-		'''Fetch all products with option tto search using query parameters'''
-
-		query = db.query(BillingPlan)
-
-		# Enable filter by query parameter
-		if query_params:
-			for column, value in query_params.items():
-				if hasattr(BillingPlan, column) and value:
-					query = query.filter(getattr(BillingPlan, column).ilike(f'%{value}%'))
-
-		return query.all()
-
-
-billing_plan_service = BillingPlanService
+billing_plan_service = BillingPlanService()
