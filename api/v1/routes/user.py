@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import Depends, APIRouter, Request, status
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -96,3 +97,29 @@ async def change_password(
         status_code=200,
         message='Password changed successfully'
     )
+
+
+@user.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_user(
+    user_id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    db: Session = Depends(get_db),
+):
+    """Endpoint for user deletion (soft-delete)"""
+
+    """
+
+    Args:
+        user_id (str): User ID
+        current_user (User): Current logged in user
+        db (Session, optional): Database Session. Defaults to Depends(get_db).
+
+    Raises:
+        HTTPException: 403 FORBIDDEN (Current user is not a super admin)
+        HTTPException: 404 NOT FOUND (User to be deleted cannot be found)
+    """
+
+    user = user_service.fetch(db=db, id=user_id)
+
+    # soft-delete the user
+    user_service.delete(db=db, id=user_id)
