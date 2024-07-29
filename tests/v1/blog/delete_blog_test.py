@@ -61,9 +61,9 @@ def test_delete_blog_success(client, db_session_mock):
     
 #     app.dependency_overrides[user_service.get_current_super_admin] = lambda: None
 
-#     response = client.delete(f"/api/v1/blogs/{mock_blog.id}")
+    # response = client.delete(f"/api/v1/blogs/{mock_blog.id}")
 
-#     assert response.status_code == 401
+    # assert response.status_code == 401
 
     
 def test_delete_blog_not_found(client, db_session_mock):

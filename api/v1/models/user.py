@@ -15,7 +15,6 @@ from api.v1.models.base_model import BaseTableModel
 class User(BaseTableModel):
     __tablename__ = 'users'
 
-    username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=True)
     first_name = Column(String, nullable=True)
