@@ -58,7 +58,7 @@ def test_update_organization_success(client, db_session_mock):
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    response = client.put(
+    response = client.patch(
         f'/api/v1/organizations/{org_id}',
         headers={'Authorization': 'Bearer token'},
         json={
@@ -83,7 +83,7 @@ def test_update_organization_missing_field(client, db_session_mock):
     org_id = "existing-org-id"
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
 
-    response = client.put(
+    response = client.patch(
         f'/api/v1/organizations/{org_id}',
         headers={'Authorization': 'Bearer token'},
         json={
@@ -101,7 +101,7 @@ def test_update_organization_unauthorized(client, db_session_mock):
     '''Test to fail updating an organization due to unauthorized access'''
 
     org_id = "existing-org-id"
-    response = client.put(
+    response = client.patch(
         f'/api/v1/organizations/{org_id}',
         json={
             "company_name": "Updated Organization",

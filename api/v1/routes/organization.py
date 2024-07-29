@@ -34,7 +34,7 @@ async def create_organization(
         data=jsonable_encoder(new_org)
     )
 
-@organization.put('/{org_id}', response_model=success_response)
+@organization.patch('/{org_id}', response_model=success_response)
 async def update_organization(org_id: str, schema: CreateUpdateOrganization, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     """update organization"""
     updated_organization = organization_service.update(db, org_id, schema, current_user)
