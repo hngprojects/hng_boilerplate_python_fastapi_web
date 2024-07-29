@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -95,25 +95,19 @@ def dislike_blog_post(
     
     blog_service = BlogService(db)
 
-    if not current_user:
-        return success_response(
-            message="Could not validate credentials",
-            status_code=status.HTTP_401_UNAUTHORIZED
-        )
-
     # GET blog post
     blog_p = blog_service.fetch(blog_id)
     if not isinstance(blog_p, Blog):
-        return success_response(
-            message="Post not found",
+        raise HTTPException(
+            detail="Post not found",
             status_code=status.HTTP_404_NOT_FOUND
         )
     
     # CONFIRM current user has NOT disliked before
     existing_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
     if isinstance(existing_dislike, BlogDislike):
-        return success_response(
-            message="You have already disliked this blog post",
+        raise HTTPException(
+            detail="You have already disliked this blog post",
             status_code=status.HTTP_403_FORBIDDEN
         )
 
@@ -121,8 +115,8 @@ def dislike_blog_post(
     new_dislike = blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
 
     if not isinstance(new_dislike, BlogDislike):
-        return success_response(
-            message="Unable to record dislike.",
+        raise HTTPException(
+            detail="Unable to record dislike.",
             status_code=status.HTTP_400_BAD_REQUEST
         )
 
