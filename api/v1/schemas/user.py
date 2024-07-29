@@ -72,3 +72,4 @@ class ChangePwdRet(BaseModel):
 
     status_code: int
     message: str
+
