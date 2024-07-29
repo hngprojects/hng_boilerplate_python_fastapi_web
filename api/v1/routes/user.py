@@ -8,8 +8,7 @@ from api.v1.models.user import User
 from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
-    ChangePwdRet,
-    UserResponse
+    ChangePwdRet
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -108,29 +107,13 @@ def get_user(user_id : str,
              db : Session = Depends(get_db)
              ):
     user = user_service.fetch(db=db , id=user_id)
-
-    return {
-        'status' : status.HTTP_200_OK,
-        'message': 'User retrieved successfully',
-        'user' : UserResponse(id=user.id , name=f'{user.first_name} {user.last_name}' , email=user.email)
-    }
-    
-    # return success_response(
-    #     status_code=status.HTTP_200_OK,
-    #     message='User retrieved successfully',
-    #     data = jsonable_encoder(user, 
-    #                             exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
-    #                             )
-    # )
-
-
-
-
-
-
-
-
-
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='User retrieved successfully',
+        data = jsonable_encoder(user, 
+                                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+                                )
+         )
 
 @user.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
