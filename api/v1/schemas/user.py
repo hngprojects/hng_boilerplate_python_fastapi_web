@@ -1,11 +1,8 @@
 import re
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
-from fastapi import HTTPException
-from pydantic import BaseModel, EmailStr, Field, field_validator
-from uuid_extensions import uuid7
-
+from pydantic import BaseModel, EmailStr, field_validator
 
 
 class UserBase(BaseModel):
@@ -14,7 +11,6 @@ class UserBase(BaseModel):
     id: str
     first_name: str
     last_name: str
-    username: str
     email: EmailStr
     created_at: datetime
 
@@ -22,11 +18,10 @@ class UserBase(BaseModel):
 class UserCreate(BaseModel):
     """Schema to create a user"""
 
-    username: str
+    email: EmailStr
     password: str
     first_name: str
     last_name: str
-    email: EmailStr
 
     @field_validator("password")
     def password_validator(cls, value):
@@ -38,7 +33,14 @@ class UserCreate(BaseModel):
                 "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character."
             )
         return value
+    
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class EmailRequest(BaseModel):
+    email: EmailStr
 
 class Token(BaseModel):
     access_token: str
@@ -48,7 +50,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     """Schema to structure token data"""
 
-    id: Optional[Any]
+    id: Optional[str]
 
 
 class DeactivateUserSchema(BaseModel):
@@ -68,7 +70,6 @@ class ChangePasswordSchema(BaseModel):
 class ChangePwdRet(BaseModel):
     """schema for returning change password response"""
 
-    success: bool
     status_code: int
     message: str
 

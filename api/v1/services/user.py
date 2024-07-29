@@ -1,7 +1,7 @@
 import random
 import string
 from typing import Any, Optional
-import bcrypt, datetime as dt
+import datetime as dt
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, Request
@@ -18,7 +18,7 @@ from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
 
-oauth2_scheme = OAuth2PasswordBearer("/api/v1/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -41,7 +41,6 @@ class UserService(Service):
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
 
-
         user = check_model_existence(db, User, id)
 
         # return user if user is not deleted
@@ -58,24 +57,12 @@ class UserService(Service):
             raise HTTPException(status_code=404, detail="User not found")
 
         return user
-
-    def fetch_by_username(self, db: Session, username):
-        """Fetches a user by their username"""
-
-        user = db.query(User).filter(User.username == username).first()
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        return user
+    
 
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
 
-        if (
-            db.query(User).filter(User.email == schema.email).first()
-            or db.query(User).filter(User.username == schema.username).first()
-        ):
+        if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
                 detail="User with this email or username already exists",
@@ -93,13 +80,10 @@ class UserService(Service):
         return user
 
     def create_admin(self, db: Session, schema: user.UserCreate):
-        if (
-            db.query(User).filter(User.email == schema.email).first()
-            or db.query(User).filter(User.username == schema.username).first()
-        ):
+        if db.query(User).filter(User.email == schema.email).first():
             user = (
                 db.query(User)
-                .filter(User.email == schema.email or User.username == schema.username)
+                .filter(User.email == schema.email)
                 .first()
             )
             if not user.is_super_admin:
@@ -128,23 +112,17 @@ class UserService(Service):
         """Function to soft delete a user"""
 
         # Get user from access token if provided, otherwise fetch user by id
-
-        # user = self.get_current_user(access_token, db) if id is not None else check_model_existence(db, User, id)
-
-        if id is not None:
-            user = check_model_existence(db, User, id)
-        else:
-            user = self.get_current_user(access_token, db)
+        user = self.get_current_user(access_token, db) if id is None else check_model_existence(db, User, id)
 
         user.is_deleted = True
         db.commit()
 
         return super().delete()
 
-    def authenticate_user(self, db: Session, username: str, password: str):
+    def authenticate_user(self, db: Session, email: str, password: str):
         """Function to authenticate a user"""
 
-        user = db.query(User).filter(User.username == username).first()
+        user = db.query(User).filter(User.email == email).first()
 
         if not user:
             raise HTTPException(status_code=400, detail="Invalid user credentials")
@@ -153,6 +131,7 @@ class UserService(Service):
             raise HTTPException(status_code=400, detail="Invalid user credentials")
 
         return user
+    
 
     def perform_user_check(self, user: User):
         """This checks if a user is active and verified and not a deleted user"""
@@ -178,8 +157,8 @@ class UserService(Service):
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         data = {"user_id": user_id, "exp": expires, "type": "access"}
-        return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-
+        encoded_jwt =  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        return encoded_jwt
 
     def create_refresh_token(self, user_id: str) -> str:
         """Function to create access token"""
@@ -187,11 +166,10 @@ class UserService(Service):
         expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
             days=settings.JWT_REFRESH_EXPIRY
         )
-
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
-
-        return jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-
+        encoded_jwt =  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        return encoded_jwt
+    
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
@@ -211,7 +189,8 @@ class UserService(Service):
 
             token_data = user.TokenData(id=user_id)
 
-        except JWTError:
+        except JWTError as err:
+            print(err)
             raise credentials_exception
 
         return token_data
@@ -262,13 +241,14 @@ class UserService(Service):
 
         credentials_exception = HTTPException(
             status_code=401,
-            detail="Could not validate crenentials",
+            detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
         token = self.verify_access_token(access_token, credentials_exception)
-
-        return db.query(User).filter(User.id == token.id).first()
+        user = db.query(User).filter(User.id == token.id).first()
+        
+        return user
 
     def deactivate_user(
         self,
@@ -336,7 +316,6 @@ class UserService(Service):
     ):
         """Endpoint to change the user's password"""
 
-
         if not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
 
@@ -355,10 +334,9 @@ class UserService(Service):
             )
         return user
 
-    def save_login_token(
-        self, db: Session, user: User, token: str, expiration: datetime
-    ):
+    def save_login_token(self, db: Session, user: User, token: str, expiration: datetime):
         """Save the token and expiration in the user's record"""
+
         db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
 
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
@@ -366,8 +344,10 @@ class UserService(Service):
         db.commit()
         db.refresh(token)
 
+
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
+        
         user = db.query(User).filter(User.email == schema.email).first()
 
         if not user:

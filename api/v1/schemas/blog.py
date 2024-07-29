@@ -1,8 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
-from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field
 
 
 class BlogCreate(BaseModel):
@@ -25,8 +24,8 @@ class BlogUpdateResponseModel(BaseModel):
 
 
 class BlogResponse(BaseModel):
-    id: UUID
-    author_id: UUID
+    id: str
+    author_id: str
     title: str
     content: str
     image_url: Optional[str]
@@ -54,3 +53,17 @@ class BlogPostResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class BlogDislikeCreate(BaseModel):
+    id: str
+    blog_id: str
+    user_id: str
+    ip_address: Optional[str]
+    created_at: datetime
+
+
+class BlogDislikeResponse(BaseModel):
+    status_code: str
+    message: str
+    data: BlogDislikeCreate

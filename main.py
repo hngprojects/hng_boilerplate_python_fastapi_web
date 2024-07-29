@@ -1,6 +1,8 @@
 from fastapi.responses import JSONResponse
 import uvicorn
+import os
 from fastapi import HTTPException, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -8,10 +10,9 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.utils.json_response import JsonResponseDict
-from starlette.middleware.sessions import SessionMiddleware   # required by google oauth
+from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
 from api.utils.logger import logger
-from api.v1.routes.newsletter import CustomException, custom_exception_handler
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 
@@ -21,7 +22,14 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# Directory to save images
+IMAGE_DIR = "media"
+if not os.path.exists(IMAGE_DIR):
+    os.makedirs(IMAGE_DIR)
+
+
 app = FastAPI(lifespan=lifespan)
+app.mount("/media/images", StaticFiles(directory=IMAGE_DIR), name="mediafiles")
 
 origins = [
     "http://localhost:3000",
@@ -38,9 +46,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_exception_handler(
-    CustomException, custom_exception_handler
-)  # Newsletter custom exception registration
 app.include_router(api_version_one)
 
 
@@ -49,6 +54,11 @@ async def get_root(request: Request) -> dict:
     return JsonResponseDict(
         message="Welcome to API", status_code=status.HTTP_200_OK, data={"URL": ""}
     )
+
+
+@app.get("/probe", tags=["Home"])
+async def probe():
+    return {"message": "I am the Python FastAPI API responding"}
 
 
 # REGISTER EXCEPTION HANDLERS

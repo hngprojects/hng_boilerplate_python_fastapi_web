@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from typing import Annotated
-from uuid_extensions import uuid7
 from api.core.responses import INVALID_CREDENTIALS, COULD_NOT_VALIDATE_CRED
 from api.utils.json_response import JsonResponseDict
 from api.v1.services.facebook import fb_user_service

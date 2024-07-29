@@ -2,9 +2,8 @@ from typing import Any, Optional
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
-from api.utils.db_validators import check_model_existence
 from api.v1.models.waitlist import Waitlist
-from pydantic import EmailStr, BaseModel
+from pydantic import BaseModel
 
 
 class WaitListService(Service):
