@@ -45,7 +45,6 @@ def create_mock_user(mock_user_service, mock_db_session):
     """Create a mock user in the mock database session."""
     mock_user = User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -56,12 +55,6 @@ def create_mock_user(mock_user_service, mock_db_session):
         updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
-
-    # mock_db_session.return_value.__enter__.return_value = mock_user
-    # mock_user_service.hash_password.return_value = "hashed_password"
-    # mock_db_session.add.return_value = None
-    # mock_db_session.commit.return_value = None
-    # mock_db_session.refresh.return_value = None
 
     return mock_user
 
@@ -112,8 +105,8 @@ def test_success_deactivation(mock_user_service, mock_db_session):
     """Test for successful user deactivation."""
     create_mock_user(mock_user_service, mock_db_session)
 
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser",
+    login = client.post(LOGIN_ENDPOINT, json={
+        "email": "testuser@gmail.com",
         "password": "Testpassword@123"
     })
     # mock_user_service.authenticate_user.return_value = create_mock_user(mock_user_service, mock_db_session)
@@ -135,7 +128,6 @@ def test_user_inactive(mock_user_service, mock_db_session):
     # Create a mock user
     mock_user = User(
         id=str(uuid7()),
-        username="testuser1",
         email="testuser1@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -148,8 +140,8 @@ def test_user_inactive(mock_user_service, mock_db_session):
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
 
     # Login with mock user details
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser1",
+    login = client.post(LOGIN_ENDPOINT, json={
+        "email": "testuser1@gmail.com",
         "password": "Testpassword@123"
     })
     response = login.json()
@@ -163,3 +155,4 @@ def test_user_inactive(mock_user_service, mock_db_session):
 
     assert user_already_deactivated.status_code == 403
     assert user_already_deactivated.json().get('message') == 'User is not active'
+    
