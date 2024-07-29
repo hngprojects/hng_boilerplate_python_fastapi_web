@@ -1,5 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
+from fastapi import HTTPException
 from main import app
 from api.v1.models.organization import Organization
 from api.v1.services.user import UserService
@@ -29,14 +30,22 @@ def override_get_db(db_session_mock):
     yield
 
     app.dependency_overrides = {}
-    
+
 @pytest.fixture
 def override_get_db():
     db = MagicMock()
-    def mock_query(organization_id):
-        org = next((org for org in MOCK_ORGANIZATIONS if org.id == organization_id), None)
-        return org if org else None
-    db.query.return_value.filter.return_value.first = lambda: mock_query(db.query.return_value.filter.return_value.filter_by_args[0])
+    
+    # Mock query method to return an object with a first method
+    def mock_query_filter(organization_id):
+        if organization_id == 1:
+            return MagicMock(first=MagicMock(return_value=MOCK_ORGANIZATIONS[0]))
+        elif organization_id == 999:
+            return MagicMock(first=MagicMock(return_value=None))
+        else:
+            raise HTTPException(status_code=422, detail="Invalid ID format")
+
+    db.query.return_value.filter.return_value = MagicMock()
+    db.query.return_value.filter.return_value.first = lambda: mock_query_filter(db.query.return_value.filter.return_value.filter_by_args[0])
     yield db
 
 @pytest.fixture(autouse=True)
@@ -45,8 +54,7 @@ def set_up(monkeypatch):
 
 @pytest.fixture
 def token():
-    # Mock token generation
-    return "testtoken"
+    return "testtoken"  # Mock token
 
 def test_get_organization_success(token):
     with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
