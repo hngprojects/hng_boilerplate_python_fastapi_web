@@ -29,9 +29,11 @@ async def google_oauth2(request: Request) -> RedirectResponse:
     # generate a state value and stre it in the session
     state = secrets.token_urlsafe(16)
     request.session['state'] = state
-    response =  await google_oauth.google.authorize_redirect(request,
-                                                             redirect_uri,
-                                                             state=state)
+    response =  await google_oauth.google.authorize_redirect(
+        request,
+        redirect_uri,
+        state=state
+    )
     return response
 
 
