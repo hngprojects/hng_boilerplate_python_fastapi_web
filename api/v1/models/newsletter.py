@@ -1,23 +1,26 @@
-from sqlalchemy import Column, String, Text, Integer, DateTime, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, Text, ForeignKey, UniqueConstraint
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from api.v1.models.base_model import BaseTableModel
-from datetime import datetime, timezone
+
 
 
 class Newsletter(BaseTableModel):
     __tablename__ = 'newsletters'
 
-    title = Column(String(100), nullable=False)
-    description = Column(Text, nullable=True)
-    content = Column(Text, nullable=True)
+    title: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    content: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    newsletter_subscribers = relationship("NewsletterSubscriber", back_populates="newsletter")
-
+    newsletter_subscribers: Mapped[list["NewsletterSubscriber"]] = relationship(back_populates="newsletter")
 
 class NewsletterSubscriber(BaseTableModel):
     __tablename__ = 'newsletter_subscribers'
 
-    email = Column(String(120), nullable=False)
-    newsletter_id = Column(Integer, ForeignKey('newsletters.id'))
+    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    newsletter_id: Mapped[str] = mapped_column(ForeignKey('newsletters.id'), nullable=False)
 
-    newsletter = relationship("Newsletter", back_populates="newsletter_subscribers")
+    newsletter: Mapped["Newsletter"] = relationship(back_populates="newsletter_subscribers")
+
+    __table_args__ = (
+        UniqueConstraint('email', 'newsletter_id', name='uq_subscriber_newsletter'),
+    )
