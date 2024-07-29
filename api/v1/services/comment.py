@@ -1,18 +1,12 @@
-# api/v1/services/comment.py
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from api.v1.models.comment import Comment
 from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
 from typing import Any, Optional
-from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models import Comment, Blog, User
-from api.v1.models.comment import Comment
-from api.v1.models.blog import Blog
-from api.v1.models.user import User
-
 
 class CommentService(Service):
     '''Comment service functionality'''
@@ -45,10 +39,8 @@ class CommentService(Service):
         db.refresh(new_comment)
         return new_comment
     
-
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all comments with option tto search using query parameters'''
-
+        '''Fetch all comments with option to search using query parameters'''
         query = db.query(Comment)
 
         # Enable filter by query parameter
@@ -58,17 +50,14 @@ class CommentService(Service):
                     query = query.filter(getattr(Comment, column).ilike(f'%{value}%'))
 
         return query.all()
-
     
     def fetch(self, db: Session, id: str):
         '''Fetches a comment by id'''
-
         comment = check_model_existence(db, Comment, id)
         return comment
 
     def update(self, db: Session, id: str, schema):
         '''Updates a comment'''
-
         comment = self.fetch(db=db, id=id)
         
         # Update the fields with the provided schema data
@@ -80,13 +69,10 @@ class CommentService(Service):
         db.refresh(comment)
         return comment
     
-
     def delete(self, db: Session, id: str):
         '''Deletes a comment'''
-        
         comment = self.fetch(id=id)
         db.delete(comment)
         db.commit()
-    
-comment_service = CommentService()
 
+comment_service = CommentService()
