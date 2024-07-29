@@ -3,7 +3,7 @@
 """
 from uuid_extensions import uuid7
 from fastapi import Depends
-from api.v1.models.base import Base
+from api.v1.models.associations import Base
 from sqlalchemy import (
         Column,
         String,
