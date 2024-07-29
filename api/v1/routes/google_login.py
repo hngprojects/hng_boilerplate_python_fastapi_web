@@ -92,7 +92,7 @@ async def google_oauth2_callback(request: Request,
             RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
                                     status_code=status.HTTP_302_FOUND)
 
-        response = RedirectResponse(url=f"{FRONTEND_URL}?success=true",
+        response = RedirectResponse(url=f"{FRONTEND_URL}/dashboard/products",
                                     status_code=status.HTTP_302_FOUND)
 
         access_token = tokens.access_token
