@@ -8,7 +8,7 @@ from typing_extensions import Annotated
 from datetime import timedelta
 
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
-from api.v1.schemas.token import TokenRequest
+from api.v1.schemas.token import TokenRequest, Token
 from typing import Annotated
 
 from api.v1.schemas.user import UserCreate
@@ -69,7 +69,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
-def login(login_request: LoginRequest, db: Session = Depends(get_db)):
+def login(response: Response, login_request: LoginRequest, db: Session = Depends(get_db)):
     '''Endpoint to log in a user'''
 
     # Authenticate the user
@@ -83,30 +83,29 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    response = success_response(
-        status_code=200,
-        message='Login successful',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user': jsonable_encoder(
-                user, 
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
-        }
-    )
+    # response = success_response(
+    #     status_code=200,
+    #     message='Login successful',
+    #     data={
+    #         'access_token': access_token,
+    #         'token_type': 'bearer',
+    #         'user': jsonable_encoder(
+    #             user, 
+    #             exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+    #         ),
+    #     }
+    # )
 
     # Add refresh token to cookies
     response.set_cookie(
         key="refresh_token",
         value=refresh_token,
-        expires=timedelta(days=30),
+        expires=timedelta(days=60),
         httponly=True,
         secure=True,
         samesite="none",
     )
-
-    return response
+    return Token(access_token=access_token, token_type='bearer')
 
 
 @auth.post("/logout", status_code=status.HTTP_200_OK)

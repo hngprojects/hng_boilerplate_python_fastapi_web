@@ -29,8 +29,10 @@ def retrieve_contact_us(db: Session = Depends(get_db),
     """
 
     all_submissions = contact_us_service.fetch_all(db)
-    submissions_filtered = list(map(lambda x: ContactUsResponseSchema(**x), all_submissions))
-
+    submissions_filtered = list(map(lambda x: ContactUsResponseSchema.model_validate(x),
+                                    all_submissions))
+    if (len(submissions_filtered) == 0):
+        submissions_filtered = [{}]
     return success_response(
         message = "Submissions retrieved successfully",
         status_code = 200,
