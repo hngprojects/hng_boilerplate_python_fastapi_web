@@ -23,7 +23,6 @@ def mock_db_session(mocker):
 def test_user():
     return User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password="hashedpassword",
         first_name="test",
