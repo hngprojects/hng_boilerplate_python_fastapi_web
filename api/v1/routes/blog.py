@@ -14,6 +14,7 @@ from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
 from api.v1.services.comment import comment_service 
+from api.v1.services.comment import CommentService
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -165,3 +166,25 @@ async def add_comment_to_blog(
         status_code = 201,
         data = jsonable_encoder(new_comment)
     )
+
+@blog.get('/{blog_id}/comments')
+async def comments(db: Annotated[Session, Depends(get_db)],
+                   blog_id: str, page: int = 1, per_page: int = 20) -> object:
+    """
+    Retrieves all comments associated with a blog
+
+    Args:
+        db: Database Session object
+        blog_id: the blog associated with the comments
+        page: the number of the current page
+        per_page: the page size for a current page
+    Returns:
+        Response: An exception if error occurs
+        object: Response object containing the comments
+    """
+    comment_services = CommentService()
+    comments_response = comment_services.validate_params(blog_id, page, per_page, db)
+    if comments_response == 'Blog not found':
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Blog not found")
+    return comments_response
