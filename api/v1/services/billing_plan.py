@@ -4,7 +4,6 @@ from typing import Any, Optional
 from api.core.base.services import Service
 
 
-
 class BillingPlanService(Service):
 	'''Product service functionality'''
 

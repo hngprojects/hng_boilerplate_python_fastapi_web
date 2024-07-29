@@ -1,5 +1,4 @@
-from typing import Any, Optional
-from uuid import UUID
+from typing import Optional
 
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -19,17 +18,25 @@ class BlogService:
 
     def create(self, db: Session, schema: BlogCreate, author_id: str):
         """Create a new blog post"""
+
         new_blogpost = Blog(**schema.model_dump(), author_id=author_id)
         db.add(new_blogpost)
         db.commit()
         db.refresh(new_blogpost)
         return new_blogpost
     
+    def fetch_all(self):
+        '''Fetch all blog posts'''
+
+        blogs = self.db.query(Blog).filter(Blog.is_deleted == False).all()
+        return blogs
+    
     def fetch(self, blog_id: str):
         '''Fetch a blog post by its ID'''
+        
         blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
         if not blog_post:
-            raise HTTPException(status_code=404, detail="Post not Found")
+            raise HTTPException(status_code=404, detail="Post not found")
         return blog_post
 
     def update(self, blog_id: str, title: Optional[str] = None, content: Optional[str] = None, current_user: User = None):
@@ -58,15 +65,9 @@ class BlogService:
                 status_code=500, detail="An error occurred while updating the blog post")
 
         return blog_post
-
-
-    def fetch_post(self, blog_id: str):
-        '''Fetch a blog post by its ID'''
-        blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
-        return blog_post
     
     def delete(self, blog_id: str):
-        post = self.fetch_post(blog_id=blog_id)
+        post = self.fetch(blog_id=blog_id)
 
         if post:
             try:
