@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class ActivityLogCreate(BaseModel):
-    user_id: int
+    user_id: str
     action: str
 
 

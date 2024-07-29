@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from main import app
 from api.v1.models.user import User
-from api.v1.models.base import user_organization_association
+from api.v1.models.associations import user_organization_association
 from api.v1.models.invitation import Invitation
 from api.v1.models.organization import Organization
 from api.v1.services.invite import InviteService
@@ -43,7 +43,6 @@ def mock_invite_service():
 def create_mock_user(mock_db_session, user_id):
     mock_user = User(
         id=user_id,
-        username="testuser",
         email="testuser@gmail.com",
         password="hashed_password",
         first_name='Test',
@@ -58,7 +57,7 @@ def create_mock_user(mock_db_session, user_id):
 def create_mock_organization(mock_db_session, org_id):
     mock_org = Organization(
         id=org_id,
-        name="Test Organization",
+        company_name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -211,3 +210,4 @@ def test_load_testing(mock_db_session, mock_invite_service):
     success_count = sum(1 for r in responses if r.status_code == 200)
 
     assert success_count == 100
+    
