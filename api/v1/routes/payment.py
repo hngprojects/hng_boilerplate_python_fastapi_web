@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 from typing import Annotated
 
 from api.utils.success_response import success_response
-from api.v1.schemas.payment import PaymentListResponse
-from api.v1.services.payment import payment_service
+from api.v1.schemas.payment import PaymentListResponse, PaymentResponse
+from api.v1.services.payment import PaymentService
 from api.v1.services.user import user_service
 from api.db.database import get_db
 from api.v1.models import User
@@ -25,6 +25,8 @@ def get_payments_for_current_user(
         - limit: Number of payment per page (default: 10, minimum: 1)
         - page: Page number (starts from 1)
     '''
+    payment_service = PaymentService()
+    
     # FETCH all payments for current user
     payments = payment_service.fetch_by_user(
         db, user_id=current_user.id, limit=limit, page=page
@@ -73,3 +75,10 @@ def get_payments_for_current_user(
         message="Payments fetched successfully", 
         data=data
     )
+
+
+@payment.get("/{payment_id}", response_model=PaymentResponse)
+async def get_payment(payment_id: str, db: Session = Depends(get_db)):
+    payment_service = PaymentService()
+    payment = payment_service.get_payment_by_id(db, payment_id)
+    return payment

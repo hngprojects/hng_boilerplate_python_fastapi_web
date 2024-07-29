@@ -1,5 +1,6 @@
 from typing import Any, Optional
 from sqlalchemy.orm import Session
+from api.v1.models.payment import Payment
 
 from api.v1.models import User
 from api.v1.models.payment import Payment
@@ -37,6 +38,10 @@ class PaymentService:
     def fetch(self, db: Session, payment_id: str):
         '''Fetches a payment by id'''
 
+        payment = check_model_existence(db, Payment, payment_id)
+        return payment
+    
+    def get_payment_by_id(self, db: Session, payment_id: str):
         payment = check_model_existence(db, Payment, payment_id)
         return payment
 
@@ -78,6 +83,3 @@ class PaymentService:
         payment = self.fetch(db=db, payment_id=payment_id)
         db.delete(payment)
         db.commit()
-
-    
-payment_service = PaymentService()
