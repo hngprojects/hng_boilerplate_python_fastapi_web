@@ -38,7 +38,6 @@ api_version_one.include_router(organization)
 api_version_one.include_router(pwd_reset)
 api_version_one.include_router(comment)
 api_version_one.include_router(payment)
-
 api_version_one.include_router(pwd_reset)
 api_version_one.include_router(activity_logs)
 api_version_one.include_router(comment)
