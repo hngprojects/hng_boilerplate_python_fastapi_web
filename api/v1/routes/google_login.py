@@ -15,7 +15,7 @@ from api.v1.services.google_oauth import GoogleOauthServices
 google_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 FRONTEND_URL = config('FRONTEND_URL')
 
-@google_auth.get("/google-login")
+@google_auth.get("/google")
 async def google_oauth2(request: Request) -> RedirectResponse:
     """
     Allows users to login using their google accounts.
