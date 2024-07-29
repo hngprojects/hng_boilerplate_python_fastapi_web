@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from main import app
 from api.v1.models.user import User
-from api.v1.models.base import user_organization_association
+from api.v1.models.associations import user_organization_association
 from api.v1.models.invitation import Invitation
 from api.v1.models.organization import Organization
 from api.v1.services.invite import InviteService
@@ -58,7 +58,7 @@ def create_mock_user(mock_db_session, user_id):
 def create_mock_organization(mock_db_session, org_id):
     mock_org = Organization(
         id=org_id,
-        name="Test Organization",
+        company_name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
