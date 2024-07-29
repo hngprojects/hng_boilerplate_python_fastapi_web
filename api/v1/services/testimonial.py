@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.testimonial import Testimonial
+
 
 
 class TestimonialService(Service):
@@ -13,10 +13,13 @@ class TestimonialService(Service):
         pass
 
 
-    def fetch_all(self, db: Session):
-        '''Fetch all testimonial'''
-        pass
+    def fetch_all(self, page :int , page_size : int, db: Session):
+        '''Fetch all testimonial with pagination'''
+        offset = (page - 1) * page_size
+        testimonials = db.query(Testimonial).offset(offset).limit(page_size).all()
 
+        return testimonials
+    
 
     def fetch(self, db: Session, id: str):
         '''Fetches a single testimonial id'''

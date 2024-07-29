@@ -7,6 +7,8 @@ class CreateSubscriptionPlan(BaseModel):
     description: Optional[str] = None
     price: int
     duration: str
+    currency: str
+    organization_id: str
     features: List[str]
 
 
