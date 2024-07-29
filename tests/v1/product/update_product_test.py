@@ -95,6 +95,7 @@ def test_update_product_with_invalid_token(db_session_mock, mock_get_current_use
     
     print("Invalid token response:", response.json())  # Debugging output
     assert response.status_code == 401
+    assert response.json()["detail"] == "Invalid credentials"
     
 
 def test_update_product_with_missing_fields(db_session_mock, mock_get_current_user, mocker):
