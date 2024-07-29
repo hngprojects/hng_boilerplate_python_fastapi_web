@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status, HTTPException, Response
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -12,6 +12,8 @@ from api.v1.schemas.blog import (BlogCreate, BlogPostResponse, BlogRequest,
                                 BlogUpdateResponseModel, BlogDislikeResponse)
 from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
+from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
+from api.v1.services.comment import comment_service 
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -134,3 +136,32 @@ async def delete_blog_post(id: str, db: Session = Depends(get_db), current_user:
 
     blog_service = BlogService(db=db)
     blog_service.delete(blog_id=id)
+
+# Post a comment to a blog
+@blog.post("/{blog_id}/comments", response_model=CommentSuccessResponse)
+async def add_comment_to_blog(
+    blog_id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    comment: CommentCreate, 
+    db: Annotated[Session, Depends(get_db)]
+    ) -> Response:
+    """Post endpoint for authenticated users to add comments to a blog. 
+
+    Args:
+        blog_id (str): the id of the blog to be commented on
+        current_user: the current authenticated user 
+        comment (CommentCreate): the body of the request
+        db: the database session object
+
+    Returns:
+        Response: a response object containing the comment details if successful or appropriate errors if not
+    """
+
+    user_id = current_user.id
+    new_comment = comment_service.create(db=db, schema=comment, user_id=user_id, blog_id=blog_id)
+
+    return success_response(
+        message = "Comment added successfully!",
+        status_code = 201,
+        data = jsonable_encoder(new_comment)
+    )
