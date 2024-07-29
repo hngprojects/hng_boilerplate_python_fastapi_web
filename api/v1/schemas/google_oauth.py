@@ -8,7 +8,6 @@ class UserData(BaseModel):
     id: str
     first_name: str
     last_name: str
-    username: str
     email: EmailStr
     created_at: datetime
 
