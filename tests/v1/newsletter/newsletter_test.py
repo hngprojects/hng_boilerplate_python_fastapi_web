@@ -6,11 +6,19 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
 from main import app
 from api.db.database import get_db
 from api.v1.models.newsletter import Newsletter
 from api.v1.schemas.newsletter import EmailSchema
+from unittest.mock import patch, MagicMock
+from api.v1.services.newsletter import NewsletterService
+from api.v1.services.user import oauth2_scheme, user_service
+
+def mock_deps():
+    return MagicMock(id="user_id")
+
+def mock_oauth():
+    return 'access_token'
 
 client = TestClient(app)
 
@@ -40,7 +48,7 @@ def test_sub_newsletter_success(db_session_mock):
     email_data = {"email": "test1@example.com"}
 
     # Act
-    response = client.post("/api/v1/newsletters", json=email_data)
+    response = client.post("/api/v1/pages/newsletters", json=email_data)
 
     # Assert
     assert response.status_code == 201
@@ -54,10 +62,76 @@ def test_sub_newsletter_existing_email(db_session_mock):
     email_data = {"email": "test@example.com"}
 
     # Act
-    response = client.post("/api/v1/newsletters", json=email_data)
+    response = client.post("/api/v1/pages/newsletters", json=email_data)
 
     # Assert
     assert response.status_code == 400
+
+class TestCodeUnderTest:
+
+    @classmethod 
+    def setup_class(cls):
+        app.dependency_overrides[user_service.get_current_super_admin] = mock_deps
+
+
+    @classmethod
+    def teardown_class(cls):
+        app.dependency_overrides = {}
+
+    # Successfully retrieves all subscriptions from db
+    def test_retrieve_subscription_success(self, client, mocker):
+        mock_subs= [{"email": "test@example.com",
+                             "title": "Dr", "content": ""},
+                            {"email": "test1@example.com",
+                             "title": "Mr", "content": ""}]
+
+        mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_subs)
+
+        response = client.get('/api/v1/pages/newsletters')
+
+        assert response.status_code == 200
+        assert response.json()['success'] == True
+        assert response.json()['message'] == "Subscriptions retrieved successfully"
+        assert len(response.json()['data']) == len(mock_subs)
+
+    # No subscriptions in database
+    def test_retrieve_contact_us_no_submissions(self, client, mocker):
+        mock_submissions = [{}]
+
+        mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_submissions)
+
+        response = client.get('/api/v1/pages/newsletters')
+
+        assert response.status_code == 200
+        assert response.json()['success'] == True
+        assert response.json()['message'] == "Subscriptions retrieved successfully"
+
+
+    # # Unauthorized access to the endpoint    
+    def test_retrieve_unauthorized(self, client):
+        app.dependency_overrides = {}
+        app.dependency_overrides[oauth2_scheme] = mock_oauth
+
+        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
+
+            response = client.get('/api/v1/pages/newsletters')
+
+            assert response.status_code == 403
+            assert response.json()['success'] == False
+            assert response.json()['message'] == 'You do not have permission to access this resource'
+
+    # # Unauthenticated access to the endpoint    
+    def test_retrieve_contact_unauthenticated(self, client):
+        app.dependency_overrides = {}
+
+        response = client.get('/api/v1/pages/newsletters')
+
+        assert response.status_code == 401
+        assert response.json()['success'] == False
+        assert response.json()['message'] == 'Not authenticated'
+
+
+
 
 
 if __name__ == "__main__":
