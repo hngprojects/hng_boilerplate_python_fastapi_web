@@ -7,8 +7,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from api.utils.json_response import JsonResponseDict
-from starlette.middleware.sessions import SessionMiddleware   # required by google oauth
+from api.utils.success_response import success_response
+from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
 from api.utils.logger import logger
 from api.v1.routes import api_version_one
@@ -42,29 +42,34 @@ app.include_router(api_version_one)
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
-    return JsonResponseDict(
+    return success_response(
         message="Welcome to API", status_code=status.HTTP_200_OK, data={"URL": ""}
     )
 
-@app.get('/probe', tags=['Home'])
+
+@app.get("/probe", tags=["Home"])
 async def probe():
     return {"message": "I am the Python FastAPI API responding"}
 
 
 # REGISTER EXCEPTION HANDLERS
 
+
 @app.exception_handler(HTTPException)
 async def http_exception(request: Request, exc: HTTPException):
     """HTTP exception handler"""
-
-    return JSONResponse(
+    return success_response(
         status_code=exc.status_code,
-        content={
-            "success": False,
-            "status_code": exc.status_code,
-            "message": exc.detail,
-        },
+        message=exc.detail,
     )
+    # return JSONResponse(
+    #     status_code=exc.status_code,
+    #     content={
+    #         "success": False,
+    #         "status_code": exc.status_code,
+    #         "message": exc.detail,
+    #     },
+    # )
 
 
 @app.exception_handler(RequestValidationError)
@@ -76,15 +81,16 @@ async def validation_exception(request: Request, exc: RequestValidationError):
         for error in exc.errors()
     ]
 
-    return JSONResponse(
-        status_code=422,
-        content={
-            "success": False,
-            "status_code": 422,
-            "message": "Invalid input",
-            "errors": errors,
-        },
-    )
+    return success_response(status_code=422, message="Invalid input")
+    # return JSONResponse(
+    #     status_code=422,
+    #     content={
+    #         "success": False,
+    #         "status_code": 422,
+    #         "message": "Invalid input",
+    #         "errors": errors,
+    #     },
+    # )
 
 
 @app.exception_handler(Exception)
@@ -93,14 +99,17 @@ async def exception(request: Request, exc: Exception):
 
     logger.exception(f"Exception occured; {exc}")
 
-    return JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "status_code": 500,
-            "message": f"An unexpected error occurred: {exc}",
-        },
+    return success_response(
+        status_code=500, message=f"An unexpected error occurred: {exc}"
     )
+    # return JSONResponse(
+    #     status_code=500,
+    #     content={
+    #         "success": False,
+    #         "status_code": 500,
+    #         "message": f"An unexpected error occurred: {exc}",
+    #     },
+    # )
 
 
 if __name__ == "__main__":
