@@ -58,6 +58,11 @@ class ProfileService(Service):
         profile = db.query(Profile).filter(Profile.user_id == user_id).first()
         if not profile:
             raise HTTPException(status_code=404, detail="User profile not found")
+        
+        # Update only the fields that are provided in the schema
+        for field, value in schema.model_dump().items():
+            if value is not None:
+                setattr(profile, field, value)
 
         for key, value in schema.dict(exclude_unset=True).items():
             setattr(profile, key, value)
