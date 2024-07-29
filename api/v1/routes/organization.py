@@ -61,4 +61,3 @@ async def update_organization(org_id: str, schema: CreateUpdateOrganization, db:
         message='Organization updated successfully',
         data=jsonable_encoder(updated_organization)
     )
-
