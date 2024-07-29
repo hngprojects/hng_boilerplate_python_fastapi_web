@@ -10,10 +10,12 @@ from api.db.database import get_db
 
 client = TestClient(app)
 
+
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock()
     yield db_session
+
 
 @pytest.fixture(autouse=True)
 def override_get_db(db_session_mock):
@@ -24,9 +26,11 @@ def override_get_db(db_session_mock):
     yield
     app.dependency_overrides = {}
 
+
 @pytest.fixture
 def mock_jwt_decode(mocker):
     return mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
+
 
 @pytest.fixture
 def mock_get_current_user(mocker):
@@ -34,10 +38,12 @@ def mock_get_current_user(mocker):
     mock = mocker.patch("api.utils.dependencies.get_current_user", return_value=user)
     return mock
 
+
 def create_test_token(user_id: str) -> str:
     expires = datetime.utcnow() + timedelta(minutes=30)
     data = {"user_id": user_id, "exp": expires}
     return jwt.encode(data, "secret", algorithm="HS256")
+
 
 def test_update_product_with_valid_token(
     db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
@@ -80,6 +86,7 @@ def test_update_product_with_valid_token(
     assert response.status_code == 200
     assert response.json()["message"] == "Product updated successfully"
 
+
 def test_update_product_with_invalid_token(
     db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
 ):
@@ -99,7 +106,10 @@ def test_update_product_with_invalid_token(
 
     print("Invalid token response:", response.json())  # Debugging output
     assert response.status_code == 401
-    assert response.json()["message"] == "Could not validate crenentials"  # Adjusted assertion
+    assert (
+        response.json()["message"] == "Could not validate crenentials"
+    )  # Adjusted assertion
+
 
 def test_update_product_with_missing_fields(
     db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
@@ -121,6 +131,7 @@ def test_update_product_with_missing_fields(
     errors = response.json().get("errors", [])
     assert isinstance(errors, list)
     assert any("Field required" in error.get("msg", "") for error in errors)
+
 
 def test_update_product_with_special_characters(
     db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
