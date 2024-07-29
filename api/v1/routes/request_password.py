@@ -5,7 +5,7 @@ from api.db.database import get_db as get_session
 from api.v1.services.request_pwd import reset_service
 import logging
 
-pwd_reset = APIRouter(prefix='/auth', tags=['Auth'])
+pwd_reset = APIRouter(prefix='/auth', tags=['Authentication'])
 
 #generate password reset link
 @pwd_reset.post("/request-password-reset")
