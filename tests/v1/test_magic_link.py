@@ -46,7 +46,6 @@ def test_request_magic_link(mock_user_service, mock_db_session):
     # Create a mock user
     mock_user = User(
         id=str(uuid7()),
-        username="testuser1",
         email="testuser1@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
