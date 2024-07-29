@@ -17,4 +17,4 @@ from api.v1.models.token_login import TokenLogin
 from api.v1.models.oauth import OAuth
 from api.v1.models.invitation import Invitation
 from api.v1.models.newsletter import Newsletter
-from api.v1.models.faq import Faq
+from api.v1.models.faq import FAQ
