@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 from api.v1.models.invitation import Invitation
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
-from api.v1.models.base import user_organization_association
+from api.v1.models.associations import user_organization_association
 from api.v1.schemas import invitations
 from urllib.parse import urlencode
 

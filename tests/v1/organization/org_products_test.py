@@ -23,7 +23,6 @@ def mock_db_session(mocker):
 def test_user():
     return User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password="hashedpassword",
         first_name="test",
@@ -36,7 +35,6 @@ def test_user():
 def another_user():
     return User(
         id=str(uuid7()),
-        username="anotheruser",
         email="anotheruser@gmail.com",
         password="hashedpassword",
         first_name="another",
@@ -48,8 +46,7 @@ def another_user():
 def test_organization(test_user):
     organization = Organization(
         id=str(uuid7()),
-        name="testorg",
-        description="An organization for testing purposes"
+        company_name="testorg",
     )
     organization.users.append(test_user)
     return organization

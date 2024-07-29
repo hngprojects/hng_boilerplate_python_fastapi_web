@@ -41,7 +41,6 @@ def test_status_code(db_session_mock):
     db_session_mock.commit.return_value = None
 
     user = {
-        "username": "string",
         "password": "strin8Hsg263@",
         "first_name": "string",
         "last_name": "string",
@@ -62,7 +61,6 @@ def test_user_login(db_session_mock):
     # Create a mock user
     mock_user = User(
         id=str(uuid7()),
-        username="testuser1",
         email="testuser1@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -75,8 +73,8 @@ def test_user_login(db_session_mock):
     db_session_mock.query.return_value.filter.return_value.first.return_value = mock_user
 
     # Login with mock user details
-    login = client.post("/api/v1/auth/login", data={
-        "username": "testuser1",
+    login = client.post("/api/v1/auth/login", json={
+        "email": "testuser1@gmail.com",
         "password": "Testpassword@123"
     })
     response = login.json()

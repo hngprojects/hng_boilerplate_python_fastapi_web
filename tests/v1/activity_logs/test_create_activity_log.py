@@ -31,7 +31,7 @@ def mock_activity_log_service():
     with patch("api.v1.services.activity_logs.activity_log_service", autospec=True) as mock_service:
         yield mock_service
 
-def create_mock_activity_log(mock_db_session, user_id: int, action: str):
+def create_mock_activity_log(mock_db_session, user_id: str, action: str):
     """Create a mock activity log in the mock database session."""
     mock_activity_log = ActivityLog(
         id=1,
@@ -45,7 +45,7 @@ def create_mock_activity_log(mock_db_session, user_id: int, action: str):
 @pytest.mark.usefixtures("mock_db_session", "mock_activity_log_service")
 def test_create_activity_log(mock_activity_log_service, mock_db_session):
     """Test for creating an activity log."""
-    mock_user_id = 1
+    mock_user_id = "101"
     mock_action = "test_action"
     
     mock_activity_log = create_mock_activity_log(mock_db_session, mock_user_id, mock_action)

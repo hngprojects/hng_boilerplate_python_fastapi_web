@@ -36,7 +36,6 @@ def test_status_code(db_session_mock):
     db_session_mock.commit.return_value = None
 
     user = {
-        "username": "string",
         "password": "strin8Hsg263@",
         "first_name": "string",
         "last_name": "string",
@@ -54,7 +53,6 @@ def test_user_fields(db_session_mock):
     db_session_mock.commit.return_value = None
 
     user = {
-        "username": "mba",
         "password": "strin8Hsg263@",
         "first_name": "sunday",
         "last_name": "mba",
@@ -65,6 +63,5 @@ def test_user_fields(db_session_mock):
 
     assert response.status_code == 201
     assert response.json()['data']["user"]['email'] == "mba@gmail.com"
-    assert response.json()['data']["user"]['username'] == "mba"
     assert response.json()['data']["user"]['first_name'] == "sunday"
     assert response.json()['data']["user"]['last_name'] == "mba"

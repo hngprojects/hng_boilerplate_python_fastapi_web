@@ -108,7 +108,6 @@ def test_login_callback_oauth(client, mock_google_oauth2):
     assert 'id' in data['user']
     assert data['user']['first_name'] == 'Johnson'
     assert data['user']['last_name'] == 'Oragui'
-    assert data['user']['username'] == 'johnson.oragui@gmail.com'
     assert data['user']['email'] == 'johnson.oragui@gmail.com'
     assert 'created_at' in data['user']
 
@@ -122,7 +121,6 @@ def test_database_for_user_data():
 
     assert user.first_name == 'Johnson'
     assert user.last_name == 'Oragui'
-    assert user.username == 'johnson.oragui@gmail.com'
     assert user.email == 'johnson.oragui@gmail.com'
 
     session.close()
