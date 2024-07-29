@@ -79,7 +79,7 @@ class TestCodeUnderTest:
         app.dependency_overrides = {}
 
     # Successfully retrieves all subscriptions from db
-    def test_retrieve_subscription_success(self, client, mocker):
+    def test_retrieve_subscription_success(self, mocker):
         mock_subs= [{"email": "test@example.com",
                              "title": "Dr", "content": ""},
                             {"email": "test1@example.com",
@@ -95,8 +95,9 @@ class TestCodeUnderTest:
         assert len(response.json()['data']) == len(mock_subs)
 
     # No subscriptions in database
-    def test_retrieve_contact_us_no_submissions(self, client, mocker):
-        mock_submissions = [{}]
+    def test_retrieve_contact_us_no_submissions(self, mocker):
+        mock_submissions = []
+        app.dependency_overrides[user_service.get_current_super_admin] = mock_deps
 
         mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_submissions)
 
@@ -105,10 +106,11 @@ class TestCodeUnderTest:
         assert response.status_code == 200
         assert response.json()['success'] == True
         assert response.json()['message'] == "Subscriptions retrieved successfully"
+        assert response.json()['data'] == [{}]
 
 
     # # Unauthorized access to the endpoint    
-    def test_retrieve_unauthorized(self, client):
+    def test_retrieve_unauthorized(self):
         app.dependency_overrides = {}
         app.dependency_overrides[oauth2_scheme] = mock_oauth
 
@@ -121,7 +123,7 @@ class TestCodeUnderTest:
             assert response.json()['message'] == 'You do not have permission to access this resource'
 
     # # Unauthenticated access to the endpoint    
-    def test_retrieve_contact_unauthenticated(self, client):
+    def test_retrieve_contact_unauthenticated(self):
         app.dependency_overrides = {}
 
         response = client.get('/api/v1/pages/newsletters')

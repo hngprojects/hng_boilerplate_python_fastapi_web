@@ -35,8 +35,8 @@ class NewsletterService(Service):
         return newsletter
     
     @staticmethod
-    def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all submisions with option to search using query parameters'''
+    def fetch_all(db: Session, **query_params: Optional[Any]):
+        '''Fetch all newsletter subscriptions with option to search using query parameters'''
 
         query = db.query(Newsletter)
 
