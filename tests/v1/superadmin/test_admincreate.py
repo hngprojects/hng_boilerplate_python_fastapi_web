@@ -58,7 +58,7 @@ def test_super_user_creation(data, db_session_mock):
     db_session_mock.commit.return_value = None
     # Mock the user creation function
 
-    url = '/api/v1/superadmin/register'
+    url = '/api/v1/auth/register-super-admin'
    
   
     response = client.post(url, json=data)
