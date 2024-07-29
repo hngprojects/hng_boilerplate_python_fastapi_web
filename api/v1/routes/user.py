@@ -9,6 +9,7 @@ from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
     ChangePwdRet,
+    UserResponse
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -83,6 +84,9 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
 #     )
 
 
+
+
+
 @user.patch("/me/password", status_code=200, response_model=ChangePwdRet)
 async def change_password(
     schema: ChangePasswordSchema,
@@ -97,6 +101,25 @@ async def change_password(
         status_code=200,
         message='Password changed successfully'
     )
+
+@user.get(path="/{user_id}", status_code=status.HTTP_200_OK)
+def get_user(user_id : str,
+             current_user : Annotated[User , Depends(user_service.get_current_user)],
+             db : Session = Depends(get_db)
+             ):
+    user = user_service.fetch(db=db , id=user_id)
+
+    return {
+        'status' : status.HTTP_200_OK,
+        'message': 'User retrieved successfully',
+        'user' : UserResponse(id=user.id , name=f'{user.first_name} {user.last_name}' , email=user.email)
+    }
+
+
+
+
+
+
 
 
 @user.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
