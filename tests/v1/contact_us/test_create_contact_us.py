@@ -62,7 +62,6 @@ def test_create_new_contact_us_message(client: client, session: session) -> pyte
     json_payload = payload[0]
     status_code = json_payload.pop("status_code")
     res = client.post("/api/v1/contact", json=json_payload)
-    print(res.json())
     assert res.status_code == status_code
     if status_code == 201:
         data = res.json()

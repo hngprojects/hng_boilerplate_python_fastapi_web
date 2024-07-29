@@ -32,7 +32,6 @@ class ContactUsService(Service):
         db.add(contact_message)
         db.commit()
         db.refresh(contact_message)
-        print(contact_message)
         return contact_message
 
     # READ
