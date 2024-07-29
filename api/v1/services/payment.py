@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from api.v1.models.payment import Payment
+from api.utils.db_validators import check_model_existence
 
 class PaymentService:
-    model = Payment
-
     def get_payment_by_id(self, db: Session, payment_id: str):
-        return db.query(Payment).filter(Payment.id == payment_id).first()
+        payment = check_model_existence(db, Payment, payment_id)
+        return payment
