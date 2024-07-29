@@ -11,7 +11,6 @@ class UserBase(BaseModel):
     id: str
     first_name: str
     last_name: str
-    username: str
     email: EmailStr
     created_at: datetime
 
@@ -19,11 +18,10 @@ class UserBase(BaseModel):
 class UserCreate(BaseModel):
     """Schema to create a user"""
 
-    username: str
+    email: EmailStr
     password: str
     first_name: str
     last_name: str
-    email: EmailStr
 
     @field_validator("password")
     def password_validator(cls, value):
@@ -35,7 +33,14 @@ class UserCreate(BaseModel):
                 "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character."
             )
         return value
+    
 
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class EmailRequest(BaseModel):
+    email: EmailStr
 
 class Token(BaseModel):
     access_token: str

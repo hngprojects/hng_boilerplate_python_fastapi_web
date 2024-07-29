@@ -46,6 +46,10 @@ async def get_root(request: Request) -> dict:
         message="Welcome to API", status_code=status.HTTP_200_OK, data={"URL": ""}
     )
 
+@app.get('/probe', tags=['Home'])
+async def probe():
+    return {"message": "I am the Python FastAPI API responding"}
+
 
 # REGISTER EXCEPTION HANDLERS
 
