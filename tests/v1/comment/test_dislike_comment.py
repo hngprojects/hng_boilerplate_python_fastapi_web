@@ -8,9 +8,7 @@ from api.v1.models import User, Blog, Comment
 from api.v1.services.user import user_service
 from uuid_extensions import uuid7
 from unittest.mock import MagicMock
-from faker import Faker
 
-fake = Faker()
 client = TestClient(app)
 
 # Mock database
@@ -25,10 +23,10 @@ def mock_db_session(mocker):
 def test_user():
     return User(
         id=str(uuid7()),
-        email=fake.email(),
-        password=fake.password(),
-        first_name=fake.first_name,
-        last_name=fake.last_name,
+        email="testuser@gmail.com",
+        password="hashedpassword",
+        first_name="test",
+        last_name="user",
         is_active=True,
     )
 
@@ -38,8 +36,8 @@ def test_blog(test_user):
     return Blog(
         id=str(uuid7()),
         author_id=test_user.id, 
-        title=fake.sentence(), 
-        content=fake.paragraphs(nb=3, ext_word_list=None)
+        title="Test 1", 
+        content="Test blog one"
     )
 
 @pytest.fixture
@@ -48,7 +46,7 @@ def test_comment(test_user, test_blog):
         id=str(uuid7()),
         user_id=test_user.id,
         blog_id=test_blog.id,
-        content=fake.paragraphs(nb=3, ext_word_list=None),
+        content="Just a test comment",
     )
 
 @pytest.fixture
@@ -56,7 +54,7 @@ def access_token_user1(test_user):
     return user_service.create_access_token(user_id=test_user.id)
 
 # Test adding comment to blog
-def test_like_comment(
+def test_dislike_comment(
     mock_db_session, 
     test_user, 
     test_blog, 
@@ -74,21 +72,21 @@ def test_like_comment(
     # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
+    # Mock the query to return null for existing dislikes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = []
 
     # Test user belonging to the organization
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.post(f"/api/v1/comments/{test_comment.id}/like", headers=headers)
+    response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
     
     # Debugging statement
     if response.status_code != 201:
         print(response.json())  # Print error message for more details
 
     assert response.status_code == 201, f"Expected status code 200, got {response.status_code}"
-    assert response.json()['message'] == "Comment liked successfully!"
+    assert response.json()['message'] == "Comment disliked successfully!"
 
-def test_like_comment_twice(
+def test_dislike_comment_twice(
     mock_db_session, 
     test_user, 
     test_blog, 
@@ -106,16 +104,16 @@ def test_like_comment_twice(
     # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
-    mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_like_comment]
+    # Mock the query to return null for existing dislikes
+    mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_dislike_comment]
 
     # Test user belonging to the organization
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.post(f"/api/v1/comments/{test_comment.id}/like", headers=headers)
+    response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
     
     # Debugging statement
     if response.status_code != 201:
         print(response.json())  # Print error message for more details
 
-    assert response.status_code == 200, f"Expected status code 201, got {response.status_code}"
-    assert response.json()['message'] == "You've already liked this comment"
+    assert response.status_code == 400, f"Expected status code 200, got {response.status_code}"
+    assert response.json()['message'] == "You can only dislike once"
