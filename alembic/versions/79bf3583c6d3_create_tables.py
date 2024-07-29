@@ -1,8 +1,8 @@
 """create tables
 
-Revision ID: e30fc0cc2d35
+Revision ID: 79bf3583c6d3
 Revises: 
-Create Date: 2024-07-29 16:06:20.870140
+Create Date: 2024-07-29 23:00:15.435313
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'e30fc0cc2d35'
+revision: str = '79bf3583c6d3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -41,14 +41,13 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_faqs_id'), 'faqs', ['id'], unique=False)
     op.create_table('newsletters',
-    sa.Column('email', sa.String(length=150), nullable=False),
-    sa.Column('title', sa.String(), nullable=True),
+    sa.Column('title', sa.String(length=100), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
     sa.Column('content', sa.Text(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_newsletters_id'), 'newsletters', ['id'], unique=False)
     op.create_table('organizations',
@@ -184,6 +183,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_messages_id'), 'messages', ['id'], unique=False)
+    op.create_table('newsletter_subscribers',
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('newsletter_id', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['newsletter_id'], ['newsletters.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email', 'newsletter_id', name='uq_subscriber_newsletter')
+    )
+    op.create_index(op.f('ix_newsletter_subscribers_id'), 'newsletter_subscribers', ['id'], unique=False)
     op.create_table('notifications',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
@@ -288,14 +298,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_token_logins_id'), 'token_logins', ['id'], unique=False)
-    op.create_table('user_newsletter_association',
-    sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('newsletter_id', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['newsletter_id'], ['newsletters.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'newsletter_id')
-    )
     op.create_table('user_organization',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('organization_id', sa.String(), nullable=False),
@@ -395,7 +397,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_blog_dislikes_id'), table_name='blog_dislikes')
     op.drop_table('blog_dislikes')
     op.drop_table('user_organization')
-    op.drop_table('user_newsletter_association')
     op.drop_index(op.f('ix_token_logins_id'), table_name='token_logins')
     op.drop_table('token_logins')
     op.drop_index(op.f('ix_testimonials_id'), table_name='testimonials')
@@ -410,6 +411,8 @@ def downgrade() -> None:
     op.drop_table('oauth')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
+    op.drop_index(op.f('ix_newsletter_subscribers_id'), table_name='newsletter_subscribers')
+    op.drop_table('newsletter_subscribers')
     op.drop_index(op.f('ix_messages_id'), table_name='messages')
     op.drop_table('messages')
     op.drop_index(op.f('ix_jobs_id'), table_name='jobs')
