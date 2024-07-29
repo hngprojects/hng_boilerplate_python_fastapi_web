@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from api.db.database import get_db
-from api.v1.models.newsletter import Newsletter
+from api.v1.models.newsletter import NewsletterSubscriber
 from api.v1.schemas.newsletter import EmailSchema
 from unittest.mock import patch, MagicMock
 from api.v1.services.newsletter import NewsletterService
@@ -41,7 +41,7 @@ def override_get_db(db_session_mock):
 
 def test_sub_newsletter_success(db_session_mock):
     # Arrange
-    db_session_mock.query(Newsletter).filter().first.return_value = None
+    db_session_mock.query(NewsletterSubscriber).filter().first.return_value = None
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
 
@@ -56,8 +56,8 @@ def test_sub_newsletter_success(db_session_mock):
 
 def test_sub_newsletter_existing_email(db_session_mock):
     # Arrange
-    existing_subscriber = Newsletter(email="test@example.com")
-    db_session_mock.query(Newsletter).filter().first.return_value = existing_subscriber
+    existing_subscriber = NewsletterSubscriber(email="test@example.com")
+    db_session_mock.query(NewsletterSubscriber).filter().first.return_value = existing_subscriber
 
     email_data = {"email": "test@example.com"}
 
@@ -80,11 +80,8 @@ class TestCodeUnderTest:
 
     # Successfully retrieves all subscriptions from db
     def test_retrieve_subscription_success(self, mocker):
-        mock_subs= [{"email": "test@example.com",
-                             "title": "Dr", "content": ""},
-                            {"email": "test1@example.com",
-                             "title": "Mr", "content": ""}]
-
+        mock_subs= [{"email": "test@example.com"},
+                    {"email": "test1@example.com"}]
         mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_subs)
 
         response = client.get('/api/v1/pages/newsletters')
