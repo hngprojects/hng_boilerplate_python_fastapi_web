@@ -22,7 +22,7 @@ class PaymentService(Service):
     
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all payments with option tto search using query parameters'''
+        '''Fetch all payments with option to search using query parameters'''
 
         query = db.query(Payment)
 

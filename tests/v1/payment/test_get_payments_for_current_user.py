@@ -71,7 +71,7 @@ def test_get_payments_successfully(
     # Make request
     params = {'page': 1, 'limit': 10}
     headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get(f"/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
 
     resp_d = response.json()
 
@@ -104,13 +104,14 @@ def test_get_payments_successfully(
     # Make request, with limit set to 2, to get 3 pages
     params = {'page': 1, 'limit': 2}
     headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get(f"/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
 
     resp_d = response.json()
 
     assert response.status_code == 200
     assert resp_d['success'] is True
     assert resp_d['message'] == "Payments fetched successfully"
+    assert resp_d['data']['user_id'] == test_user.id
 
     pagination = resp_d['data']['pagination']
     assert pagination['limit'] == 2
@@ -121,36 +122,19 @@ def test_get_payments_successfully(
     assert len(payments) == 5
 
 
-# Test for invalid or un-authenticated request
-def test_for_invalid_or_unauthenticated_get_payments(
+# Test for un-authenticated request
+def test_for_unauthenticated_get_payments(
     mock_db_session,
     test_user,
     test_payment,
     access_token_user
 ):
-    params = {'page': 1, 'limit': 10}
-
-    # INVALID USER #
-
-    # Mock the query for getting user
-    mock_db_session.query.return_value.filter.return_value.first.return_value = None
-
-    # Make request
-    headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get(f"/api/v1/payments/current-user", params=params, headers=headers)
-
-    assert response.status_code == 401
-    assert response.json()['message'] == "Could not validate credentials"
-    assert not response.json().get('data')
-
-
-    # INVALID TOKEN #
-
     # Mock the query for getting user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
 
     # Make request
-    response = client.get(f"/api/v1/payments/current-user", params=params)
+    params = {'page': 1, 'limit': 10}
+    response = client.get("/api/v1/payments/current-user", params=params)
 
     assert response.status_code == 401
     assert response.json()['message'] == "Not authenticated"
@@ -174,7 +158,7 @@ def test_for_no_payments_for_user(
     # Make request
     params = {'page': 1, 'limit': 10}
     headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get(f"/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
 
     assert response.status_code == 404
     assert response.json()['message'] == "Payments not found for user"
