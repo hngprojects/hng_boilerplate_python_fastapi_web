@@ -89,9 +89,9 @@ class RequestPasswordService:
             raise HTTPException(status_code=404, detail="User not found")
         
         return success_response(
-                message=f"token is valid for user {email}",
-                status_code=status.HTTP_302_FOUND
-            )
+            message=f"token is valid for user {email}",
+            status_code=status.HTTP_302_FOUND
+        )
     
     @staticmethod
     def reset_password(data: request_password_reset.ResetPassword = Depends(), token: str = Query(...), session: Session = Depends(get_db)):
@@ -112,8 +112,8 @@ class RequestPasswordService:
             session.commit()
 
             return success_response(
-                message="password has been reset successfully",
-                status_code=status.HTTP_201_CREATED
+                message="Password has been reset successfully",
+                status_code=status.HTTP_200_OK
             )
         
         except SQLAlchemyError as e:

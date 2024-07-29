@@ -9,6 +9,7 @@ class ProfileBase(BaseModel):
 
     id: str
     created_at: datetime
+    username: str
     pronouns: str 
     job_title: str
     department: str
@@ -23,6 +24,7 @@ class ProfileBase(BaseModel):
 class ProfileCreateUpdate(BaseModel):
     '''Schema to create a profile'''
    
+    username: str
     pronouns: str 
     job_title: str
     department: str
