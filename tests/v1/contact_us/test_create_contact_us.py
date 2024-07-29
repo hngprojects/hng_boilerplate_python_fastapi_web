@@ -61,7 +61,7 @@ payload = [
 def test_create_new_contact_us_message(client: client, session: session) -> pytest:
     json_payload = payload[0]
     status_code = json_payload.pop("status_code")
-    res = client.post("/api/v1/contact-us", json=json_payload)
+    res = client.post("/api/v1/contact", json=json_payload)
     print(res.json())
     assert res.status_code == status_code
     if status_code == 201:
@@ -75,7 +75,7 @@ def test_create_new_contact_us_message(client: client, session: session) -> pyte
 def test_create_new_contact_us_message_2(client: client, session: session) -> pytest:
     json_payload = payload[1]
     status_code = json_payload.pop("status_code")
-    res = client.post("/api/v1/contact-us", json=json_payload)
+    res = client.post("/api/v1/contact", json=json_payload)
     assert res.status_code == status_code
     if status_code == 201:
         data = res.json()
@@ -88,23 +88,23 @@ def test_create_new_contact_us_message_2(client: client, session: session) -> py
 def test_create_new_contact_us_message_with_missing_phone_number_field(client: client, session: session) -> pytest:
     json_payload = payload[2]
     status_code = json_payload.pop("status_code")
-    res = client.post("/api/v1/contact-us", json=json_payload)
+    res = client.post("/api/v1/contact", json=json_payload)
     assert res.status_code == status_code
 
 def test_create_new_contact_us_message_with_missing_message_field(client: client, session: session) -> pytest:
     json_payload = payload[3]
     status_code = json_payload.pop("status_code")
-    res = client.post("/api/v1/contact-us", json=json_payload)
+    res = client.post("/api/v1/contact", json=json_payload)
     assert res.status_code == status_code
 
 def test_create_new_contact_us_message_with_missing_full_name_field(client: client, session: session) -> pytest:
     json_payload = payload[4]
     status_code = json_payload.pop("status_code")
-    res = client.post("/api/v1/contact-us", json=json_payload)
+    res = client.post("/api/v1/contact", json=json_payload)
     assert res.status_code == status_code
 
 def test_create_new_contact_us_message_with_missing_email_field(client: client, session: session) -> pytest:
     json_payload = payload[5]
     status_code = json_payload.pop("status_code")
-    res = client.post("/api/v1/contact-us", json=json_payload)
+    res = client.post("/api/v1/contact", json=json_payload)
     assert res.status_code == status_code
