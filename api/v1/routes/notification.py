@@ -32,6 +32,15 @@ def mark_notification_as_read(
     return success_response(status_code=200, message="Notifcation marked as read")
 
 
+@notification.get("/current-user")
+def get_current_user_notifications(
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    data = notification_service.get_current_user_notifications(current_user, db)
+    return success_response(status_code=200, message="All notifications", data=data)
+
+
 @notification.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
     notification_id: str,
@@ -46,11 +55,14 @@ def delete_notification(
 def get_notification(
     notification_id: str,
     current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     notification = notification_service.fetch(
-        notification_id=notification_id,
-        user=current_user,
-        db=db
+        notification_id=notification_id, user_id=current_user.id, db=db
     )
-    return {"message": "Notification fetched successfully", "status_code": 200, "success": True, "data": notification}
+    return {
+        "message": "Notification fetched successfully",
+        "status_code": 200,
+        "success": True,
+        "data": notification,
+    }
