@@ -15,8 +15,8 @@ from api.v1.services.user import user_service
 comment = APIRouter(prefix='/comments', tags=['Comments'])
 
 
-@comment.put(
-    '/{comment_id}',
+@comment.patch(
+    '/edit/{comment_id}',
     status_code=status.HTTP_200_OK,
     response_model=CommentResponse
 )
