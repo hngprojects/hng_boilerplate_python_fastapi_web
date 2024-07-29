@@ -81,11 +81,6 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
 #         status_code=200,
 #         message='User deleted successfully',
 #     )
-
-
-
-
-
 @user.patch("/me/password", status_code=200, response_model=ChangePwdRet)
 async def change_password(
     schema: ChangePasswordSchema,
