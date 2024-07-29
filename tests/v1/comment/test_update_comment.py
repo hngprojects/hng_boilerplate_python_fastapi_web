@@ -11,9 +11,7 @@ from api.v1.models.blog import Blog
 from api.v1.models.comment import Comment
 from api.v1.services.user import user_service
 from api.v1.models import User
-from api.v1.models.organization import Organization
-from api.v1.services.organization import organization_service
-from api.v1.services.comments import comment_service
+from api.v1.services.comment import comment_service
 from main import app
 
 
@@ -91,7 +89,7 @@ def test_update_comment_success(client, db_session_mock, mock_comment):
     db_session_mock.refresh.return_value = None
 
     with patch(
-        "api.v1.services.comments.comment_service.update_comment",
+        "api.v1.services.comment.comment_service.update_comment",
             return_value=mock_comment):
         response = client.patch(
             f'/api/v1/comments/edit/{mock_comment.id}',
