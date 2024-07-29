@@ -46,9 +46,7 @@ def mock_auth(monkeypatch):
 
 def test_update_comment_success(
         mock_db,
-        mock_current_user,
         mock_comment,
-        mock_auth,
         monkeypatch):
     def mock_get_db():
         """mock get db"""
@@ -67,8 +65,8 @@ def test_update_comment_success(
         mock_update_comment
     )
 
-    response = client.put(
-        "/api/v1/comments/comment123",
+    response = client.patch(
+        "/api/v1/comments/edit/comment123",
         json={"content": "Updated content"},
         headers={"Authorization": "Bearer fake_token"}
     )
@@ -91,12 +89,12 @@ def test_update_comment_not_found(mock_db, mock_auth, monkeypatch):
         mock_update_comment
     )
 
-    response = client.put(
-        "/api/v1/comments/nonexistent",
+    response = client.patch(
+        "/api/v1/comments/edit/nonexistent",
         json={"content": "Updated content"},
         headers={"Authorization": "Bearer fake_token"}
     )
-
+    print(response)
     assert response.status_code == 401
 
 
@@ -107,8 +105,8 @@ def test_update_comment_invalid_input(mock_db, mock_auth, monkeypatch):
 
     monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
 
-    response = client.put(
-        "/api/v1/comments/comment123",
+    response = client.patch(
+        "/api/v1/comments/edit/comment123",
         json={},  # Missing required 'content' field
         headers={"Authorization": "Bearer fake_token"}
     )
@@ -127,8 +125,8 @@ def test_update_comment_unauthorized(monkeypatch):
         mock_get_current_user
     )
 
-    response = client.put(
-        "/api/v1/comments/comment123",
+    response = client.patch(
+        "/api/v1/comments/edit/comment123",
         json={"content": "Updated content"},
         headers={"Authorization": "Bearer invalid_token"}
     )
@@ -161,8 +159,8 @@ def test_update_comment_wrong_user(
         "api.v1.routes.comments.comment_service.update_comment",
         mock_update_comment)
 
-    response = client.put(
-        "/api/v1/comments/comment123",
+    response = client.patch(
+        "/api/v1/comments/edit/comment123",
         json={"content": "Updated content"},
         headers={"Authorization": "Bearer fake_token"}
     )
