@@ -46,7 +46,6 @@ def create_mock_user(mock_user_service, mock_db_session):
     """Create a mock user in the mock database session."""
     mock_user = User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name="Test",
@@ -69,7 +68,7 @@ def test_autheniticated_user(mock_db_session, mock_user_service):
 
     login = client.post(
         LOGIN_ENDPOINT,
-        data={"username": "testuser", "password": "Testpassword@123"},
+        json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
     access_token = login.json()["data"]["access_token"]
 
@@ -88,7 +87,7 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
 
     login = client.post(
         LOGIN_ENDPOINT,
-        data={"username": "testuser", "password": "Testpassword@123"},
+        json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
     access_token = login.json()["data"]["access_token"]
 
@@ -108,7 +107,7 @@ def test_user_password(mock_db_session, mock_user_service):
 
     login = client.post(
         LOGIN_ENDPOINT,
-        data={"username": "testuser", "password": "Testpassword@123"},
+        json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
     access_token = login.json()["data"]["access_token"]
 

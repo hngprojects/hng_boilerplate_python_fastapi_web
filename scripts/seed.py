@@ -2,7 +2,7 @@
 """ Populates the database with seed data
 """
 from api.v1.models import *
-from api.v1.models.base import Base
+from api.v1.models.associations import Base
 from api.v1.services.user import user_service
 from api.db.database import create_database, get_db
 
@@ -36,7 +36,10 @@ product_4 = Product(name="Latte", price=29000, description="test product 4", org
 profile_1 = Profile(bio='My name is John Doe', phone_number='09022112233')
 user_1.profile = profile_1
 
-db.add_all([product_1, product_2, product_3, product_4])
+blog_1 = Blog(author_id=user_1.id, title="Test 1", content="Test blog one")
+blog_2 = Blog(author_id=user_2.id, title="Test 2", content="Test user two")
+
+db.add_all([product_1, product_2, product_3, product_4, blog_1, blog_2])
 db.commit()
 users = db.query(Organization).first().users
 print("Seed data succesfully")

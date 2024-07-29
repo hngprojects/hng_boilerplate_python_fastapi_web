@@ -28,7 +28,7 @@ def mock_db_session():
 
 @pytest.fixture
 def current_user():
-    return User(id=f'{uuid7()}', username="testuser", email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
+    return User(id=f'{uuid7()}', email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
 
 @pytest.fixture
 def valid_blog_post():
@@ -84,7 +84,6 @@ async def test_update_blog_forbidden(client, mock_db_session, current_user, vali
     # Simulate a different user
     different_user = User(
         id=f'{uuid7()}', 
-        username="otheruser", 
         email="other@example.com",
         password="hashedpassword1", 
         first_name="other", 
