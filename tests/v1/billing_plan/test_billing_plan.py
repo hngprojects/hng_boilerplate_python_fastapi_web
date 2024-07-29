@@ -43,13 +43,12 @@ def create_mock_user(mock_user_service, mock_db_session):
     """Create a mock user in the mock database session."""
     mock_user = User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=False,
+        is_super_admin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -64,5 +63,31 @@ def test_fetch_all_plans(mock_user_service, mock_db_session):
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     response = client.get(BILLPLAN_ENDPOINT
                                , headers={'Authorization': f'Bearer {access_token}'})
+    
+    assert response.status_code == status.HTTP_200_OK
+
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_create_new_plans(mock_user_service, mock_db_session):
+    """Billing plan creation test."""
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    access_token = user_service.create_access_token(user_id=str(uuid7()))
+    data = {
+            "name": "Advanced",
+            "organization_id": "s2334d",
+            "description": "All you need in one pack",
+            "price": 80,
+            "duration": "Monthly",
+            "currency": "Naira",
+            "features": [
+                "Multiple team",
+                "Premium support"
+            ]
+            }
+    
+    response = client.post(
+        BILLPLAN_ENDPOINT,
+        headers={'Authorization': f'Bearer {access_token}'},
+        json=data
+        )
     
     assert response.status_code == status.HTTP_200_OK

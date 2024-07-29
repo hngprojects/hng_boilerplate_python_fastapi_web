@@ -2,8 +2,10 @@
 """
 Unittests to mock google oauth2
 """
+import os
 import pytest
 from fastapi.testclient import TestClient
+from fastapi import status
 from unittest.mock import patch
 from main import app
 from api.core.dependencies.google_oauth_config import google_oauth
@@ -36,7 +38,7 @@ return_value = {
         'name': 'Johnson Oragui',
         'picture': 'https://lh3.googleusercontent.com/a/ACg8rdfcvg0cK-dwE_fcjV9yj7yhnjiWCDl1PnXbWw56dq-qZKN52Q=s96-c',
         'given_name': 'Johnson',
-        'family_name': 'Oragui',
+        'family_name': 'oragui',
         'iat': 1721489311,
         'exp': 1721492911
         }
@@ -60,6 +62,7 @@ def db_teardown():
 @pytest.fixture
 def client():
     client = TestClient(app)
+    os.environ['TESTING'] = 'TEST'
     return client
 
 
@@ -88,41 +91,26 @@ def test_login_callback_oauth(client, mock_google_oauth2):
     """
     Test for google_login callback function/route
     """
-    global user_id
-    response = client.get("/api/v1/auth/callback/google?code=fake-code")
-    assert response.status_code == 200
-    data = response.json()
+    response = client.get("/api/v1/auth/callback/google?code=fake-code", follow_redirects=False)
+    print(response.headers, response.has_redirect_location)
+    print(response.headers['location'])
+    assert response.status_code == status.HTTP_302_FOUND
+    assert response.headers["location"] == "http://127.0.0.1:3000/login-success?success=true"
+    assert response.cookies
 
-    user_id = data['user']['id']
-
-    assert data['message'] == 'Authentication was successful'
-    assert data['status'] == 'successful'
-    assert data['statusCode'] == 200
-
-    assert 'access_token' in data['tokens']
-    assert 'refresh_token' in data['tokens']
-    assert 'token_type' in data['tokens']
-    assert data['tokens']['token_type'] == 'bearer'
-
-    assert type(data['user']) == dict
-    assert 'id' in data['user']
-    assert data['user']['first_name'] == 'Johnson'
-    assert data['user']['last_name'] == 'Oragui'
-    assert data['user']['username'] == 'johnson.oragui@gmail.com'
-    assert data['user']['email'] == 'johnson.oragui@gmail.com'
-    assert 'created_at' in data['user']
 
 def test_database_for_user_data():
     """
     Tests if the data were stored in the users table
     """
     global user_id
-    session = SessionFactory()
-    user: object = session.query(User).filter_by(id=user_id).first()
+    session: Session = SessionFactory()
+    email = return_value['userinfo']['email']
+    user: object = session.query(User).filter_by(email=email).first()
+    user_id = user.id
 
     assert user.first_name == 'Johnson'
-    assert user.last_name == 'Oragui'
-    assert user.username == 'johnson.oragui@gmail.com'
+    assert user.last_name == 'oragui'
     assert user.email == 'johnson.oragui@gmail.com'
 
     session.close()
