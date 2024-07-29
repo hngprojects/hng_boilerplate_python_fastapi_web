@@ -6,5 +6,5 @@ class CreateContactUs(BaseModel):
 
     full_name: str
     email: EmailStr
-    title: str
+    phone_number: str
     message: str

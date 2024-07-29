@@ -11,6 +11,12 @@ class ContactUsService(Service):
     """Contact Us Service."""
 
     def __init__(self) -> None:
+        self.adabtingMapper = {
+            "full_name": "full_name",
+            "email": "email",
+            "title": "phone_number", # Adapting the schema to the model
+            "message": "message",
+        }
         super().__init__()
 
     # ------------ CRUD functions ------------ #
@@ -18,10 +24,10 @@ class ContactUsService(Service):
     def create(self, db: Annotated[Session, Depends(get_db)], data: CreateContactUs):
         """Create a new contact us message."""
         contact_message = ContactUs(
-            full_name=data.full_name,
-            email=data.email,
-            title=data.title,
-            message=data.message,
+            full_name=data[self.adabtingMapper["full_name"]],
+            email=data[self.adabtingMapper["email"]],
+            title=data[self.adabtingMapper["title"]],
+            message=data[self.adabtingMapper["message"]],
         )
         db.add(contact_message)
         db.commit()
