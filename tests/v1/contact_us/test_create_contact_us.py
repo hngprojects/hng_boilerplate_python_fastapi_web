@@ -3,23 +3,29 @@ from tests.database import session, client
 from api.v1.models.contact_us import ContactUs
 
 # setup the test database
-# '{ "full_name": "John Doe","email": "john@gmail.com","title": "Hello","message": "Hello, I am John Doe"}'
+adabtingMapper = {
+    "full_name": "full_name",
+    "email": "email",
+    "phone_number": "title",
+    "message": "message",
+}
+# '{ "full_name": "John Doe","email": "john@gmail.com","phone_number": "Hello","message": "Hello, I am John Doe"}'
 payload = [
     { # all fields are valid
         "full_name": "John Doe",
         "email": "john@gmail.com",
-        "title": "Hello",
+        "phone_number": "0123456789",
         "message": "Hello, I am John Doe",
         "status_code": 201, # will be stripped out later
     },
     { # all fields are valid
         "full_name": "Jane Doe",
         "email": "jane@gmail.com",
-        "title": "Hi",
+        "phone_number": "0123456789",
         "message": "Hi, I am Jane Doe",
         "status_code": 201, # will be stripped out later
     },
-    { # missing title field
+    { # missing phone_number field
         "full_name": "John Doe",
         "email": "john@gmail.com",
         "message": "Hello, I am John Doe",
@@ -28,25 +34,25 @@ payload = [
     { # missing message field
         "full_name": "John Doe",
         "email": "john@gmail.com",
-        "title": "Hello",
+        "phone_number": "0123456789",
         "status_code": 422, # will be stripped out later
     },
     { # missing full_name field
         "email": "jane@gmail.com",
-        "title": "Hi",
+        "phone_number": "0123456789",
         "message": "Hi, I am Jane Doe",
         "status_code": 422, # will be stripped out later
     },
     { # missing email field
         "full_name": "Jane Doe",
-        "title": "Hi",
+        "phone_number": "0123456789",
         "message": "Hi, I am Jane Doe",
         "status_code": 422, # will be stripped out later
     },
     { # invalid email field
         "full_name": "John Doe",
         "email": "john",
-        "title": "Hello",
+        "phone_number": "0123456789",
         "message": "Hello, I am John Doe",
         "status_code": 422, # will be stripped out later
     },
@@ -61,10 +67,10 @@ def test_create_new_contact_us_message(client: client, session: session) -> pyte
     if status_code == 201:
         data = res.json()
         contact_us_message = session.query(ContactUs).get(data["data"]["id"])  # noqa: F405
-        assert contact_us_message.full_name == json_payload["full_name"]
-        assert contact_us_message.email == json_payload["email"]
-        assert contact_us_message.title == json_payload["title"]
-        assert contact_us_message.message == json_payload["message"]
+        assert getattr(contact_us_message, adabtingMapper["full_name"]) == json_payload["full_name"]
+        assert getattr(contact_us_message, adabtingMapper["email"]) == json_payload["email"]
+        assert getattr(contact_us_message, adabtingMapper["phone_number"]) == json_payload["phone_number"]
+        assert getattr(contact_us_message, adabtingMapper["message"]) == json_payload["message"]
 
 def test_create_new_contact_us_message_2(client: client, session: session) -> pytest:
     json_payload = payload[1]
@@ -74,12 +80,12 @@ def test_create_new_contact_us_message_2(client: client, session: session) -> py
     if status_code == 201:
         data = res.json()
         contact_us_message = session.query(ContactUs).get(data["data"]["id"])  # noqa: F405
-        assert contact_us_message.full_name == json_payload["full_name"]
-        assert contact_us_message.email == json_payload["email"]
-        assert contact_us_message.title == json_payload["title"]
-        assert contact_us_message.message == json_payload["message"]
+        assert getattr(contact_us_message, adabtingMapper["full_name"]) == json_payload["full_name"]
+        assert getattr(contact_us_message, adabtingMapper["email"]) == json_payload["email"]
+        assert getattr(contact_us_message, adabtingMapper["phone_number"]) == json_payload["phone_number"]
+        assert getattr(contact_us_message, adabtingMapper["message"]) == json_payload["message"]
 
-def test_create_new_contact_us_message_with_missing_title_field(client: client, session: session) -> pytest:
+def test_create_new_contact_us_message_with_missing_phone_number_field(client: client, session: session) -> pytest:
     json_payload = payload[2]
     status_code = json_payload.pop("status_code")
     res = client.post("/api/v1/contact-us", json=json_payload)

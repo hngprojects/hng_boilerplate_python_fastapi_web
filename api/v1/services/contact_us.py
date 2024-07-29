@@ -24,10 +24,10 @@ class ContactUsService(Service):
     def create(self, db: Annotated[Session, Depends(get_db)], data: CreateContactUs):
         """Create a new contact us message."""
         contact_message = ContactUs(
-            full_name=data[self.adabtingMapper["full_name"]],
-            email=data[self.adabtingMapper["email"]],
-            title=data[self.adabtingMapper["title"]],
-            message=data[self.adabtingMapper["message"]],
+            full_name=getattr(data, self.adabtingMapper["full_name"]),
+            email=getattr(data, self.adabtingMapper["email"]),
+            title=getattr(data, self.adabtingMapper["title"]),
+            message=getattr(data, self.adabtingMapper["message"]),
         )
         db.add(contact_message)
         db.commit()
