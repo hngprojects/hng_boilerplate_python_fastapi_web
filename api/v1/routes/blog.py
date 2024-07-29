@@ -1,15 +1,14 @@
 from typing import List, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from api.db.database import get_db
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.models.blog import Blog, BlogDislike
 from api.v1.schemas.blog import (BlogCreate, BlogPostResponse, BlogRequest,
-                                BlogUpdateResponseModel, BlogDislikeResponse)
+                                BlogUpdateResponseModel)
 from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
@@ -85,48 +84,6 @@ async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_
         message = "Blog post updated successfully",
         status_code = 200,
         data = jsonable_encoder(updated_blog_post)
-    )
-
-
-@blog.put("/{blog_id}/dislike", response_model=BlogDislikeResponse)
-def dislike_blog_post(
-    blog_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user)
-    ):
-    
-    blog_service = BlogService(db)
-
-    # GET blog post
-    blog_p = blog_service.fetch(blog_id)
-    if not isinstance(blog_p, Blog):
-        raise HTTPException(
-            detail="Post not found",
-            status_code=status.HTTP_404_NOT_FOUND
-        )
-    
-    # CONFIRM current user has NOT disliked before
-    existing_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
-    if isinstance(existing_dislike, BlogDislike):
-        raise HTTPException(
-            detail="You have already disliked this blog post",
-            status_code=status.HTTP_403_FORBIDDEN
-        )
-
-    # UPDATE disikes
-    new_dislike = blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
-
-    if not isinstance(new_dislike, BlogDislike):
-        raise HTTPException(
-            detail="Unable to record dislike.",
-            status_code=status.HTTP_400_BAD_REQUEST
-        )
-
-    # Return success response
-    return success_response(
-        status_code=status.HTTP_200_OK, 
-        message="Dislike recorded successfully.", 
-        data=new_dislike.to_dict()
     )
     
     
