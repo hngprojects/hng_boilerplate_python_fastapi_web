@@ -1,19 +1,5 @@
-from datetime import datetime
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 
-
-class UserData(BaseModel):
-    """
-    Schema Response representing the validated google login
-    """
-    id: str
-    first_name: str
-    last_name: str
-    email: EmailStr
-    created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class Tokens(BaseModel):
     """
@@ -21,16 +7,6 @@ class Tokens(BaseModel):
     """
     access_token: str
     refresh_token: str
-
-class StatusResponse(BaseModel):
-    """
-    Schema Response to the end user
-    """
-    message: str
-    status: str
-    statusCode: int
-    tokens: Tokens
-    user: UserData
 
 class IdToken(BaseModel):
     id_token: str
