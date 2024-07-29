@@ -1,12 +1,10 @@
-from typing import Any, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-
 from api.core.base.services import Service
+from api.v1.models.comment import Comment, CommentLike
+from typing import Any, Optional
 from api.utils.db_validators import check_model_existence
-from api.v1.models import Comment, Blog, User
-from api.v1.models.comment import Comment
 from api.v1.models.blog import Blog
-from api.v1.models.user import User
 
 
 class CommentService(Service):
@@ -15,7 +13,7 @@ class CommentService(Service):
     def create(self, db: Session, schema, user_id, blog_id):
         '''Create a new comment to a blog'''
         # check if blog exists
-        check_model_existence(db, Blog, blog_id)
+        blog = check_model_existence(db, Blog, blog_id)
 
         # create and add the new comment to the database
         new_comment = Comment(**schema.model_dump(), user_id=user_id, blog_id=blog_id)
@@ -24,8 +22,9 @@ class CommentService(Service):
         db.refresh(new_comment)
         return new_comment
 
+
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all comments with option to search using query parameters'''
+        '''Fetch all comments with option tto search using query parameters'''
 
         query = db.query(Comment)
 
