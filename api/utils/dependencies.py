@@ -50,15 +50,16 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     return user
 
 
-
-
-
-def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    user = get_current_user(db, token)
-    if not user.is_super_admin:
+def get_super_admin(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    current_user = get_current_user(db, token)
+    if not current_user or not current_user.is_super_admin:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this resource",
+            status_code=401,
+            detail={
+                "message": "User does not have admin privileges",
+                "status_code": 401,
+                "data": {}
+            }
         )
-    return user
+    return current_user
 

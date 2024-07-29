@@ -13,6 +13,7 @@ from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.v1.services.waitlist_email import send_confirmation_email, add_user_to_waitlist, find_existing_user
 from api.utils.logger import logger
 from api.db.database import get_db
+from api.v1.services.waitlist import waitlist_service
 
 waitlist = APIRouter(prefix="/waitlists", tags=["Waitlist"])
 
@@ -96,3 +97,29 @@ def admin_add_user_to_waitlist(
     )
 
     return JsonResponseDict(**resp)
+
+@waitlist.get("/users", response_model=success_response, status_code=200)
+async def get_all_waitlist_emails(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin=Depends(get_super_admin)
+):
+    try:
+        waitlist_users = waitlist_service.fetch_all(db)
+        emails = [user.email for user in waitlist_users]
+
+        return success_response(
+            message="Waitlist retrieved successfully",
+            status_code=200,
+            data=emails
+        )
+    except Exception as e:
+        logger.error(f"Failed to retrieve waitlist emails: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "Failed to retrieve waitlist emails",
+                "success": False,
+                "status_code": 500
+            }
+        )
