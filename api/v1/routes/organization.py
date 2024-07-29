@@ -16,7 +16,7 @@ organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 @organization.post('', response_model=success_response, status_code=status.HTTP_201_CREATED)
 async def create_organization(
     schema: CreateUpdateOrganization,
-    db: Session= Depends(get_db), 
+    db: Session= Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
     '''Endpoint to create a new organization'''
@@ -33,3 +33,23 @@ async def create_organization(
         data=jsonable_encoder(new_org)
     )
 
+
+@organization.get(
+    '/{org_id}/users',
+    response_model=success_response,
+    status_code=status.HTTP_200_OK
+)
+async def get_organization_users(
+    org_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    '''Endpoint to fetch all users in an organization'''
+
+    org = organization_service.fetch(db, org_id)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Organization users fetched successfully',
+        data=jsonable_encoder(org.users)
+    )

@@ -8,8 +8,8 @@ from api.v1.models.associations import user_organization_association
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
 from api.v1.schemas.organization import (
-    CreateUpdateOrganization, 
-    AddUpdateOrganizationRole, 
+    CreateUpdateOrganization,
+    AddUpdateOrganizationRole,
     RemoveUserFromOrganization
 )
 
@@ -36,7 +36,7 @@ class OrganizationService(Service):
         db.commit()
 
         return new_organization
-    
+
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         '''Fetch all products with option tto search using query parameters'''
@@ -51,37 +51,37 @@ class OrganizationService(Service):
 
         return query.all()
 
-    
+
     def fetch(self, db: Session, id: str):
         '''Fetches an organization by id'''
 
         organization = check_model_existence(db, Organization, id)
         return organization
-    
+
 
     def update(self, db: Session, id: str, schema):
         '''Updates a product'''
 
         organization = self.fetch(db=db, id=id)
-        
+
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(organization, key, value)
-        
+
         db.commit()
         db.refresh(organization)
         return organization
-    
+
 
     def delete(self, db: Session, id: str):
         '''Deletes a product'''
-        
+
         product = self.fetch(id=id)
         db.delete(product)
         db.commit()
 
-    
+
     # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session, org_id: str, user_to_update_id: str):
     # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session):
     #     '''Updates a user role'''
@@ -145,21 +145,21 @@ class OrganizationService(Service):
     #     db.execute(stmt)
     #     db.commit()
 
-    
-    # def get_users_in_organization(self, db: Session, org_id: str):
-    #     '''Fetches all users in an organization'''
 
-    #     organization = check_model_existence(db, Organization, org_id)
-        
-    #     # Fetch all users associated with the organization
-    #     return organization.users
-    
+    def get_users_in_organization(self, db: Session, org_id: str):
+        '''Fetches all users in an organization'''
+
+        organization = check_model_existence(db, Organization, org_id)
+
+        # Fetch all users associated with the organization
+        return organization.users
+
 
     # def get_user_organizations(self, db: Session, user_id: str):
     #     '''Fetches all organizations that belong to a user'''
 
     #     user = check_model_existence(db, User, user_id)
-        
+
     #     # Fetch all users associated with the organization
     #     return user.organizations
 
