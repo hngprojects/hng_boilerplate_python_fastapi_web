@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -14,16 +14,25 @@ from api.v1.services.user import user_service
 comment = APIRouter(prefix="/comments", tags=["Comments"])
 
 @comment.post("/{blog_id}", response_model=CommentSuccessResponse)
-def add_comment(
+def add_comment_to_blog(
     blog_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
     comment: CommentCreate, 
     db: Annotated[Session, Depends(get_db)]
-    ):
+    ) -> Response:
+    """Post endpoint for authenticated users to add comments to a blog. 
 
-    if not blog_id:
-        return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bad request, blog id required")
-    
+    Args:
+        blog_id (str): the id of the blog to be commented on
+        current_user (Annotated[User, Depends): the current authenticated user 
+        comment (CommentCreate): the body of the request
+        db (Annotated[Session, Depends): the database session object
+
+    Returns:
+        Response: a response object containing the comment details if successful or appropriate
+            errors if not
+    """
+
     user_id = current_user.id
     new_comment = comment_service.create(db=db, schema=comment, user_id=user_id, blog_id=blog_id)
 
