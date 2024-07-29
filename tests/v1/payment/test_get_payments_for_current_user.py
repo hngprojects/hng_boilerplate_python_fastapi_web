@@ -50,6 +50,10 @@ def test_payment(test_user):
 def access_token_user(test_user):
     return user_service.create_access_token(user_id=test_user.id)
 
+@pytest.fixture
+def random_access_token():
+    return user_service.create_access_token(user_id=str(uuid7()))
+
 
 # Test for successful retrieve of payments
 def test_get_payments_successfully(
@@ -128,11 +132,20 @@ def test_for_unauthenticated_get_payments(
     test_payment,
     access_token_user
 ):
+    params = {'page': 1, 'limit': 10}
+
     # Mock the query for getting user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
 
-    # Make request
-    params = {'page': 1, 'limit': 10}
+    # Make request || WRONG Authorization
+    headers = {'Authorization': f'Bearer {random_access_token}'}
+    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
+
+    assert response.status_code == 401
+    assert response.json()['message'] == "Could not validate credentials"
+    assert not response.json().get('data')
+
+    # Make request || NO Authorization
     response = client.get("/api/v1/payments/current-user", params=params)
 
     assert response.status_code == 401
