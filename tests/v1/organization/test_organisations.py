@@ -66,7 +66,6 @@ def test_get_organization_not_found(db_session_mock, mock_get_current_user):
         data = response.json()
         assert data["detail"] == "Organization not found"
         
-def test_get_organization_invalid_id(token):
-    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
-        response = client.get("/api/v1/organisations/abc", headers={"Authorization": f"Bearer {token}"})
-        assert response.status_code == 422  # Unprocessable Entity due to validation error
+def test_get_organization_invalid_id(db_session_mock, mock_get_current_user):
+    response = client.get("/api/v1/organisations/abc", headers={"Authorization": "Bearer testtoken"})
+    assert response.status_code == 422  # Unprocessable Entity due to validation error
