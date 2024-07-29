@@ -12,12 +12,13 @@ from api.v1.routes.billing_plan import bill_plan
 from api.v1.routes.google_login import google_auth
 from api.v1.routes.invitations import invites
 from api.v1.routes.profiles import profile
-from api.v1.routes.comment import comment
+from api.v1.routes.jobs import jobs
 from api.v1.routes.payment import payment
 from api.v1.routes.organization import organization
 from api.v1.routes.request_password import pwd_reset
 from api.v1.routes.organisations import Organisation_id
 from api.v1.routes.activity_logs import activity_logs
+from api.v1.routes.comment import comment
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -40,3 +41,5 @@ api_version_one.include_router(Organisation_id)
 api_version_one.include_router(comment)
 api_version_one.include_router(payment)
 api_version_one.include_router(activity_logs)
+api_version_one.include_router(jobs)
+api_version_one.include_router(comment)
