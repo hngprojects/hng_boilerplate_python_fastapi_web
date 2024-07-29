@@ -47,7 +47,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['newsletter_id'], ['newsletters.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.add_column('user_organization', sa.Column('status', sa.String(length=20), nullable=False))
+    
     # ### end Alembic commands ###
 
 
