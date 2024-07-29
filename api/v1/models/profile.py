@@ -17,6 +17,7 @@ class Profile(BaseTableModel):
     __tablename__ = 'profiles'
 
     user_id = Column(String, ForeignKey('users.id', ondelete="CASCADE"), unique=True, nullable=False)
+    username = Column(String, nullable=True)
     pronouns = Column(String, nullable=True)
     job_title = Column(String, nullable=True)
     department = Column(String, nullable=True)

@@ -8,19 +8,18 @@ from sqlalchemy import (
         Boolean
         )
 from sqlalchemy.orm import relationship
-from api.v1.models.base import user_organization_association, user_newsletter_association
+from api.v1.models.associations import user_organization_association, user_newsletter_association
 from api.v1.models.base_model import BaseTableModel
 
 
 class User(BaseTableModel):
     __tablename__ = "users"
 
-    username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
-    is_active = Column(Boolean, server_default=text("false"))
+    is_active = Column(Boolean, server_default=text("true"))
     is_super_admin = Column(Boolean, server_default=text("false"))
     is_deleted = Column(Boolean, server_default=text("false"))
     is_verified = Column(Boolean, server_default=text("false"))
