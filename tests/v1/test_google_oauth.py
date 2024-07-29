@@ -82,7 +82,7 @@ def test_google_login(client, mock_google_oauth2):
     """
     Test for google_login function redirect to google oauth
     """
-    response = client.get("/api/v1/auth/google-login")
+    response = client.get("/api/v1/auth/google")
     assert response.status_code == 200
     assert response.url == "http://testserver/api/v1/auth/google-login"
 
