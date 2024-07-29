@@ -7,7 +7,7 @@ from sqlalchemy import (
         Boolean
         )
 from sqlalchemy.orm import relationship
-from api.v1.models.base import user_organization_association, user_newsletter_association
+from api.v1.models.associations import user_organization_association, user_newsletter_association
 from api.v1.models.base_model import BaseTableModel
 
 

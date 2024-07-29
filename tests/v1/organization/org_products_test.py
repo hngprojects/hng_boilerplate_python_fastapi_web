@@ -48,8 +48,7 @@ def another_user():
 def test_organization(test_user):
     organization = Organization(
         id=str(uuid7()),
-        name="testorg",
-        description="An organization for testing purposes"
+        company_name="testorg",
     )
     organization.users.append(test_user)
     return organization
