@@ -38,7 +38,6 @@ def create_mock_user(mock_user_service, mock_db_session):
     """Create a mock user in the mock database session."""
     mock_user = User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -74,8 +73,8 @@ def test_success_retrieval(mock_user_service, mock_db_session):
 
     # get auth credentials
     create_mock_user(mock_user_service, mock_db_session)
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser",
+    login = client.post(LOGIN_ENDPOINT, json={
+        "email": "testuser@gmail.com",
         "password": "Testpassword@123"
     })
     response = login.json()
@@ -97,8 +96,8 @@ def test_success_retrieval(mock_user_service, mock_db_session):
 #     """Test for invalid testimonial id"""
 
 #     create_mock_user(mock_user_service, mock_db_session)
-#     login = client.post(LOGIN_ENDPOINT, data={
-#         "username": "testuser",
+#     login = client.post(LOGIN_ENDPOINT, json={
+#         "email": "testuser@gmail.com",
 #         "password": "Testpassword@123"
 #     })
 #     response = login.json()

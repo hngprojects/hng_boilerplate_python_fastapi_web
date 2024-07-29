@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 class ActivityLogCreate(BaseModel):
-    user_id: int
+    user_id: str
     action: str

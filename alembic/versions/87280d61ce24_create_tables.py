@@ -1,8 +1,8 @@
 """create tables
 
-Revision ID: b251dcbfd254
+Revision ID: 87280d61ce24
 Revises: 
-Create Date: 2024-07-29 02:41:41.589272
+Create Date: 2024-07-29 10:13:14.413363
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b251dcbfd254'
+revision: str = '87280d61ce24'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -60,12 +60,11 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_organizations_id'), 'organizations', ['id'], unique=False)
     op.create_table('users',
-    sa.Column('username', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=True),
     sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_verified', sa.Boolean(), server_default=sa.text('false'), nullable=True),
@@ -73,8 +72,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('username')
+    sa.UniqueConstraint('email')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('waitlist',
@@ -221,6 +219,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
     op.create_table('profiles',
     sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('username', sa.String(), nullable=True),
     sa.Column('pronouns', sa.String(), nullable=True),
     sa.Column('job_title', sa.String(), nullable=True),
     sa.Column('department', sa.String(), nullable=True),
