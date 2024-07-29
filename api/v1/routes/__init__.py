@@ -12,7 +12,7 @@ from api.v1.routes.billing_plan import bill_plan
 from api.v1.routes.google_login import google_auth
 from api.v1.routes.invitations import invites
 from api.v1.routes.profiles import profile
-from api.v1.routes.payments import payment
+from api.v1.routes.payment import payment
 from api.v1.routes.organization import organization
 from api.v1.routes.request_password import pwd_reset
 from api.v1.routes.activity_logs import activity_logs

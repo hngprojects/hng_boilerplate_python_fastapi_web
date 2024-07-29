@@ -3,11 +3,10 @@ from sqlalchemy.orm import Session
 
 from api.v1.models import User
 from api.v1.models.payment import Payment
-from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 
 
-class PaymentService(Service):
+class PaymentService:
     '''Payment service functionality'''
 
     def create(self, db: Session,  schema):
