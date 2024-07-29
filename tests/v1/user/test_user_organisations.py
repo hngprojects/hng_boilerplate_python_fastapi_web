@@ -1,9 +1,3 @@
-import sys, os
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -43,7 +37,7 @@ def client(test_db):
 
 @pytest.fixture(scope="module")
 def test_user(test_db):
-    user = User(email="test@example.com", username="testuser", password="testpassword", is_super_admin=False)
+    user = User(email="test@example.com", password="testpassword", is_super_admin=False)
     test_db.add(user)
     test_db.commit()
     test_db.refresh(user)
@@ -51,7 +45,7 @@ def test_user(test_db):
 
 @pytest.fixture(scope="module")
 def test_super_user(test_db):
-    super_user = User(email="superuser@example.com", username="superuser", password="superpassword", is_super_admin=True)
+    super_user = User(email="superuser@example.com", password="superpassword", is_super_admin=True)
     test_db.add(super_user)
     test_db.commit()
     test_db.refresh(super_user)
@@ -59,7 +53,8 @@ def test_super_user(test_db):
 
 @pytest.fixture(scope="module")
 def test_organization(test_db, test_user):
-    organization = Organization(company_name="Test Organization", user_id=test_user.id)
+    organization = Organization(company_name="Test Organization")
+    organization.users.append(test_user)
     test_db.add(organization)
     test_db.commit()
     test_db.refresh(organization)
