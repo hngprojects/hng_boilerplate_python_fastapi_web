@@ -17,6 +17,9 @@ class OrganizationBase(BaseModel):
     lga: str
 
 
+class Config:
+        from_attributes = True
+
 class CreateUpdateOrganization(BaseModel):
     '''Organization schema to create or update organization'''
 

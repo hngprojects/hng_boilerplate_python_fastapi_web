@@ -7,10 +7,12 @@ from api.v1.models.product import Product
 from api.v1.models.associations import user_organization_association
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
+from fastapi import HTTPException
 from api.v1.schemas.organization import (
     CreateUpdateOrganization, 
     AddUpdateOrganizationRole, 
-    RemoveUserFromOrganization
+    RemoveUserFromOrganization,
+    OrganizationBase
 )
 
 
@@ -145,14 +147,14 @@ class OrganizationService(Service):
     #     db.execute(stmt)
     #     db.commit()
 
+    """Endpoint to get organization"""
     
-    # def get_users_in_organization(self, db: Session, org_id: str):
-    #     '''Fetches all users in an organization'''
+    def get_organization(db: Session, org_id: int) -> OrganizationBase:
+        organization = db.query(Organization).filter(Organization.id == org_id).first()
+        if organization is None:
+            raise HTTPException(status_code=404, detail="Organization not found")
+        return OrganizationBase.from_orm(organization)
 
-    #     organization = check_model_existence(db, Organization, org_id)
-        
-    #     # Fetch all users associated with the organization
-    #     return organization.users
     
 
     # def get_user_organizations(self, db: Session, user_id: str):

@@ -16,7 +16,6 @@ from api.v1.routes.jobs import jobs
 from api.v1.routes.payment import payment
 from api.v1.routes.organization import organization
 from api.v1.routes.request_password import pwd_reset
-from api.v1.routes.organisations import Organisation_id
 from api.v1.routes.activity_logs import activity_logs
 from api.v1.routes.comment import comment
 
@@ -37,7 +36,6 @@ api_version_one.include_router(invites)
 api_version_one.include_router(profile)
 api_version_one.include_router(organization)
 api_version_one.include_router(pwd_reset)
-api_version_one.include_router(Organisation_id)
 api_version_one.include_router(comment)
 api_version_one.include_router(payment)
 api_version_one.include_router(activity_logs)
