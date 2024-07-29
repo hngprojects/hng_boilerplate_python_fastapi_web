@@ -4,17 +4,17 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models import User
-from typing_extensions import Annotated
+from api.v1.schemas.user import TokenData
 from datetime import timedelta
 
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
 from typing import Annotated
 
-from api.v1.schemas.user import UserCreate
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
+from api.v1.services.auth import AuthService
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -211,4 +211,37 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
 
+# Verify Magic Link
+@auth.post("/verify-magic-link")
+async def verify_magic_link(token_schema: TokenData):
+    user, access_token = AuthService.verify_magic_token(token_schema.token)
+
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message='Login successful',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+    
 
