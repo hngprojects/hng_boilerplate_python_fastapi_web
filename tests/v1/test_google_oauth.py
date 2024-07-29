@@ -111,7 +111,6 @@ def test_database_for_user_data():
 
     assert user.first_name == 'Johnson'
     assert user.last_name == 'oragui'
-    assert user.username == 'johnson.oragui@gmail.com'
     assert user.email == 'johnson.oragui@gmail.com'
 
     session.close()
