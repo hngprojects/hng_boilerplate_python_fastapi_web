@@ -42,6 +42,6 @@ async def update_comment(
             content=str(comment.content),
             created_at=str(comment.created_at),
             updated_at=str(comment.updated_at),
-            user=comment.user.to_dict() if comment.user.to_dict() else None
+            user=comment.user.to_dict() if comment.user else None
         )
     )

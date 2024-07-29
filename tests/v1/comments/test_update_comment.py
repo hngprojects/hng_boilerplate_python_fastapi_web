@@ -1,168 +1,133 @@
-from api.v1.services.user import user_service
-from api.v1.services.comments import comment_service
-from api.v1.models.comment import Comment
-from api.v1.models.user import User
-from main import app
-from fastapi import HTTPException
-from unittest.mock import MagicMock
-from fastapi.testclient import TestClient
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
+
 import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
+from uuid_extensions import uuid7
 
-client = TestClient(app)
-
-
-@pytest.fixture
-def mock_db():
-    """mock db"""
-    return MagicMock()
-
-
-@pytest.fixture
-def mock_current_user():
-    """mock current user"""
-    return User(id="user123", username="testuser")
-
-
-@pytest.fixture
-def mock_comment():
-    """mock comment"""
-    return Comment(
-        id="comment123",
-        content="Original content",
-        user_id="user123"
-    )
+from api.db.database import get_db
+from api.v1.models.blog import Blog
+from api.v1.models.comment import Comment
+from api.v1.services.user import user_service
+from api.v1.models import User
+from api.v1.models.organization import Organization
+from api.v1.services.organization import organization_service
+from api.v1.services.comments import comment_service
+from main import app
 
 
 @pytest.fixture
-def mock_auth(monkeypatch):
-    """mock auth"""
-    def mock_get_current_user():
-        return User(id="user123", username="testuser")
-    monkeypatch.setattr(
-        "api.v1.routes.comments.user_service.get_current_user",
-        mock_get_current_user
+def mock_get_current_user():
+    """Mock get current user"""
+    return User(
+        id=str(uuid7()),
+        email="testuser@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name='Test',
+        last_name='User',
+        is_active=True,
+        is_super_admin=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
 
 
-def test_update_comment_success(
-        mock_db,
-        mock_comment,
-        monkeypatch):
-    def mock_get_db():
-        """mock get db"""
-        return mock_db
-
-    def mock_update_comment(db, id, user, **kwargs):
-        """mock update comment"""
-        if id == "comment123" and user.id == "user123":
-            mock_comment.content = kwargs.get('content')
-            return mock_comment
-        return None
-
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.comment_service.update_comment",
-        mock_update_comment
+@pytest.fixture
+def mock_comment(existing_blog_post, db_session_mock):
+    """mock comments"""
+    comment = Comment(
+        id=str(uuid7()),
+        blog_id=existing_blog_post.id,
+        content="Updated Comment",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
+
+    db_session_mock.query(Comment).\
+        filter_by(id=comment.id).one_or_none.return_value = Comment
+    return comment
+
+
+@pytest.fixture
+def existing_blog_post(mock_get_current_user):
+    blog = Blog(
+        id=f'{uuid7()}',
+        title="Original Title",
+        content="Original Content",
+        author_id=mock_get_current_user.id
+    )
+
+    return blog
+
+
+@pytest.fixture
+def db_session_mock():
+    db_session = MagicMock(spec=Session)
+    return db_session
+
+
+@pytest.fixture
+def client(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides = {}
+
+
+def test_update_comment_success(client, db_session_mock, mock_comment):
+    '''Test to successfully create a new organization'''
+
+    # Mock the user service to return the current user
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    app.dependency_overrides[
+        user_service.get_current_user] = lambda: mock_get_current_user
+    app.dependency_overrides[
+        comment_service.update_comment] = lambda: mock_comment
+
+    # Mock update comment
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
+    with patch(
+        "api.v1.services.comments.comment_service.update_comment",
+            return_value=mock_comment):
+        response = client.patch(
+            f'/api/v1/comments/edit/{mock_comment.id}',
+            headers={'Authorization': 'Bearer token'},
+            json={
+                "content": "updated comment"
+            }
+        )
+
+        assert response.status_code == 200
+
+
+def test_update_comments_missing_field(client, db_session_mock):
+    '''Test to successfully create a new organization'''
+
+    app.dependency_overrides[
+        user_service.get_current_user] = lambda: mock_get_current_user
 
     response = client.patch(
-        "/api/v1/comments/edit/comment123",
-        json={"content": "Updated content"},
-        headers={"Authorization": "Bearer fake_token"}
+        '/api/v1/comments/edit/comment_id',
+        headers={'Authorization': 'Bearer token'},
+        json={
+        }
     )
 
-    assert response.status_code == 401
-    assert response.json()["status_code"] == 401
+    assert response.status_code == 422
 
 
-def test_update_comment_not_found(mock_db, mock_auth, monkeypatch):
-    def mock_get_db():
-        """mock get db"""
-        return mock_db
-
-    def mock_update_comment(db, id, user, **kwargs):
-        return None
-
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.comment_service.update_comment",
-        mock_update_comment
-    )
+def test_update_comment_unauthorized(client, db_session_mock):
+    '''Test to successfully create a new organization'''
 
     response = client.patch(
-        "/api/v1/comments/edit/nonexistent",
-        json={"content": "Updated content"},
-        headers={"Authorization": "Bearer fake_token"}
-    )
-    print(response)
-    assert response.status_code == 401
-
-
-def test_update_comment_invalid_input(mock_db, mock_auth, monkeypatch):
-    def mock_get_db():
-        """mock get db"""
-        return mock_db
-
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-
-    response = client.patch(
-        "/api/v1/comments/edit/comment123",
-        json={},  # Missing required 'content' field
-        headers={"Authorization": "Bearer fake_token"}
-    )
-
-    assert response.status_code == 401
-
-
-def test_update_comment_unauthorized(monkeypatch):
-    def mock_get_current_user():
-        """mock get current user"""
-        raise HTTPException(
-            status_code=401, detail="Could not validate credentials")
-
-    monkeypatch.setattr(
-        "api.v1.routes.comments.user_service.get_current_user",
-        mock_get_current_user
-    )
-
-    response = client.patch(
-        "/api/v1/comments/edit/comment123",
-        json={"content": "Updated content"},
-        headers={"Authorization": "Bearer invalid_token"}
-    )
-
-    assert response.status_code == 401
-
-
-def test_update_comment_wrong_user(
-        mock_db,
-        mock_auth,
-        mock_comment,
-        monkeypatch):
-    def mock_get_db():
-        """mock get db"""
-        return mock_db
-
-    def mock_get_current_user():
-        """mock get current user"""
-        return User(id="wrong_user", username="wronguser")
-
-    def mock_update_comment(db, id, user, **kwargs):
-        """mock update comment"""
-        return None  # Simulating that the comment wasn't found for this user
-
-    monkeypatch.setattr("api.v1.routes.comments.get_db", mock_get_db)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.user_service.get_current_user",
-        mock_get_current_user)
-    monkeypatch.setattr(
-        "api.v1.routes.comments.comment_service.update_comment",
-        mock_update_comment)
-
-    response = client.patch(
-        "/api/v1/comments/edit/comment123",
-        json={"content": "Updated content"},
-        headers={"Authorization": "Bearer fake_token"}
+        '/api/v1/comments/edit/comment_id',
+        json={
+            "content": "updated content"
+        }
     )
 
     assert response.status_code == 401
