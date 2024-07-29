@@ -41,7 +41,9 @@ class CommentService(Service):
         db.refresh(new_comment)
         return new_comment
     
+    
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
+        '''Fetch all comments with option to search using query parameters'''
         '''Fetch all comments with option to search using query parameters'''
         query = db.query(Comment)
 
@@ -71,10 +73,12 @@ class CommentService(Service):
         db.refresh(comment)
         return comment
     
+    
     def delete(self, db: Session, id: str):
         '''Deletes a comment'''
         comment = self.fetch(id=id)
         db.delete(comment)
         db.commit()
+
 
 comment_service = CommentService()
