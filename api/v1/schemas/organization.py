@@ -6,8 +6,8 @@ class OrganizationBase(BaseModel):
 
     id: str
     created_at: datetime
+    updated_at: datetime
     company_name: str
-    description: str
     company_email: EmailStr
     industry: str
     organization_type: str
@@ -21,7 +21,6 @@ class CreateUpdateOrganization(BaseModel):
     '''Organization schema to create or update organization'''
 
     company_name: str
-    description: str
     company_email: EmailStr
     industry: str
     organization_type: str

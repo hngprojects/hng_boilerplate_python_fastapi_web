@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, Request, status
+from fastapi import Depends, APIRouter, status
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -13,7 +13,7 @@ from api.v1.services.organization import organization_service
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
 
-@organization.post('/', response_model=success_response, status_code=status.HTTP_201_CREATED)
+@organization.post('', response_model=success_response, status_code=status.HTTP_201_CREATED)
 async def create_organization(
     schema: CreateUpdateOrganization,
     db: Session= Depends(get_db), 

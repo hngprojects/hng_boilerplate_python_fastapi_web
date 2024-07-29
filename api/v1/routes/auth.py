@@ -20,7 +20,7 @@ from api.v1.services.user import user_service
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
   
-@auth.post("/register", status_code=status.HTTP_201_CREATED)
+@auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=success_response)
 def register(response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
 
@@ -67,7 +67,6 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
         message="User Created Successfully",
         data=user_created.to_dict(),
     )
-
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK)

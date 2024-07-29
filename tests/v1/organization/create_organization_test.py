@@ -71,7 +71,6 @@ def test_create_organization_success(client, db_session_mock):
             headers={'Authorization': 'Bearer token'},
             json={
                 "company_name": "Joboy dev",
-                "description": "test",
                 "company_email": "dev@gmail.com",
                 "industry": "Tech",
                 "organization_type": "Tech",
@@ -96,7 +95,11 @@ def test_create_organization_missing_field(client, db_session_mock):
         headers = {'Authorization': 'Bearer token'},
         json={
             'name': 'Test Organization',
-            'description': 'Test organization description',
+            "company_email": "dev@gmail.com",
+            "industry": "Tech",
+            "organization_type": "Tech",
+            "country": "Nigeria",
+            "state": "Lagos",
         }
     )
 
@@ -109,7 +112,6 @@ def test_create_organization_unauthorized(client, db_session_mock):
         '/api/v1/organizations',
         json={
             "company_name": "Joboy dev",
-            "description": "test",
             "company_email": "dev@gmail.com",
             "industry": "Tech",
             "organization_type": "Tech",

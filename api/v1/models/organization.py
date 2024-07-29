@@ -16,7 +16,6 @@ class Organization(BaseTableModel):
     __tablename__ = 'organizations'
 
     company_name = Column(String, nullable=False, unique=True)
-    description = Column(Text, nullable=True)
     company_email = Column(String, nullable=True, unique=True)
     industry = Column(String, nullable=True)
     organization_type = Column(String, nullable=True)
@@ -35,4 +34,4 @@ class Organization(BaseTableModel):
     products = relationship("Product", back_populates="organization", cascade="all, delete-orphan")
     
     def __str__(self):
-        return self.name
+        return self.company_name
