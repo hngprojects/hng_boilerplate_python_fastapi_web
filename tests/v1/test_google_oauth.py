@@ -95,7 +95,7 @@ def test_login_callback_oauth(client, mock_google_oauth2):
     print(response.headers, response.has_redirect_location)
     print(response.headers['location'])
     assert response.status_code == status.HTTP_302_FOUND
-    assert response.headers["location"] == "http://127.0.0.1:3000/dashboard/products"
+    assert response.headers["location"] == "http://127.0.0.1:3000/login-success/dashboard/products"
     assert response.cookies
 
 
