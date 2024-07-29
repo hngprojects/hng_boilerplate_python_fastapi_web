@@ -30,23 +30,19 @@ def mark_notification_as_read(
 
 
 @notification.get("/current-user")
-def get_me(
+def get_current_user_notifications(
     current_user: User = Depends(user_service.get_current_user),
     db: Session = Depends(get_db),
 ):
-    data = notification_service.get_me(current_user, db)
+    data = notification_service.get_current_user_notifications(current_user, db)
     return success_response(status_code=200, message="All notifications", data=data)
+
 
 @notification.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
     notification_id: str,
-    current_user = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db)
-    ):
+    current_user=Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
 
-    notification_service.delete(
-        notification_id,
-        user=current_user,
-        db=db
-        )
-
+    notification_service.delete(notification_id, user=current_user, db=db)
