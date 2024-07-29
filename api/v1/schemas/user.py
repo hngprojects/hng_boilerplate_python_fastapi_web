@@ -73,8 +73,3 @@ class ChangePwdRet(BaseModel):
     status_code: int
     message: str
 
-class UserResponse(BaseModel):
-    """Response schema for user"""
-    id : str
-    name : str
-    email : str
