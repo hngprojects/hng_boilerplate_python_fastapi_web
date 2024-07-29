@@ -9,4 +9,5 @@ class ActivityLogCreate(BaseModel):
 
 class ActivityLogResponse(BaseModel):
     action: str
+    user_id: str
     timestamp: datetime
