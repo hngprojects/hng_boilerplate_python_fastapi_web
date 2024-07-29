@@ -11,7 +11,6 @@ client = TestClient(app)
 data1 = {
     "first_name": "Marvelous",
     "last_name": "Uboh",
-    "username": "marveld0",
     "password": "Doyinsola174@$",
     "email": "utibesolomon12@gmail.com"
 }
@@ -19,7 +18,6 @@ data2 = {
 
     "first_name": "Marvelou",
     "last_name": "Ubh",
-    "username": "marveldoes",
     "password": "Doyinsola177@$",
     "email": "utibesolomon15@gmail.com"
 
@@ -28,7 +26,6 @@ data3 = {
 
     "first_name": "Marvelu",
     "last_name": "Ub",
-    "username": "marveldid",
     "password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
     

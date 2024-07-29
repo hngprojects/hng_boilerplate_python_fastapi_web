@@ -59,7 +59,6 @@ def create_mock_verify_link(mock_reset_service, user_email):
 def create_mock_user(mock_db_session, user_email):
     mock_user = User(
         id=1,
-        username="testuser",
         email=user_email,
         password="hashed_password",
         first_name='Test',
@@ -89,8 +88,8 @@ def test_reset_password_success(mock_db_session, mock_verify_reset_token, mock_g
     response = client.post(POST_PASSWORD_RESET_ENDPOINT, params={"token": token}, json=payload)
     print("JSON", response.json())
     print("JSON", response.url)
-    assert response.status_code == 201
-    assert response.json()['message'] == "password has been reset successfully"
+    assert response.status_code == 200
+    assert response.json()['message'] == "Password has been reset successfully"
     assert mock_db_session.commit.called
 
 

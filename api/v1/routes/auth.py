@@ -7,12 +7,11 @@ from api.v1.models import User
 from typing_extensions import Annotated
 from datetime import timedelta
 
-from api.v1.schemas.user import UserCreate
-from api.v1.schemas.token import TokenRequest, EmailRequest
+from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
+from api.v1.schemas.token import TokenRequest
 from typing import Annotated
 
 from api.v1.schemas.user import UserCreate
-from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -70,13 +69,13 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
-def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     '''Endpoint to log in a user'''
 
     # Authenticate the user
     user = user_service.authenticate_user(
         db=db,
-        username=login_request.username,
+        email=login_request.email,
         password=login_request.password
     )
 
@@ -90,6 +89,10 @@ def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = De
         data={
             'access_token': access_token,
             'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
         }
     )
 

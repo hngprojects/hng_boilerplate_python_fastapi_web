@@ -31,7 +31,6 @@ def create_mock_user(mock_user_service, mock_db_session):
     """Create a mock user in the mock database session."""
     mock_user = User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -43,11 +42,14 @@ def create_mock_user(mock_user_service, mock_db_session):
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
     return mock_user
+
+
 def create_mock_user_profile(mock_user_service, mock_db_session):
     '''Create a new user profile'''
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     mock_profile = Profile(
         id=str(uuid7()),
+        username="testuser",
         pronouns="he/him",
         job_title="developer",
         department="backend",
@@ -62,18 +64,22 @@ def create_mock_user_profile(mock_user_service, mock_db_session):
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_profile
     return mock_profile
+
+
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_errors(mock_user_service, mock_db_session):
     """Test for errors in profile creation"""
     create_mock_user(mock_user_service, mock_db_session)
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser",
+    login = client.post(LOGIN_ENDPOINT, json={
+        "email": "testuser@gmail.com",
         "password": "Testpassword@123"
     })
     response = login.json()
     assert response.get("status_code") == status.HTTP_200_OK
     access_token = response.get('data').get('access_token')
+
     missing_field = client.post(PROFILE_ENDPOINT, json={
+        "username": "testuser",
         "job_title": "developer",
         "department": "backend",
         "social": "facebook",
@@ -83,7 +89,9 @@ def test_errors(mock_user_service, mock_db_session):
         "recovery_email": "user@gmail.com"
     }, headers={'Authorization': f'Bearer {access_token}'})
     assert missing_field.status_code == 422
+
     unauthorized_error = client.post(PROFILE_ENDPOINT, json={
+        "username": "testuser",
         "pronouns": "male",
         "job_title": "developer",
         "department": "backend",
@@ -94,18 +102,21 @@ def test_errors(mock_user_service, mock_db_session):
         "recovery_email": "user@gmail.com"
     })
     assert unauthorized_error.status_code == 401
+
+
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_user_profile_exists(mock_user_service, mock_db_session):
     """Test for profile creation when profile already exists"""
     create_mock_user(mock_user_service, mock_db_session)
-    login = client.post(LOGIN_ENDPOINT, data={
-        "username": "testuser",
+    login = client.post(LOGIN_ENDPOINT, json={
+        "email": "testuser@gmail.com",
         "password": "Testpassword@123"
     })
     response = login.json()
     assert response.get("status_code") == status.HTTP_200_OK
     access_token = response.get('data').get('access_token')
     profile_exists = client.post(PROFILE_ENDPOINT, json={
+        "username": "testuser",
         "pronouns": "he/him",
         "job_title": "developer",
         "department": "backend",
