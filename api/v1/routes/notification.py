@@ -6,6 +6,7 @@ from typing import Annotated
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.notification import notification_service
+from api.v1.schemas.notification import NotificationRead
 
 notification = APIRouter(prefix="/notifications", tags=["Notifications"])
 
@@ -15,7 +16,7 @@ notification = APIRouter(prefix="/notifications", tags=["Notifications"])
     summary="Mark a notification as read",
     description="This endpoint marks a notification as `read`. User must be authenticated an must be the owner of a notification to mark it as `read`",
     status_code=status.HTTP_200_OK,
-    response_model=success_response
+    response_model=success_response,
 )
 def mark_notification_as_read(
     id: Annotated[str, Path()],
@@ -32,12 +33,24 @@ def mark_notification_as_read(
 @notification.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
     notification_id: str,
-    current_user = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db)
-    ):
+    current_user=Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
 
-    notification_service.delete(
-        notification_id,
-        user=current_user,
-        db=db
-        )
+    notification_service.delete(notification_id, user=current_user, db=db)
+
+
+@notification.get(
+    "/{notification_id}",
+    response_model=NotificationRead,
+    status_code=status.HTTP_200_OK,
+)
+def get_notification(
+    notification_id: str,
+    current_user=Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    notification = notification_service.fetch(
+        db=db, notification_id=notification_id, user_id=current_user.id
+    )
+    return notification

@@ -54,6 +54,15 @@ class NotificationService(Service):
         db.delete(notification)
         db.commit()
         db.refresh()
+        
+    
+    def fetch(self, db: Session, notification_id: str, user_id: str):
+        notification = db.query(Notification).filter(Notification.id == notification_id, Notification.user_id == user_id).first()
+
+        if not notification:
+            raise HTTPException(status_code=404, detail="Notification not found")
+
+        return notification
 
     def create(self):
         super().create()
