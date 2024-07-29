@@ -9,7 +9,7 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
 from api.v1.schemas.organization import OrganizationBase
-from api.v1.services.organization import get_organization
+from api.v1.services.organization import organization_service
 from api.v1.services.user import user_service, oauth2_scheme
 
 
@@ -42,9 +42,7 @@ async def create_organization(
 @organization.get('/{org_id}',response_model=OrganizationBase, status_code=status.HTTP_200_OK)
 def read_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = user_service.get_current_user(token, db)
-    organization = get_organization(db, org_id)
-    if organization is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
+    organization = organization_service.get_organization(db, org_id)
     return {
         "status": "success",
         "status_code": 200,
