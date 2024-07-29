@@ -37,7 +37,7 @@ pydantic==2.8.2
 pydantic-settings==2.3.4
 pydantic_core==2.20.1
 Pygments==2.18.0
-pyjwt>=2.4.0
+PyJWT==2.8.0
 PyMySQL==1.1.1
 pytest==8.2.2
 pytest-asyncio==0.23.8
