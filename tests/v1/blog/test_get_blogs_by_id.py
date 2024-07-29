@@ -51,30 +51,6 @@ def test_fetch_blog_by_id(client, db_session_mock):
 
     assert response.status_code == 200
 
-    # # Extract the JSON response data
-    # response_data = response.json()
-
-    # # expected_response = {
-    # #     "success": True,
-    # #     "status_code": 200,
-    # #     "message": "Blog post retrieved successfully",
-    # #     "data": {
-    # #         "id": id,
-    # #         "author_id": author_id,
-    # #         "title": "Test Title",
-    # #         "content": "Test Content",
-    # #         "image_url": "http://example.com/image.png",
-    # #         "tags": 'test,blog',
-    # #         "is_deleted": False,
-    # #         "excerpt": "Test Excerpt",
-    # #         "created_at": mock_blog["created_at"],
-    # #         "updated_at": mock_blog["updated_at"]
-    # #     }
-    # # }
-
-    # # # Adjust the expected response to match the actual response structure
-    # # assert response_data == expected_response
-
 
 def test_fetch_blog_by_id_not_found(client, db_session_mock):
     id = "afa7addb-98a3-4603-8d3f-f36a31bcd1bd"

@@ -1,8 +1,8 @@
-"""generated new migrations
+"""create tables
 
-Revision ID: 05faae41758c
+Revision ID: 87280d61ce24
 Revises: 
-Create Date: 2024-07-24 21:19:41.591722
+Create Date: 2024-07-29 10:13:14.413363
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '05faae41758c'
+revision: str = '87280d61ce24'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -43,21 +43,28 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_newsletters_id'), 'newsletters', ['id'], unique=False)
     op.create_table('organizations',
-    sa.Column('name', sa.String(length=50), nullable=False),
-    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('company_name', sa.String(), nullable=False),
+    sa.Column('company_email', sa.String(), nullable=True),
+    sa.Column('industry', sa.String(), nullable=True),
+    sa.Column('organization_type', sa.String(), nullable=True),
+    sa.Column('country', sa.String(), nullable=True),
+    sa.Column('state', sa.String(), nullable=True),
+    sa.Column('address', sa.String(), nullable=True),
+    sa.Column('lga', sa.String(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('company_email'),
+    sa.UniqueConstraint('company_name')
     )
     op.create_index(op.f('ix_organizations_id'), 'organizations', ['id'], unique=False)
     op.create_table('users',
-    sa.Column('username', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
-    sa.Column('is_active', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+    sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=True),
     sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_verified', sa.Boolean(), server_default=sa.text('false'), nullable=True),
@@ -65,8 +72,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email'),
-    sa.UniqueConstraint('username')
+    sa.UniqueConstraint('email')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('waitlist',
@@ -184,18 +190,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_oauth_id'), 'oauth', ['id'], unique=False)
-    op.create_table('org_roles',
-    sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('org_id', sa.String(), nullable=False),
-    sa.Column('is_admin', sa.Boolean(), nullable=True),
-    sa.Column('id', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['org_id'], ['organizations.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_org_roles_id'), 'org_roles', ['id'], unique=False)
     op.create_table('payments',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('amount', sa.Numeric(), nullable=False),
@@ -225,6 +219,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
     op.create_table('profiles',
     sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('username', sa.String(), nullable=True),
     sa.Column('pronouns', sa.String(), nullable=True),
     sa.Column('job_title', sa.String(), nullable=True),
     sa.Column('department', sa.String(), nullable=True),
@@ -278,6 +273,8 @@ def upgrade() -> None:
     op.create_table('user_organization',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('organization_id', sa.String(), nullable=False),
+    sa.Column('role', sa.Enum('admin', 'user', 'guest', 'owner', name='user_org_role'), nullable=False),
+    sa.Column('status', sa.Enum('member', 'suspended', 'left', name='user_org_status'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'organization_id')
@@ -318,11 +315,39 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comments_id'), 'comments', ['id'], unique=False)
+    op.create_table('comment_dislikes',
+    sa.Column('comment_id', sa.String(), nullable=False),
+    sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('ip_address', sa.String(), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['comment_id'], ['comments.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_comment_dislikes_id'), 'comment_dislikes', ['id'], unique=False)
+    op.create_table('comment_likes',
+    sa.Column('comment_id', sa.String(), nullable=False),
+    sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('ip_address', sa.String(), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['comment_id'], ['comments.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_comment_likes_id'), 'comment_likes', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_comment_likes_id'), table_name='comment_likes')
+    op.drop_table('comment_likes')
+    op.drop_index(op.f('ix_comment_dislikes_id'), table_name='comment_dislikes')
+    op.drop_table('comment_dislikes')
     op.drop_index(op.f('ix_comments_id'), table_name='comments')
     op.drop_table('comments')
     op.drop_index(op.f('ix_blog_likes_id'), table_name='blog_likes')
@@ -341,8 +366,6 @@ def downgrade() -> None:
     op.drop_table('products')
     op.drop_index(op.f('ix_payments_id'), table_name='payments')
     op.drop_table('payments')
-    op.drop_index(op.f('ix_org_roles_id'), table_name='org_roles')
-    op.drop_table('org_roles')
     op.drop_index(op.f('ix_oauth_id'), table_name='oauth')
     op.drop_table('oauth')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
