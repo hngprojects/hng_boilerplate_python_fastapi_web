@@ -3,6 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
+from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from typing_extensions import Annotated
 from datetime import timedelta
@@ -13,6 +14,8 @@ from typing import Annotated
 
 from api.v1.schemas.user import UserCreate
 from api.utils.email_service import send_mail
+from datetime import timedelta
+from api.v1.schemas.user import UserCreate, MagicLinkRequest
 from api.db.database import get_db
 from api.v1.services.user import user_service
 
@@ -60,12 +63,36 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
 def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
     """Endpoint for super admin creation"""
 
-    user_created = user_service.create_admin(db=db, schema=user)
-    return success_response(
+    user = user_service.create_admin(db=db, schema=user)
+
+    # Create access and refresh tokens
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
         status_code=201,
         message="User Created Successfully",
-        data=user_created.to_dict(),
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
     )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
@@ -211,4 +238,20 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
     return {"message": "Hello, admin!"}
 
+
+
+@auth.post("/request-magic-link", status_code=status.HTTP_200_OK)
+def request_magic_link(request: MagicLinkRequest, response: Response, db: Session = Depends(get_db)):
+    user = user_service.fetch_by_email(
+        db=db,
+        email=request.email
+    )
+    access_token = user_service.create_access_token(user_id=user.id)
+    send_magic_link(user.email, access_token)
+
+    response = success_response(
+        status_code=200,
+        message=f"Magic link sent to {user.email}"
+    )
+    return response
 

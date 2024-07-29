@@ -1,4 +1,6 @@
+import logging
 from typing import Any, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -60,6 +62,7 @@ class OrganizationService(Service):
         return organization
     
 
+
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
         try:
             stmt = select(user_organization_association.c.role).where(
@@ -101,6 +104,24 @@ class OrganizationService(Service):
         db.commit()
 
     
+    def check_user_role_in_org(self, db: Session, user: User, org: Organization, role: str):
+        '''Check user role in organization'''
+
+        if role not in ['user', 'guest', 'admin', 'owner']:
+            raise HTTPException(status_code=400, detail="Invalid role")
+
+        stmt = user_organization_association.select().where(
+            user_organization_association.c.user_id == user.id,
+            user_organization_association.c.organization_id == org.id,
+            user_organization_association.c.role == role
+        )
+
+        result = db.execute(stmt).fetchone()
+
+        if result is None:
+            raise HTTPException(status_code=403, detail=f"Permission denied as user is not of {role} role")
+
+    
     # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session, org_id: str, user_to_update_id: str):
     # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session):
     #     '''Updates a user role'''
@@ -132,6 +153,10 @@ class OrganizationService(Service):
 
         # Check if user is not in organization
         check_user_in_org(user, organization)
+        
+        # Check for user role permissions
+        self.check_user_role_in_org(db=db, user=user, org=organization, role='admin')\
+              or self.check_user_role_in_org(db=db, user=user, org=organization, role='owner')
 
         # Update user role
         stmt = user_organization_association.insert().values(
@@ -154,6 +179,10 @@ class OrganizationService(Service):
 
     #     # Check if user is not in organization
     #     check_user_in_org(user, organization)
+
+    #     # Check for user role permissions
+    #      self.check_user_role_in_org(db=db, user=user, org=organization, role='admin')\
+    #       or self.check_user_role_in_org(db=db, user=user, org=organization, role='owner')
 
     #     # Update user role
     #     stmt = user_organization_association.delete().where(

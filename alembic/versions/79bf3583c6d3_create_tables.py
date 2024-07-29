@@ -1,8 +1,8 @@
 """create tables
 
-Revision ID: 87280d61ce24
+Revision ID: 79bf3583c6d3
 Revises: 
-Create Date: 2024-07-29 10:13:14.413363
+Create Date: 2024-07-29 23:00:15.435313
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '87280d61ce24'
+revision: str = '79bf3583c6d3'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,15 +31,23 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_contact_us_id'), 'contact_us', ['id'], unique=False)
+    op.create_table('faqs',
+    sa.Column('question', sa.String(), nullable=True),
+    sa.Column('answer', sa.Text(), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_faqs_id'), 'faqs', ['id'], unique=False)
     op.create_table('newsletters',
-    sa.Column('email', sa.String(length=150), nullable=False),
-    sa.Column('title', sa.String(), nullable=True),
+    sa.Column('title', sa.String(length=100), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
     sa.Column('content', sa.Text(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_newsletters_id'), 'newsletters', ['id'], unique=False)
     op.create_table('organizations',
@@ -59,6 +67,15 @@ def upgrade() -> None:
     sa.UniqueConstraint('company_name')
     )
     op.create_index(op.f('ix_organizations_id'), 'organizations', ['id'], unique=False)
+    op.create_table('product_categories',
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name')
+    )
+    op.create_index(op.f('ix_product_categories_id'), 'product_categories', ['id'], unique=False)
     op.create_table('users',
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=True),
@@ -101,6 +118,8 @@ def upgrade() -> None:
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('price', sa.Numeric(), nullable=False),
     sa.Column('currency', sa.String(), nullable=False),
+    sa.Column('duration', sa.String(), nullable=False),
+    sa.Column('description', sa.String(), nullable=True),
     sa.Column('features', sa.ARRAY(sa.String()), nullable=False),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -164,6 +183,17 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_messages_id'), 'messages', ['id'], unique=False)
+    op.create_table('newsletter_subscribers',
+    sa.Column('email', sa.String(length=120), nullable=False),
+    sa.Column('newsletter_id', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['newsletter_id'], ['newsletters.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('email', 'newsletter_id', name='uq_subscriber_newsletter')
+    )
+    op.create_index(op.f('ix_newsletter_subscribers_id'), 'newsletter_subscribers', ['id'], unique=False)
     op.create_table('notifications',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
@@ -210,9 +240,15 @@ def upgrade() -> None:
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('price', sa.Numeric(), nullable=False),
     sa.Column('org_id', sa.String(), nullable=False),
+    sa.Column('category_id', sa.String(), nullable=False),
+    sa.Column('quantity', sa.Integer(), nullable=True),
+    sa.Column('image_url', sa.String(), nullable=False),
+    sa.Column('status', sa.Enum('in_stock', 'out_of_stock', 'low_on_stock', name='productstatusenum'), nullable=True),
+    sa.Column('archived', sa.Boolean(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['category_id'], ['product_categories.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['org_id'], ['organizations.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -262,14 +298,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_token_logins_id'), 'token_logins', ['id'], unique=False)
-    op.create_table('user_newsletter_association',
-    sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('newsletter_id', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['newsletter_id'], ['newsletters.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('user_id', 'newsletter_id')
-    )
     op.create_table('user_organization',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('organization_id', sa.String(), nullable=False),
@@ -315,6 +343,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_comments_id'), 'comments', ['id'], unique=False)
+    op.create_table('product_variants',
+    sa.Column('size', sa.String(), nullable=False),
+    sa.Column('stock', sa.Integer(), nullable=True),
+    sa.Column('price', sa.Numeric(), nullable=True),
+    sa.Column('product_id', sa.String(), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_product_variants_id'), 'product_variants', ['id'], unique=False)
     op.create_table('comment_dislikes',
     sa.Column('comment_id', sa.String(), nullable=False),
     sa.Column('user_id', sa.String(), nullable=False),
@@ -348,6 +388,8 @@ def downgrade() -> None:
     op.drop_table('comment_likes')
     op.drop_index(op.f('ix_comment_dislikes_id'), table_name='comment_dislikes')
     op.drop_table('comment_dislikes')
+    op.drop_index(op.f('ix_product_variants_id'), table_name='product_variants')
+    op.drop_table('product_variants')
     op.drop_index(op.f('ix_comments_id'), table_name='comments')
     op.drop_table('comments')
     op.drop_index(op.f('ix_blog_likes_id'), table_name='blog_likes')
@@ -355,7 +397,6 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_blog_dislikes_id'), table_name='blog_dislikes')
     op.drop_table('blog_dislikes')
     op.drop_table('user_organization')
-    op.drop_table('user_newsletter_association')
     op.drop_index(op.f('ix_token_logins_id'), table_name='token_logins')
     op.drop_table('token_logins')
     op.drop_index(op.f('ix_testimonials_id'), table_name='testimonials')
@@ -370,6 +411,8 @@ def downgrade() -> None:
     op.drop_table('oauth')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
+    op.drop_index(op.f('ix_newsletter_subscribers_id'), table_name='newsletter_subscribers')
+    op.drop_table('newsletter_subscribers')
     op.drop_index(op.f('ix_messages_id'), table_name='messages')
     op.drop_table('messages')
     op.drop_index(op.f('ix_jobs_id'), table_name='jobs')
@@ -386,10 +429,14 @@ def downgrade() -> None:
     op.drop_table('waitlist')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
+    op.drop_table('product_categories')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
     op.drop_table('organizations')
     op.drop_index(op.f('ix_newsletters_id'), table_name='newsletters')
     op.drop_table('newsletters')
+    op.drop_index(op.f('ix_faqs_id'), table_name='faqs')
+    op.drop_table('faqs')
     op.drop_index(op.f('ix_contact_us_id'), table_name='contact_us')
     op.drop_table('contact_us')
     # ### end Alembic commands ###

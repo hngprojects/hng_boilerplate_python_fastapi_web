@@ -35,7 +35,7 @@ class UserCreate(BaseModel):
     
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class EmailRequest(BaseModel):
@@ -70,4 +70,14 @@ class ChangePwdRet(BaseModel):
     """schema for returning change password response"""
 
     status_code: int
+    message: str
+
+class MagicLinkRequest(BaseModel):
+    '''Schema for magic link creation'''
+
+    email: EmailStr
+
+class MagicLinkResponse(BaseModel):
+    '''Schema for magic link respone'''
+
     message: str
