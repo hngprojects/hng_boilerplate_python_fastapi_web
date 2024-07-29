@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
+
 class UserData(BaseModel):
     """
     Schema Response representing the validated google login
@@ -20,7 +21,6 @@ class Tokens(BaseModel):
     """
     access_token: str
     refresh_token: str
-    token_type: str
 
 class StatusResponse(BaseModel):
     """
@@ -31,3 +31,6 @@ class StatusResponse(BaseModel):
     statusCode: int
     tokens: Tokens
     user: UserData
+
+class IdToken(BaseModel):
+    id_token: str
