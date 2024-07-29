@@ -24,12 +24,14 @@ class CommentSuccessResponse(BaseModel):
     data: CommentData
 
 class CommentDislike(BaseModel):
-    id: str
-    comment_id: str
-    user_id: str 
-    ip_address: str
-    created_at: datetime
-    updated_at: datetime
+    id: str = ''
+    comment_id: str = ''
+    user_id: str  = ''
+    ip_address: str = ''
+    created_at: datetime = ''
+    updated_at: datetime = ''
+    
+    model_config = ConfigDict(from_attributes=True)
 
 class DislikeSuccessResponse(BaseModel):
     status_code: int = 201
@@ -45,15 +47,7 @@ class LikeSchema(BaseModel):
     comment_id: str = ''
 
     model_config = ConfigDict(from_attributes=True)
-
-class DisLikeSchema(BaseModel):
-    """
-    Schema for likes
-    """
-    user_id: str = ''
-    comment_id: str = ''
-
-    model_config = ConfigDict(from_attributes=True)
+   
 
 class CommentsSchema(BaseModel):
     """
@@ -63,7 +57,7 @@ class CommentsSchema(BaseModel):
     blog_id: str = ''
     content: str = ''
     likes: List[LikeSchema] = []
-    dislikes: List[DisLikeSchema] = []
+    dislikes: List[CommentDislike] = []
     created_at: datetime = datetime.now()
 
     model_config = ConfigDict(from_attributes=True)
