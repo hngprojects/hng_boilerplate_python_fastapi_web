@@ -130,4 +130,4 @@ def test_wrong_auth_token(
     ### TEST ATTEMPT WITH INVALID AUTH... ###
     resp = make_request(test_blog.id, None)
     assert resp.status_code == 401
-    assert resp.json()['message'] == 'Could not validate crenentials'
+    assert resp.json()['message'] == 'Could not validate credentials'
