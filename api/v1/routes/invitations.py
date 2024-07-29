@@ -13,9 +13,9 @@ invites = APIRouter(prefix='/invite', tags=["Invitation Management"])
 # Add other necessary imports
 
 
-# Helper route for generating invitation link pending when the actual endpoint will be ready
+#generate invitation link to join organization
 @invites.post("/create", tags=["Invitation Management"])
-async def generate_invite_link(invite_schema: invitations.InvitationCreate, request: Request, session: Session = Depends(get_session)):
+async def generate_invite_link(invite_schema: invitations.InvitationCreate, request: Request, session: Session = Depends(get_session), current_user: User = Depends(user_service.get_current_user)):
     return invite.InviteService.create(invite_schema, request, session)
 
 
