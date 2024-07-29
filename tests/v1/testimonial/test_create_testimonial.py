@@ -58,7 +58,6 @@ def test_create_testimonial(client: client, session: session) -> pytest:
     assert res.status_code == status_code
     testimonial_id = res.json()["data"]["id"]
     testimonial = session.query(Testimonial).get(testimonial_id)
-    print(testimonial)
     assert testimonial.content == payload[0]["content"]
     assert testimonial.ratings == payload[0]["ratings"]
 

@@ -14,10 +14,10 @@ from api.v1.schemas.testimonial import CreateTestimonial
 from api.core.responses import SUCCESS
 from typing import Annotated
 
-testimonial = APIRouter(tags=['Testimonial'])
+testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
 
 
-@testimonial.get('/testimonials/{testimonial_id}', status_code=status.HTTP_200_OK)
+@testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
 def get_testimonial(
     testimonial_id: str,
     db: Session = Depends(get_db),
@@ -34,7 +34,7 @@ def get_testimonial(
     )
 
 
-@testimonial.delete("/testimonials/{testimonial_id}", status_code=status.HTTP_204_NO_CONTENT)
+@testimonial.delete("/{testimonial_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_testimonial(
     testimonial_id: str,
     current_user: User = Depends(user_service.get_current_super_admin),
@@ -47,7 +47,7 @@ def delete_testimonial(
     testimonial_service.delete(db, testimonial_id)
 
 
-@testimonial.delete("/testimonials", status_code=status.HTTP_204_NO_CONTENT)
+@testimonial.delete("/", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_all_testimonials(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
@@ -58,7 +58,7 @@ async def delete_all_testimonials(
 
     testimonial_service.delete_all(db)
 
-@testimonial.post('/testimonials', response_model=success_response)
+@testimonial.post('/', response_model=success_response)
 def create_testimonial(
     testimonial_data: CreateTestimonial,
     db: Annotated[Session, Depends(get_db)],
