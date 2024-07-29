@@ -1,6 +1,8 @@
 from pydantic import BaseModel
+from typing import List
 from typing import Optional
 from datetime import datetime
+
 
 class PaymentResponse(BaseModel):
     id: str
@@ -15,3 +17,26 @@ class PaymentResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+        
+class PaymentBase(BaseModel):
+    amount: float
+    currency: str
+    status: str
+    method: str
+    created_at: datetime
+
+      
+class PaymentsData(BaseModel):
+    current_page: int
+    total_pages: int
+    limit: int
+    total_items: int
+    Payments: List[PaymentBase]
+
+      
+class PaymentListResponse(BaseModel):
+    status_code: int = 200
+    success: bool
+    message: str
+    data: PaymentsData
