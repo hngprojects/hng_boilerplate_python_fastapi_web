@@ -33,5 +33,5 @@ def test_get_payment_not_found(mocker):
 
     response = client.get("/api/v1/payments/non_existent_id")
     assert response.status_code == 404
-    assert response.json() == {'message': 'Payment does not exist', 'status_code': 404, 'success': False}
+    assert response.json() == {'message': 'Payment does not exist', 'status_code': 404}
 

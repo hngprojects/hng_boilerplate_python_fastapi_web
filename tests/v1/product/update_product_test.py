@@ -109,10 +109,13 @@ def test_update_product_with_missing_fields(db_session_mock, mock_get_current_us
     
     print(f"Missing fields response: {response.json()}")  # Debugging output
     assert response.status_code == 422
-    
-    errors = response.json().get("errors", [])
-    assert isinstance(errors, list)
-    assert any("Field required" in error.get("msg", "") for error in errors)
+
+    # the new unified response for unprocessable entity doesn't include the field "errors" nor "msg"
+    # errors = response.json().get("errors", [])
+    # assert isinstance(errors, list)
+    # assert any("Field required" in error.get("msg", "") for error in errors)
+    assert 'data' not in response.json()
+    assert 'Invalid input' in response.json().get('message', '')
 
 
 def test_update_product_with_special_characters(db_session_mock, mock_get_current_user, mocker):
