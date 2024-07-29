@@ -38,7 +38,6 @@ def mock_blog_service():
 def test_user():
     return User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password="hashedpassword",
         first_name="test",
