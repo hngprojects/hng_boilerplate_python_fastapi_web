@@ -9,7 +9,7 @@ from api.v1.models.user import User
 from api.v1.models.organization import Organization
 from api.v1.services.user import user_service
 
-DATABASE_URL = "postgresql://username:password@localhost:5432/test"
+DATABASE_URL = "postgresql://avnadmin:AVNS_2PlhlTL4JnOZVHz3MS1@pg-32befd8f-habeebbabasulaiman-d281.d.aivencloud.com:18124/defaultdb"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

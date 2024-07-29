@@ -15,7 +15,7 @@ from api.v1.services.google_oauth import GoogleOauthServices
 google_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 FRONTEND_URL = config('FRONTEND_URL')
 
-@google_auth.get("/google-login")
+@google_auth.get("/google")
 async def google_oauth2(request: Request) -> RedirectResponse:
     """
     Allows users to login using their google accounts.
@@ -92,7 +92,7 @@ async def google_oauth2_callback(request: Request,
             RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
                                     status_code=status.HTTP_302_FOUND)
 
-        response = RedirectResponse(url=f"{FRONTEND_URL}?success=true",
+        response = RedirectResponse(url=f"{FRONTEND_URL}/dashboard/products",
                                     status_code=status.HTTP_302_FOUND)
 
         access_token = tokens.access_token
