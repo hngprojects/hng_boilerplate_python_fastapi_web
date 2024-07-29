@@ -23,8 +23,7 @@ class ProfileBase(BaseModel):
     avatar_url: str
     recovery_email: Optional[EmailStr]
     user: UserBase
-    created_at: datetime
-    updated_at: datetime
+    
 
 
 class ProfileCreateUpdate(BaseModel):
