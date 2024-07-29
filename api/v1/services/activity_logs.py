@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from api.v1.models.activity_logs import ActivityLog
+from typing import Optional, List
 
 
 class ActivityLogService:
