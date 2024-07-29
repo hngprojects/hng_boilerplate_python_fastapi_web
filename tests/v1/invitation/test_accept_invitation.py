@@ -43,7 +43,6 @@ def mock_invite_service():
 def create_mock_user(mock_db_session, user_id):
     mock_user = User(
         id=user_id,
-        username="testuser",
         email="testuser@gmail.com",
         password="hashed_password",
         first_name='Test',
@@ -211,3 +210,4 @@ def test_load_testing(mock_db_session, mock_invite_service):
     success_count = sum(1 for r in responses if r.status_code == 200)
 
     assert success_count == 100
+    
