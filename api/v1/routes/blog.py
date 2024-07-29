@@ -1,26 +1,45 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import JSONResponse
+from typing import List, Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Response
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from typing import List
 
-from api.v1.models.blog import Blog
-from api.v1.schemas.blog import BlogUpdateResponseModel, BlogRequest, BlogResponse, BlogPostResponse
-from api.v1.services.blog import BlogService
-from api.utils.dependencies import get_current_user
 from api.db.database import get_db
+from api.utils.success_response import success_response
 from api.v1.models.user import User
+from api.v1.schemas.blog import (BlogCreate, BlogPostResponse, BlogRequest,
+                                BlogUpdateResponseModel)
+from api.v1.services.blog import BlogService
+from api.v1.services.user import user_service
+from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
+from api.v1.services.comment import comment_service 
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
+@blog.post("/", response_model=success_response)
+def create_blog(blog: BlogCreate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="You are not Authorized")
+    blog_service = BlogService(db)
+    new_blogpost = blog_service.create(db=db, schema=blog, author_id=current_user.id)
 
-@blog.get("/", response_model=List[BlogResponse])
+    return success_response(
+        message = "Blog created successfully!",
+        status_code = 200,
+        data = jsonable_encoder(new_blogpost)
+    )
+
+@blog.get("/", response_model=success_response)
 def get_all_blogs(db: Session = Depends(get_db)):
 
-    blogs = db.query(Blog).filter(Blog.is_deleted == False).all()
-    if not blogs:
-        return []
-    return blogs
+    blog_service = BlogService(db)
+    blogs = blog_service.fetch_all()
+
+    return success_response(
+        message = "Blogs fetched successfully!",
+        status_code = 200,
+        data = [blog.to_dict() for blog in blogs]
+    )
 
 
 @blog.get("/{id}", response_model=BlogPostResponse)
@@ -41,46 +60,65 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     blog_service = BlogService(db)
 
     blog_post = blog_service.fetch(id)
-    if not blog_post:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={
-                "success": False,
-                "status_code": status.HTTP_404_NOT_FOUND,
-                "message": "Post not Found"
-            }
-        )
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={
-            "success": True,
-            "status_code": status.HTTP_200_OK,
-            "message": "Blog post retrieved successfully",
-            "data": jsonable_encoder(blog_post)
-        }
+    return success_response(
+        message = "Blog post retrieved successfully!",
+        status_code = 200,
+        data = jsonable_encoder(blog_post)
     )
 
 
 @blog.put("/{id}", response_model=BlogUpdateResponseModel)
-async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    blog_service = BlogService(db)
-    try:
-        updated_blog_post = blog_service.update(
-            blog_id=id,
-            title=blogPost.title,
-            content=blogPost.content,
-            current_user=current_user
-        )
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        # Catch any other exceptions and raise an HTTP 500 error
-        raise HTTPException(
-            status_code=500, detail="An unexpected error occurred")
+async def update_blog(id: str, blogPost: BlogRequest, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
+    '''Endpoint to update a blog post'''
 
-    return {
-        "status": "200",
-        "message": "Blog post updated successfully",
-        "data": {"post": jsonable_encoder(updated_blog_post)}
-    }
+    blog_service = BlogService(db)
+    updated_blog_post = blog_service.update(
+        blog_id=id,
+        title=blogPost.title,
+        content=blogPost.content,
+        current_user=current_user
+    )
+    
+    return success_response(
+        message = "Blog post updated successfully",
+        status_code = 200,
+        data = jsonable_encoder(updated_blog_post)
+    )
+    
+    
+@blog.delete("/{id}", status_code=204)
+async def delete_blog_post(id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
+    '''Endpoint to delete a blog post'''
+
+    blog_service = BlogService(db=db)
+    blog_service.delete(blog_id=id)
+
+# Post a comment to a blog
+@blog.post("/{blog_id}/comments", response_model=CommentSuccessResponse)
+async def add_comment_to_blog(
+    blog_id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    comment: CommentCreate, 
+    db: Annotated[Session, Depends(get_db)]
+    ) -> Response:
+    """Post endpoint for authenticated users to add comments to a blog. 
+
+    Args:
+        blog_id (str): the id of the blog to be commented on
+        current_user: the current authenticated user 
+        comment (CommentCreate): the body of the request
+        db: the database session object
+
+    Returns:
+        Response: a response object containing the comment details if successful or appropriate errors if not
+    """
+
+    user_id = current_user.id
+    new_comment = comment_service.create(db=db, schema=comment, user_id=user_id, blog_id=blog_id)
+
+    return success_response(
+        message = "Comment added successfully!",
+        status_code = 201,
+        data = jsonable_encoder(new_comment)
+    )

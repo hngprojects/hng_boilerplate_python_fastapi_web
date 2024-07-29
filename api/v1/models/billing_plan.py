@@ -1,5 +1,5 @@
 # app/models/billing_plan.py
-from sqlalchemy import Column, String, ARRAY, ForeignKey, Numeric, DateTime, JSON
+from sqlalchemy import Column, String, ARRAY, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
 
@@ -10,6 +10,8 @@ class BillingPlan(BaseTableModel):
     name = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
     currency = Column(String, nullable=False)
-    # features = Column(ARRAY(String), nullable=False)
+    duration = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    features = Column(ARRAY(String), nullable=False)
 
     organization = relationship("Organization", back_populates="billing_plans")
