@@ -41,7 +41,6 @@ class UserService(Service):
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
 
-
         user = check_model_existence(db, User, id)
 
         # return user if user is not deleted
