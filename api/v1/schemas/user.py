@@ -73,3 +73,13 @@ class ChangePwdRet(BaseModel):
 
     status_code: int
     message: str
+
+class MagicLinkRequest(BaseModel):
+    '''Schema for magic link creation'''
+
+    email: EmailStr
+
+class MagicLinkResponse(BaseModel):
+    '''Schema for magic link respone'''
+
+    message: str
