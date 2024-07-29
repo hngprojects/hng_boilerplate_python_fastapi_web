@@ -13,7 +13,6 @@ from api.core.base.services import Service
 from sqlalchemy.orm import Session
 from typing import Annotated, Union
 from api.v1.services.user import user_service
-from api.v1.schemas.google_oauth import Tokens
 
 
 CLIENT_ID = config('GOOGLE_CLIENT_ID')
@@ -22,7 +21,8 @@ class GoogleOauthServices(Service):
     """
     Handles database operations for google oauth
     """
-    async def verify_google_token(self, token: str):
+    def verify_google_token(self, token: str,
+                                  db: Annotated[Session, Depends(get_db)]):
         """
         Verifies id_token
         Args:
@@ -32,26 +32,22 @@ class GoogleOauthServices(Service):
             Tokens: if authenticated
         """
         try:
-            print('id_token: ', token)
             # Verify the token
             id_info = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
-            print('after id_info verification: ', id_info)
             
-            user = self.create(id_info)
-            print('user: ', user)
+            user = self.create(id_info, db)
             
             if not user:
-                return False
-            tokens = await self.generate_tokens(user)
-            print('tokens: ', tokens)
+                return False, False
+            access, refresh = self.generate_tokens(user)
             
-            return token
+            return access, refresh
         except (GoogleAuthError, ValueError):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-    async def create(self, info: dict,
+    def create(self, info: dict,
                db: Annotated[Session, Depends(get_db)]) -> object:
         """
         Creates a user using information from google.
@@ -65,15 +61,21 @@ class GoogleOauthServices(Service):
             False: for when Authentication fails
         """
         try:
-            user = User(email=info['email'], first_name=info['name'])
+            user_exists = db.query(User).filter_by(email=info['email']).one_or_none()
+            if user_exists:
+                return user_exists
+            user = User(email=info['email'], first_name=info['given_name'],
+                        last_name=info['family_name'])
             
             db.add(user)
             db.commit()
-            oauth = OAuth(sub=info['sub'], access_token='None', refresh_token='None')
-            profile = Profile(user_id=user.id)
+            oauth = OAuth(user_id=user.id, provider='google',
+                          sub=info['sub'], access_token='None', refresh_token='None')
+            profile = Profile(user_id=user.id, avatar_url=info['picture'])
             
             db.add_all([oauth, profile])
             db.commit()
+            db.refresh(user)
             return user
         except Exception:
             db.rollback()
@@ -93,12 +95,10 @@ class GoogleOauthServices(Service):
             access_token = user_service.create_access_token(user.id)
             # create refresh token
             refresh_token = user_service.create_access_token(user.id)
-            # create a token data for response
-            tokens = Tokens(access_token=access_token,
-                            refresh_token=refresh_token)
-            return tokens
+            
+            return access_token, refresh_token
         except Exception:
-            return False
+            return False, False
 
     def fetch(self):
         """
