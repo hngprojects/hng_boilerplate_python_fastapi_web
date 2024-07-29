@@ -1,8 +1,8 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from api.v1.schemas.newsletter import EmailSchema
 from api.core.base.services import Service
 from api.v1.models.newsletter import Newsletter
+from api.v1.schemas.newsletter import EmailSchema
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
 
 class NewsletterService(Service):
@@ -33,3 +33,12 @@ class NewsletterService(Service):
             raise HTTPException(status_code=400, detail='User already subscribed to newsletter')
 
         return newsletter
+    
+    @staticmethod
+    def delete(db: Session, newsletter: Newsletter) -> None:
+        """
+        Unsubsribes a user for newsletter
+        """
+        db.delete(newsletter)
+        db.commit
+        return None
