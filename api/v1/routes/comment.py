@@ -55,6 +55,7 @@ async def update_comment(comment_id: str, request: UpdateCommentRequest, db: Ses
     return await CommentService.update_comment(db, comment_id, request, current_user.id)
 
 
+
 # Endpoint to dislike a comment
 @comment.post("/{comment_id}/dislike", response_model=DislikeSuccessResponse)
 async def dislike_comment(
