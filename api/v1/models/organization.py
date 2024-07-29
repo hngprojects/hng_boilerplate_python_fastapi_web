@@ -15,9 +15,9 @@ from api.v1.models.base_model import BaseTableModel
 class Organization(BaseTableModel):
     __tablename__ = 'organizations'
 
-    company_name = Column(String, nullable=False)
+    company_name = Column(String, nullable=False, unique=True)
     description = Column(Text, nullable=True)
-    company_email = Column(String, nullable=True)
+    company_email = Column(String, nullable=True, unique=True)
     industry = Column(String, nullable=True)
     organization_type = Column(String, nullable=True)
     country = Column(String, nullable=True)

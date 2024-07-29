@@ -43,9 +43,9 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_newsletters_id'), 'newsletters', ['id'], unique=False)
     op.create_table('organizations',
-    sa.Column('company_name', sa.String(), nullable=False),
+    sa.Column('company_name', sa.String(), nullable=False, unique=True),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('company_email', sa.String(), nullable=True),
+    sa.Column('company_email', sa.String(), nullable=True, unique=True),
     sa.Column('industry', sa.String(), nullable=True),
     sa.Column('organization_type', sa.String(), nullable=True),
     sa.Column('country', sa.String(), nullable=True),
