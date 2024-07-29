@@ -1,36 +1,43 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Response
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from api.v1.models import Job
-from ..schemas.job_update import JobUpdateSchema
-from api.db.database import get_db 
-from api.utils.dependencies import get_current_user
+from api.v1.models.job import Job
+from api.v1.models.user import User
+from api.v1.services.job import job_service
+from api.db.database import get_db
+from api.v1.services.user import user_service
+from api.utils.success_response import success_response
+from typing import Optional
 
-app = FastAPI()
+router = APIRouter()
 
-@app.put("/jobs/{job_id}", response_model=Job)
-async def update_job(
+@router.put("/jobs/{job_id}", response_model=Job)
+def update_job(
     job_id: str,
-    job_update: JobUpdateSchema,
+    title: Optional[str] = None,
+    description: Optional[str] = None,
+    department: Optional[str] = None,
+    location: Optional[str] = None,
+    salary: Optional[str] = None,
+    job_type: Optional[str] = None,
+    company_name: Optional[str] = None,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: User = Depends(user_service.get_current_super_admin),
 ):
-    job = db.query(Job).filter(Job.id == job_id).first()
+    job_service.db = db
+    updated_job = job_service.update_job(
+        job_id=job_id,
+        user=current_user,
+        title=title,
+        description=description,
+        department=department,
+        location=location,
+        salary=salary,
+        job_type=job_type,
+        company_name=company_name,
+    )
 
-    if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
-
-    if job.author_id != current_user['id']:
-        raise HTTPException(status_code=403, detail="Not authorized to update this job")
-
-    for key, value in job_update.dict(exclude_unset=True).items():
-        setattr(job, key, value)
-
-    db.commit()
-    db.refresh(job)
-    
-    return {
-        "success": True,
-        "status_code": 200,
-        "message": "Job updated successfully",
-        "data": job
-    }
+    return success_response(
+        status_code = 200,
+        message = "Updated Successfully",
+        data = updated_job
+    )
