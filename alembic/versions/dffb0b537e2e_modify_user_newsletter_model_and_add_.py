@@ -1,7 +1,7 @@
 """Modify User, Newsletter model and Add NewsletterSubscriber models
 
 Revision ID: dffb0b537e2e
-Revises: 0e76b801cf53
+# Revises: b251dcbfd254
 Create Date: 2024-07-28 20:30:18.369953
 
 """
@@ -14,7 +14,7 @@ from sqlalchemy import inspect
 
 # revision identifiers, used by Alembic.
 revision: str = 'dffb0b537e2e'
-down_revision: Union[str, None] = '0e76b801cf53'
+down_revision: Union[str, None] = 'b251dcbfd254'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
