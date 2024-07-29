@@ -7,7 +7,6 @@ def success_response(status_code: int, message: str, data: Optional[dict] = None
 
     response_data = {
         "status_code": status_code,
-        "success": True,
         "message": message
     }
 
