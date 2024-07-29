@@ -57,7 +57,6 @@ def override_get_current_super_admin():
 
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: User(
         id=str(uuid7()),
-        username="admintestuser",
         email="admintestuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name="AdminTest",
@@ -81,7 +80,6 @@ def create_dummy_mock_user(mock_user_service: UserService, mock_db_session: Sess
     """
     dummy_mock_user = User(
         id=mock_id,
-        username="dummyuser",
         email="dummyuser1@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name="Mr",
@@ -114,7 +112,6 @@ def test_non_admin_access(
 
     mock_get_current_user.return_value = User(
         id=str(uuid7()),
-        username="admintestuser",
         email="admintestuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name="AdminTest",

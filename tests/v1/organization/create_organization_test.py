@@ -17,7 +17,6 @@ from main import app
 def mock_get_current_user():
     return User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
