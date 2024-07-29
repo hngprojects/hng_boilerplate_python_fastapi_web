@@ -25,17 +25,17 @@ jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
 async def add_jobs(
     job: PostJobSchema,
     db: Session = Depends(get_db),
-    user: User = Depends(user_service.get_current_user)
+    admin: User = Depends(user_service.get_current_super_admin)
 ):
     """
     Add a job listing to the database.
-    This endpoint allows a user to post a job listing to the database.
+    This endpoint allows an admin to post a job listing to the database.
 
     Parameters:
     - job: PostJobSchema
         The details of the job listing.
-    - user: User (Depends on get_current_user)
-        The current user posting the job request. This is a dependency that provides the user context.
+    - admin: User (Depends on get_current_super_admin)
+        The current admin posting the job request. This is a dependency that provides the admin context.
     - db: The database session
     """
     if job.title.strip() == '' or job.description.strip() == '':
@@ -43,7 +43,7 @@ async def add_jobs(
                             detail="Invalid request data"
                             )
     
-    job_full = AddJobSchema(author_id=user.id, **job.model_dump())
+    job_full = AddJobSchema(author_id=admin.id, **job.model_dump())
     new_job = job_service.create(db, job_full)
     logger.info(f"Job Listing created successfully {new_job.id}")
 

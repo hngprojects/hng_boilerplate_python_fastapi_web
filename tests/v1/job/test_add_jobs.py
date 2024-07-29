@@ -2,9 +2,6 @@
 # pip install pytest-mock
 import pytest
 from unittest.mock import patch, MagicMock
-from sqlalchemy.exc import IntegrityError
-
-
 from fastapi.testclient import TestClient
 from main import app
 from api.v1.services.user import user_service
@@ -12,7 +9,7 @@ from api.db.database import get_db
 from sqlalchemy.orm import Session
 from datetime import datetime
 from api.v1.schemas.jobs import JobCreateResponseSchema
-from fastapi.encoders import jsonable_encoder
+from api.v1.services.user import oauth2_scheme
 
 
 def mock_deps():
@@ -20,6 +17,9 @@ def mock_deps():
 
 def mock_db():
     return MagicMock(spec=Session)
+
+def mock_oauth():
+    return 'access_token'
 
 @pytest.fixture
 def client():
@@ -29,7 +29,7 @@ def client():
 class TestCodeUnderTest:
     @classmethod 
     def setup_class(cls):
-        app.dependency_overrides[user_service.get_current_user] = mock_deps
+        app.dependency_overrides[user_service.get_current_super_admin] = mock_deps
         app.dependency_overrides[get_db] = mock_db
 
         
@@ -92,3 +92,22 @@ class TestCodeUnderTest:
         assert response.status_code == 401
         assert response.json()['message'] == 'Not authenticated'
         assert response.json()['success'] == False
+        
+  # Handling forbidden request
+    def test_add_jobs_forbidden(self, client):
+        test_job = {"title": "Hala",
+                    "description": 'Work',
+                    "company_name": "HNG"}
+        
+        app.dependency_overrides = {}
+        app.dependency_overrides[get_db] = mock_db
+        app.dependency_overrides[oauth2_scheme] = mock_oauth
+
+
+        # from api.v1.services.user import user_service
+        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
+            response = client.post("/api/v1/jobs", json=test_job)
+        assert response.status_code == 403
+        assert response.json()['message'] == 'You do not have permission to access this resource'
+        assert response.json()['success'] == False
+        
