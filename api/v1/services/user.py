@@ -57,24 +57,12 @@ class UserService(Service):
             raise HTTPException(status_code=404, detail="User not found")
 
         return user
-
-    def fetch_by_username(self, db: Session, username):
-        """Fetches a user by their username"""
-
-        user = db.query(User).filter(User.username == username).first()
-
-        if not user:
-            raise HTTPException(status_code=404, detail="User not found")
-
-        return user
+    
 
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
 
-        if (
-            db.query(User).filter(User.email == schema.email).first()
-            or db.query(User).filter(User.username == schema.username).first()
-        ):
+        if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
                 detail="User with this email or username already exists",
@@ -92,13 +80,10 @@ class UserService(Service):
         return user
 
     def create_admin(self, db: Session, schema: user.UserCreate):
-        if (
-            db.query(User).filter(User.email == schema.email).first()
-            or db.query(User).filter(User.username == schema.username).first()
-        ):
+        if db.query(User).filter(User.email == schema.email).first():
             user = (
                 db.query(User)
-                .filter(User.email == schema.email or User.username == schema.username)
+                .filter(User.email == schema.email)
                 .first()
             )
             if not user.is_super_admin:
@@ -134,10 +119,10 @@ class UserService(Service):
 
         return super().delete()
 
-    def authenticate_user(self, db: Session, username: str, password: str):
+    def authenticate_user(self, db: Session, email: str, password: str):
         """Function to authenticate a user"""
 
-        user = db.query(User).filter(User.username == username).first()
+        user = db.query(User).filter(User.email == email).first()
 
         if not user:
             raise HTTPException(status_code=400, detail="Invalid user credentials")
@@ -146,6 +131,7 @@ class UserService(Service):
             raise HTTPException(status_code=400, detail="Invalid user credentials")
 
         return user
+    
 
     def perform_user_check(self, user: User):
         """This checks if a user is active and verified and not a deleted user"""

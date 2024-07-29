@@ -72,10 +72,11 @@ class GoogleOauthServices(Service):
                     # if the user is not found in the database, add the user oauth2_data
                     # add the user to the database, and link the user to the associated
                     # oauth_data
-                    new_user = User(username=user_info.get("email"),
-                                    first_name=user_info.get("given_name"),
-                                    last_name=user_info.get("family_name"),
-                                    email=user_info.get("email"))
+                    new_user = User(
+                        email=user_info.get("email"),
+                        first_name=user_info.get("given_name"),
+                        last_name=user_info.get("family_name"),
+                    )
                     # commit to get the user_id
                     db.add(new_user)
                     db.commit()
@@ -177,14 +178,18 @@ class GoogleOauthServices(Service):
             # create refresh token
             refresh_token = user_service.create_access_token(user.id)
             # create a token data for response
-            tokens = Tokens(access_token=access_token,
-                            refresh_token=refresh_token,
-                            token_type="bearer")
+            tokens = Tokens(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer"
+            )
 
-            return StatusResponse(message="Authentication was successful",
-                                              status="successful",
-                                              statusCode=200,
-                                              tokens=tokens,
-                                              user=user_response)
+            return StatusResponse(
+                message="Authentication was successful",
+                status="successful",
+                statusCode=200,
+                tokens=tokens,
+                user=user_response
+            )
         except Exception as exc:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
