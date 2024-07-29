@@ -9,7 +9,7 @@ from api.v1.models.user import User
 from api.v1.models.organization import Organization
 from api.v1.services.user import user_service
 
-DATABASE_URL = "postgresql://freeman:2234@localhost:5432/hng_fast_api"
+DATABASE_URL = "postgresql://username:password@localhost:5432/test"
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
