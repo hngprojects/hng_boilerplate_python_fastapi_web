@@ -1,3 +1,5 @@
+#api/v1/routes/comment.py
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
