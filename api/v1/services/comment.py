@@ -23,7 +23,7 @@ class CommentService(Service):
         db.commit()
         db.refresh(new_comment)
         return new_comment
-    
+
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         '''Fetch all comments with option tto search using query parameters'''
@@ -38,7 +38,7 @@ class CommentService(Service):
 
         return query.all()
 
-    
+
     def fetch(self, db: Session, id: str):
         '''Fetches a comment by id'''
 
@@ -49,22 +49,22 @@ class CommentService(Service):
         '''Updates a comment'''
 
         comment = self.fetch(db=db, id=id)
-        
+
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(comment, key, value)
-        
+
         db.commit()
         db.refresh(comment)
         return comment
-    
+
 
     def delete(self, db: Session, id: str):
         '''Deletes a comment'''
-        
+
         comment = self.fetch(id=id)
         db.delete(comment)
         db.commit()
-    
+
 comment_service = CommentService()
