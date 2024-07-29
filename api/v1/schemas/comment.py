@@ -22,3 +22,17 @@ class CommentSuccessResponse(BaseModel):
     message: str 
     success: bool = True
     data: CommentData
+
+class CommentDislike(BaseModel):
+    id: str
+    comment_id: str
+    user_id: str 
+    ip_address: str
+    created_at: datetime
+    updated_at: datetime
+
+class DislikeSuccessResponse(BaseModel):
+    status_code: int = 201
+    message: str 
+    success: bool = True
+    data: CommentDislike
