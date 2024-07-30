@@ -15,14 +15,14 @@ import jwt
 client = TestClient(app)
 
 
-# Mock the database dependency
+
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock()
     yield db_session
 
 
-# Override the dependency with the mock
+
 @pytest.fixture(autouse=True)
 def override_get_db(db_session_mock):
     def get_db_override():
@@ -145,8 +145,6 @@ def test_success_profile_update(
         headers={"Authorization": f"Bearer {token}"},
     )
 
-    print("Update response:", response.json())  # Debugging output
-
     assert response.status_code == 200
     assert response.json()["data"]["bio"] == "Updated bio"
     assert response.json()["data"]["updated_at"] is not None
@@ -157,7 +155,6 @@ def test_profile_update_not_found(
 ):
     mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
 
-    # Ensure the profile query returns None
     db_session_mock.query().filter().first.return_value = None
 
     profile_update = ProfileCreateUpdate(
@@ -178,8 +175,6 @@ def test_profile_update_not_found(
         json=jsonable_encoder(profile_update),
         headers={"Authorization": f"Bearer {token}"},
     )
-
-    print("Update response:", response.json())  # Debugging output
 
     assert response.status_code == 401
     assert response.json()["message"] == "User not authenticated"
