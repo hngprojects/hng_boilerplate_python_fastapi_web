@@ -59,5 +59,14 @@ async def get_organization_users(
         success=True,
         status_code=status.HTTP_200_OK,
         message='Organization users fetched successfully',
-        data=jsonable_encoder(org_users)
+        data=jsonable_encoder(
+            org_users,
+            exclude={
+                'password',
+                'is_super_admin',
+                'is_deleted',
+                'is_verified',
+                'updated_at'
+            }
+        )
     )
