@@ -1,5 +1,4 @@
-
-from fastapi import (Depends, APIRouter, Response, Request, status)
+from fastapi import Depends, APIRouter, status, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from typing import Annotated
 from starlette.responses import RedirectResponse
@@ -11,28 +10,58 @@ from decouple import config
 from api.db.database import get_db
 from api.core.dependencies.google_oauth_config import google_oauth
 from api.v1.services.google_oauth import GoogleOauthServices
+from api.utils.success_response import success_response
+from api.v1.schemas.user import UserCreate
+from api.v1.models.user import User
+from api.v1.schemas.google_oauth import OAuthToken
+from api.v1.services.user import user_service
+from fastapi.encoders import jsonable_encoder
+import requests
+from datetime import timedelta
 
 google_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 FRONTEND_URL = config('FRONTEND_URL')
 
-@google_auth.get("/google")
-async def google_oauth2(request: Request) -> RedirectResponse:
-    """
-    Allows users to login using their google accounts.
+@google_auth.post("/google")
+async def google_login(token_request: OAuthToken, db: Session = Depends(get_db)):
+    access_token = token_request.id_token
+    profile_endpoint = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
+    profile_response = requests.get(profile_endpoint, headers=headers)
+    
+    if profile_response.status_code != 200:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
 
-    Args:
-        request: request object
 
-    Returns:
-        RedirectResponse: A redirect to google authorization server for authorization
-    """
-    redirect_uri = request.url_for('google_oauth2_callback')
-    # generate a state value and stre it in the session
-    state = secrets.token_urlsafe(16)
-    request.session['state'] = state
-    response =  await google_oauth.google.authorize_redirect(request,
-                                                             redirect_uri,
-                                                             state=state)
+    profile_data = profile_response.json()
+    user = GoogleOauthServices.create_oauth_user(db=db, google_response=profile_data)
+
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message='success',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user,
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
     return response
 
 
