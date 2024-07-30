@@ -109,7 +109,6 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
 
-
 @user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
 async def get_users(current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
                     db: Annotated[Session, Depends(get_db)],
@@ -139,3 +138,4 @@ async def get_users(current_user: Annotated[User, Depends(user_service.get_curre
         'is_super_admin': is_super_admin,
     }
     return user_service.fetch_all(db, page, per_page, **query_params)
+
