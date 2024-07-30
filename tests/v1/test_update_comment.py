@@ -1,13 +1,12 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from main import app
 from api.db.database import get_db
 from api.v1.models.comment import Comment
-from api.v1.schemas.comment import UpdateCommentRequest
 from api.v1.models.user import User
 from api.v1.models.blog import Blog
+from api.v1.schemas.comment import UpdateCommentRequest
 
 client = TestClient(app)
 
@@ -33,21 +32,37 @@ def db_session():
 
 @pytest.fixture
 def create_test_user(db_session):
-    user = User(id="test_user_id", username="testuser", email="testuser@example.com", hashed_password="fakehashedpassword")
+    user = User(
+        id="test_user_id",
+        email="testuser@example.com",
+        password="fakehashedpassword",
+        first_name="Test",
+        last_name="User"
+    )
     db_session.add(user)
     db_session.commit()
     return user
 
 @pytest.fixture
 def create_test_blog(db_session, create_test_user):
-    blog = Blog(id="test_blog_id", title="Test Blog", content="This is a test blog.", user_id=create_test_user.id)
+    blog = Blog(
+        id="test_blog_id",
+        title="Test Blog",
+        content="This is a test blog.",
+        user_id=create_test_user.id
+    )
     db_session.add(blog)
     db_session.commit()
     return blog
 
 @pytest.fixture
 def create_test_comment(db_session, create_test_user, create_test_blog):
-    comment = Comment(id="test_comment_id", content="This is a test comment.", user_id=create_test_user.id, blog_id=create_test_blog.id)
+    comment = Comment(
+        id="test_comment_id",
+        content="This is a test comment.",
+        user_id=create_test_user.id,
+        blog_id=create_test_blog.id
+    )
     db_session.add(comment)
     db_session.commit()
     return comment
@@ -83,7 +98,13 @@ def test_update_comment_unauthorized(db_session, create_test_user, create_test_c
     update_data = {
         "content": "Updated comment content."
     }
-    another_user = User(id="another_user_id", username="anotheruser", email="anotheruser@example.com", hashed_password="fakehashedpassword")
+    another_user = User(
+        id="another_user_id",
+        email="anotheruser@example.com",
+        password="fakehashedpassword",
+        first_name="Another",
+        last_name="User"
+    )
     db_session.add(another_user)
     db_session.commit()
     
