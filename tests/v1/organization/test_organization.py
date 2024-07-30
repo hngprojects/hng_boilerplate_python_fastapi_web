@@ -51,7 +51,7 @@ def client(db_session_mock):
 
 @pytest.fixture
 def mock_get_current_user_fixture():
-    with patch("api.v1.services.user.user_service.get_current_user", return_value=mock_get_current_user()) as mock:
+    with patch("api.v1.routes.organization.get_db", return_value=mock_get_current_user()) as mock:
         yield mock
 
 def test_get_organization_success(client, db_session_mock, mock_get_current_user_fixture):
@@ -62,7 +62,7 @@ def test_get_organization_success(client, db_session_mock, mock_get_current_user
     mock_organization.id = org_id  # Set the ID to match
 
     # Mock the organization fetch
-    with patch("api.v1.services.organization.organization_service.get_organization", return_value=mock_organization):
+    with patch("api.v1.routes.organization.get_db", return_value=mock_organization):
         response = client.get(
             f'/api/v1/organizations/{org_id}',
             headers={'Authorization': 'Bearer token'},
@@ -78,7 +78,7 @@ def test_get_organization_not_found(client, db_session_mock, mock_get_current_us
     org_id = str(uuid7())  # Use a UUID for the org_id
 
     # Mock the organization fetch to return None
-    with patch("api.v1.services.organization.organization_service.get_organization", return_value=None):
+    with patch("api.v1.routes.organization.get_db", return_value=None):
         response = client.get(
             f'/api/v1/organizations/{org_id}',
             headers={'Authorization': 'Bearer token'},
