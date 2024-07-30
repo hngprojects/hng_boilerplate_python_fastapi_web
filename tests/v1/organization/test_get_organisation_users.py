@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
 
 from api.db.database import get_db
+from api.utils.success_response import success_response
 from api.v1.services.user import user_service
 from api.v1.models import User
 from api.v1.models.organization import Organization
@@ -67,15 +68,14 @@ def test_get_organisation_users_success(client, db_session_mock):
     app.dependency_overrides[
         organization_service.fetch
     ] = lambda: mock_org
-    app.dependency_overrides[
-        organization_service.count_organization_users
-    ] = lambda: 1
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    mock_orgs_user = mock_org_users()
+    mock_orgs_user = success_response(status_code=200,
+                                      message="users fetched successfully",
+                                      data={})
     mock_organization = mock_org()
 
     with patch(

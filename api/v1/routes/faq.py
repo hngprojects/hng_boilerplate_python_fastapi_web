@@ -3,7 +3,9 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from api.db.database import get_db
+from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
+from api.v1.models.faq import FAQ
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from api.v1.services.faq import faq_service
@@ -13,14 +15,18 @@ faq = APIRouter(prefix="/faqs", tags=["Frequently Asked Questions"])
 
 
 @faq.get('', response_model=success_response, status_code=200)
-async def get_all_faqs(db: Session = Depends(get_db)):
+async def get_all_faqs(
+    db: Session = Depends(get_db),
+    limit: int = 10,
+    skip: int = 0,
+):
     '''Endpoint to get all FAQs'''
 
-    faqs = faq_service.fetch_all(db)
-    return success_response(
-        data=jsonable_encoder(faqs), 
-        message='Successfully fetched all FAQs',
-        status_code=status.HTTP_200_OK
+    return paginated_response(
+        db=db,
+        model=FAQ,
+        limit=limit,
+        skip=skip,
     )
 
 
@@ -80,9 +86,3 @@ async def update_faq(
     '''Endpoint to delete an FAQ. Only accessible to superadmins'''
 
     faq_service.delete(db, faq_id=id)
-
-    # return success_response(
-    #     data=jsonable_encoder(faq),
-    #     message='Successfully created FAQ',
-    #     status_code=status.HTTP_200_OK
-    # ) 

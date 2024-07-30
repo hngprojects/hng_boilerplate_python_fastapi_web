@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence, check_user_in_org
+from api.utils.pagination import paginated_response
 from api.v1.models.product import Product
 from api.v1.models.associations import user_organization_association
 from api.v1.models.organization import Organization
@@ -59,8 +60,8 @@ class OrganizationService(Service):
         '''Fetches an organization by id'''
 
         organization = check_model_existence(db, Organization, id)
-        return organization
 
+        return organization
 
 
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
@@ -190,7 +191,6 @@ class OrganizationService(Service):
     #     db.execute(stmt)
     #     db.commit()
 
-
     def get_users_in_organization(self, db: Session, org_id: str):
         '''Fetches all users in an organization'''
 
@@ -209,19 +209,14 @@ class OrganizationService(Service):
 
         check_model_existence(db, Organization, org_id)
 
-        users = db.query(User).join(Organization.users).filter(
-            Organization.id == org_id).limit(per_page).offset(
-            (page - 1) * per_page).all()
-        return users
-
-    def count_organization_users(self, db: Session, org_id: str):
-        '''Counts all users in an organization'''
-
-        check_model_existence(db, Organization, org_id)
-
-        count = db.query(User).join(Organization.users).filter(
-            Organization.id == org_id).count()
-        return count
+        return paginated_response(
+            db=db,
+            model=User,
+            skip=page,
+            join=user_organization_association,
+            filters={'organization_id': org_id},
+            limit=per_page
+        )
 
     # def get_user_organizations(self, db: Session, user_id: str):
     #     '''Fetches all organizations that belong to a user'''
