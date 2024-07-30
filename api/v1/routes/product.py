@@ -42,7 +42,6 @@ async def get_products_by_filter_status(
 ):
     '''Endpoint to get products by filter status'''
     try:
-        print("Requested filter status:", filter_status)
         products = product_service.fetch_by_filter_status(db, filter_status)
         return SuccessResponse(
             message="Products retrieved successfully",
@@ -50,7 +49,6 @@ async def get_products_by_filter_status(
             data=products
         )
     except Exception as e:
-        print(f"Error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to retrieve products")
 
 @product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)

@@ -67,7 +67,6 @@ class ProductService(Service):
     def fetch_by_filter_status(self, db: Session, filter_status: ProductFilterStatusEnum):
         '''Fetch products by filter status'''
         products = db.query(Product).filter(Product.filter_status == filter_status.value).all()
-        print(products)
         return [ProductFilterResponse.from_orm(product) for product in products]
 
     def update(self, db: Session, id: str, schema):
