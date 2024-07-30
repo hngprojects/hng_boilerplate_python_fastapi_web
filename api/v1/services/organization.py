@@ -1,9 +1,8 @@
 from api.db.database import get_db
 import logging
 from typing import Any, Optional
-from fastapi import Depends HTTPException
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, status
 from sqlalchemy import select
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence, check_user_in_org
