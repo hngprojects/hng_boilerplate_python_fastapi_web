@@ -20,7 +20,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
+        status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
@@ -52,8 +52,12 @@ def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_s
     if not user.is_super_admin:
         logger.error("User is not a super admin")
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to access this resource",
+            status_code=401,
+            detail={
+                "message": "User does not have admin privileges",
+                "status_code": 401,
+                "data": {}
+            }
         )
     logger.debug("User is super admin")
     return user

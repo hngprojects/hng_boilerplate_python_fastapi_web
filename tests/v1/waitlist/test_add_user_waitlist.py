@@ -10,7 +10,10 @@ from main import app
 from api.utils.dependencies import get_super_admin
 
 def mock_deps():
-    return MagicMock(is_admin=True)
+    return MagicMock(is_super_admin=True)
+
+def mock_dep():
+    return MagicMock(is_super_admin=False)
 
 @pytest.fixture
 def client():
@@ -66,3 +69,30 @@ class TestCodeUnderTest:
     
         assert response.status_code == 400
         assert response.json()["message"]== "Email already added"
+
+class TestWaitlistEndpoint:
+    @classmethod 
+    def setup_class(cls):
+        # Set the default to superadmin
+        app.dependency_overrides[get_super_admin] = mock_deps
+        
+    @classmethod
+    def teardown_class(cls):
+        # Clear dependency overrides after tests
+        app.dependency_overrides = {}
+
+    @patch('api.v1.services.waitlist.waitlist_service.fetch_all')
+    def test_get_all_waitlist_emails_success(self, mock_service, client):
+        print("Current Dependency Override for get_super_admin:", app.dependency_overrides.get(get_super_admin))
+        # Mock return value for fetch_all method
+        mock_service.return_value = [
+            MagicMock(email="test@example.com"),
+            MagicMock(email="duplicate@example.com")
+        ]
+
+        response = client.get("/api/v1/waitlists/users")
+
+        assert response.status_code == 200
+        assert response.json()["message"] == "Waitlist retrieved successfully"
+        assert response.json()["data"] == ["test@example.com", "duplicate@example.com"]
+
