@@ -31,7 +31,7 @@ class CommentService(Service):
         )
         
     
-    def validate_params(self, params):
+    def validate_params(self, arg1, arg2, arg3, arg4):
         # Implementation of validate_params
         pass
 
