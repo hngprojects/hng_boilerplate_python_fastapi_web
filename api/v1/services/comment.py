@@ -3,7 +3,6 @@ from fastapi import HTTPException
 from api.v1.models.comment import Comment
 from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
 from typing import Any, Optional
-
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models import Comment, Blog, User
