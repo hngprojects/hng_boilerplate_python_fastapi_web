@@ -17,7 +17,7 @@ from api.v1.models import User
 product = APIRouter(prefix='/products', tags=['Products'])
 
 
-@product.get('', response_model=success_response, status_code=200)
+@product.get('', response_model=paginated_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
