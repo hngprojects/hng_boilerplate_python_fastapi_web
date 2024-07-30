@@ -81,7 +81,7 @@ class ProductService(Service):
     def delete(self, db: Session, id: str, current_user: User):
         """Deletes a product"""
 
-        product: Product = self.fetch(id=id)
+        product: Product = self.fetch(db=db, id=id)
 
         # check ownership
 

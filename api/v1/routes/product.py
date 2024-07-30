@@ -111,7 +111,7 @@ async def update_product(
 @product.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(
     id: str,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(user_service.get_current_user),
     db: Session = Depends(get_db),
 ):
     """Enpoint to delete a product
