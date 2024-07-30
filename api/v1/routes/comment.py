@@ -56,7 +56,6 @@ async def update_comment(comment_id: str, request: UpdateCommentRequest, db: Ses
 
 
 
-# Endpoint to dislike a comment
 @comment.post("/{comment_id}/dislike", response_model=DislikeSuccessResponse)
 async def dislike_comment(
     request: Request,
@@ -70,7 +69,13 @@ async def dislike_comment(
     user_id = current_user.id
     client_ip = request.headers.get("X-Forwarded-For") or request.client.host
 
-    dislike = comment_dislike_service.create(db=db, user_id=user_id, comment_id=comment_id, client_ip=client_ip)
+    client_ip = request.headers.get("X-Forwarded-For")
+    if client_ip is None or client_ip == "":
+        client_ip = request.client.host
+
+    dislike = comment_dislike_service.create(
+        db=db, user_id=user_id, comment_id=comment_id, client_ip=client_ip
+        )
 
     return success_response(
         message="Comment disliked successfully!",
