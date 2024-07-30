@@ -17,12 +17,12 @@ from fastapi import status
 from datetime import datetime, timezone
 
 client = TestClient(app)
-USERORG_ENDPOINT = '/organizations/'
+USERORG_ENDPOINT = '/api/v1/organizations/'
 
 @pytest.fixture
 def mock_db_session():
     """Fixture to create a mock database session."""
-    with patch("api.v1.services.organization.get_db", autospec=True) as mock_get_db:
+    with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
@@ -57,10 +57,14 @@ def create_mock_organizations(mock_db_session, user_id):
     mock_orgs = [
         Organization(
             id=str(uuid7()),
-            name=f"Test Organization {i}",
-            description=f"Description for org {i}",
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
+            company_name=f"Test Organization {i}",
+            company_email=f"org{i}@test.com",
+            industry="IT",
+            organization_type="Private",
+            country="Country",
+            state="State",
+            address="Address",
+            lga="LGA"
         )
         for i in range(3)
     ]
@@ -85,5 +89,11 @@ def test_get_user_organizations(mock_user_service, mock_db_session):
     assert response.json()['message'] == "Organizations retrieved successfully"
     assert len(response.json()['data']) == len(mock_orgs)
     for org, resp_org in zip(mock_orgs, response.json()['data']):
-        assert resp_org['name'] == org.name
-        assert resp_org['description'] == org.description
+        assert resp_org['company_name'] == org.company_name
+        assert resp_org['company_email'] == org.company_email
+        assert resp_org['industry'] == org.industry
+        assert resp_org['organization_type'] == org.organization_type
+        assert resp_org['country'] == org.country
+        assert resp_org['state'] == org.state
+        assert resp_org['address'] == org.address
+        assert resp_org['lga'] == org.lga
