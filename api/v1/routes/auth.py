@@ -231,7 +231,7 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
     )
 
     return response
-    
+
 
 # Protected route example: test route
 @auth.get("/admin")
