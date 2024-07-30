@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
-from api.v1.schemas.user import TokenData
+from api.v1.schemas.user import Token
 from datetime import timedelta
 
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
@@ -234,8 +234,8 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 
 # Verify Magic Link
 @auth.post("/verify-magic-link")
-async def verify_magic_link(token_schema: TokenData):
-    user, access_token = AuthService.verify_magic_token(token_schema.token)
+async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
+    user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
 
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 

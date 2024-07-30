@@ -7,6 +7,7 @@ from api.utils.settings import settings
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
+from typing import Tuple
 import jwt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -15,10 +16,7 @@ class AuthService(Service):
     """Auth Service"""
 
     @staticmethod
-    def verify_magic_token(
-        magic_token: str = Depends(oauth2_scheme), 
-        db: Session = Depends(get_db)
-    ) -> User:
+    def verify_magic_token(magic_token: str, db: Session) -> Tuple[User, str]:
         """Function to verify magic token"""
 
         credentials_exception = HTTPException(
@@ -30,4 +28,4 @@ class AuthService(Service):
         token = user_service.verify_access_token(magic_token, credentials_exception)
         user = db.query(User).filter(User.id == token.id).first()
         
-        return user, token
+        return user, magic_token
