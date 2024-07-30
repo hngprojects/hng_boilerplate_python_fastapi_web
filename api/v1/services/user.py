@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
@@ -25,18 +26,58 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserService(Service):
     """User service"""
 
-    def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all users"""
+    def fetch_all(self, db: Session, page: int, per_page: int,
+                  **query_params: Optional[Any]):
+        """
+        Fetch all users
+        Args:
+            db: database Session object
+            page: page number
+            per_page: max number of users in a page
+            query_params: params to filter by
+        """
+        per_page = per_page if per_page <= 10 else 10
+        query = (db.query(User)
+                 .order_by(desc(User.created_at))
+                 .limit(per_page)
+                 .offset((page - 1) * per_page))
+        total_users = db.query(User).count()
 
-        query = db.query(User)
 
         # Enable filter by query parameter
         if query_params:
+            query = db.query(User)
             for column, value in query_params.items():
                 if hasattr(User, column) and value:
                     query = query.filter(getattr(User, column).ilike(f"%{value}%"))
-
-        return query.all()
+        all_users: list = query.all()
+        return self.all_users_response(all_users, total_users, page, per_page)
+   
+    def all_users_response(self, users: list, total_users: int,
+                           page: int, per_page: int):
+        """
+        Generates a response for all users
+        Args:
+            users: a list containing user objects
+            total_users: total number of users
+        """
+        if not users or len(users) == 0:
+            return user.AllUsersResponse(message='No user has registered currently!',
+                                         status='success',
+                                         status_code=200,
+                                         page=page,
+                                         per_page=per_page,
+                                         total=0,
+                                         data=[])
+        all_users = [user.UserData.model_validate(usr,
+                                                  from_attributes=True) for usr in users]
+        return user.AllUsersResponse(message='Users successfully retrieved',
+                                     status='success',
+                                     status_code=200,
+                                     page=page,
+                                     per_page=per_page,
+                                     total=total_users,
+                                     data=all_users)
 
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
