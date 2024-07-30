@@ -19,9 +19,9 @@ testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
 @testimonial.get('', status_code=status.HTTP_200_OK)
 def get_testimonials(
+    page_size: int ,
+    page: int,
     db: Session = Depends(get_db),
-    page_size: int = 10,
-    page: int = 0,
 ):
     """End point to Query Testimonials with pagination"""
 
@@ -29,7 +29,7 @@ def get_testimonials(
         db=db,
         model=Testimonial,
         limit=page_size,
-        skip=page,
+        skip=(page - 1) * page_size,
     )
 
 
