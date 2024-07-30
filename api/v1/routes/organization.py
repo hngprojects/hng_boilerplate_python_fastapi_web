@@ -51,6 +51,7 @@ def read_organization(org_id: int, db: Session = Depends(get_db), token: str = D
     }
 
 
+
 @organization.patch('/{org_id}', response_model=success_response)
 async def update_organization(org_id: str, schema: CreateUpdateOrganization, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     """update organization"""
