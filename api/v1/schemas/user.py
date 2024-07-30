@@ -17,7 +17,6 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
-
     email: EmailStr
     password: str
     first_name: str
@@ -36,7 +35,7 @@ class UserCreate(BaseModel):
     
 
 class LoginRequest(BaseModel):
-    email: str
+    email: EmailStr
     password: str
 
 class EmailRequest(BaseModel):
