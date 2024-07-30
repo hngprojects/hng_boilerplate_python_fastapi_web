@@ -48,13 +48,11 @@ def update_user_profile(
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to update user profile"""
-    logger.debug(f"Updating profile for user: {current_user}")
-    if current_user is None:
-        raise HTTPException(status_code=401, detail="User not authenticated")
-    else:
-        logger.debug(f"Current user ID: {current_user.id}")
-    updated_profile = profile_service.update(db, schema=schema, 
-                                             user_id=current_user.id)
+    
+    updated_profile = profile_service.update(
+        db, schema=schema, 
+        user_id=current_user.id
+    )
 
     response = success_response(
         status_code=status.HTTP_200_OK,

@@ -66,6 +66,6 @@ def paginated_response(
             "total": total,
             "skip": skip,
             "limit": limit,
-            "data": results
+            "items": results
         }
     )
