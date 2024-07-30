@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, status, HTTPException
+from fastapi import Depends, APIRouter, status
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -44,3 +44,9 @@ async def update_organization(org_id: str, schema: CreateUpdateOrganization, db:
         message='Organization updated successfully',
         data=jsonable_encoder(updated_organization)
     )
+
+@organization.delete("/{org_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_organization(org_id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+    """delete organization"""
+    organization_service.delete(db, org_id, current_user)
+    return success_response(status_code=status.HTTP_204_NO_CONTENT, message='Organization deleted successfully')
