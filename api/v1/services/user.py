@@ -80,30 +80,29 @@ class UserService(Service):
         return user
 
     def create_admin(self, db: Session, schema: user.UserCreate):
+        """Creates a new admin"""
+
         if db.query(User).filter(User.email == schema.email).first():
-            user = (
-                db.query(User)
-                .filter(User.email == schema.email)
-                .first()
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email already exists",
             )
-            if not user.is_super_admin:
-                user.is_super_admin = True
-                db.commit()
-                db.refresh(user)
-                return user
-            else:
-                raise HTTPException(
-                    status_code=400,
-                    detail="User is already registered and is a superuser",
-                )
+        
         # Hash password
-        # Create new admin
-        user = self.create(db=db, schema=schema)
-        user.is_super_admin = True
+        schema.password = self.hash_password(password=schema.password)
+
+        # Create user object with hashed password and other attributes from schema
+        user = User(**schema.model_dump())
+        db.add(user)
         db.commit()
         db.refresh(user)
 
+        # Set user to super admin
+        user.is_super_admin = True
+        db.commit()
+
         return user
+    
 
     def update(self, db: Session, id=None , access_token : str = Depends(oauth2_scheme)):
         """Function to Update a user"""

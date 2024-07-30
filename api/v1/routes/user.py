@@ -26,10 +26,16 @@ def get_current_user_details(
 
     return success_response(
         status_code=200,
-        message='User details retrieved successfully',
+        message="User details retrieved successfully",
         data=jsonable_encoder(
-            current_user, 
-            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            current_user,
+            exclude=[
+                "password",
+                "is_super_admin",
+                "is_deleted",
+                "is_verified",
+                "updated_at",
+            ],
         ),
     )
 
