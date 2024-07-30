@@ -105,8 +105,11 @@ class UserService(Service):
 
         return user
 
-    def update(self, db: Session):
-        return super().update()
+    def update(self, db: Session, id=None , access_token : str = Depends(oauth2_scheme)):
+        """Function to Update a user"""
+        # Get user from access token or fetch by id
+
+        user = self.get_current_user(access_token, db) if id is None else check_model_existence(db,User,id)
 
     def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
         """Function to soft delete a user"""
