@@ -1,16 +1,13 @@
 from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
-from typing_extensions import Annotated
 from datetime import timedelta
 
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
-from typing import Annotated
 
 from api.v1.schemas.user import UserCreate
 from api.utils.email_service import send_mail
@@ -193,8 +190,7 @@ async def request_signin_token(email_schema: EmailRequest, db: Session = Depends
     # Save the token and expiry
     user_service.save_login_token(db, user, token, token_expiry)
 
-    # Send the token to the user's email
-    # send_mail(to=user.email, subject="Your SignIn Token", body=token)
+    # Send mail notification
 
     return success_response(
         status_code=200,

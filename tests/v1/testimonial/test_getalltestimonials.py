@@ -96,4 +96,3 @@ def test_gettestimonials(db_session_mock):
     bad_url = 'api/v1/testimonials??page=-1&page_size=-1'
     bad_response = client.get(bad_url)
     assert bad_response.status_code == 422
-

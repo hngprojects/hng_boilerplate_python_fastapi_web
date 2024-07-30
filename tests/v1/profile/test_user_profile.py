@@ -9,9 +9,13 @@ from uuid_extensions import uuid7
 from api.db.database import get_db
 from fastapi import status
 from datetime import datetime, timezone
+
+
 client = TestClient(app)
 PROFILE_ENDPOINT = '/api/v1/profile/'
 LOGIN_ENDPOINT = 'api/v1/auth/login'
+
+
 @pytest.fixture
 def mock_db_session():
     """Fixture to create a mock database session. api.v1.services.user.get_db"""
