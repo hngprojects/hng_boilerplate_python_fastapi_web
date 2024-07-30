@@ -51,10 +51,10 @@ def create_mock_user(mock_user_service, mock_db_session):
     return mock_user
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_fetch_all_plans(mock_user_service, mock_db_session):
+def test_get_user_organisations(mock_user_service, mock_db_session):
     """Test for user deactivation errors."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     response = client.get(USEROGR_ENDPOINT, headers={'Authorization': f'Bearer {access_token}'})
     
-    assert response.status_code == status.HTTP_404_NOT_FOUND
+    assert response.status_code == status.HTTP_200_OK
