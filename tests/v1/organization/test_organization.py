@@ -9,6 +9,7 @@ from api.v1.services.user import user_service
 from api.v1.models import User
 from api.v1.models.organization import Organization
 from api.v1.services.user import UserService
+from api.v1.services.organization import organization_service
 from main import app
 
 def mock_get_current_user():
@@ -55,6 +56,16 @@ def mock_get_current_user():
         yield
 
 def test_get_organization_success(db_session_mock, mock_get_current_user):
+    
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
+    app.dependency_overrides[organization_service.fetch] = lambda: mock_org
+
+    # Mock organization creation
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
     mock_organization = MagicMock(spec=Organization)
     mock_organization.id = 1
     mock_organization.company_name = "Mock Org 1"
@@ -68,7 +79,7 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
 
     db_session_mock.query().filter().first.return_value = mock_organization
 
-    with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
+    with patch("api.v1.services.organization.organization_service.fetch", return_value=mock_organization) as mock_fetch:
         response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 200
         data = response.json()
@@ -81,7 +92,7 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
 def test_get_organization_not_found(db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = None
 
-    with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
+    with patch("api.v1.services.organization.organization_service.fetch", return_value=db_session_mock):
         response = client.get("/api/v1/organizations/999", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 404
         data = response.json()
