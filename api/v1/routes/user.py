@@ -126,3 +126,15 @@ def delete_user(
 
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
+
+@user.get("", status_code=status.HTTP_200_OK)
+def get_all_users(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
+    users = user_service.fetch_all(db)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Retrived all user information Successfully",
+        data = jsonable_encoder(
+            users, 
+            exclude=['password']
+        )
+    )
