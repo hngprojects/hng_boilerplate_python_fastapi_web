@@ -11,6 +11,7 @@ from api.v1.models.organization import Organization
 from api.v1.services.organization import organization_service
 from main import app
 
+# Mock function to simulate getting the current user
 def mock_get_current_user():
     return User(
         id=str(uuid7()),
@@ -24,70 +25,64 @@ def mock_get_current_user():
         updated_at=datetime.now(timezone.utc)
     )
 
+# Mock function to simulate fetching an organization
 def mock_org():
     return Organization(
         id=str(uuid7()),
         company_name="Test Organization",
-        company_email="testorg@example.com",
-        industry="Tech",
-        organization_type="Private",
-        country="Country",
-        state="State",
-        address="Address",
-        lga="LGA",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
 
 @pytest.fixture
 def db_session_mock():
-    return MagicMock(spec=Session)
+    db_session = MagicMock(spec=Session)
+    return db_session
 
 @pytest.fixture
 def client(db_session_mock):
     app.dependency_overrides[get_db] = lambda: db_session_mock
-    yield TestClient(app)
+    client = TestClient(app)
+    yield client
     app.dependency_overrides = {}
 
 @pytest.fixture
-def mock_get_current_user_fixture():
-    with patch("api.v1.routes.organization.get_db", return_value=mock_get_current_user()) as mock:
-        yield mock
+def mock_current_user():
+    return mock_get_current_user()
 
-def test_get_organization_success(client, db_session_mock, mock_get_current_user_fixture):
+def test_get_organization_success(client, db_session_mock, mock_current_user):
     '''Test to successfully retrieve an organization by ID'''
+    
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_current_user
+    db_session_mock.query.return_value.filter.return_value.first.return_value = mock_org()
 
-    org_id = str(uuid7())  # Use a UUID for the org_id
-    mock_organization = mock_org()
-    mock_organization.id = org_id  # Set the ID to match
-
-    # Mock the organization fetch
-    with patch("api.v1.routes.organization.get_db", return_value=mock_organization):
-        response = client.get(
-            f'/api/v1/organizations/{org_id}',
-            headers={'Authorization': 'Bearer token'},
-        )
+    response = client.get(
+        f'/api/v1/organizations/{mock_org().id}',
+        headers={'Authorization': 'Bearer token'},
+    )
 
     assert response.status_code == 200
-    assert response.json()["message"] == 'Retrieve Organization successfully'
-    assert response.json()["data"]["company_name"] == "Test Organization"
+    data = response.json()
+    assert data["company_name"] == "Test Organization"
 
-def test_get_organization_not_found(client, db_session_mock, mock_get_current_user_fixture):
+def test_get_organization_not_found(client, db_session_mock, mock_current_user):
     '''Test retrieving an organization that does not exist'''
+    
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_current_user
+    db_session_mock.query.return_value.filter.return_value.first.return_value = None
 
-    org_id = str(uuid7())  # Use a UUID for the org_id
-
-    # Mock the organization fetch to return None
-    with patch("api.v1.routes.organization.get_db", return_value=None):
-        response = client.get(
-            f'/api/v1/organizations/{org_id}',
-            headers={'Authorization': 'Bearer token'},
-        )
+    org_id = str(uuid7())
+    response = client.get(
+        f'/api/v1/organizations/{org_id}',
+        headers={'Authorization': 'Bearer token'},
+    )
 
     assert response.status_code == 404
-    assert response.json()["message"] == "Organization not found"
+    assert response.json()["detail"] == "Organization not found"
 
-def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user_fixture):
+def test_get_organization_invalid_id(client):
     '''Test retrieving an organization with an invalid ID format'''
 
     invalid_org_id = "invalid_id"  # Use a non-UUID string

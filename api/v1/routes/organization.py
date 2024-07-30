@@ -41,18 +41,19 @@ def create_organization(
     )
 
   
-"""Endpoint to get an organization"""
-
 @organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
-def read_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
-    current_user = user_service.get_current_user(token, db)
-    organization = organization_service.get_organization(db, org_id)
-    return {
-        "status": "success",
-        "status_code": 200,
-        "data": organization
-    }
+async def get_organization(
+    org_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get an organization by ID"""
 
+    organization = organization_service.fetch(db, org_id)
+    if not organization:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
+
+    return jsonable_encoder(organization)
 
 
 @organization.patch('/{org_id}', response_model=success_response)
