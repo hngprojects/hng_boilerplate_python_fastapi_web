@@ -40,7 +40,7 @@ async def create_organization(
 
 """Endpoint to get an organization"""
 
-@organization.get('/{org_id}',response_model=OrganizationBase, status_code=status.HTTP_200_OK)
+@organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
 def read_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = user_service.get_current_user(token, db)
     organization = organization_service.get_organization(db, org_id)
