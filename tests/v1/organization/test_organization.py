@@ -16,6 +16,8 @@ from api.v1.services.user import user_service
 from api.v1.models import User
 from api.v1.services.organization import organization_service
 
+client = TestClient(app)
+
 # Mock current user
 def mock_get_current_user():
     return User(
@@ -60,13 +62,11 @@ def client(db_session_mock):
 
 @pytest.fixture
 def db_session_mock():
-    """Fixture to mock the database session."""
     db = MagicMock()
     return db
 
 @pytest.fixture
 def mock_get_current_user():
-    """Fixture to mock the current user retrieval."""
     with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
         yield
 
@@ -84,8 +84,8 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
 
     db_session_mock.query().filter().first.return_value = mock_organization
 
-    with patch("api.v1.routes.organization.get_organization", return_value=db_session_mock):
-        response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer testtoken"})
+    with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
+        response = client.get("/api/v1/organisations/1", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "success"
@@ -98,7 +98,7 @@ def test_get_organization_not_found(db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = None
 
     with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
-        response = client.get("/api/v1/organizations/999", headers={"Authorization": "Bearer testtoken"})
+        response = client.get("/api/v1/organisations/999", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 404
         data = response.json()
         assert data["message"] == "Organization not found"
@@ -106,5 +106,5 @@ def test_get_organization_not_found(db_session_mock, mock_get_current_user):
         assert data["success"] is False
 
 def test_get_organization_invalid_id(db_session_mock, mock_get_current_user):
-    response = client.get("/api/v1/organizations/abc", headers={"Authorization": "Bearer testtoken"})
+    response = client.get("/api/v1/organisations/abc", headers={"Authorization": "Bearer testtoken"})
     assert response.status_code == 422  # Unprocessable Entity due to validation error
