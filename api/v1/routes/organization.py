@@ -46,13 +46,13 @@ async def get_organization_users(
     org_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
-    page: int = 1,
-    per_page: int = 10
+    skip: int = 1,
+    limit: int = 10
 ):
     '''Endpoint to fetch all users in an organization'''
 
     return organization_service.paginate_users_in_organization(
-        db, org_id, page, per_page
+        db, org_id, skip, limit
     )
 
 
