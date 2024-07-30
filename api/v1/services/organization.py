@@ -151,9 +151,32 @@ class OrganizationService(Service):
 
         organization = check_model_existence(db, Organization, org_id)
 
-        # Fetch all users associated with the organization
         return organization.users
 
+    def paginate_users_in_organization(
+            self,
+            db: Session,
+            org_id: str,
+            page: int,
+            per_page: int
+    ):
+        '''Fetches all users in an organization'''
+
+        check_model_existence(db, Organization, org_id)
+
+        users = db.query(User).join(Organization.users).filter(
+            Organization.id == org_id).limit(per_page).offset(
+            (page - 1) * per_page).all()
+        return users
+
+    def count_organization_users(self, db: Session, org_id: str):
+        '''Counts all users in an organization'''
+
+        check_model_existence(db, Organization, org_id)
+
+        count = db.query(User).join(Organization.users).filter(
+            Organization.id == org_id).count()
+        return count
 
     # def get_user_organizations(self, db: Session, user_id: str):
     #     '''Fetches all organizations that belong to a user'''

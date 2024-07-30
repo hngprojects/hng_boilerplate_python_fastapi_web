@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.organization import CreateUpdateOrganization
+from api.v1.schemas.organization import CreateUpdateOrganization, PaginatedOrgUsers
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
@@ -36,20 +36,28 @@ async def create_organization(
 
 @organization.get(
     '/{org_id}/users',
-    response_model=success_response,
-    status_code=status.HTTP_200_OK
+    response_model=PaginatedOrgUsers,
+    status_code=status.HTTP_200_OK,
 )
 async def get_organization_users(
     org_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
+    page: int = 1,
+    per_page: int = 10
 ):
     '''Endpoint to fetch all users in an organization'''
 
-    org = organization_service.fetch(db, org_id)
+    org_users = organization_service.paginate_users_in_organization(
+        db, org_id, page, per_page)
+    total = organization_service.count_organization_users(db, org_id)
 
-    return success_response(
+    return PaginatedOrgUsers(
+        total=total,
+        page=page,
+        per_page=per_page,
+        success=True,
         status_code=status.HTTP_200_OK,
         message='Organization users fetched successfully',
-        data=jsonable_encoder(org.users)
+        data=jsonable_encoder(org_users)
     )
