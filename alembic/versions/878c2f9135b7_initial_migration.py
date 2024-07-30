@@ -1,8 +1,8 @@
-"""create tables
+"""initial migration
 
-Revision ID: e30fc0cc2d35
+Revision ID: 878c2f9135b7
 Revises: 
-Create Date: 2024-07-29 16:06:20.870140
+Create Date: 2024-07-29 22:24:00.741552
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'e30fc0cc2d35'
+revision: str = '878c2f9135b7'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -77,6 +77,16 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_product_categories_id'), 'product_categories', ['id'], unique=False)
+    op.create_table('topics',
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('content', sa.String(), nullable=False),
+    sa.Column('tags', sa.ARRAY(sa.String()), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_topics_id'), 'topics', ['id'], unique=False)
     op.create_table('users',
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=True),
@@ -426,6 +436,8 @@ def downgrade() -> None:
     op.drop_table('waitlist')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_topics_id'), table_name='topics')
+    op.drop_table('topics')
     op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
     op.drop_table('product_categories')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')

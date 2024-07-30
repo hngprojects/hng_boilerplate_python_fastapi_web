@@ -5,7 +5,6 @@ from api.v1.services.user import user_service
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.models import User, Blog, Comment
-from api.v1.services.user import user_service
 from uuid_extensions import uuid7
 from unittest.mock import MagicMock
 from faker import Faker
