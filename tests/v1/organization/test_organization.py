@@ -56,44 +56,40 @@ def client(db_session_mock):
 def test_get_organization_success(client, db_session_mock):
     '''Test to successfully retrieve an organization by ID'''
 
-    # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
 
     mock_organization = mock_org()
     db_session_mock.query().filter().first.return_value = mock_organization
 
-    with patch("api.v1.services.organization.get_organization", return_value=mock_organization):
-        response = client.get(
-            f'/api/v1/organisations/{mock_organization.id}',
-            headers={'Authorization': 'Bearer token'}
-        )
+    response = client.get(
+        f'/api/v1/organisations/{mock_organization.id}',
+        headers={'Authorization': 'Bearer token'}
+    )
 
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "success"
-        assert data["status_code"] == 200
-        assert data["data"]["id"] == mock_organization.id
-        assert data["data"]["company_name"] == mock_organization.company_name
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["status_code"] == 200
+    assert data["data"]["id"] == mock_organization.id
+    assert data["data"]["company_name"] == mock_organization.company_name
 
 def test_get_organization_not_found(client, db_session_mock):
     '''Test retrieving an organization that does not exist'''
 
-    # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
 
     db_session_mock.query().filter().first.return_value = None
 
-    with patch("api.v1.services.organization.get_organization", return_value=None):
-        response = client.get(
-            '/api/v1/organisations/non-existent-id',
-            headers={'Authorization': 'Bearer token'}
-        )
+    response = client.get(
+        '/api/v1/organisations/non-existent-id',
+        headers={'Authorization': 'Bearer token'}
+    )
 
-        assert response.status_code == 404
-        data = response.json()
-        assert data["message"] == "Organization not found"
-        assert data["status_code"] == 404
-        assert data["success"] is False
+    assert response.status_code == 404
+    data = response.json()
+    assert data["message"] == "Organization not found"
+    assert data["status_code"] == 404
+    assert data["success"] is False
 
 def test_get_organization_invalid_id(client, db_session_mock):
     '''Test retrieving an organization with an invalid ID format'''
