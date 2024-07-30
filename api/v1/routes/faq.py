@@ -14,7 +14,7 @@ from api.v1.schemas.faq import CreateFAQ, UpdateFAQ
 faq = APIRouter(prefix="/faqs", tags=["Frequently Asked Questions"])
 
 
-@faq.get('', response_model=paginated_response, status_code=200)
+@faq.get('', response_model=success_response, status_code=200)
 async def get_all_faqs(
     db: Session = Depends(get_db),
     limit: int = 10,

@@ -32,7 +32,7 @@ def create_blog(blog: BlogCreate, db: Session = Depends(get_db), current_user: U
         data = jsonable_encoder(new_blogpost)
     )
 
-@blog.get("/", response_model=paginated_response)
+@blog.get("/", response_model=success_response)
 def get_all_blogs(db: Session = Depends(get_db), limit: int=  10, skip: int = 0):
     '''Endpoint to get all blogs'''
 
