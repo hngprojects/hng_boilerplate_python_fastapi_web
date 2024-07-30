@@ -40,20 +40,24 @@ class NotificationService(Service):
         db: Session = Depends(get_db),
     ):
         notification = (
-            db.query(Notification)
-            .filter(Notification.id == notification_id)
-            .first()
+            db.query(Notification).filter(Notification.id == notification_id).first()
         )
 
         if not notification:
             raise HTTPException(status_code=404, detail="Notification not found")
 
         if notification.user_id != user.id:
-            raise HTTPException(status_code=403, detail="You do not have permission to delete this notification")
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to delete this notification",
+            )
 
         db.delete(notification)
         db.commit()
         db.refresh()
+
+    def get_me(self, user: User, db: Session = Depends(get_db)):
+        return {"notifications": user.notifications}
 
     def create(self):
         super().create()
@@ -66,5 +70,6 @@ class NotificationService(Service):
 
     def update(self):
         super().update()
+
 
 notification_service = NotificationService()
