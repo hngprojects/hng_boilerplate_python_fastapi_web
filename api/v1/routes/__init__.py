@@ -21,6 +21,7 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
+from api.v1.routes.topic import topic
 
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -48,4 +49,4 @@ api_version_one.include_router(comment)
 api_version_one.include_router(jobs)
 api_version_one.include_router(sms)
 api_version_one.include_router(faq)
-
+api_version_one.include_router(topic)

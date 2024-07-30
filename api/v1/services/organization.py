@@ -59,8 +59,7 @@ class OrganizationService(Service):
         '''Fetches an organization by id'''
 
         organization = check_model_existence(db, Organization, id)
-        return organization
-    
+        return organization 
 
 
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
