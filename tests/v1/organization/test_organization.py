@@ -34,11 +34,6 @@ def mock_org():
 )
 
 @pytest.fixture
-def db_session_mock():
-    db_session = MagicMock(spec=Session)
-    return db_session
-
-@pytest.fixture
 def client(db_session_mock):
     app.dependency_overrides[get_db] = lambda: db_session_mock
     client = TestClient(app)
