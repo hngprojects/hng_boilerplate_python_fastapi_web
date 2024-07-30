@@ -68,6 +68,10 @@ def create_mock_organizations(mock_db_session, user_id):
         )
         for i in range(3)
     ]
+
+    for org in mock_orgs:
+        org.users.append(user_id)
+
     mock_db_session.query.return_value.filter.return_value.all.return_value = mock_orgs
     return mock_orgs
 
