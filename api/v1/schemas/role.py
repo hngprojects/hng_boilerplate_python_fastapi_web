@@ -6,6 +6,7 @@ class RoleCreate(BaseModel):
     organization_id: str
     permission_ids: List[str]
 
+
 class ResponseModel(BaseModel):
     message: str
     status_code: int
