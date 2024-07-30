@@ -59,6 +59,27 @@ class NotificationService(Service):
 
     def get_me(self, user: User, db: Session = Depends(get_db)):
         return {"notifications": user.notifications}
+    
+    def fetch(
+        self,
+        notification_id: str,
+        user: User,
+        db: Session = Depends(get_db),
+    ):
+        notification = (
+            db.query(Notification)
+            .filter(Notification.id == notification_id)
+            .first()
+        )
+
+        if not notification:
+            raise HTTPException(status_code=404, detail="Notification not found")
+
+        if notification.user_id != user.id:
+            print(f"Permission check failed. User ID: {user.id}, Notification User ID: {notification.user_id}")
+            raise HTTPException(status_code=403, detail="You do not have permission to view this notification")
+
+        return notification
 
     def create(self):
         super().create()

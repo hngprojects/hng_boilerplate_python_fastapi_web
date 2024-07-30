@@ -55,14 +55,11 @@ def delete_notification(
 def get_notification(
     notification_id: str,
     current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_db)
 ):
     notification = notification_service.fetch(
-        notification_id=notification_id, user_id=current_user.id, db=db
+        notification_id=notification_id,
+        user=current_user,
+        db=db
     )
-    return {
-        "message": "Notification fetched successfully",
-        "status_code": 200,
-        "success": True,
-        "data": notification,
-    }
+    return {"message": "Notification fetched successfully", "status_code": 200, "success": True, "data": notification}
