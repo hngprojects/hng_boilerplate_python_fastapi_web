@@ -8,9 +8,9 @@ from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 
-settings = APIRouter(prefix="/api/v1/users", tags=["Profile-settings"])
+settings = APIRouter(prefix="/api/v1", tags=["Profile-settings"])
 
-@settings.patch("/{user_Id}", status_code=status.HTTP_200_OK, response_model=success_response)
+@settings.patch("/users", status_code=status.HTTP_200_OK, response_model=success_response)
 async def update_profile_settings(settings: UserAndProfileUpdate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     """
     Update the authenticated user's profile. This endpoint allows partial updates.

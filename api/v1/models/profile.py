@@ -1,5 +1,6 @@
 """ The Profile model
 """
+from typing import Optional, Dict
 from sqlalchemy import (
         Column,
         String,
@@ -8,6 +9,7 @@ from sqlalchemy import (
         )
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
+from pydantic import Field
 
 
 
@@ -23,6 +25,7 @@ class Profile(BaseTableModel):
     phone_number = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     recovery_email = Column(String, nullable=True)
+    preferences: Optional[Dict[str, Optional[str]]] = Field(default_factory=dict)
 
 
     user = relationship("User", back_populates="profile")
