@@ -17,8 +17,8 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-DEACTIVATION_ENDPOINT = "/api/v1/users/deactivation"
-LOGIN_ENDPOINT = "api/v1/auth/login"
+DEACTIVATION_ENDPOINT = '/api/v1/profile/deactivate'
+LOGIN_ENDPOINT = 'api/v1/auth/login'
 
 
 @pytest.fixture
