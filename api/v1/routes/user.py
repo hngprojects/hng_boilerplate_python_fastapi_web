@@ -1,5 +1,5 @@
-from typing import Annotated
-from fastapi import Depends, APIRouter, Request, status
+from typing import Annotated, Optional
+from fastapi import Depends, APIRouter, Request, status, Query, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -8,7 +8,7 @@ from api.v1.models.user import User
 from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
-    ChangePwdRet
+    ChangePwdRet, AllUsersResponse
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -109,14 +109,33 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
 
-@user.get("", status_code=status.HTTP_200_OK)
-def get_all_users(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
-    users = user_service.fetch_all(db)
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message="Retrived all user information Successfully",
-        data = jsonable_encoder(
-            users, 
-            exclude=['password']
-        )
-    )
+@user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
+async def get_users(current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+                    db: Annotated[Session, Depends(get_db)],
+                    page: int = 1, per_page: int = 10,
+                    is_active: Optional[bool] = Query(None),
+                    is_deleted: Optional[bool] = Query(None),
+                    is_verified: Optional[bool] = Query(None),
+                    is_super_admin: Optional[bool] = Query(None)):
+    """
+    Retrieves all users.
+    Args:
+        current_user: The current user(admin) making the request
+        db: database Session object
+        page: the page number
+        per_page: the maximum size of users for each page
+        is_active: boolean to filter active users
+        is_deleted: boolean to filter deleted users
+        is_verified: boolean to filter verified users
+        is_super_admin: boolean to filter users that are super admin
+    Returns:
+        UserData
+    """
+    query_params = {
+        'is_active': is_active,
+        'is_deleted': is_deleted,
+        'is_verified': is_verified,
+        'is_super_admin': is_super_admin,
+    }
+    return user_service.fetch_all(db, page, per_page, **query_params)
+
