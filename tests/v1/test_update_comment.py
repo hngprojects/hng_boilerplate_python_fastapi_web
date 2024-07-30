@@ -33,7 +33,6 @@ def db_session():
 @pytest.fixture
 def create_test_user(db_session):
     user = User(
-        id="test_user_id",
         email="testuser@example.com",
         password="fakehashedpassword",
         first_name="Test",
@@ -46,10 +45,9 @@ def create_test_user(db_session):
 @pytest.fixture
 def create_test_blog(db_session, create_test_user):
     blog = Blog(
-        id="test_blog_id",
         title="Test Blog",
         content="This is a test blog.",
-        user_id=create_test_user.id
+        author_id=create_test_user.id
     )
     db_session.add(blog)
     db_session.commit()
@@ -68,9 +66,7 @@ def create_test_comment(db_session, create_test_user, create_test_blog):
     return comment
 
 def test_update_comment_success(db_session, create_test_user, create_test_comment):
-    update_data = {
-        "content": "Updated comment content."
-    }
+    update_data = {"content": "Updated comment content."}
     response = client.put(
         f"/comments/{create_test_comment.id}/",
         json=update_data,
