@@ -8,7 +8,7 @@ from api.v1.models.user import User
 from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
-    ChangePwdRet
+    ChangePwdRet, AllUsersResponse
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -108,3 +108,20 @@ def delete_user(
 
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
+
+
+@user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
+async def get_users(current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+                    db: Annotated[Session, Depends(get_db)],
+                    page: int = 1, per_page: int = 10):
+    """
+    Retrieves all users.
+    Args:
+        current_user: The current user(admin) making the request
+        db: database Session object
+        page: the page number
+        per_page: the maximum size of users for each page
+    Returns:
+        UserData
+    """
+    return user_service.fetch_all(db, page, per_page)
