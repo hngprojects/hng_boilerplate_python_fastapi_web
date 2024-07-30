@@ -3,8 +3,10 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
 
+from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
+from api.v1.models.product import Product
 from api.v1.services.product import product_service
 from api.v1.schemas.product import ProductList
 from api.v1.schemas.product import ProductUpdate, ResponseModel
@@ -15,7 +17,24 @@ from api.v1.models import User
 product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@product.get("/{org_id}", status_code=status.HTTP_200_OK, response_model=ProductList)
+@product.get('', response_model=success_response, status_code=200)
+async def get_all_products(
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
+    skip: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
+    db: Session = Depends(get_db),
+):
+    '''Endpoint to get all products. Only accessible to superadmin'''
+
+    return paginated_response(
+        db=db,
+        model=Product,
+        limit=limit,
+        skip=skip
+    )
+
+
+@product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
