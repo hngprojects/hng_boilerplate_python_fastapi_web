@@ -29,6 +29,11 @@ class CommentService(Service):
             status_code=200,
             data={"comment_id": comment.id, "content": comment.content, "updated_at": comment.updated_at}
         )
+        
+    
+    def validate_params(self, params):
+        # Implementation of validate_params
+        pass
 
     def create(self, db: Session, schema, user_id, blog_id):
         '''Create a new comment to a blog'''
