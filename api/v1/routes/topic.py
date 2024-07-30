@@ -86,7 +86,7 @@ async def search_for_topic(
 		data=jsonable_encoder(topics)
 	)
 
-@topic.delete('/topics')
+@topic.delete('/topics', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_a_topic(
 	db: Session = Depends(get_db),
 	id: str = Query(..., description="Topic's id"),
@@ -94,7 +94,7 @@ async def delete_a_topic(
 ):
 	"""
 	Description
-		Get endpoint for unauthenticated users to search for topics.
+		Delete endpoint for admin users to delete topics.
 
 	Args:
 		id: parameter for topic id
@@ -106,10 +106,6 @@ async def delete_a_topic(
 
 	topic = topic_service.delete(db, id)
 
-	return success_response(
-		status_code=status.HTTP_200_OK,
-		message='Topic deleted successfully!',
-	)
 
 @topic.patch("/topics")
 async def update_a_topic(

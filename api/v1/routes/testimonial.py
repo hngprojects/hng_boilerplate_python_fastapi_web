@@ -10,6 +10,9 @@ from fastapi import Depends, APIRouter, status,Query
 from api.utils.success_response import success_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
+from api.utils.pagination import paginated_response
+from api.v1.models.testimonial import Testimonial
+
 
 testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 
@@ -17,17 +20,17 @@ testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
 @testimonial.get('', status_code=status.HTTP_200_OK)
 def get_testimonials(
     db: Session = Depends(get_db),
-    page : int = Query(1, gt=0),
-    page_size : int = Query(10, gt=0)
+    page_size: int = 10,
+    page: int = 0,
 ):
     """End point to Query Testimonials with pagination"""
 
-    testimonials = testimonial_service.fetch_all(page= page , page_size=page_size, db=db)
-    return {
-        'status_code' :  status.HTTP_200_OK,
-        'message' : 'Testimonials fetched Successfully',
-        'data': [jsonable_encoder(testimonial) for testimonial in testimonials]
-        }
+    return paginated_response(
+        db=db,
+        model=Testimonial,
+        limit=page_size,
+        skip=page,
+    )
 
 
 @testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)

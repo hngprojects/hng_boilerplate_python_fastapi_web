@@ -119,7 +119,7 @@ def test_delete_topic(
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.delete(f"/api/v1/help-center/topics?id={test_topic.id}", headers=headers)    
-    assert response.status_code == 200
+    assert response.status_code == 204
 
 def test_search_topic(
     mock_db_session, 
