@@ -5,7 +5,7 @@ from api.core.base.services import Service
 from api.db.database import get_db
 from api.v1.models.notifications import Notification
 from api.v1.models.user import User
-from api.v1.schemas.notification import NotificationRead
+# from api.v1.schemas.notification import NotificationRead
 
 
 class NotificationService(Service):
@@ -60,32 +60,32 @@ class NotificationService(Service):
     def get_me(self, user: User, db: Session = Depends(get_db)):
         return {"notifications": user.notifications}
     
-    def fetch(
-        self,
-        notification_id: str,
-        user: User,
-        db: Session = Depends(get_db),
-    ):
-        notification = (
-            db.query(Notification)
-            .filter(Notification.id == notification_id)
-            .first()
-        )
+    # def fetch(
+    #     self,
+    #     notification_id: str,
+    #     user: User,
+    #     db: Session = Depends(get_db),
+    # ):
+    #     notification = (
+    #         db.query(Notification)
+    #         .filter(Notification.id == notification_id)
+    #         .first()
+    #     )
 
-        if not notification:
-            raise HTTPException(status_code=404, detail="Notification not found")
+    #     if not notification:
+    #         raise HTTPException(status_code=404, detail="Notification not found")
 
-        if notification.user_id != user.id:
-            print(f"Permission check failed. User ID: {user.id}, Notification User ID: {notification.user_id}")
-            raise HTTPException(status_code=403, detail="You do not have permission to view this notification")
+    #     if notification.user_id != user.id:
+    #         print(f"Permission check failed. User ID: {user.id}, Notification User ID: {notification.user_id}")
+    #         raise HTTPException(status_code=403, detail="You do not have permission to view this notification")
 
-        return notification
+    #     return notification
 
     def create(self):
         super().create()
 
-    # def fetch(self, db: Session):
-    #     super().fetch()
+    def fetch(self, db: Session):
+        super().fetch()
 
     def fetch_all(self):
         super().fetch_all()

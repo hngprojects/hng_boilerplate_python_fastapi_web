@@ -6,7 +6,7 @@ from typing import Annotated
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.notification import notification_service
-from api.v1.schemas.notification import NotificationRead
+# from api.v1.schemas.notification import NotificationRead
 from api.v1.models.notifications import Notification
 
 
@@ -51,15 +51,15 @@ def delete_notification(
     notification_service.delete(notification_id, user=current_user, db=db)
 
 
-@notification.get("/{notification_id}", status_code=status.HTTP_200_OK)
-def get_notification(
-    notification_id: str,
-    current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db)
-):
-    notification = notification_service.fetch(
-        notification_id=notification_id,
-        user=current_user,
-        db=db
-    )
-    return {"message": "Notification fetched successfully", "status_code": 200, "success": True, "data": notification}
+# @notification.get("/{notification_id}", status_code=status.HTTP_200_OK)
+# def get_notification(
+#     notification_id: str,
+#     current_user: User = Depends(user_service.get_current_user),
+#     db: Session = Depends(get_db)
+# ):
+#     notification = notification_service.fetch(
+#         notification_id=notification_id,
+#         user=current_user,
+#         db=db
+#     )
+#     return {"message": "Notification fetched successfully", "status_code": 200, "success": True, "data": notification}
