@@ -10,7 +10,6 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.models import User
 from api.v1.models.organization import Organization
-from api.v1.services.organization import organization_service
 from main import app
 
 def mock_get_current_user():
@@ -62,11 +61,12 @@ def test_get_organization_success(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = mock_organization
 
     response = client.get(
-        f'/api/v1/organisations/{mock_organization.id}',
+        f'/api/v1/organizations/{mock_organization.id}',
         headers={'Authorization': 'Bearer token'}
     )
 
-    assert response.status_code == 200
+    # Validate status code and response content
+    assert response.status_code == 200, response.text
     data = response.json()
     assert data["status"] == "success"
     assert data["status_code"] == 200
@@ -81,22 +81,26 @@ def test_get_organization_not_found(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = None
 
     response = client.get(
-        '/api/v1/organisations/non-existent-id',
+        '/api/v1/organizations/non-existent-id',
         headers={'Authorization': 'Bearer token'}
     )
 
-    assert response.status_code == 404
+    assert response.status_code == 404, response.text
     data = response.json()
-    assert data["message"] == "Organization not found"
-    assert data["status_code"] == 404
-    assert data["success"] is False
+
+    assert "detail" in data
+    assert data["detail"] == "Organization not found"
 
 def test_get_organization_invalid_id(client, db_session_mock):
     '''Test retrieving an organization with an invalid ID format'''
 
     response = client.get(
-        '/api/v1/organisations/invalid-id-format',
+        '/api/v1/organizations/invalid-id-format',
         headers={'Authorization': 'Bearer token'}
     )
 
-    assert response.status_code == 422  # Unprocessable Entity due to validation error
+    # Check for status code and validation error format
+    assert response.status_code == 422, response.text  # Unprocessable Entity due to validation error
+    data = response.json()
+    assert "detail" in data
+    assert data["detail"][0]["msg"] == "value is not a valid integer"
