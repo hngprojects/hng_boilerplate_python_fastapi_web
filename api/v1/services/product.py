@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.product import Product
+from api.v1.models.user import User
 from api.v1.models import Organization
 from api.utils.db_validators import check_user_in_org
 
@@ -34,7 +35,7 @@ class ProductService(Service):
 
         return query.all()
 
-    def fetch(self, db: Session, id: str):
+    def fetch(self, db: Session, id: str) -> Product:
         """Fetches a product by id"""
 
         product = check_model_existence(db, Product, id)
@@ -77,10 +78,20 @@ class ProductService(Service):
         db.refresh(product)
         return product
 
-    def delete(self, db: Session, id: str):
+    def delete(self, db: Session, id: str, current_user: User):
         """Deletes a product"""
 
-        product = self.fetch(id=id)
+        product: Product = self.fetch(db=db, id=id)
+
+        # check ownership
+
+        org_id = product.org_id
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        # delete the product
+
         db.delete(product)
         db.commit()
 

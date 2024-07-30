@@ -210,36 +210,7 @@ async def comments(
     """
     comment_services = CommentService()
     comments_response = comment_services.validate_params(blog_id, page, per_page, db)
-    if comments_response == "Blog not found":
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found"
-        )
-    return comments_response
-
-
-@blog.get("/{blog_id}/comments")
-async def comments(
-    db: Annotated[Session, Depends(get_db)],
-    blog_id: str,
-    page: int = 1,
-    per_page: int = 20,
-) -> object:
-    """
-    Retrieves all comments associated with a blog
-
-    Args:
-        db: Database Session object
-        blog_id: the blog associated with the comments
-        page: the number of the current page
-        per_page: the page size for a current page
-    Returns:
-        Response: An exception if error occurs
-        object: Response object containing the comments
-    """
-    comment_services = CommentService()
-    comments_response = comment_services.validate_params(blog_id, page, per_page, db)
-    if comments_response == "Blog not found":
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Blog not found"
-        )
+    if comments_response == 'Blog not found':
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="Blog not found")
     return comments_response

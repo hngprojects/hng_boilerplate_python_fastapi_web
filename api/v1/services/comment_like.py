@@ -11,9 +11,9 @@ class CommentLikeService(Service):
     """Comment like service functionality"""
 
     def create(self, db: Session, user_id, comment_id, client_ip: Optional[str] = None):
-        """Function to like a comment"""
-
-        like_data = db.query(CommentLike).filter_by(user_id=user_id).first()
+        '''Function to like a comment'''
+        
+        like_data = db.query(CommentLike).filter_by(user_id=user_id, comment_id=comment_id).first()
         if like_data:
             raise HTTPException(
                 status_code=status.HTTP_200_OK,

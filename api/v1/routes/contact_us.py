@@ -1,14 +1,40 @@
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
-from api.utils.success_response import success_response
 from api.db.database import get_db
+from typing import Annotated
+from api.core.responses import SUCCESS
+from api.utils.success_response import success_response
 from api.v1.services.contact_us import contact_us_service
+from api.v1.schemas.contact_us import CreateContactUs
 from api.v1.schemas.contact_us import ContactUsResponseSchema
 from fastapi.encoders import jsonable_encoder
-from api.v1.models.user import User
 from api.v1.services.user import user_service
+from api.v1.models import *
 
 contact_us = APIRouter(prefix="/contact", tags=["Contact-Us"])
+
+
+# CREATE
+@contact_us.post(
+    "",
+    response_model=success_response,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        201: {"description": "Contact us message created successfully"},
+        422: {"description": "Validation Error"},
+    },
+)
+async def create_contact_us(
+    data: CreateContactUs, db: Annotated[Session, Depends(get_db)]
+):
+    """Add a new contact us message."""
+    new_contact_us_message = contact_us_service.create(db, data)
+    response = success_response(
+        message=SUCCESS,
+        data={"id": new_contact_us_message.id},
+        status_code=status.HTTP_201_CREATED,
+    )
+    return response
 
 
 @contact_us.get(

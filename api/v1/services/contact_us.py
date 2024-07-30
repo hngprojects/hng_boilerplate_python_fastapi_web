@@ -1,15 +1,40 @@
-from api.core.base.services import Service
-from typing import Optional, Any
+from fastapi import Depends
 from sqlalchemy.orm import Session
-from api.v1.models.contact_us import ContactUs
+from typing import Annotated, Optional, Any
+from api.core.base.services import Service
+from api.v1.routes.contact_us import get_db
+from api.v1.schemas.contact_us import CreateContactUs
+from api.v1.models import ContactUs
 
 
 class ContactUsService(Service):
-    """Contact Us service functionality"""
+    """Contact Us Service."""
 
-    def create(self, db: Session, schema):
-        pass
+    def __init__(self) -> None:
+        self.adabtingMapper = {
+            "full_name": "full_name",
+            "email": "email",
+            "title": "phone_number", # Adapting the schema to the model
+            "message": "message",
+        }
+        super().__init__()
 
+    # ------------ CRUD functions ------------ #
+    # CREATE
+    def create(self, db: Annotated[Session, Depends(get_db)], data: CreateContactUs):
+        """Create a new contact us message."""
+        contact_message = ContactUs(
+            full_name=getattr(data, self.adabtingMapper["full_name"]),
+            email=getattr(data, self.adabtingMapper["email"]),
+            title=getattr(data, self.adabtingMapper["title"]),
+            message=getattr(data, self.adabtingMapper["message"]),
+        )
+        db.add(contact_message)
+        db.commit()
+        db.refresh(contact_message)
+        return contact_message
+
+    # READ
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all submisions with option to search using query parameters"""
 
@@ -35,10 +60,14 @@ class ContactUsService(Service):
         contact_us_submission = db.query(ContactUs).where(ContactUs.email == email)
         return contact_us_submission
 
-    def update(self):
+    # UPDATE
+    def update(self, db: Annotated[Session, Depends(get_db)], contact_id: int, data: CreateContactUs):
+        """Update a single contact us message."""
         pass
 
-    def delete(self):
+    # DELETE
+    def delete(self, db: Annotated[Session, Depends(get_db)], contact_id: int):
+        """Delete a single contact us message."""
         pass
 
 

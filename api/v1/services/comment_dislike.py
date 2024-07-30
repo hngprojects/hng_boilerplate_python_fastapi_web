@@ -14,7 +14,7 @@ class CommentDislikeService(Service):
     def create(self, db: Session, user_id, comment_id, client_ip: Optional[str] = None):
         """Function to dislike a comment"""
         # check if the user_id has disliked the comment, return error is so
-        dislike_data = db.query(CommentDislike).filter_by(user_id=user_id).first()
+        dislike_data = db.query(CommentDislike).filter_by(user_id=user_id, comment_id=comment_id).first()
         if dislike_data:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
