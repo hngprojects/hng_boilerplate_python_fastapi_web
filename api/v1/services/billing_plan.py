@@ -3,17 +3,22 @@ from api.v1.models.billing_plan import BillingPlan
 from typing import Any, Optional
 from api.core.base.services import Service
 from api.v1.schemas.plans import CreateSubscriptionPlan
+from api.utils.db_validators import check_model_existence
+from api.v1.models.organization import Organization
 
 
 class BillingPlanService(Service):
 	'''Product service functionality'''
 
-	def create(db: Session, request: CreateSubscriptionPlan):
+	def create(db: Session, request: CreateSubscriptionPlan, organization_id: str):
 		"""
 		Create and return a new billing plan
 		"""
 
-		plan = BillingPlan(**request.dict())
+		# check the a valid organization id is passed
+		check_model_existence(db, Organization, organization_id)
+
+		plan = BillingPlan(**request.dict(), organization_id=organization_id)
 		db.add(plan)
 		db.commit()
 		db.refresh(plan)

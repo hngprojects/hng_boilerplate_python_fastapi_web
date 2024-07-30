@@ -7,7 +7,6 @@ class CreateSubscriptionPlan(BaseModel):
     price: int
     duration: str
     currency: str
-    organization_id: str
     features: List[str]
     
     

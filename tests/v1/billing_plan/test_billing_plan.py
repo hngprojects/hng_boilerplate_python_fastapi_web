@@ -69,11 +69,12 @@ def test_fetch_all_plans(mock_user_service, mock_db_session):
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_create_new_plans(mock_user_service, mock_db_session):
     """Billing plan creation test."""
+
+    url = '/api/v1/organizations/s2334d/billing-plans'
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     data = {
             "name": "Advanced",
-            "organization_id": "s2334d",
             "description": "All you need in one pack",
             "price": 80,
             "duration": "Monthly",
@@ -85,7 +86,7 @@ def test_create_new_plans(mock_user_service, mock_db_session):
             }
     
     response = client.post(
-        BILLPLAN_ENDPOINT,
+        url,
         headers={'Authorization': f'Bearer {access_token}'},
         json=data
         )
