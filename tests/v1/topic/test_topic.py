@@ -12,14 +12,12 @@ from faker import Faker
 fake = Faker()
 client = TestClient(app)
 
-# Mock database
 @pytest.fixture
 def mock_db_session(mocker):
     db_session_mock = mocker.MagicMock(spec=Session)
     app.dependency_overrides[get_db] = lambda: db_session_mock
     return db_session_mock
 
-# Test User
 @pytest.fixture
 def test_user():
     return User(
@@ -49,14 +47,12 @@ def test_topic(test_user):
 def access_token_user1(test_user):
     return user_service.create_access_token(user_id=test_user.id)
 
-# Test creating topic
 def test_create_topic(
     mock_db_session, 
     test_user, 
     test_topic,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Topic and ident == test_topic.id:
             return test_topic
@@ -64,7 +60,6 @@ def test_create_topic(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
@@ -87,7 +82,6 @@ def test_update_topic(
     test_topic,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Topic and ident == test_topic.id:
             return test_topic
@@ -95,10 +89,8 @@ def test_update_topic(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
@@ -114,7 +106,6 @@ def test_delete_topic(
     test_topic,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Topic and ident == test_topic.id:
             return test_topic
@@ -122,10 +113,8 @@ def test_delete_topic(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
@@ -138,7 +127,6 @@ def test_search_topic(
     test_topic,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Topic and ident == test_topic.id:
             return test_topic
@@ -146,10 +134,8 @@ def test_search_topic(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
     response = client.get(f"/api/v1/help-center/topics/search?search_query={test_topic.id}")    
     if response.status_code != 200:
@@ -163,7 +149,6 @@ def test_fetch_a_topic(
     test_topic,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Topic and ident == test_topic.id:
             return test_topic
@@ -171,10 +156,8 @@ def test_fetch_a_topic(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
     response = client.get(f"/api/v1/help-center/topics/{test_topic.id}")
@@ -189,7 +172,6 @@ def test_fetch_all_topic(
     test_topic,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Topic and ident == test_topic.id:
             return test_topic
@@ -197,10 +179,8 @@ def test_fetch_all_topic(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
     response = client.get(f"/api/v1/help-center/topics")
