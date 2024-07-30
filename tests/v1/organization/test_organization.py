@@ -30,9 +30,17 @@ def mock_org():
     return Organization(
         id=str(uuid7()),
         company_name="Test Organization",
+        company_email="info@testorg.com",
+        industry="Technology",
+        organization_type="Private",
+        country="Nigeria",
+        state="Lagos",
+        address="123 Tech Street",
+        lga="Ikeja",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
-    )
+)
+
 
 @pytest.fixture
 def db_session_mock():
@@ -52,8 +60,7 @@ def mock_current_user():
 
 def test_get_organization_success(client, db_session_mock, mock_current_user):
     '''Test to successfully retrieve an organization by ID'''
-    
-    # Mock the user service to return the current user
+
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_current_user
     db_session_mock.query.return_value.filter.return_value.first.return_value = mock_org()
 
@@ -65,6 +72,14 @@ def test_get_organization_success(client, db_session_mock, mock_current_user):
     assert response.status_code == 200
     data = response.json()
     assert data["company_name"] == "Test Organization"
+    assert data["company_email"] == "info@testorg.com"
+    assert data["industry"] == "Technology"
+    assert data["organization_type"] == "Private"
+    assert data["country"] == "Nigeria"
+    assert data["state"] == "Lagos"
+    assert data["address"] == "123 Tech Street"
+    assert data["lga"] == "Ikeja"
+
 
 def test_get_organization_not_found(client, db_session_mock, mock_current_user):
     '''Test retrieving an organization that does not exist'''
