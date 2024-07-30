@@ -104,27 +104,19 @@ class UserService(Service):
         
         return user
 
-    def update(self, db: Session, current_user_id : str ,schema : user.UserUpdate, id=None):
+    def update(self, db: Session, current_user : User ,schema : user.UserUpdate, id=None):
         """Function to update a User"""
         # Get user from access token if provided, otherwise fetch user by id
-        user = check_model_existence(db, User, id)
-       
-
-        if current_user_id != user.id or user.is_deleted :
-            raise HTTPException(
-                status_code=403,
-                detail="You dont have permission to perform this action",
-            )
-        if schema.first_name is not None:
-            user.first_name = schema.first_name
-        if schema.last_name is not None:
-            user.last_name = schema.last_name
-        if schema.email is not None:
-            user.email = schema.email
+        if current_user.is_super_admin and id is not None :
+            user = self.fetch(db=db, id=id)
+        else :
+            user = self.fetch(db=db, id=current_user.id)
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(user, key , value)
         db.commit()
         db.refresh(user)
         return user
-        
 
     def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
         """Function to soft delete a user"""
