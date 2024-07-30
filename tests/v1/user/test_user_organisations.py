@@ -10,6 +10,7 @@ from api.v1.models.organization import Organization
 from api.v1.services.user import user_service
 from api.utils.settings import settings
 
+
 DB_HOST = settings.DB_HOST
 DB_PORT = settings.DB_PORT
 DB_USER = settings.DB_USER
@@ -17,7 +18,9 @@ DB_PASSWORD = settings.DB_PASSWORD
 DB_NAME = settings.DB_NAME
 DB_TYPE = settings.DB_TYPE
 
+
 DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+
 
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
