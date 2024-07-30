@@ -29,12 +29,16 @@ def mock_get_current_user():
 
 
 def mock_org():
+    """Mock organization"""
     return Organization(
         id=str(uuid7()),
-        company_name="Test Organization",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        company_name='Test Company',
     )
+
+
+def mock_org_users():
+    """Mock organization users"""
+    return [mock_get_current_user()]
 
 
 @pytest.fixture
@@ -55,18 +59,28 @@ def test_get_organisation_users_success(client, db_session_mock):
     '''Test to successfully get organization users'''
 
     app.dependency_overrides[
-        user_service.get_current_user] = lambda: mock_get_current_user
-    app.dependency_overrides[organization_service.fetch] = lambda: mock_org
+        user_service.get_current_user
+    ] = lambda: mock_get_current_user
+    app.dependency_overrides[
+        organization_service.paginate_users_in_organization
+    ] = lambda: mock_org_users
+    app.dependency_overrides[
+        organization_service.fetch
+    ] = lambda: mock_org
+    app.dependency_overrides[
+        organization_service.count_organization_users
+    ] = lambda: 1
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
+    mock_orgs_user = mock_org_users()
     mock_organization = mock_org()
 
     with patch(
-        "api.v1.services.organization.organization_service.fetch",
-            return_value=mock_organization):
+        "api.v1.services.organization.organization_service.paginate_users_in_organization",
+            return_value=mock_orgs_user):
         response = client.get(
             f'/api/v1/organizations/{mock_organization.id}/users',
             headers={'Authorization': 'Bearer token'},
