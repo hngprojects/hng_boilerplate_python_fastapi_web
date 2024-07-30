@@ -1,6 +1,7 @@
+# tests/v1/organization/test_organization.py
+
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -27,7 +28,7 @@ def mock_get_current_user():
 
 def mock_org():
     return Organization(
-        id=str(uuid4()),
+        id=1,  # Ensure this ID is an integer if the API expects an integer
         company_name="Test Organization",
         company_email="testorg@example.com",
         industry="Tech",
@@ -81,17 +82,16 @@ def test_get_organization_not_found(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = None
 
     response = client.get(
-        '/api/v1/organizations/non-existent-id',
+        '/api/v1/organizations/99999',
         headers={'Authorization': 'Bearer token'}
     )
 
     assert response.status_code == 404, response.text
     data = response.json()
+    assert data["message"] == "Organization not found"
+    assert data["status_code"] == 404
 
-    assert "detail" in data
-    assert data["detail"] == "Organization not found"
-
-def test_get_organization_invalid_id(client, db_session_mock):
+def test_get_organization_invalid_id(client):
     '''Test retrieving an organization with an invalid ID format'''
 
     response = client.get(
@@ -102,5 +102,5 @@ def test_get_organization_invalid_id(client, db_session_mock):
     # Check for status code and validation error format
     assert response.status_code == 422, response.text  # Unprocessable Entity due to validation error
     data = response.json()
-    assert "detail" in data
-    assert data["detail"][0]["msg"] == "value is not a valid integer"
+    assert "errors" in data
+    assert data["errors"][0]["msg"] == "Input should be a valid integer, unable to parse string as an integer"
