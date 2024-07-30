@@ -48,5 +48,4 @@ class RemoveUserFromOrganization(BaseModel):
     '''Schema to delete a user role in an organization'''
 
     user_id: str
-    org_id: str 
-
+    org_id: str

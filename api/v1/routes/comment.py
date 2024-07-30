@@ -41,7 +41,6 @@ async def like_comment(
         data = jsonable_encoder(like)
     )
 
-# Endpoint to dislike a comment
 @comment.post("/{comment_id}/dislike", response_model=DislikeSuccessResponse)
 async def dislike_comment(
     request: Request,
@@ -64,11 +63,9 @@ async def dislike_comment(
     user_id = current_user.id
 
     client_ip = request.headers.get("X-Forwarded-For")
-    # check if none and return Request.client.host instead
     if client_ip is None or client_ip == "":
         client_ip = request.client.host
 
-    # create the dislike using the create method in comment_dislike_service
     dislike = comment_dislike_service.create(
         db=db, user_id=user_id, comment_id=comment_id, client_ip=client_ip
         )
