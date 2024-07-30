@@ -48,3 +48,19 @@ async def create_billing_plan(
         data=billing_plan,
         message="Billing plan created successfully"
     )
+
+
+@bill_plan.get('/billing-plans/{plan_id}', response_model=BillingPlanResponse)
+async def get_billing_plan_by_id(
+    plan_id: str,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Get Billing Plan by ID endpoint
+    """
+    billing_plan = billing_plan_service.get_billing_plan_by_id(db=db, plan_id=plan_id)
+    if not billing_plan:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Billing plan not found")
+    
+    return billing_plan
