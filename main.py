@@ -2,7 +2,6 @@ from fastapi.responses import JSONResponse
 import uvicorn
 import os
 from fastapi import HTTPException, Request
-from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -22,14 +21,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-# Directory to save images
-IMAGE_DIR = "media"
-if not os.path.exists(IMAGE_DIR):
-    os.makedirs(IMAGE_DIR)
-
-
 app = FastAPI(lifespan=lifespan)
-app.mount("/media/images", StaticFiles(directory=IMAGE_DIR), name="mediafiles")
+
 
 origins = [
     "http://localhost:3000",
