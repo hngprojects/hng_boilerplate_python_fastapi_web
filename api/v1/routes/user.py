@@ -46,7 +46,7 @@ def get_current_user_details(
 #         message='User deleted successfully',
 #     )
 
-@user.patch("/password-update", status_code=200)
+@user.patch("/me/password", status_code=200)
 async def change_password(
     schema: ChangePasswordSchema,
     db: Session = Depends(get_db),

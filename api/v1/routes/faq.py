@@ -17,7 +17,7 @@ faq = APIRouter(prefix="/faqs", tags=["Frequently Asked Questions"])
 @faq.get('', response_model=success_response, status_code=200)
 async def get_all_faqs(
     db: Session = Depends(get_db),
-    limit: int = 2,
+    limit: int = 10,
     skip: int = 0,
 ):
     '''Endpoint to get all FAQs'''
