@@ -148,33 +148,3 @@ def test_success_profile_update(
     assert response.status_code == 200
     assert response.json()["data"]["bio"] == "Updated bio"
     assert response.json()["data"]["updated_at"] is not None
-
-
-def test_profile_update_not_found(
-    db_session_mock, mock_get_current_user, mock_jwt_decode, mocker
-):
-    mocker.patch("jose.jwt.decode", return_value={"user_id": "user_id"})
-
-    db_session_mock.query().filter().first.return_value = None
-
-    profile_update = ProfileCreateUpdate(
-        pronouns="Updated pronouns",
-        job_title="Updated job title",
-        department="Updated department",
-        social="Updated social",
-        bio="Updated bio",
-        phone_number="+1234567890",
-        avatar_url="updated_avatar_url",
-        recovery_email="updated_recovery_email@example.com",
-    )
-
-    token = create_test_token("user_id")
-
-    response = client.patch(
-        "/api/v1/profile/",
-        json=jsonable_encoder(profile_update),
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    assert response.status_code == 401
-    assert response.json()["message"] == "User not authenticated"

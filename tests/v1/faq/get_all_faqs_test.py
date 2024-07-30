@@ -1,84 +1,68 @@
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from uuid_extensions import uuid7
 
 from api.db.database import get_db
-from api.v1.services.user import user_service
-from api.v1.models import User
 from api.v1.models.faq import FAQ
-from api.v1.services.faq import faq_service
 from main import app
 
 
-def mock_get_current_admin():
-    return User(
-        id=str(uuid7()),
-        email="admin@gmail.com",
-        password=user_service.hash_password("Testadmin@123"),
-        first_name='Admin',
-        last_name='User',
-        is_active=True,
-        is_super_admin=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-
-
-def mock_faq():
-    faq1 =  FAQ(
-        id=str(uuid7()),
-        question="TTest qustion?",
-        answer="TAnswer",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-
-    faq2 =  FAQ(
-        id=str(uuid7()),
-        question="TTest qustion1?",
-        answer="TAnswer1",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-
-    return [faq1, faq2]
-
-
 @pytest.fixture
-def db_session_mock():
+def mock_db_session():
     db_session = MagicMock(spec=Session)
     return db_session
 
 @pytest.fixture
-def client(db_session_mock):
-    app.dependency_overrides[get_db] = lambda: db_session_mock
+def client(mock_db_session):
+    app.dependency_overrides[get_db] = lambda: mock_db_session
     client = TestClient(app)
     yield client
     app.dependency_overrides = {}
 
 
-def test_fetch_faq_success(client, db_session_mock):
-    '''Test to successfully fetch a new faq'''
+def test_get_all_faqs(mock_db_session, client):
+    """Test to verify the pagination response for FAQs."""
+    # Mock data
+    mock_faq_data = [
+        FAQ(id=1, question="Question 1", answer="Answer 1"),
+        FAQ(id=2, question="Question 2", answer="Answer 2"),
+        FAQ(id=3, question="Question 3", answer="Answer 3"),
+    ]
+    
+    mock_query = MagicMock()
+    mock_query.count.return_value = 3
+    mock_db_session.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_faq_data
 
-    # Mock the user service to return the current user
-    app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-    app.dependency_overrides[faq_service.fetch_all] = lambda: mock_faq
+    mock_db_session.query.return_value = mock_query
 
-    # Mock faq creation
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
+    # Perform the GET request
+    response = client.get('/api/v1/faqs', params={'limit': 2, 'skip': 0})
 
-    mock_freq_asked_questions = mock_faq()
+    # Verify the response
+    assert response.status_code == 200
 
-    with patch("api.v1.services.faq.faq_service.fetch", return_value=mock_freq_asked_questions) as mock_fetch:
-        response = client.get(
-            '/api/v1/faqs',
-            headers={'Authorization': 'Bearer token'}
-        )
 
-        assert response.status_code == 200
+def test_get_all_faqs_with_skip(mock_db_session, client):
+    """Test to verify the pagination response for FAQs."""
+
+    # Mock data
+    mock_faq_data = [
+        FAQ(id=1, question="Question 1", answer="Answer 1"),
+        FAQ(id=2, question="Question 2", answer="Answer 2"),
+        FAQ(id=3, question="Question 3", answer="Answer 3"),
+    ]
+    
+    mock_query = MagicMock()
+    mock_query.count.return_value = 3
+    mock_db_session.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_faq_data
+
+    mock_db_session.query.return_value = mock_query
+
+
+    # Perform the GET request
+    response = client.get('/api/v1/faqs', params={'limit': 2, 'skip': 2})
+
+    # Verify the response
+    assert response.status_code == 200
