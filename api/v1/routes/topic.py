@@ -87,7 +87,7 @@ async def search_for_topic(
 	)
 
 @topic.delete('/topics')
-async def delete_topic(
+async def delete_a_topic(
 	db: Session = Depends(get_db),
 	id: str = Query(..., description="Topic's id"),
 	current_user: User = Depends(user_service.get_current_super_admin),
@@ -112,7 +112,7 @@ async def delete_topic(
 	)
 
 @topic.patch("/topics")
-async def update_topic(
+async def update_a_topic(
 	schema: TopicUpdateSchema,
 	id: str = Query(..., description="Topic's id"),
 	db: Session = Depends(get_db),
@@ -137,8 +137,8 @@ async def update_topic(
 		data=jsonable_encoder(updated_topic)
 	)
 	
-@topic.post("/topics", response_class=TopicData)
-async def create_topic(
+@topic.post("/topics")
+async def create_a_topic(
 	schema: TopicBase,
 	db: Session = Depends(get_db),
 	current_user: User = Depends(user_service.get_current_super_admin),
