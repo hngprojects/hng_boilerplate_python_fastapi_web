@@ -7,7 +7,7 @@ from sqlalchemy import (
         Boolean
         )
 from sqlalchemy.orm import relationship
-from api.v1.models.base import user_organization_association, user_newsletter_association
+from api.v1.models.associations import user_organization_association
 from api.v1.models.base_model import BaseTableModel
 
 
@@ -15,12 +15,11 @@ from api.v1.models.base_model import BaseTableModel
 class User(BaseTableModel):
     __tablename__ = 'users'
 
-    username = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=True)
     first_name = Column(String, nullable=True)
     last_name = Column(String, nullable=True)
-    is_active = Column(Boolean, server_default=text("false"))
+    is_active = Column(Boolean, server_default=text("true"))
     is_super_admin = Column(Boolean, server_default=text("false"))
     is_deleted = Column(Boolean, server_default=text("false"))
     is_verified = Column(Boolean, server_default=text("false"))
@@ -38,7 +37,6 @@ class User(BaseTableModel):
     comments = relationship("Comment", back_populates="user", cascade="all, delete-orphan")
     invitations = relationship("Invitation", back_populates="user", cascade="all, delete-orphan")
     messages = relationship("Message", back_populates="user", cascade="all, delete-orphan")
-    newsletters = relationship("Newsletter", secondary=user_newsletter_association, back_populates="subscribers")
     blog_likes = relationship("BlogLike", back_populates="user", cascade="all, delete-orphan")
     blog_dislikes = relationship("BlogDislike", back_populates="user", cascade="all, delete-orphan")
     comment_likes = relationship("CommentLike", back_populates="user", cascade="all, delete-orphan")

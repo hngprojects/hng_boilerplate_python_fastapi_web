@@ -11,19 +11,16 @@ class UserBase(BaseModel):
     id: str
     first_name: str
     last_name: str
-    username: str
     email: EmailStr
     created_at: datetime
 
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
-
-    username: str
+    email: EmailStr
     password: str
     first_name: str
     last_name: str
-    email: EmailStr
 
     @field_validator("password")
     def password_validator(cls, value):
@@ -35,7 +32,14 @@ class UserCreate(BaseModel):
                 "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character."
             )
         return value
+    
 
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+class EmailRequest(BaseModel):
+    email: EmailStr
 
 class Token(BaseModel):
     access_token: str
@@ -66,4 +70,14 @@ class ChangePwdRet(BaseModel):
     """schema for returning change password response"""
 
     status_code: int
+    message: str
+
+class MagicLinkRequest(BaseModel):
+    '''Schema for magic link creation'''
+
+    email: EmailStr
+
+class MagicLinkResponse(BaseModel):
+    '''Schema for magic link respone'''
+
     message: str

@@ -1,6 +1,8 @@
 from fastapi.responses import JSONResponse
 import uvicorn
+import os
 from fastapi import HTTPException, Request
+from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
@@ -8,7 +10,7 @@ from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from api.utils.json_response import JsonResponseDict
-from starlette.middleware.sessions import SessionMiddleware   # required by google oauth
+from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
 from api.utils.logger import logger
 from api.v1.routes import api_version_one
@@ -20,7 +22,14 @@ async def lifespan(app: FastAPI):
     yield
 
 
+# Directory to save images
+IMAGE_DIR = "media"
+if not os.path.exists(IMAGE_DIR):
+    os.makedirs(IMAGE_DIR)
+
+
 app = FastAPI(lifespan=lifespan)
+app.mount("/media/images", StaticFiles(directory=IMAGE_DIR), name="mediafiles")
 
 origins = [
     "http://localhost:3000",
@@ -47,7 +56,13 @@ async def get_root(request: Request) -> dict:
     )
 
 
+@app.get("/probe", tags=["Home"])
+async def probe():
+    return {"message": "I am the Python FastAPI API responding"}
+
+
 # REGISTER EXCEPTION HANDLERS
+
 
 @app.exception_handler(HTTPException)
 async def http_exception(request: Request, exc: HTTPException):
