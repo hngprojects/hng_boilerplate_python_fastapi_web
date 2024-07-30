@@ -51,10 +51,15 @@ def create_mock_user(mock_user_service, mock_db_session):
     return mock_user
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_get_user_organisations(mock_user_service, mock_db_session):
-    """Test for user deactivation errors."""
+def test_get_user_organizations(mock_user_service, mock_db_session):
+    """Test for retrieving user organizations."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
-    access_token = user_service.create_access_token(user_id=str(uuid7()))
-    response = client.get(USEROGR_ENDPOINT, headers={'Authorization': f'Bearer {access_token}'})
+    access_token = user_service.create_access_token(user_id=mock_user.id)
     
+    # Mock the `get_current_user` method to return the mock user
+    mock_user_service.get_current_user.return_value = mock_user
+
+    response = client.get(USERORG_ENDPOINT, headers={'Authorization': f'Bearer {access_token}'})
+
     assert response.status_code == status.HTTP_200_OK
+    # Add more assertions as needed to validate the response content
