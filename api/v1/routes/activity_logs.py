@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, status
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from api.v1.models.user import User
 from api.v1.schemas.activity_logs import ActivityLogCreate, ActivityLogResponse
 from api.v1.services.activity_logs import activity_log_service
+from api.v1.services.user import user_service
 from api.db.database import get_db
 from api.utils.success_response import success_response
 
@@ -27,7 +29,7 @@ async def create_activity_log(activity_log: ActivityLogCreate, db: Session = Dep
 
 
 @activity_logs.get("/", response_model=list[ActivityLogResponse])
-async def get_all_activity_logs(db: Session = Depends(get_db)):
+async def get_all_activity_logs(current_user: User = Depends(user_service.get_current_super_admin), db: Session = Depends(get_db)):
     '''Get all activity logs'''
 
     activity_logs = activity_log_service.get_all_activity_logs(db=db)
