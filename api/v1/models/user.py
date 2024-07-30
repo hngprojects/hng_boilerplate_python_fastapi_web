@@ -1,5 +1,6 @@
 """ User data model
 """
+
 from sqlalchemy import (
         Column,
         String,
@@ -11,9 +12,8 @@ from api.v1.models.associations import user_organization_association
 from api.v1.models.base_model import BaseTableModel
 
 
-
 class User(BaseTableModel):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=True)
@@ -46,7 +46,6 @@ class User(BaseTableModel):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
         return obj_dict
-
 
     def __str__(self):
         return self.email
