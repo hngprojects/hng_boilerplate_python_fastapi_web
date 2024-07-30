@@ -6,6 +6,7 @@ from typing import Annotated
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
+from api.v1.models.product import Product
 from api.v1.services.product import product_service
 from api.v1.schemas.product import ProductList
 from api.v1.schemas.product import ProductUpdate, ResponseModel
@@ -20,12 +21,36 @@ product = APIRouter(prefix='/products', tags=['Products'])
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
+    skip: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
 ):
     '''Endpoint to get all products. Only accessible to superadmin'''
 
-    products = product_service.fetch_all(db)
+    return paginated_response(
+        db=db,
+        model=Product,
+        limit=limit,
+        skip=skip
+    )
+
+
+@product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)
+def get_organization_products(
+    org_id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
+    db: Session = Depends(get_db), 
+):
+    '''
+    Endpoint to retrieve a paginated list of products of an organization.
+
+    Query parameter: 
+        - limit: Number of product per page (default: 10, minimum: 1)
+        - page: Page number (starts from 1)
+    '''
+
+    products = product_service.fetch_by_organization(db, user=current_user, org_id=org_id, limit=limit, page=page)
 
     total_products = len(products)
 
@@ -50,62 +75,9 @@ async def get_all_products(
 
     return success_response(
         status_code=200, 
-        message="Successfully fetched all products", 
+        message="Successfully fetched organizations products", 
         data=data
     )
-
-
-@product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)
-def get_organization_products(
-    org_id: str,
-    current_user: Annotated[User, Depends(user_service.get_current_user)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    skip: Annotated[int, Query(ge=1, description="Number of products to skip per page")] = 10,
-    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
-    db: Session = Depends(get_db), 
-):
-    '''
-    Endpoint to retrieve a paginated list of products of an organization.
-
-    Query parameter: 
-        - limit: Number of product per page (default: 10, minimum: 1)
-        - page: Page number (starts from 1)
-    '''
-
-    products = product_service.fetch_by_organization(db, user=current_user, org_id=org_id, limit=limit, page=page)
-
-    total_products = len(products)
-
-    total_pages = int(total_products / limit) + (total_products % limit > 0)
-
-    # product_data = [
-    #     {
-    #         "name": product.name,
-    #         "description": product.description,
-    #         "price": str(product.price)
-    #     }
-    #     for product in products
-    # ]
-
-    # data = {
-    #     "current_page": page,
-    #     "total_pages": total_pages,
-    #     "limit": limit,
-    #     "total_items": total_products,
-    #     "products": jsonable_encoder(products)
-    # }
-
-    return paginated_response(
-        items=jsonable_encoder(products),
-        limit=limit,
-        skip=skip
-    )
-
-    # return success_response(
-    #     status_code=200, 
-    #     message="Successfully fetched organizations products", 
-    #     data=data
-    # )
 
 
 @product.put("/{id}", response_model=ResponseModel)
