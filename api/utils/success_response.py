@@ -1,8 +1,9 @@
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union,List,Dict
 from fastapi.responses import JSONResponse
 
 
-def success_response(status_code: int, message: str, data: Optional[dict] = None):
+
+def success_response(status_code: int, message: str, data: Optional[Union[Dict , List[Dict]]] = None):
     '''Returns a JSON response for success responses'''
 
     response_data = {
@@ -10,8 +11,9 @@ def success_response(status_code: int, message: str, data: Optional[dict] = None
         "success": True,
         "message": message
     }
-
-    if data:
+    
+    if data is not None:
+        
         response_data['data'] = data
 
     return JSONResponse(
