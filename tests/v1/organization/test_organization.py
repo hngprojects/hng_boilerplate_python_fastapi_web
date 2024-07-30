@@ -56,50 +56,27 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 def test_get_organization_success(client, db_session_mock):
-    '''Test to successfully get an organization'''
-
-    # Mock the user service to return the current user
-    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
-
     mock_organization = mock_org()
     db_session_mock.query().filter().first.return_value = mock_organization
 
-    response = client.get(
-        '/organizations/1',
-        headers={'Authorization': 'Bearer token'}
-    )
-
+    response = client.get('/organizations/1', headers={'Authorization': 'Bearer token'})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
     assert data["status_code"] == 200
+    assert "data" in data
     assert data["data"]["company_name"] == mock_organization.company_name
 
 def test_get_organization_not_found(client, db_session_mock):
-    '''Test to handle organization not found'''
-
-    # Mock the user service to return the current user
-    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
-
     db_session_mock.query().filter().first.return_value = None
 
-    response = client.get(
-        '/organizations/999',
-        headers={'Authorization': 'Bearer token'}
-    )
-
+    response = client.get('/organizations/999', headers={'Authorization': 'Bearer token'})
     assert response.status_code == 404
     data = response.json()
-    assert data["message"] == "Organization not found"
+    assert data["status"] == "unsuccessful"
     assert data["status_code"] == 404
-    assert data["success"] is False
+    assert data["message"] == "Organization not found"
 
 def test_get_organization_invalid_id(client):
-    '''Test to handle invalid organization ID format'''
-
-    response = client.get(
-        '/organizations/abc',
-        headers={'Authorization': 'Bearer token'}
-    )
-
-    assert response.status_code == 422  # Unprocessable Entity due to validation error
+    response = client.get('/organizations/abc', headers={'Authorization': 'Bearer token'})
+    assert response.status_code == 422  # Expecting validation error for invalid ID format

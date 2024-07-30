@@ -43,12 +43,25 @@ async def create_organization(
 @organization.get('/{org_id}',response_model=OrganizationBase, status_code=status.HTTP_200_OK)
 def read_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = user_service.get_current_user(token, db)
-    organization = organization_service.get_organization(db, org_id)
-    return {
-        "status": "success",
-        "status_code": 200,
-        "data": organization
-    }
+    try:
+        organization = organization_service.get_organization(db, org_id)
+        return {
+            "status": "success",
+            "status_code": 200,
+            "data": organization
+        }
+    except HTTPException as e:
+        if e.status_code == 404:
+            return {
+                "status": "unsuccessful",
+                "status_code": 404,
+                "message": "Organization not found"
+            }
+        else:
+            raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 
