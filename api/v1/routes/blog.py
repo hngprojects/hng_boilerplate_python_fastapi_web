@@ -5,6 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from api.db.database import get_db
+from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.models.blog import Blog, BlogDislike
@@ -32,15 +33,14 @@ def create_blog(blog: BlogCreate, db: Session = Depends(get_db), current_user: U
     )
 
 @blog.get("/", response_model=success_response)
-def get_all_blogs(db: Session = Depends(get_db)):
+def get_all_blogs(db: Session = Depends(get_db), limit: int=  10, skip: int = 0):
+    '''Endpoint to get all blogs'''
 
-    blog_service = BlogService(db)
-    blogs = blog_service.fetch_all()
-
-    return success_response(
-        message = "Blogs fetched successfully!",
-        status_code = 200,
-        data = [blog.to_dict() for blog in blogs]
+    return paginated_response(
+        db=db,
+        model=Blog,
+        limit=limit,
+        skip=skip,
     )
 
 
