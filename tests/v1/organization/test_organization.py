@@ -2,14 +2,11 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 from main import app
-from datetime import datetime
+from datetime import datetime, timezone
 from api.v1.models.organization import Organization
 from api.v1.services.user import UserService
 from api.db.database import get_db
 from unittest.mock import MagicMock, patch
-
-
-from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
 from api.v1.services.user import user_service
@@ -54,21 +51,16 @@ def db_session_mock():
     return db_session
 
 @pytest.fixture
+def mock_get_current_user():
+    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
+        yield
+
+@pytest.fixture
 def client(db_session_mock):
     app.dependency_overrides[get_db] = lambda: db_session_mock
     client = TestClient(app)
     yield client
     app.dependency_overrides = {}
-
-@pytest.fixture
-def db_session_mock():
-    db = MagicMock()
-    return db
-
-@pytest.fixture
-def mock_get_current_user():
-    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
-        yield
 
 def test_get_organization_success(db_session_mock, mock_get_current_user):
     mock_organization = MagicMock(spec=Organization)
@@ -79,7 +71,7 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = mock_organization
 
     # Patch get_db in the correct module
-    with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
+    with patch("api.db.database.get_db", return_value=db_session_mock):
         response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 200
         data = response.json()
@@ -92,8 +84,7 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
 def test_get_organization_not_found(db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = None
 
-    # Patch get_db in the correct module
-    with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
+    with patch("api.db.database.get_db", return_value=db_session_mock):
         response = client.get("/api/v1/organizations/999", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 404
         data = response.json()
@@ -102,7 +93,6 @@ def test_get_organization_not_found(db_session_mock, mock_get_current_user):
         assert data["success"] is False
 
 def test_get_organization_invalid_id(db_session_mock, mock_get_current_user):
-    # Patch get_db in the correct module
-    with patch("api.v1.routes.organization.get_db", return_value=db_session_mock):
+    with patch("api.db.database.get_db", return_value=db_session_mock):
         response = client.get("/api/v1/organizations/abc", headers={"Authorization": "Bearer testtoken"})
         assert response.status_code == 422  # Unprocessable Entity due to validation error
