@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models import User
-from api.v1.schemas.user import TokenData
+from api.v1.schemas.user import Token
 from datetime import timedelta
 
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
@@ -213,8 +213,8 @@ def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_curr
 
 # Verify Magic Link
 @auth.post("/verify-magic-link")
-async def verify_magic_link(token_schema: TokenData):
-    user, access_token = AuthService.verify_magic_token(token_schema.token)
+async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
+    user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
 
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
