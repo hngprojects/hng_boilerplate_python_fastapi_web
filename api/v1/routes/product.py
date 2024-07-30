@@ -6,13 +6,15 @@ from typing import Annotated
 from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.services.product import product_service
-from api.v1.schemas.product import ProductList
 from api.v1.schemas.product import (
     ProductUpdate,
     ResponseModel,
     ProductDetail,
+    ProductCategoryBase,
+    ProductList,
+    ProductVariantBase,
+    ProductDetailOrganization,
 )
-from api.v1.models.product import Product
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.models import User
@@ -117,7 +119,7 @@ async def update_product(
     )
 
 
-@product.get("/{id}", response_model=ProductDetail)
+@product.get("/{id}")
 async def get_product_detail(
     id: str,
     db: Session = Depends(get_db),
@@ -141,9 +143,44 @@ async def get_product_detail(
     """
 
     product = product_service.fetch(db, id)
+    product_detail = ProductDetail(
+        id=product.id,
+        name=product.name,
+        description=product.description,
+        price=product.price,
+        organization=ProductDetailOrganization(
+            id=product.org_id,
+            company_name=product.organization.company_name,
+            company_email=product.organization.company_email,
+            industry=product.organization.industry,
+            organization_type=product.organization.organization_type,
+            country=product.organization.country,
+            state=product.organization.state,
+            address=product.organization.address,
+            lga=product.organization.lga,
+            created_at=product.organization.created_at,
+            updated_at=product.organization.updated_at,
+        ),
+        quantity=product.quantity,
+        image_url=product.image_url,
+        status=product.status,
+        archived=product.archived,
+        variants=[
+            ProductVariantBase(
+                id=variant.id,
+                size=variant.size,
+                price=variant.price,
+                stock=variant.stock,
+            )
+            for variant in product.variants
+        ],
+        category=ProductCategoryBase(
+            id=product.category_id, name=product.category.name
+        ),
+    )
 
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Product fetched successfully",
-        data=jsonable_encoder(product),
+        data=jsonable_encoder(product_detail),
     )

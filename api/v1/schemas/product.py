@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, PositiveFloat
+from pydantic import BaseModel, EmailStr, Field, PositiveFloat
 from typing import List, Optional, Any, Dict
 from datetime import datetime
 from api.v1.schemas.organization import OrganizationBase
@@ -80,12 +80,26 @@ class ProductVariantBase(BaseModel):
     stock: int
 
 
+class ProductDetailOrganization(BaseModel):
+    id: str
+    company_name: str
+    company_email: EmailStr | None = None
+    industry: str | None = None
+    organization_type: str | None = None
+    country: str | None = None
+    state: str | None = None
+    address: str | None = None
+    lga: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
 class ProductDetail(BaseModel):
     id: str
     name: str
     description: str
     price: float
-    organization: OrganizationBase
+    organization: ProductDetailOrganization
     quantity: int
     image_url: str
     status: str
