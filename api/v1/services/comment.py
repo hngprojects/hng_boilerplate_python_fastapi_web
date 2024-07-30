@@ -13,6 +13,7 @@ from api.v1.models import Comment, Blog, User
 class CommentService(Service):
     '''Comment service functionality'''
     
+    @staticmethod
     def update_comment(db: Session, comment_id: str, data: UpdateCommentRequest, user_id: str):
         comment = db.query(Comment).filter(Comment.id == comment_id).first()
         if not comment:
