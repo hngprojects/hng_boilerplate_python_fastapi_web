@@ -46,7 +46,6 @@ user = User(
     password=user_service.hash_password("Testpassword@123"),
     first_name="Test",
     last_name="User",
-    is_active=False,
     created_at=created_at,
     updated_at=updated_at,
 )
