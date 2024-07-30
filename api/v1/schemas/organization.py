@@ -50,3 +50,13 @@ class RemoveUserFromOrganization(BaseModel):
     user_id: str
     org_id: str 
 
+
+class AddUserToOrganization(BaseModel):
+    user_id: str
+    role: str
+
+    @field_validator('role')
+    def role_validator(cls, value):
+        if value not in ['admin', 'user', 'guest', 'owner']:
+            raise ValueError('Role has to be one of admin, guest, user, or owner')
+        return value

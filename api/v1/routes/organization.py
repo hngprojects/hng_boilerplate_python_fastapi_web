@@ -4,15 +4,13 @@ from sqlalchemy.orm import Session
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.organization import CreateUpdateOrganization
+from api.v1.schemas.organization import CreateUpdateOrganization, AddUserToOrganization
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
 
-
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
-
 
 @organization.post('', response_model=success_response, status_code=status.HTTP_201_CREATED)
 async def create_organization(
@@ -50,3 +48,9 @@ def delete_organization(org_id: str, db: Session = Depends(get_db), current_user
     """delete organization"""
     organization_service.delete(db, org_id, current_user)
     return success_response(status_code=status.HTTP_204_NO_CONTENT, message='Organization deleted successfully')
+
+@organization.post("/{org_id}", status_code=status.HTTP_201_CREATED)
+def add_user_organization(payload: AddUserToOrganization, org_id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+    """add user to organization"""
+    organization_service.add_user_org(db, current_user, org_id, payload)
+    return success_response(status_code=status.HTTP_201_CREATED, message='User added to organization successfully')

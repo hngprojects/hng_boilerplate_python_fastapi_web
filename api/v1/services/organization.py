@@ -111,7 +111,9 @@ class OrganizationService(Service):
                 detail=f"Permission denied as user is not of {role} role",
             )
 
-    def add_user_to_organization(self, schema: AddUpdateOrganizationRole, db: Session):
+    def update_user_to_organization(
+        self, schema: AddUpdateOrganizationRole, db: Session
+    ):
         """Deletes a user from an organization"""
 
         # Fetch the user and organization
@@ -137,19 +139,36 @@ class OrganizationService(Service):
         db.commit()
 
     def delete(self, db: Session, id: str, user: User):
-        '''Deletes a organization'''
+        """Deletes a organization"""
         organization = self.fetch(id=id)
         stmt = user_organization_association.select().where(
-            user_organization_association.c.user_id==user.id,
-            user_organization_association.c.organization_id==id,
-            user_organization_association.c.role=='owner'
+            user_organization_association.c.user_id == user.id,
+            user_organization_association.c.organization_id == id,
+            user_organization_association.c.role == "owner",
         )
         result = db.execute(stmt).fetchone()
         if not result or not user.is_super_admin:
-            raise HTTPException(status_code=403, detail="Only the organization owner can delete an organization")
+            raise HTTPException(
+                status_code=403,
+                detail="Only the organization owner can delete an organization",
+            )
         db.delete(organization)
         db.commit()
 
+    def add_user_org(self, db: Session, current_user: User, org_id: str, payload: dict):
+        """Add a user to an organization"""
+        organization = check_model_existence(db, Organization, org_id)
+        check_user_in_org(current_user, organization)
+        self.check_user_role_in_org(
+            db, current_user, organization, "admin"
+        ) or self.check_user_role_in_org(db, current_user, organization, "owner")
+        stmt = user_organization_association.insert().values(
+            user_id=payload.user_id,
+            organization_id=org_id,
+            role=payload.role,
+        )
+        db.execute(stmt)
+        db.commit()
 
 
 organization_service = OrganizationService()
