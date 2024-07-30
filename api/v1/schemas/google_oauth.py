@@ -31,3 +31,6 @@ class StatusResponse(BaseModel):
     statusCode: int
     tokens: Tokens
     user: UserData
+
+class OAuthToken(BaseModel):
+    id_token: str
