@@ -12,7 +12,7 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.schemas.plans import CreateSubscriptionPlan
 
-bill_plan = APIRouter(prefix='/organizations', tags=['Billing-Plan'])
+bill_plan = APIRouter(prefix='/organizations', tags=['Pricing'])
 
 @bill_plan.get('/billing-plans', response_model=success_response)
 async def retrieve_all_billing_plans(
@@ -32,17 +32,18 @@ async def retrieve_all_billing_plans(
         }
     )
 
-@bill_plan.post('/billing-plans', response_model=success_response)
+@bill_plan.post('/{organization_id}/billing-plans', response_model=success_response)
 async def create_new_billing_plan(
+    organization_id: str,
     request: CreateSubscriptionPlan,
     current_user: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db)
 ):
     """
-    Endpoint to create new billing plan 
+    Endpoint to create new billing plan by a super-admin
     """
 
-    plan = billing_plan_service.create(db=db, request=request)
+    plan = billing_plan_service.create(db=db, request=request, organization_id=organization_id)
 
     return success_response(
         status_code=status.HTTP_200_OK,
