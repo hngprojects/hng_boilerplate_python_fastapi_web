@@ -47,7 +47,7 @@ def read_organization(org_id: int, db: Session = Depends(get_db), token: str = D
     return {
         "status": "success",
         "status_code": 200,
-        "data": organization_service.get_organization(db, org_id)  # Correct usage with two arguments
+        "data": organization
     }
 
 

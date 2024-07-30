@@ -197,14 +197,12 @@ class OrganizationService(Service):
 
     """Endpoint to get organization"""
     
-    def get_organization(self, db: Session, org_id: int) -> OrganizationBase:
+    def get_organization(db: Session, org_id: int) -> OrganizationBase:
         organization = db.query(Organization).filter(Organization.id == org_id).first()
-        if not organization:
+        if organization is None:
             raise HTTPException(status_code=404, detail="Organization not found")
         return OrganizationBase.from_orm(organization)
 
-# Instantiate the service
-organization_service = OrganizationService()
     
 
     # def get_user_organizations(self, db: Session, user_id: str):

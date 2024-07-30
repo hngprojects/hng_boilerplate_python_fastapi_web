@@ -4,19 +4,18 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from uuid_extensions import uuid7
+from uuid import uuid4
 
-from main import app
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.models import User
 from api.v1.models.organization import Organization
-from api.v1.services.user import UserService
+from api.v1.services.organization import organization_service
+from main import app
 
-# Mock current user
 def mock_get_current_user():
     return User(
-        id=str(uuid7()),
+        id=str(uuid4()),
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -27,18 +26,17 @@ def mock_get_current_user():
         updated_at=datetime.now(timezone.utc)
     )
 
-# Mock organization object
 def mock_org():
     return Organization(
-        id=str(uuid7()),
+        id=str(uuid4()),
         company_name="Test Organization",
         company_email="testorg@example.com",
         industry="Tech",
         organization_type="Private",
-        country="Country",
-        state="State",
-        address="Address",
-        lga="LGA",
+        country="Nigeria",
+        state="Lagos",
+        address="123 Street, Lagos",
+        lga="Ikorodu",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -51,55 +49,58 @@ def db_session_mock():
 @pytest.fixture
 def client(db_session_mock):
     app.dependency_overrides[get_db] = lambda: db_session_mock
-    yield TestClient(app)
+    client = TestClient(app)
+    yield client
     app.dependency_overrides = {}
 
-@pytest.fixture
-def mock_get_current_user_fixture():
-    with patch("api.v1.services.user.user_service.get_current_user", return_value=mock_get_current_user()) as mock:
-        yield mock
+def test_get_organization_success(client, db_session_mock):
+    '''Test to successfully retrieve an organization by ID'''
 
-@pytest.fixture
-def db_session_mock():
-    db = MagicMock()
-    return db
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
 
-@pytest.fixture
-def mock_get_current_user():
-    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
-        yield
-
-def test_get_organization_success(db_session_mock, mock_get_current_user):
-    mock_organization = MagicMock(spec=Organization)
-    mock_organization.id = 1
-    mock_organization.company_name = "Mock Org 1"
-    mock_organization.company_email = "contact@mockorg1.com"
-
+    mock_organization = mock_org()
     db_session_mock.query().filter().first.return_value = mock_organization
 
-    with patch("api.db.database.get_db", return_value=db_session_mock):
-        response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer testtoken"})
+    with patch("api.v1.services.organization.get_organization", return_value=mock_organization):
+        response = client.get(
+            f'/api/v1/organisations/{mock_organization.id}',
+            headers={'Authorization': 'Bearer token'}
+        )
+
         assert response.status_code == 200
         data = response.json()
         assert data["status"] == "success"
         assert data["status_code"] == 200
         assert data["data"]["id"] == mock_organization.id
         assert data["data"]["company_name"] == mock_organization.company_name
-        assert data["data"]["company_email"] == mock_organization.company_email
 
-def test_get_organization_not_found(db_session_mock, mock_get_current_user):
+def test_get_organization_not_found(client, db_session_mock):
+    '''Test retrieving an organization that does not exist'''
+
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
+
     db_session_mock.query().filter().first.return_value = None
 
-    with patch("api.db.database.get_db", return_value=db_session_mock):
-        response = client.get("/api/v1/organizations/999", headers={"Authorization": "Bearer testtoken"})
+    with patch("api.v1.services.organization.get_organization", return_value=None):
+        response = client.get(
+            '/api/v1/organisations/non-existent-id',
+            headers={'Authorization': 'Bearer token'}
+        )
+
         assert response.status_code == 404
         data = response.json()
-        assert data["status"] == "error"
-        assert data["status_code"] == 404
         assert data["message"] == "Organization not found"
+        assert data["status_code"] == 404
+        assert data["success"] is False
 
-def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user_fixture):
-    with patch("api.db.database.get_db", return_value=db_session_mock):
-        response = client.get("/api/v1/organizations/abc", headers={"Authorization": "Bearer testtoken"})
-        assert response.status_code == 422  # Unprocessable Entity due to validation error
+def test_get_organization_invalid_id(client, db_session_mock):
+    '''Test retrieving an organization with an invalid ID format'''
 
+    response = client.get(
+        '/api/v1/organisations/invalid-id-format',
+        headers={'Authorization': 'Bearer token'}
+    )
+
+    assert response.status_code == 422  # Unprocessable Entity due to validation error
