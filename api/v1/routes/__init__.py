@@ -20,6 +20,7 @@ from api.v1.routes.activity_logs import activity_logs
 from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.faq import faq
+from api.v1.routes.notification_settings import notification_setting
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -45,3 +46,4 @@ api_version_one.include_router(contact_us)
 api_version_one.include_router(comment)
 api_version_one.include_router(faq)
 api_version_one.include_router(jobs)
+api_version_one.include_router(notification_setting)
