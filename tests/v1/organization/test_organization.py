@@ -28,68 +28,73 @@ def mock_org():
     return Organization(
         id=str(uuid7()),
         company_name="Test Organization",
+        company_email="testorg@example.com",
+        industry="Tech",
+        organization_type="Private",
+        country="Country",
+        state="State",
+        address="Address",
+        lga="LGA",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
 
 @pytest.fixture
 def db_session_mock():
-    db_session = MagicMock(spec=Session)
-    return db_session
+    return MagicMock(spec=Session)
 
 @pytest.fixture
 def client(db_session_mock):
     app.dependency_overrides[get_db] = lambda: db_session_mock
-    client = TestClient(app)
-    yield client
+    yield TestClient(app)
     app.dependency_overrides = {}
 
-def test_get_organization_success(client, db_session_mock):
+@pytest.fixture
+def mock_get_current_user_fixture():
+    with patch("api.v1.services.user.user_service.get_current_user", return_value=mock_get_current_user()) as mock:
+        yield mock
+
+def test_get_organization_success(client, db_session_mock, mock_get_current_user_fixture):
     '''Test to successfully retrieve an organization by ID'''
 
-    org_id = "existing-org-id"
-    current_user = mock_get_current_user()  # Get the actual user object
-    app.dependency_overrides[user_service.get_current_user] = lambda: current_user
-
-    # Mock the organization fetch and user role retrieval
-    organization_service.fetch = MagicMock(return_value=mock_org())
-    organization_service.get_organization = MagicMock(return_value='admin')
-
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
-    
+    org_id = str(uuid7())  # Use a UUID for the org_id
     mock_organization = mock_org()
-    
-    with patch("api.v1.services.organization.organization_service.get_organization", return_value=mock_organization) as mock_create:
+    mock_organization.id = org_id  # Set the ID to match
+
+    # Mock the organization fetch
+    with patch("api.v1.services.organization.organization_service.get_organization", return_value=mock_organization):
         response = client.get(
-        f'/api/v1/organizations/{org_id}',
-        headers={'Authorization': 'Bearer token'},
-    )
+            f'/api/v1/organizations/{org_id}',
+            headers={'Authorization': 'Bearer token'},
+        )
 
     assert response.status_code == 200
-    assert response.json()["message"] == ' Retrieve Organization successfully'
-    assert response.json()["data"]["company_name"] == "Get Organization"
+    assert response.json()["message"] == 'Retrieve Organization successfully'
+    assert response.json()["data"]["company_name"] == "Test Organization"
 
-def test_get_organization_not_found(client, db_session_mock):
+def test_get_organization_not_found(client, db_session_mock, mock_get_current_user_fixture):
     '''Test retrieving an organization that does not exist'''
 
-    org_id = "existing-org-id"
-    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
+    org_id = str(uuid7())  # Use a UUID for the org_id
+
+    # Mock the organization fetch to return None
+    with patch("api.v1.services.organization.organization_service.get_organization", return_value=None):
+        response = client.get(
+            f'/api/v1/organizations/{org_id}',
+            headers={'Authorization': 'Bearer token'},
+        )
+
+    assert response.status_code == 404
+    assert response.json()["message"] == "Organization not found"
+
+def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user_fixture):
+    '''Test retrieving an organization with an invalid ID format'''
+
+    invalid_org_id = "invalid_id"  # Use a non-UUID string
 
     response = client.get(
-        f'/api/v1/organizations/{org_id}',
+        f'/api/v1/organizations/{invalid_org_id}',
         headers={'Authorization': 'Bearer token'},
     )
 
-    assert response.status_code == 422
-
-def test_get_organization_invalid_id(client, db_session_mock):
-    '''Test retrieving an organization with an invalid ID format'''
-
-    org_id = "existing-org-id"
-    response = client.get(
-        f'/api/v1/organizations/{org_id}',
-         headers={'Authorization': 'Bearer token'}
-    )
-
-    assert response.status_code == 401
+    assert response.status_code == 422  # Unprocessable Entity due to validation error
