@@ -6,16 +6,13 @@ from api.v1.models.newsletter import Newsletter
 
 
 class NewsletterService(Service):
-    '''Newsletter service functionality'''
+    """Newsletter service functionality"""
 
     @staticmethod
     def create(db: Session, request: EmailSchema) -> Newsletter:
-        '''add a new subscriber'''
+        """add a new subscriber"""
 
-        new_subscriber = Newsletter(
-            title="",
-            content="",
-            email=request.email)
+        new_subscriber = Newsletter(title="", content="", email=request.email)
         db.add(new_subscriber)
         db.commit()
         db.refresh(new_subscriber)
@@ -28,8 +25,12 @@ class NewsletterService(Service):
         Check if user with email already exist
         """
 
-        newsletter = db.query(Newsletter).filter(Newsletter.email==request.email).first()
+        newsletter = (
+            db.query(Newsletter).filter(Newsletter.email == request.email).first()
+        )
         if newsletter:
-            raise HTTPException(status_code=400, detail='User already subscribed to newsletter')
+            raise HTTPException(
+                status_code=400, detail="User already subscribed to newsletter"
+            )
 
         return newsletter

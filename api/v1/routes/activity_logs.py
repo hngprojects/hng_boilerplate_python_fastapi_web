@@ -8,18 +8,19 @@ from api.utils.success_response import success_response
 
 activity_logs = APIRouter(prefix="/activity-logs", tags=["Activity Logs"])
 
+
 @activity_logs.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_activity_log(activity_log: ActivityLogCreate, db: Session = Depends(get_db)):
-    '''Create a new activity log'''
+async def create_activity_log(
+    activity_log: ActivityLogCreate, db: Session = Depends(get_db)
+):
+    """Create a new activity log"""
 
     new_activity_log = activity_log_service.create_activity_log(
-        db=db, 
-        user_id=activity_log.user_id, 
-        action=activity_log.action
+        db=db, user_id=activity_log.user_id, action=activity_log.action
     )
 
     return success_response(
         status_code=201,
         message="Activity log created successfully",
-        data= jsonable_encoder(new_activity_log)
+        data=jsonable_encoder(new_activity_log),
     )

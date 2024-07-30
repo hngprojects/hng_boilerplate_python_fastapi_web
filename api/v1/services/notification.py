@@ -5,6 +5,7 @@ from api.core.base.services import Service
 from api.db.database import get_db
 from api.v1.models.notifications import Notification
 from api.v1.models.user import User
+
 # from api.v1.schemas.notification import NotificationRead
 
 
@@ -58,10 +59,10 @@ class NotificationService(Service):
         db.refresh()
 
     def get_current_user_notifications(self, user: User, db: Session = Depends(get_db)):
-        '''Endpoint to get current user notifications'''
-        
+        """Endpoint to get current user notifications"""
+
         return {"notifications": user.notifications}
-    
+
     # def fetch(
     #     self,
     #     notification_id: str,

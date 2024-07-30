@@ -17,6 +17,7 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
+
     email: EmailStr
     password: str
     first_name: str
@@ -33,14 +34,16 @@ class UserCreate(BaseModel):
                 "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one special character."
             )
         return value
-    
+
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 class EmailRequest(BaseModel):
     email: EmailStr
+
 
 class Token(BaseModel):
     access_token: str
@@ -73,12 +76,14 @@ class ChangePwdRet(BaseModel):
     status_code: int
     message: str
 
+
 class MagicLinkRequest(BaseModel):
-    '''Schema for magic link creation'''
+    """Schema for magic link creation"""
 
     email: EmailStr
 
+
 class MagicLinkResponse(BaseModel):
-    '''Schema for magic link respone'''
+    """Schema for magic link respone"""
 
     message: str

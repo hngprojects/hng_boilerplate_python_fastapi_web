@@ -5,11 +5,7 @@ from sqlalchemy.orm import Session
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.user import (
-    DeactivateUserSchema,
-    ChangePasswordSchema,
-    ChangePwdRet
-)
+from api.v1.schemas.user import DeactivateUserSchema, ChangePasswordSchema, ChangePwdRet
 from api.db.database import get_db
 from api.v1.services.user import user_service
 
@@ -52,6 +48,7 @@ def get_current_user_details(
 #         message='User deleted successfully',
 #     )
 
+
 @user.patch("/me/password", status_code=200)
 async def change_password(
     schema: ChangePasswordSchema,
@@ -62,27 +59,35 @@ async def change_password(
 
     user_service.change_password(schema.old_password, schema.new_password, user, db)
 
-    return success_response(
-        status_code=200,
-        message='Password changed successfully'
-    )
+    return success_response(status_code=200, message="Password changed successfully")
+
 
 @user.get(path="/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id : str,
-             current_user : Annotated[User , Depends(user_service.get_current_user)],
-             db : Session = Depends(get_db)
-             ):
-    
+def get_user(
+    user_id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    db: Session = Depends(get_db),
+):
+
     user = user_service.fetch(db=db, id=user_id)
 
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='User retrieved successfully',
-        data = jsonable_encoder(
-            user, 
-            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
-        )
+        message="User retrieved successfully",
+        data=jsonable_encoder(
+            user,
+            exclude=[
+                "password",
+                "is_super_admin",
+                "is_deleted",
+                "is_verified",
+                "updated_at",
+                "created_at",
+                "is_active",
+            ],
+        ),
     )
+
 
 @user.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(

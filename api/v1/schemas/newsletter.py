@@ -7,4 +7,3 @@ class EmailSchema(BaseModel):
     """
 
     email: EmailStr
-    

@@ -6,14 +6,9 @@ from api.utils.success_response import success_response
 
 
 def paginated_response(
-    db: Session,
-    model,
-    skip: int,
-    limit: int,
-    filters: Optional[Dict[str, Any]]=None
+    db: Session, model, skip: int, limit: int, filters: Optional[Dict[str, Any]] = None
 ):
-    
-    '''
+    """
     Custom response for pagination.\n
     This takes in four atguments:
         * db- this is the database session
@@ -44,7 +39,7 @@ def paginated_response(
             filters={'org_id': org_id}
         )
         ```
-    '''
+    """
 
     query = db.query(model)
 
@@ -53,7 +48,7 @@ def paginated_response(
         for attr, value in filters.items():
             if value is not None:
                 query = query.filter(getattr(model, attr).like(f"%{value}%"))
-    
+
     total = query.count()
     results = jsonable_encoder(query.offset(skip).limit(limit).all())
     total_pages = int(total / limit) + (total % limit > 0)
@@ -62,10 +57,10 @@ def paginated_response(
         status_code=200,
         message="Successfully fetched items",
         data={
-            'pages': total_pages,
+            "pages": total_pages,
             "total": total,
             "skip": skip,
             "limit": limit,
-            "items": results
-        }
+            "items": results,
+        },
     )

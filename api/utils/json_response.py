@@ -7,6 +7,7 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
+
 class JsonResponseDict(JSONResponse):
 
     def __init__(

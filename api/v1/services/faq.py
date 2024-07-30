@@ -7,10 +7,10 @@ from api.utils.db_validators import check_model_existence
 
 
 class FAQService(Service):
-    '''Payment service functionality'''
+    """Payment service functionality"""
 
     def create(self, db: Session, schema: CreateFAQ):
-        '''Create a new FAQ'''
+        """Create a new FAQ"""
 
         new_faq = FAQ(**schema.model_dump())
         db.add(new_faq)
@@ -18,10 +18,9 @@ class FAQService(Service):
         db.refresh(new_faq)
 
         return new_faq
-    
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all FAQs with option to search using query parameters'''
+        """Fetch all FAQs with option to search using query parameters"""
 
         query = db.query(FAQ)
 
@@ -29,36 +28,33 @@ class FAQService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(FAQ, column) and value:
-                    query = query.filter(getattr(FAQ, column).ilike(f'%{value}%'))
+                    query = query.filter(getattr(FAQ, column).ilike(f"%{value}%"))
 
         return query.all()
 
-    
     def fetch(self, db: Session, faq_id: str):
-        '''Fetches a, FAQ by id'''
+        """Fetches a, FAQ by id"""
 
         faq = check_model_existence(db, FAQ, faq_id)
         return faq
-    
 
     def update(self, db: Session, faq_id: str, schema: UpdateFAQ):
-        '''Updates an FAQ'''
+        """Updates an FAQ"""
 
         faq = self.fetch(db=db, faq_id=faq_id)
-        
+
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(faq, key, value)
-        
+
         db.commit()
         db.refresh(faq)
         return faq
-    
 
     def delete(self, db: Session, faq_id: str):
-        '''Deletes an FAQ'''
-        
+        """Deletes an FAQ"""
+
         faq = self.fetch(db=db, faq_id=faq_id)
         db.delete(faq)
         db.commit()

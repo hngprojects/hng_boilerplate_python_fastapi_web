@@ -9,24 +9,27 @@ from api.v1.services.user import user_service
 from api.db.database import get_db
 from api.v1.models import User
 
-payment = APIRouter(prefix='/payments', tags=['Payments'])
+payment = APIRouter(prefix="/payments", tags=["Payments"])
 
-@payment.get('/current-user', status_code=status.HTTP_200_OK, response_model=PaymentListResponse)
+
+@payment.get(
+    "/current-user", status_code=status.HTTP_200_OK, response_model=PaymentListResponse
+)
 def get_payments_for_current_user(
     current_user: User = Depends(user_service.get_current_user),
     limit: Annotated[int, Query(ge=1, description="Number of payments per page")] = 10,
     page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
-    db: Session = Depends(get_db), 
+    db: Session = Depends(get_db),
 ):
-    '''
+    """
     Endpoint to retrieve a paginated list of payments of ``current_user``.
 
-    Query parameter: 
+    Query parameter:
         - limit: Number of payment per page (default: 10, minimum: 1)
         - page: Page number (starts from 1)
-    '''
+    """
     payment_service = PaymentService()
-    
+
     # FETCH all payments for current user
     payments = payment_service.fetch_by_user(
         db, user_id=current_user.id, limit=limit, page=page
@@ -38,8 +41,7 @@ def get_payments_for_current_user(
     if not num_of_payments:
         # RETURN not found message
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail="Payments not found for user"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Payments not found for user"
         )
 
     # GET total number of pages based on number of payments/limit per page
@@ -52,7 +54,7 @@ def get_payments_for_current_user(
             "currency": pay.currency,
             "status": pay.status,
             "method": pay.method,
-            "created_at": pay.created_at.isoformat()
+            "created_at": pay.created_at.isoformat(),
         }
         for pay in payments
     ]
@@ -66,14 +68,14 @@ def get_payments_for_current_user(
             "total_items": num_of_payments,
         },
         "payments": payment_data,
-        "user_id": current_user.id
+        "user_id": current_user.id,
     }
 
     # RETURN all data with success message
     return success_response(
-        status_code=status.HTTP_200_OK, 
-        message="Payments fetched successfully", 
-        data=data
+        status_code=status.HTTP_200_OK,
+        message="Payments fetched successfully",
+        data=data,
     )
 
 

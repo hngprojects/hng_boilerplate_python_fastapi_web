@@ -11,11 +11,17 @@ from api.v1.services.user import user_service
 from api.v1.services.profile import profile_service
 
 
-profile = APIRouter(prefix='/profile', tags=['Profiles'])
+profile = APIRouter(prefix="/profile", tags=["Profiles"])
 
-@profile.get('/current-user', status_code=status.HTTP_200_OK, response_model=success_response)
-def get_current_user_profile(db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-    '''Endpoint to get current user profile details'''
+
+@profile.get(
+    "/current-user", status_code=status.HTTP_200_OK, response_model=success_response
+)
+def get_current_user_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get current user profile details"""
 
     profile = profile_service.fetch_by_user_id(db, user_id=current_user.id)
 
@@ -26,12 +32,15 @@ def get_current_user_profile(db: Session = Depends(get_db), current_user: User =
     )
 
 
-@profile.post('/', status_code=status.HTTP_201_CREATED, response_model=success_response)
-def create_user_profile(schema: ProfileCreateUpdate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-    '''Endpoint to create user profile from the frontend'''
+@profile.post("/", status_code=status.HTTP_201_CREATED, response_model=success_response)
+def create_user_profile(
+    schema: ProfileCreateUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to create user profile from the frontend"""
 
-    user_profile = profile_service.create(db, schema=schema, 
-                                          user_id=current_user.id)
+    user_profile = profile_service.create(db, schema=schema, user_id=current_user.id)
 
     response = success_response(
         status_code=status.HTTP_201_CREATED,
@@ -40,19 +49,15 @@ def create_user_profile(schema: ProfileCreateUpdate, db: Session = Depends(get_d
     )
 
 
-@profile.patch("/", status_code=status.HTTP_200_OK, 
-               response_model=success_response)
+@profile.patch("/", status_code=status.HTTP_200_OK, response_model=success_response)
 def update_user_profile(
     schema: ProfileCreateUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to update user profile"""
-    
-    updated_profile = profile_service.update(
-        db, schema=schema, 
-        user_id=current_user.id
-    )
+
+    updated_profile = profile_service.update(db, schema=schema, user_id=current_user.id)
 
     response = success_response(
         status_code=status.HTTP_200_OK,
@@ -61,7 +66,6 @@ def update_user_profile(
     )
 
     return response
-
 
 
 @profile.post("/deactivate", status_code=status.HTTP_200_OK)

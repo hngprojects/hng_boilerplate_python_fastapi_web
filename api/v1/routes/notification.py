@@ -6,6 +6,7 @@ from typing import Annotated
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.notification import notification_service
+
 # from api.v1.schemas.notification import NotificationRead
 from api.v1.models.notifications import Notification
 
