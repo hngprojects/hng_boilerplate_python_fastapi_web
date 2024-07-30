@@ -112,13 +112,15 @@ def delete_user(
     user_service.delete(db=db, id=user_id)
 
 @user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
-async def get_users(current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-                    db: Annotated[Session, Depends(get_db)],
-                    page: int = 1, per_page: int = 10,
-                    is_active: Optional[bool] = Query(None),
-                    is_deleted: Optional[bool] = Query(None),
-                    is_verified: Optional[bool] = Query(None),
-                    is_super_admin: Optional[bool] = Query(None)):
+async def get_users(
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    db: Annotated[Session, Depends(get_db)],
+    page: int = 1, per_page: int = 10,
+    is_active: Optional[bool] = Query(None),
+    is_deleted: Optional[bool] = Query(None),
+    is_verified: Optional[bool] = Query(None),
+    is_super_admin: Optional[bool] = Query(None)
+):
     """
     Retrieves all users.
     Args:
