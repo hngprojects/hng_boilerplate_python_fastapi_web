@@ -34,4 +34,8 @@ class Settings(BaseSettings):
     # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
     # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
 
+    TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
+    TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
+
 settings = Settings()
