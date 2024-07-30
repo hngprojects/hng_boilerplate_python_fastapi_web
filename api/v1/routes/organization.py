@@ -9,6 +9,7 @@ from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
+from api.v1.models import Organization
 
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
@@ -44,3 +45,20 @@ async def update_organization(org_id: str, schema: CreateUpdateOrganization, db:
         message='Organization updated successfully',
         data=jsonable_encoder(updated_organization)
     )
+
+@organization.delete("/superadmin/{org_id}")
+async def delete_organization(org_id: str, db: Session = Depends(get_db), 
+                        current_user: User = Depends(user_service.get_current_super_admin),
+):
+    # Retrieve the organization by ID
+    organization = db.query(Organization).filter(Organization.id == org_id).first()
+
+    if organization is None:
+        # If the organization does not exist, raise a 404 error
+        raise HTTPException(status_code=404, detail="Organization not found")
+
+    # Delete the organization from the database
+    organization_service.delete(db, id=org_id)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Organization deleted successfully',)
