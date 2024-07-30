@@ -3,10 +3,10 @@ from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.product import Product
+from api.v1.models.product import Product, ProductFilterStatusEnum
 from api.v1.models import Organization
 from api.utils.db_validators import check_user_in_org
-
+from api.v1.schemas.product import ProductFilterResponse
 
 class ProductService(Service):
     '''Product service functionality'''
@@ -58,6 +58,12 @@ class ProductService(Service):
         products = db.query(Product).filter(Product.org_id == org_id).offset(offset_value).limit(limit).all()
 
         return products
+    
+    def fetch_by_filter_status(self, db: Session, filter_status: ProductFilterStatusEnum):
+        '''Fetch products by filter status'''
+        products = db.query(Product).filter(Product.filter_status == filter_status.value).all()
+        print(products)
+        return [ProductFilterResponse.from_orm(product) for product in products]
 
     def update(self, db: Session, id: str, schema):
         '''Updates a product'''

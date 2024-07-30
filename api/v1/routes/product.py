@@ -1,19 +1,19 @@
-from fastapi import Depends, APIRouter, status, Query
+from fastapi import Depends, APIRouter, status, Query,  HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
+from typing import List
 
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
-from api.v1.models.product import Product
+from api.v1.models.product import Product, ProductFilterStatusEnum
 from api.v1.services.product import product_service
 from api.v1.schemas.product import ProductList
-from api.v1.schemas.product import ProductUpdate, ResponseModel
+from api.v1.schemas.product import ProductUpdate, ResponseModel, ProductFilterResponse, SuccessResponse
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.models import User
-
 product = APIRouter(prefix='/products', tags=['Products'])
 
 
@@ -33,6 +33,24 @@ async def get_all_products(
         skip=skip
     )
 
+@product.get('/filter-status', response_model=SuccessResponse[List[ProductFilterResponse]], status_code=200)
+async def get_products_by_filter_status(
+    filter_status: ProductFilterStatusEnum = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    '''Endpoint to get products by filter status'''
+    try:
+        print("Requested filter status:", filter_status)
+        products = product_service.fetch_by_filter_status(db, filter_status)
+        return SuccessResponse(
+            message="Products retrieved successfully",
+            status_code=200,
+            data=products
+        )
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve products")
 
 @product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)
 def get_organization_products(
