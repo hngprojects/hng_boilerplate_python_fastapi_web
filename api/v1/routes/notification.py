@@ -15,7 +15,7 @@ notification = APIRouter(prefix="/notifications", tags=["Notifications"])
     summary="Mark a notification as read",
     description="This endpoint marks a notification as `read`. User must be authenticated an must be the owner of a notification to mark it as `read`",
     status_code=status.HTTP_200_OK,
-    response_model=success_response
+    response_model=success_response,
 )
 def mark_notification_as_read(
     id: Annotated[str, Path()],
@@ -29,15 +29,20 @@ def mark_notification_as_read(
     return success_response(status_code=200, message="Notifcation marked as read")
 
 
+@notification.get("/current-user")
+def get_current_user_notifications(
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    data = notification_service.get_current_user_notifications(current_user, db)
+    return success_response(status_code=200, message="All notifications", data=data)
+
+
 @notification.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
     notification_id: str,
-    current_user = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db)
-    ):
+    current_user=Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
 
-    notification_service.delete(
-        notification_id,
-        user=current_user,
-        db=db
-        )
+    notification_service.delete(notification_id, user=current_user, db=db)
