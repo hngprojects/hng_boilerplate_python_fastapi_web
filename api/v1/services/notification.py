@@ -57,7 +57,9 @@ class NotificationService(Service):
         db.commit()
         db.refresh()
 
-    def get_me(self, user: User, db: Session = Depends(get_db)):
+    def get_current_user_notifications(self, user: User, db: Session = Depends(get_db)):
+        '''Endpoint to get current user notifications'''
+        
         return {"notifications": user.notifications}
     
     # def fetch(
