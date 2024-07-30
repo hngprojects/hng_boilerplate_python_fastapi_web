@@ -96,15 +96,3 @@ class TestWaitlistEndpoint:
         assert response.json()["message"] == "Waitlist retrieved successfully"
         assert response.json()["data"] == ["test@example.com", "duplicate@example.com"]
 
-    # def test_get_all_waitlist_emails_non_superadmin(self, client):
-    #     # Override dependency to simulate non-superadmin access
-    #     app.dependency_overrides[get_super_admin] = mock_dep
-
-    #     response = client.get("/api/v1/waitlists/users")
-
-    #     assert response.status_code == 401
-    #     assert response.json()["detail"] == {
-    #         "message": "User does not have admin privileges",
-    #         "status_code": 401,
-    #         "data": {}
-    #     }

@@ -104,22 +104,11 @@ async def get_all_waitlist_emails(
     db: Session = Depends(get_db),
     admin=Depends(get_super_admin)
 ):
-    try:
-        waitlist_users = waitlist_service.fetch_all(db)
-        emails = [user.email for user in waitlist_users]
+    waitlist_users = waitlist_service.fetch_all(db)
+    emails = [user.email for user in waitlist_users]
 
-        return success_response(
-            message="Waitlist retrieved successfully",
-            status_code=200,
-            data=emails
-        )
-    except Exception as e:
-        logger.error(f"Failed to retrieve waitlist emails: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": "Failed to retrieve waitlist emails",
-                "success": False,
-                "status_code": 500
-            }
-        )
+    return success_response(
+        message="Waitlist retrieved successfully",
+        status_code=200,
+        data=emails
+    )
