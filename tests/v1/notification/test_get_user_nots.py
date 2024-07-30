@@ -42,12 +42,10 @@ access_token = user_service.create_access_token(str(user_id))
 
 user = User(
     id=user_id,
-    username="testuser1",
     email="testuser1@gmail.com",
     password=user_service.hash_password("Testpassword@123"),
     first_name="Test",
     last_name="User",
-    is_active=False,
     created_at=created_at,
     updated_at=updated_at,
 )
