@@ -1,5 +1,5 @@
-from typing import Annotated
-from fastapi import Depends, APIRouter, Request, status
+from typing import Annotated, Optional
+from fastapi import Depends, APIRouter, Request, status, Query, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -113,7 +113,11 @@ def delete_user(
 @user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
 async def get_users(current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
                     db: Annotated[Session, Depends(get_db)],
-                    page: int = 1, per_page: int = 10):
+                    page: int = 1, per_page: int = 10,
+                    is_active: Optional[bool] = Query(None),
+                    is_deleted: Optional[bool] = Query(None),
+                    is_verified: Optional[bool] = Query(None),
+                    is_super_admin: Optional[bool] = Query(None)):
     """
     Retrieves all users.
     Args:
@@ -121,7 +125,17 @@ async def get_users(current_user: Annotated[User, Depends(user_service.get_curre
         db: database Session object
         page: the page number
         per_page: the maximum size of users for each page
+        is_active: boolean to filter active users
+        is_deleted: boolean to filter deleted users
+        is_verified: boolean to filter verified users
+        is_super_admin: boolean to filter users that are super admin
     Returns:
         UserData
     """
-    return user_service.fetch_all(db, page, per_page)
+    query_params = {
+        'is_active': is_active,
+        'is_deleted': is_deleted,
+        'is_verified': is_verified,
+        'is_super_admin': is_super_admin,
+    }
+    return user_service.fetch_all(db, page, per_page, **query_params)
