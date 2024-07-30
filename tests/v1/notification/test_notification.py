@@ -10,6 +10,7 @@ from api.v1.routes.blog import get_db
 from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
 from api.v1.models.user import User
+from api.utils.email_service import send_mail
 
 
 # Mock database dependency
@@ -88,3 +89,64 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     assert response.status_code == 401
     assert response.json()["success"] == False
     assert response.json()["status_code"] == 401
+    
+    
+    
+    
+
+# New test cases for send_notification endpoint
+
+def test_send_notification_success(client, monkeypatch):
+    # Create a MagicMock object
+    mock_send_mail = MagicMock(return_value=None)
+
+    # Use monkeypatch to replace the send_mail function with the MagicMock
+    monkeypatch.setattr("api.utils.email_service.send_mail", mock_send_mail)
+
+    response = client.post(
+        "/api/v1/notifications/send",
+        json={
+            "email": "recipient@example.com",
+            "subject": "Test Notification",
+            "message": "This is a test notification."
+        }
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "success": True,
+        "status_code": 200,
+        "message": "Notification sent successfully",
+        "data": {}
+    }
+    # Assert that the mock_send_mail was called once with the correct parameters
+    mock_send_mail.assert_called_once_with(
+        to="recipient@example.com",
+        subject="Test Notification",
+        body="This is a test notification."
+    )
+
+def test_send_notification_failure(client, monkeypatch):
+    # Create a MagicMock object that raises an exception
+    mock_send_mail = MagicMock(side_effect=Exception("SMTP error"))
+
+    # Use monkeypatch to replace the send_mail function with the MagicMock
+    monkeypatch.setattr("api.utils.email_service.send_mail", mock_send_mail)
+
+    response = client.post(
+        "/api/v1/notifications/send",
+        json={
+            "email": "recipient@example.com",
+            "subject": "Test Notification",
+            "message": "This is a test notification."
+        }
+    )
+
+    assert response.status_code == 500
+    assert "SMTP error" in response.json()["detail"]
+    # Assert that the mock_send_mail was called once with the correct parameters
+    mock_send_mail.assert_called_once_with(
+        to="recipient@example.com",
+        subject="Test Notification",
+        body="This is a test notification."
+    )

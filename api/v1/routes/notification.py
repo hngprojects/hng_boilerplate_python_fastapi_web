@@ -1,13 +1,39 @@
-from fastapi import Depends, status, APIRouter, Path
+from fastapi import Depends, status, APIRouter, Path, HTTPException
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models import User
 from typing import Annotated
 from api.db.database import get_db
 from api.v1.services.user import user_service
+from api.utils.email_service import send_mail
 from api.v1.services.notification import notification_service
+from api.v1.schemas.notification import NotificationRequest, ResponseModel
+
 
 notification = APIRouter(prefix="/notifications", tags=["Notifications"])
+
+
+
+@notification.post("/send", response_model=ResponseModel)
+async def send_notification(request: NotificationRequest):
+    """
+    Endpoint to send an email notification.
+
+    Args:
+        request (NotificationRequest): The request object containing email, subject, and message.
+
+    Returns:
+        ResponseModel: The response model indicating the success of the operation.
+
+    Raises:
+        HTTPException: If there is an error in sending the email.
+    """
+    try:
+        response = await notification_service.send_email(request)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 
 @notification.patch(

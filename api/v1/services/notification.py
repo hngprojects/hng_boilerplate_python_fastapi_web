@@ -1,10 +1,16 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.db.database import get_db
 from api.v1.models.notifications import Notification
 from api.v1.models.user import User
+from api.v1.schemas.notification import NotificationRequest, ResponseModel
+from api.utils.email_service import send_mail
+from typing import List
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 
 class NotificationService(Service):
@@ -32,6 +38,31 @@ class NotificationService(Service):
 
         # commit changes
         db.commit()
+        
+        
+        
+    async def send_email(self, request: NotificationRequest) -> ResponseModel:
+        """
+        Sends an email notification.
+
+        Args:
+            request (NotificationRequest): The request object containing email, subject, and message.
+
+        Returns:
+            ResponseModel: The response model indicating the success of the operation.
+        """
+        subject = request.subject
+        recipient = request.email
+        body = request.message
+
+        send_mail(subject, recipient, body)
+        
+        return ResponseModel(
+            success=True,
+            status_code=200,
+            message="Notification sent successfully",
+            data={}
+        )
 
     def delete(
         self,
