@@ -53,17 +53,3 @@ class BlogPostResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-
-class BlogDislikeCreate(BaseModel):
-    id: str
-    blog_id: str
-    user_id: str
-    ip_address: Optional[str]
-    created_at: datetime
-
-
-class BlogDislikeResponse(BaseModel):
-    status_code: str
-    message: str
-    data: BlogDislikeCreate

@@ -19,6 +19,7 @@ from api.v1.routes.request_password import pwd_reset
 from api.v1.routes.activity_logs import activity_logs
 from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
+from api.v1.routes.user_organisations import user_organisations
 from api.v1.routes.faq import faq
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -43,5 +44,7 @@ api_version_one.include_router(payment)
 api_version_one.include_router(activity_logs)
 api_version_one.include_router(contact_us)
 api_version_one.include_router(comment)
+api_version_one.include_router(jobs)
+api_version_one.include_router(user_organisations)
 api_version_one.include_router(faq)
 api_version_one.include_router(jobs)
