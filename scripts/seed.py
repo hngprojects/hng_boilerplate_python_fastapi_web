@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """ Populates the database with seed data
 """
+import sys, os
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from api.v1.models import *
 from api.v1.models.associations import Base
 from api.v1.services.user import user_service
@@ -63,5 +69,20 @@ blog_2 = Blog(author_id=user_2.id, title="Test 2", content="Test user two")
 
 db.add_all([product_1, product_2, product_3, product_4, blog_1, blog_2])
 db.commit()
+
+
+admin_user = User(
+    email="admin@example.com",
+    password=user_service.hash_password("supersecret"),
+    first_name="Admin",
+    last_name="User",
+    is_active=True,
+    is_super_admin=True,
+    is_deleted=False,
+    is_verified=True,
+)
+db.add(admin_user)
+db.commit()
+
 users = db.query(Organization).first().users
 print("Seed data succesfully")
