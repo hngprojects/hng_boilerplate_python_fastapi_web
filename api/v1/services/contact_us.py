@@ -14,8 +14,9 @@ class ContactUsService(Service):
         self.adabtingMapper = {
             "full_name": "full_name",
             "email": "email",
-            "title": "phone_number", # Adapting the schema to the model
+            "phone_number": "phone_number",
             "message": "message",
+            "org_id": "org_id",
         }
         super().__init__()
 
@@ -26,8 +27,9 @@ class ContactUsService(Service):
         contact_message = ContactUs(
             full_name=getattr(data, self.adabtingMapper["full_name"]),
             email=getattr(data, self.adabtingMapper["email"]),
-            title=getattr(data, self.adabtingMapper["title"]),
+            phone_number=getattr(data, self.adabtingMapper["phone_number"]),
             message=getattr(data, self.adabtingMapper["message"]),
+            org_id=getattr(data, self.adabtingMapper["org_id"]),
         )
         db.add(contact_message)
         db.commit()
