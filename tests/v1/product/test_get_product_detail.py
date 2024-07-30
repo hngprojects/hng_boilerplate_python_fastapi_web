@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
@@ -11,7 +11,6 @@ from ....main import app
 from api.v1.routes.blog import get_db
 from api.v1.services.user import user_service
 from api.v1.services.product import product_service
-from api.v1.models.user import User
 
 
 # Mock database dependency
@@ -41,19 +40,6 @@ timeinfo = datetime.now(tzinfo)
 created_at = timeinfo
 updated_at = timeinfo
 access_token = user_service.create_access_token(str(user_id))
-
-# Create test user
-
-user = User(
-    id=user_id,
-    email="testuser1@gmail.com",
-    password=user_service.hash_password("Testpassword@123"),
-    first_name="Test",
-    last_name="User",
-    is_active=False,
-    created_at=created_at,
-    updated_at=updated_at,
-)
 
 # Create test organization
 
@@ -95,8 +81,8 @@ product.variants = []
 
 @pytest.fixture
 def mock_product_service_fetch(db_session_mock):
-    product_service.fetch = MagicMock(return_value=product)
-    return product_service
+    with patch.object(product_service, 'fetch', return_value=product) as mock:
+        yield mock
 
 
 def test_get_product_detail_success(

@@ -44,41 +44,41 @@ def mock_get_current_user(mocker):
     return mock
 
 
-# def test_update_product_with_valid_token(db_session_mock, mock_get_current_user, mocker):
-#     """Test product update with a valid token."""
-#     mocker.patch('jwt.decode', return_value={"user_id": "user_id"})
+def test_update_product_with_valid_token(db_session_mock, mock_get_current_user, mocker):
+    """Test product update with a valid token."""
+    mocker.patch('jwt.decode', return_value={"user_id": "user_id"})
     
-#     mock_product = MagicMock()
-#     mock_product.id = 'c9752bcc-1cf4-4476-a1ee-84b19fd0c521'
-#     mock_product.name = 'Old Product'
-#     mock_product.price = 20.0
-#     mock_product.description = 'Old Description'
-#     mock_product.updated_at = None
-#     db_session_mock().query().filter().first.return_value = mock_product
+    mock_product = MagicMock()
+    mock_product.id = 'c9752bcc-1cf4-4476-a1ee-84b19fd0c521'
+    mock_product.name = 'Old Product'
+    mock_product.price = 20.0
+    mock_product.description = 'Old Description'
+    mock_product.updated_at = None
+    db_session_mock().query().filter().first.return_value = mock_product
 
-#     def mock_commit():
-#         mock_product.name = 'Updated Product'
-#         mock_product.price = 25.0
-#         mock_product.description = 'Updated Description'
-#         mock_product.updated_at = datetime.utcnow()
+    def mock_commit():
+        mock_product.name = 'Updated Product'
+        mock_product.price = 25.0
+        mock_product.description = 'Updated Description'
+        mock_product.updated_at = datetime.utcnow()
 
-#     db_session_mock().commit = mock_commit
+    db_session_mock().commit = mock_commit
 
-#     product_update = {
-#         "name": "Updated Product",
-#         "price": 25.0,
-#         "description": "Updated Description",
-#     }
+    product_update = {
+        "name": "Updated Product",
+        "price": 25.0,
+        "description": "Updated Description",
+    }
 
-#     response = client.put(
-#         "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
-#         json=product_update,
-#         headers={"Authorization": "Bearer valid_token"}
-#     )
+    response = client.put(
+        "/api/v1/products/c9752bcc-1cf4-4476-a1ee-84b19fd0c521",
+        json=product_update,
+        headers={"Authorization": "Bearer valid_token"}
+    )
 
-#     print("Update response:", response.json())  # Debugging output
+    print("Update response:", response.json())  # Debugging output
 
-#     assert response.status_code == 200
+    assert response.status_code == 200
     
     
 def test_update_product_with_invalid_token(db_session_mock, mock_get_current_user, mocker):
@@ -132,7 +132,7 @@ def test_update_product_with_special_characters(db_session_mock, mock_get_curren
         mock_product.name = 'Updated @Product! #2024'
         mock_product.price = 99.99
         mock_product.description = 'Updated & Description!'
-        # mock_product.updated_at = datetime.utcnow()
+        mock_product.updated_at = datetime.utcnow()
 
     db_session_mock().commit = mock_commit
 
