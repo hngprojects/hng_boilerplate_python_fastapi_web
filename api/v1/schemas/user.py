@@ -17,13 +17,13 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
-
     email: EmailStr
     password: str
     first_name: str
     last_name: str
 
     @field_validator("password")
+    @classmethod
     def password_validator(cls, value):
         if not re.match(
             r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$",
