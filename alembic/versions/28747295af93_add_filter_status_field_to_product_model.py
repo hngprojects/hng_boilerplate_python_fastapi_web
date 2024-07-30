@@ -1,8 +1,8 @@
 """add filter_status field to Product model
 
-Revision ID: f02f9175ae13
-Revises: d0fdcf651c1c
-Create Date: 2024-07-30 21:50:33.043677
+Revision ID: 28747295af93
+Revises: 5f9d01dc6cc9
+Create Date: 2024-07-31 01:41:33.879947
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f02f9175ae13'
-down_revision: Union[str, None] = 'd0fdcf651c1c'
+revision: str = '28747295af93'
+down_revision: Union[str, None] = '5f9d01dc6cc9'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
