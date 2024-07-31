@@ -4,17 +4,9 @@ from api.v1.models.user import User
 from api.db.database import get_db
 from uuid_extensions import uuid7
 from fastapi.testclient import TestClient
-from fastapi import status
 import pytest
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
-import os
-import sys
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../..")))
 
 
 client = TestClient(app)

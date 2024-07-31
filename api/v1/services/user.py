@@ -19,6 +19,7 @@ from api.v1.models.user import User
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
+from api.v1.services.notification_settings import notification_setting_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -131,6 +132,9 @@ class UserService(Service):
         db.add(user)
         db.commit()
         db.refresh(user)
+
+        # Create notification settings directly for the user
+        notification_setting_service.create(db=db, user=user)
 
         return user
 
