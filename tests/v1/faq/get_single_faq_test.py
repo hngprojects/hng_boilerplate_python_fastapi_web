@@ -72,21 +72,3 @@ def test_fetch_faq_success(client, db_session_mock):
         )
 
         assert response.status_code == 200
-
-
-# def test_fetch_faq_not_found(client, db_session_mock):
-#     '''Test to check if an faq exists'''
-
-#     # Mock the user service to return the current user
-#     app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-
-#     # mock_freq_asked_questions = mock_faq()
-
-#     with patch("api.v1.services.faq.faq_service.fetch", return_value=None) as mock_fetch:
-#         response = client.get(
-#             f'/api/v1/faqs/{uuid7()}',
-#             headers={'Authorization': 'Bearer token'}
-#         )
-
-#         assert response.status_code == 404
-

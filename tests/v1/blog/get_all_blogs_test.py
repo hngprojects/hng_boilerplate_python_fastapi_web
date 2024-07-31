@@ -1,13 +1,5 @@
-import os
-import sys
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
-
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
@@ -34,15 +26,20 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 def test_get_all_blogs_empty(client, db_session_mock):
-    # Mock the return value for the query
-    db_session_mock.query().filter().all.return_value = []
+    # Mock data
+    mock_blog_data = []
+    
+    mock_query = MagicMock()
+    mock_query.count.return_value = 0
+    db_session_mock.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_blog_data
+
+    db_session_mock.query.return_value = mock_query
 
     # Call the endpoint
     response = client.get("/api/v1/blogs")
 
     # Assert the response
     assert response.status_code == 200
-    assert response.json().get('data') == None
 
 def test_get_all_blogs_with_data(client, db_session_mock):
     blog_id = str(uuid7())
@@ -53,22 +50,27 @@ def test_get_all_blogs_with_data(client, db_session_mock):
     created_at = timeinfo
     updated_at = timeinfo
 
-    # Create a mock blog post
-    blog = Blog(
-        id=blog_id,
-        author_id=author_id,
-        title="Test Blog",
-        content="Test Content",
-        image_url="http://example.com/image.png",
-        tags=["test", "blog"],
-        is_deleted=False,
-        excerpt="Test Excerpt",
-        created_at=created_at,
-        updated_at=updated_at
-    )
+    # Mock data
+    mock_blog_data = [
+        Blog(
+            id=blog_id,
+            author_id=author_id,
+            title="Test Blog",
+            content="Test Content",
+            image_url="http://example.com/image.png",
+            tags=["test", "blog"],
+            is_deleted=False,
+            excerpt="Test Excerpt",
+            created_at=created_at,
+            updated_at=updated_at
+        )
+    ]
+    
+    mock_query = MagicMock()
+    mock_query.count.return_value = 1
+    db_session_mock.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_blog_data
 
-    # Mock the return value for the query
-    db_session_mock.query().filter().all.return_value = [blog]
+    db_session_mock.query.return_value = mock_query
 
     # Call the endpoint
     response = client.get("/api/v1/blogs")

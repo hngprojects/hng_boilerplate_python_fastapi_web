@@ -2,10 +2,12 @@ import random
 import string
 from typing import Any, Optional
 import datetime as dt
+from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
@@ -17,6 +19,7 @@ from api.v1.models.user import User
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
+from api.v1.services.notification_settings import notification_setting_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -25,18 +28,71 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserService(Service):
     """User service"""
 
-    def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all users"""
-
-        query = db.query(User)
+    def fetch_all(self, db: Session, page: int, per_page: int,
+                  **query_params: Optional[Any]):
+        """
+        Fetch all users
+        Args:
+            db: database Session object
+            page: page number
+            per_page: max number of users in a page
+            query_params: params to filter by
+        """
+        per_page = min(per_page, 10)
 
         # Enable filter by query parameter
-        if query_params:
-            for column, value in query_params.items():
-                if hasattr(User, column) and value:
-                    query = query.filter(getattr(User, column).ilike(f"%{value}%"))
+        filters = []
+        if all(query_params):
+            # Validate boolean query parameters
+            for param, value in query_params.items():
+                if value is not None and not isinstance(value, bool):
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                        detail=f"Invalid value for '{param}'. Must be a boolean."
+                    )
+                if value == None:
+                    continue
+                if hasattr(User, param):
+                    filters.append(getattr(User, param) == value)
+        query = db.query(User)
+        total_users = query.count()
+        if filters:
+            query = query.filter(*filters)
+            total_users = query.count()
 
-        return query.all()
+        all_users: list = (query
+                           .order_by(desc(User.created_at))
+                           .limit(per_page)
+                           .offset((page - 1) * per_page)
+                           .all())
+
+        return self.all_users_response(all_users, total_users, page, per_page)
+   
+    def all_users_response(self, users: list, total_users: int,
+                           page: int, per_page: int):
+        """
+        Generates a response for all users
+        Args:
+            users: a list containing user objects
+            total_users: total number of users
+        """
+        if not users or len(users) == 0:
+            return user.AllUsersResponse(message='No User(s) for this query',
+                                         status='success',
+                                         status_code=200,
+                                         page=page,
+                                         per_page=per_page,
+                                         total=0,
+                                         data=[])
+        all_users = [user.UserData.model_validate(usr,
+                                                  from_attributes=True) for usr in users]
+        return user.AllUsersResponse(message='Users successfully retrieved',
+                                     status='success',
+                                     status_code=200,
+                                     page=page,
+                                     per_page=per_page,
+                                     total=total_users,
+                                     data=all_users)
 
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
@@ -77,6 +133,9 @@ class UserService(Service):
         db.commit()
         db.refresh(user)
 
+        # Create notification settings directly for the user
+        notification_setting_service.create(db=db, user=user)
+
         return user
 
     def create_admin(self, db: Session, schema: user.UserCreate):
@@ -101,11 +160,27 @@ class UserService(Service):
         user.is_super_admin = True
         db.commit()
 
+        
         return user
-    
 
-    def update(self, db: Session):
-        return super().update()
+    def update(self, db: Session, current_user : User ,schema : user.UserUpdate, id=None):
+        """Function to update a User"""
+        # Get user from access token if provided, otherwise fetch user by id
+        if db.query(User).filter(User.email == schema.email).first():
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email or username already exists",
+            )
+        if current_user.is_super_admin and id is not None :
+            user = self.fetch(db=db, id=id)
+        else :
+            user = self.fetch(db=db, id=current_user.id)
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(user, key , value)
+        db.commit()
+        db.refresh(user)
+        return user
 
     def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
         """Function to soft delete a user"""

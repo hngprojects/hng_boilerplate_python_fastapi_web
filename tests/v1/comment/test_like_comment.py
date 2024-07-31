@@ -13,14 +13,12 @@ from faker import Faker
 fake = Faker()
 client = TestClient(app)
 
-# Mock database
 @pytest.fixture
 def mock_db_session(mocker):
     db_session_mock = mocker.MagicMock(spec=Session)
     app.dependency_overrides[get_db] = lambda: db_session_mock
     return db_session_mock
 
-# Test User
 @pytest.fixture
 def test_user():
     return User(
@@ -55,7 +53,6 @@ def test_comment(test_user, test_blog):
 def access_token_user1(test_user):
     return user_service.create_access_token(user_id=test_user.id)
 
-# Test adding comment to blog
 def test_like_comment(
     mock_db_session, 
     test_user, 
@@ -63,7 +60,6 @@ def test_like_comment(
     test_comment,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Comment and ident == test_comment.id:
             return test_comment
@@ -71,19 +67,15 @@ def test_like_comment(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = []
 
-    # Test user belonging to the organization
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.post(f"/api/v1/comments/{test_comment.id}/like", headers=headers)
     
-    # Debugging statement
     if response.status_code != 201:
-        print(response.json())  # Print error message for more details
+        print(response.json())
 
     assert response.status_code == 201, f"Expected status code 200, got {response.status_code}"
     assert response.json()['message'] == "Comment liked successfully!"
@@ -95,7 +87,6 @@ def test_like_comment_twice(
     test_comment,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
     def mock_get(model, ident):
         if model == Comment and ident == test_comment.id:
             return test_comment
@@ -103,19 +94,15 @@ def test_like_comment_twice(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing likes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_like_comment]
 
-    # Test user belonging to the organization
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.post(f"/api/v1/comments/{test_comment.id}/like", headers=headers)
     
-    # Debugging statement
     if response.status_code != 201:
-        print(response.json())  # Print error message for more details
+        print(response.json())
 
     assert response.status_code == 200, f"Expected status code 201, got {response.status_code}"
     assert response.json()['message'] == "You've already liked this comment"
