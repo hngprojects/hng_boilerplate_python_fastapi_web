@@ -86,7 +86,6 @@ async def test_pay_with_flutterwave_success(
         headers={"Authorization": "Bearer test_secret_key"}
     )
 
-    # Check if payment details were saved correctly
     mock_payment_service_instance.create.assert_called_once_with(
         mock_db_session,
         {
