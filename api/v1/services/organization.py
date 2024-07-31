@@ -127,24 +127,24 @@ class OrganizationService(Service):
 
     
     # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session, org_id: str, user_to_update_id: str):
-    # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session):
-    #     '''Updates a user role'''
+    def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session):
+        '''Updates a user role'''
 
-    #     # Fetch the user and organization
-    #     user = check_model_existence(db, User, schema.user_id)
-    #     organization = check_model_existence(db, Organization, schema.org_id)
+        # Fetch the user and organization
+        user = check_model_existence(db, User, schema.user_id)
+        organization = check_model_existence(db, Organization, schema.org_id)
 
-    #     # Check if user is not in organization
-    #     check_user_in_org(user, organization)
+        # Check if user is not in organization
+        check_user_in_org(user, organization)
 
-    #     # Update user role
-    #     stmt = user_organization_association.update().where(
-    #         user_organization_association.c.user_id == schema.user_id,
-    #         user_organization_association.c.organization_id == schema.org_id,
-    #     ).values(role=schema.role)
+        # Update user role
+        stmt = user_organization_association.update().where(
+            user_organization_association.c.user_id == schema.user_id,
+            user_organization_association.c.organization_id == schema.org_id,
+        ).values(role=schema.role)
 
-    #     db.execute(stmt)
-    #     db.commit()
+        db.execute(stmt)
+        db.commit()
 
 
     # def add_user_to_organization(self, db: Session, org_id: str, user_id: str):
@@ -174,46 +174,46 @@ class OrganizationService(Service):
 
 
     # # def remove_user_from_organization(self, db: Session, org_id: str, user_id: str):
-    # def remove_user_from_organization(self, schema: AddRemoveUserFromOrganization, db: Session):
-    #     '''Deletes a user from an organization'''
+    def remove_user_from_organization(self, schema: RemoveUserFromOrganization, db: Session):
+        '''Deletes a user from an organization'''
 
-    #     # Fetch the user and organization
-    #     user = check_model_existence(db, User, schema.user_id)
-    #     organization = check_model_existence(db, Organization, schema.org_id)
+        # Fetch the user and organization
+        user = check_model_existence(db, User, schema.user_id)
+        organization = check_model_existence(db, Organization, schema.org_id)
 
-    #     # Check if user is not in organization
-    #     check_user_in_org(user, organization)
+        # Check if user is not in organization
+        check_user_in_org(user, organization)
 
-    #     # Check for user role permissions
-    #      self.check_user_role_in_org(db=db, user=user, org=organization, role='admin')\
-    #       or self.check_user_role_in_org(db=db, user=user, org=organization, role='owner')
+        # Check for user role permissions
+        self.check_user_role_in_org(db=db, user=user, org=organization, role='admin')\
+          or self.check_user_role_in_org(db=db, user=user, org=organization, role='owner')
 
-    #     # Update user role
-    #     stmt = user_organization_association.delete().where(
-    #         user_organization_association.c.user_id == schema.user_id,
-    #         user_organization_association.c.organization_id == schema.org_id,
-    #     )
+        # Update user role
+        stmt = user_organization_association.delete().where(
+            user_organization_association.c.user_id == schema.user_id,
+            user_organization_association.c.organization_id == schema.org_id,
+        )
 
-    #     db.execute(stmt)
-    #     db.commit()
+        db.execute(stmt)
+        db.commit()
 
     
-    # def get_users_in_organization(self, db: Session, org_id: str):
-    #     '''Fetches all users in an organization'''
+    def get_users_in_organization(self, db: Session, org_id: str):
+        '''Fetches all users in an organization'''
 
-    #     organization = check_model_existence(db, Organization, org_id)
+        organization = check_model_existence(db, Organization, org_id)
         
-    #     # Fetch all users associated with the organization
-    #     return organization.users
+        # Fetch all users associated with the organization
+        return organization.users
     
 
-    # def get_user_organizations(self, db: Session, user_id: str):
-    #     '''Fetches all organizations that belong to a user'''
+    def get_user_organizations(self, db: Session, user_id: str):
+        '''Fetches all organizations that belong to a user'''
 
-    #     user = check_model_existence(db, User, user_id)
+        user = check_model_existence(db, User, user_id)
         
-    #     # Fetch all users associated with the organization
-    #     return user.organizations
+        # Fetch all users associated with the organization
+        return user.organizations
 
     def check_by_email(self, db: Session, email):
         """Fetches a user by their email"""
@@ -234,5 +234,6 @@ class OrganizationService(Service):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="an organization with this name already exist")
 
         return False
+
 
 organization_service = OrganizationService()
