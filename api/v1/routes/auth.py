@@ -228,39 +228,6 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 
     return response
 
-# Verify Magic Link
-@auth.post("/verify-magic-link")
-async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
-    user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
-
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
-
-    response = success_response(
-        status_code=200,
-        message='Login successful',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user': jsonable_encoder(
-                user, 
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
-        }
-    )
-
-    # Add refresh token to cookies
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        expires=timedelta(days=30),
-        httponly=True,
-        secure=True,
-        samesite="none",
-    )
-
-    return response
-
-    
 
 # Verify Magic Link
 @auth.post("/verify-magic-link")
@@ -311,4 +278,3 @@ def request_magic_link(request: MagicLinkRequest, response: Response, db: Sessio
         message=f"Magic link sent to {user.email}"
     )
     return response
-
