@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-""" This module contains the Json response class
-"""
+""" This module contains the Json response class """
 from enum import Enum
 from json import dumps
 from fastapi import status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
-
+from pydantic import BaseModel
+from typing import Any, Dict, Optional
 
 class JsonResponseDict(JSONResponse):
 
     def __init__(
-        self, message: str, data: dict | None = None, error: str = "", status_code=200
+        self, message: str, data: Optional[Dict[str, Any]] = None, error: str = "", status_code: int = 200
     ):
-        """initialize your response"""
+        """Initialize your response"""
         self.message = message
         self.data = data
         self.error = error
@@ -23,15 +23,15 @@ class JsonResponseDict(JSONResponse):
         )
 
     def __repr__(self):
-        return {
+        return str({
             "message": self.message,
             "data": self.data,
             "error": self.error,
             "status_code": self.status_code,
-        }
+        })
 
     def __str__(self):
-        """string representation"""
+        """String representation"""
         return dumps(
             {
                 "message": self.message,
@@ -42,8 +42,7 @@ class JsonResponseDict(JSONResponse):
         )
 
     def response(self):
-        """return a json response dictionary"""
-        print(f"response: {format(self)}")
+        """Return a json response dictionary"""
         if self.status_code < 300:
             return {
                 "message": self.message,
@@ -56,7 +55,6 @@ class JsonResponseDict(JSONResponse):
                 "error": self.error,
                 "status_code": self.status_code,
             }
-
 
 """
 usage:
