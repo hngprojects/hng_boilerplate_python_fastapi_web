@@ -1,6 +1,8 @@
+from typing import Any, Optional
+
 from api.core.base.services import Service
-from api.v1.models.newsletter import NewsletterSubscriber
-from typing import Optional, Anyfrom api.v1.schemas.newsletter import EmailSchema
+from api.v1.models.newsletter import Newsletter, NewsletterSubscriber
+from api.v1.schemas.newsletter import EmailSchema
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
