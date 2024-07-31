@@ -29,10 +29,7 @@ class Settings(BaseSettings):
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
 
-    # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
-    # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
-
-    # FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
+    FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
 
     TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
