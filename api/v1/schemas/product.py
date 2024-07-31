@@ -8,8 +8,6 @@ from datetime import datetime
 
 T = TypeVar('T')
 
->>>>>>>>> Temporary merge branch 2
-
 class ProductUpdate(BaseModel):
     """
     Pydantic model for updating a product.
@@ -87,7 +85,6 @@ class ProductCreate(BaseModel):
     class Config:
         orm_mode = True
 
-        
 
 #status filter
 class ProductFilterResponse(BaseModel):
@@ -113,16 +110,3 @@ class SuccessResponse(BaseModel, Generic[T]):
     status_code: int
     data: T
 
-
-class ProductCreate(BaseModel):
-    name: str = Field(..., description="Name of the product")
-    description: Optional[str] = Field(None, description="Description of the product")
-    price: Decimal = Field(..., description="Price of the product")
-    org_id: str = Field(..., description="Organization ID that the product belongs to")
-    category_id: str = Field(..., description="Category ID that the product belongs to")
-    quantity: Optional[int] = Field(0, description="Quantity of the product in stock")
-    image_url: str = Field(..., description="URL of the product image")
-    status: Optional[ProductStatusEnum] = Field(ProductStatusEnum.in_stock, description="Current status of the product")
-
-    class Config:
-        orm_mode = True
