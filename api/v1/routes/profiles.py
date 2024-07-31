@@ -46,7 +46,7 @@ def create_user_profile(schema: ProfileCreateUpdate, db: Session = Depends(get_d
     return response
 
 
-settings = APIRouter(prefix="/api/v1/users", tags=["Profile-settings"])
+settings = APIRouter(prefix="/users", tags=["Profile-settings"])
 
 @settings.patch("/settings", status_code=status.HTTP_200_OK, response_model=success_response)
 async def update_profile_settings(settings: UserAndProfileUpdate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
