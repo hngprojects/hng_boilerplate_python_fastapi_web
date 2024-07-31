@@ -1,143 +1,75 @@
-#!/usr/bin/env python3
-"""
-Unittests to mock google oauth2
-"""
-import os
+import sys, os
+import warnings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
+
 import pytest
 from fastapi.testclient import TestClient
-from fastapi import status
-from unittest.mock import patch
-from main import app
-from api.core.dependencies.google_oauth_config import google_oauth
-from api.db.database import engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
+from unittest.mock import Mock, patch
+from requests.models import Response as RequestsResponse
 from api.v1.models.user import User
-from api.v1.models.oauth import OAuth
-from api.v1.models.profile import Profile
+from api.v1.schemas.google_oauth import OAuthToken
+from main import app
+from datetime import timedelta
+from api.utils.success_response import success_response
 
-SessionFactory: Session = sessionmaker(bind=engine, autoflush=False)
-
-user_id: str = ""
-
-return_value = {
-    'access_token': 'EVey7-4DYZRDXTg493-w0171...',
-    'expires_in': 3599,
-    'scope': 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email openid',
-    'token_type': 'Bearer',
-    'id_token': 'eyJhbGciOiJSUcoL9_mGQBw...',
-    'expires_at': 1721492909,
-    'userinfo': {
-        'iss': 'https://accounts.google.com',
-        'azp': '209678677159-sro71tn72puotnppasrtgv52j829cq8g.apps.googleusercontent.com',
-        'aud': '209678677159-sro71tn72puotnppas0jnmj52j829cq8g.apps.googleusercontent.com',
-        'sub': '114132989973144532376',
-        'email': 'johnson.oragui@gmail.com',
-        'email_verified': True,
-        'at_hash': 'hD_Uuf9ibTsxXsDP1_ePgw',
-        'nonce': 'aEbk4yA7wZtXazvBrmyL',
-        'name': 'Johnson Oragui',
-        'picture': 'https://lh3.googleusercontent.com/a/ACg8rdfcvg0cK-dwE_fcjV9yj7yhnjiWCDl1PnXbWw56dq-qZKN52Q=s96-c',
-        'given_name': 'Johnson',
-        'family_name': 'oragui',
-        'iat': 1721489311,
-        'exp': 1721492911
-        }
-}
-
-@pytest.fixture(scope="session", autouse=True)
-def db_teardown():
-    yield
-    session: Session = SessionFactory()
-    try:
-        session.query(Profile).delete()
-        session.query(OAuth).delete()
-        session.query(User).delete()
-        session.commit()
-    except Exception as e:
-        session.rollback()
-        raise e
-    # finally:
-    #     session.close()
+client = TestClient(app)
 
 @pytest.fixture
-def client():
-    client = TestClient(app)
-    os.environ['TESTING'] = 'TEST'
-    return client
-
+def mock_db_session():
+    db = Mock(spec=Session)
+    yield db
 
 @pytest.fixture
-def mock_google_oauth2():
-    with patch.object(google_oauth.google, 'authorize_redirect') as mock_authorize_redirect:
-        with patch.object(google_oauth.google, 'authorize_access_token') as mock_authorize_token_userinfo:
-            with patch.object(google_oauth.google, 'parse_id_token') as _:
-                mock_authorize_redirect.return_value = "http://testserver/api/v1/auth/google"
-                mock_authorize_token_userinfo.return_value = return_value
+def mock_google_profile_response():
+    profile_data = {
+        "id": "123456789",
+        "email": "test@example.com",
+        "verified_email": True,
+        "first_name": "Test User",
+        "last_name": "Test",
+        "family_name": "User",
+        "picture": "https://example.com/avatar.jpg",
+        "locale": "en"
+    }
+    response = Mock(spec=RequestsResponse)
+    response.status_code = 200
+    response.json.return_value = profile_data
+    yield response
 
+@pytest.fixture
+def mock_google_services():
+    with patch("api.v1.services.google_oauth.GoogleOauthServices.create_oauth_user") as mock_create_oauth_user:
+        mock_user = User(
+            id=1,
+            email="test@example.com",
+            first_name="Test User"
+        )
+        mock_create_oauth_user.return_value = mock_user
+        yield mock_create_oauth_user
 
-                yield mock_authorize_redirect, mock_authorize_token_userinfo
+@pytest.fixture
+def mock_user_services():
+    with patch("api.v1.services.user.user_service.create_access_token") as mock_create_access_token, \
+         patch("api.v1.services.user.user_service.create_refresh_token") as mock_create_refresh_token:
+        mock_create_access_token.return_value = "access_token_example"
+        mock_create_refresh_token.return_value = "refresh_token_example"
+        yield mock_create_access_token, mock_create_refresh_token
 
-
-def test_google_login(client, mock_google_oauth2):
-    """
-    Test for google_login function redirect to google oauth
-    """
-    response = client.get("/api/v1/auth/google")
+@patch("requests.get")
+def test_google_login(mock_requests_get, mock_db_session, mock_google_profile_response, mock_google_services, mock_user_services):
+    mock_requests_get.return_value = mock_google_profile_response
+    
+    token_request = OAuthToken(id_token="valid_token")
+    response = client.post("api/v1/auth/google", json=token_request.dict(), headers={"Content-Type": "application/json"})
+    
     assert response.status_code == 200
-    assert response.url == "http://testserver/api/v1/auth/google"
-
-
-def test_login_callback_oauth(client, mock_google_oauth2):
-    """
-    Test for google_login callback function/route
-    """
-    response = client.get("/api/v1/auth/callback/google?code=fake-code", follow_redirects=False)
-    print(response.headers, response.has_redirect_location)
-    print(response.headers['location'])
-    assert response.status_code == status.HTTP_302_FOUND
-    assert response.headers["location"] == "http://127.0.0.1:3000/login-success/dashboard/products"
-    assert response.cookies
-
-
-def test_database_for_user_data():
-    """
-    Tests if the data were stored in the users table
-    """
-    global user_id
-    session: Session = SessionFactory()
-    email = return_value['userinfo']['email']
-    user: object = session.query(User).filter_by(email=email).first()
-    user_id = user.id
-
-    assert user.first_name == 'Johnson'
-    assert user.last_name == 'oragui'
-    assert user.email == 'johnson.oragui@gmail.com'
-
-    session.close()
-
-def test_database_for_oauth_data():
-    """
-    Tests if the data were stored in the oauth table
-    """
-    global user_id
-    session = SessionFactory()
-    oauth = session.query(OAuth).filter_by(user_id=user_id).first()
-
-    assert oauth.access_token == return_value['access_token']
-    assert oauth.refresh_token == ''
-    assert oauth.sub == return_value['userinfo']['sub']
-
-    session.close()
-
-def test_database_for_profile_data():
-    """
-    Tests if the avatar_url were stored in the profile table
-    """
-    global user_id
-    session = SessionFactory()
-
-    user_profile = session.query(Profile).filter_by(user_id=user_id).one_or_none()
-
-    assert user_profile.avatar_url == return_value['userinfo']['picture']
-
-    session.close()
+    response_data = response.json()
+    assert response_data["message"] == "success"
+    assert response_data["data"]["access_token"] == "access_token_example"
+    assert response_data["data"]["user"]["email"] == "test@example.com"
+    assert "refresh_token" in response.cookies
+    assert response.cookies["refresh_token"] == "refresh_token_example"

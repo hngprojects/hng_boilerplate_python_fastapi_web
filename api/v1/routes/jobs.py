@@ -48,27 +48,6 @@ async def add_jobs(
     logger.info(f"Job Listing created successfully {new_job.id}")
 
     return success_response(
-        message="Job listing created successfully",
-        status_code=201,
-        data=jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
-    )
-
-
-@jobs.get('/{id}')
-async def get_job(job: PostJobSchema,
-                  db: Session = Depends(get_db),
-                  admin: User = Depends(user_service.get_current_super_admin)
-                  ):
-    job = job_service.fetch(db=db, id=id) | None
-    if job:
-        return success_response(
-            message="Job listing retrieved successfully",
-            status_code=200,
-            data=jsonable_encoder(PostJobSchema.model_validate(job))
-        )
-    
-    return success_response(
-        message="Job listing not found!",
-        status_code=404,
-        data={}
+        message = "Job listing created successfully",
+        status_code = 201,
     )
