@@ -14,15 +14,16 @@ from api.v1.schemas.plans import CreateSubscriptionPlan
 
 bill_plan = APIRouter(prefix='/organizations', tags=['Billing-Plan'])
 
-@bill_plan.get('/billing-plans', response_model=success_response)
+@bill_plan.get('/{organization_id}/billing-plans', response_model=success_response)
 async def retrieve_all_billing_plans(
+    organization_id: str,
     db: Session = Depends(get_db)
 ):
     """
     Endpoint to get all billing plans 
     """
 
-    plans = billing_plan_service.fetch_all(db=db)
+    plans = billing_plan_service.fetch_all(db=db, organization_id=organization_id)
 
     return success_response(
         status_code=status.HTTP_200_OK,

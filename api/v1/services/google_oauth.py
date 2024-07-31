@@ -3,20 +3,21 @@ from datetime import datetime, timezone
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.oauth import OAuth
+from api.v1.models.user import User
 from api.v1.models.profile import Profile
 from api.core.base.services import Service
 from sqlalchemy.orm import Session
 from typing import Annotated, Union
 from api.v1.services.user import user_service
 from api.v1.schemas.google_oauth import Tokens
+from api.v1.services.profile import profile_service
 
 
-class GoogleOauthServices(Service):
+class GoogleOauthServices(Service): 
     """
     Handles database operations for google oauth
     """
-    def create(self, google_response: dict,
-               db: Annotated[Session, Depends(get_db)]) -> object:
+    def create_oauth_user(self, google_response: dict, db: Session):
         """
         Creates a user using information from google.
 
@@ -25,39 +26,24 @@ class GoogleOauthServices(Service):
             db: database session to manage database operation
 
         Returns:
-            user: The token object if user already exists or if newly created
+            user: The user object if user already exists or if newly created
             False: for when Authentication fails
         """
         try:
-            # retrieve the user information
             user_info: dict = google_response.get("userinfo")
             email = user_info.get("email")
             existing_user = db.query(User).filter_by(email=email).first()
 
             if existing_user:
-                # check if user has an entry in oauth table
                 oauth_data = db.query(OAuth).filter_by(user_id=existing_user.id).first()
-                # if the entry exists
                 if oauth_data:
-                    # update the oauth data
                     self.update(oauth_data, google_response, db)
-                # if the entry does not exist
                 else:
-                    # create an entry for the user in oauth table
                     self.create_oauth_data(existing_user.id, google_response, db)
-                # pass the user object to generate tokens
-                user_tokens = self.generate_tokens(existing_user)
-                # return the generated tokens
-                return user_tokens
+                return existing_user
             else:
-                # if the user is not found in the database, create new user
                 new_user = self.create_new_user(google_response, db)
-
-                # pass the user object to generate tokens
-                user_tokens = self.generate_tokens(new_user)
-
-                # return the generated tokens
-                return user_tokens
+                return new_user
         except Exception:
             db.rollback()
             return False
@@ -180,22 +166,22 @@ class GoogleOauthServices(Service):
             False: If an error occured
         """
         try:
-            user_info: dict = google_response.get("userinfo")
             new_user = User(
-                first_name=user_info.get("given_name"),
-                last_name=user_info.get("family_name"),
-                email=user_info.get("email")
+                first_name=google_response.get("given_name"),
+                last_name=google_response.get("family_name"),
+                email=google_response.get("email"),
+                avatar_url=google_response.get("picture")
             )
             db.add(new_user)
             db.commit()
 
-            profile = Profile(user_id=new_user.id, avatar_url=user_info.get("picture"))
+            profile = Profile(user_id=new_user.id, avatar_url=google_response.get("picture"))
             oauth_data = OAuth(
                 provider="google",
                 user_id=new_user.id,
-                sub=user_info.get("sub"),
-                access_token=google_response.get("access_token"),
-                refresh_token=google_response.get("refresh_token", '')
+                sub=google_response.get("sub"),
+                access_token=user_service.create_access_token(new_user.id),
+                refresh_token=user_service.create_refresh_token(new_user.id)
             )
             db.add_all([profile, oauth_data])
             db.commit()
