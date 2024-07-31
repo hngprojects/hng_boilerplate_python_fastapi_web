@@ -8,7 +8,7 @@ from api.v1.models.user import User
 from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
-    ChangePwdRet, AllUsersResponse,
+    ChangePwdRet, AllUsersResponse, UserUpdate,
     AdminCreateUserResponse, AdminCreateUser
 )
 from api.db.database import get_db
@@ -83,6 +83,38 @@ def get_user(
         message='User retrieved successfully',
         data = jsonable_encoder(
             user, 
+            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+        )
+    )
+@user.patch(path="/",status_code=status.HTTP_200_OK)
+def update_current_user(
+                        current_user : Annotated[User , Depends(user_service.get_current_user)],
+                        schema : UserUpdate,
+                        db : Session = Depends(get_db)):
+    
+    user = user_service.update(db=db, schema= schema, current_user=current_user)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='User Updated Successfully',
+        data= jsonable_encoder(
+            user,
+            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+        )
+    )
+@user.patch(path="/{user_id}", status_code=status.HTTP_200_OK)
+def update_user(user_id : str,
+                current_user : Annotated[User , Depends(user_service.get_current_super_admin)],
+                schema : UserUpdate,
+                db : Session = Depends(get_db)
+               ):
+    user = user_service.update(db=db, schema=schema, id=user_id, current_user=current_user)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='User Updated Successfully',
+        data= jsonable_encoder(
+            user,
             exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
     )
