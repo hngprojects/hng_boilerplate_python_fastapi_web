@@ -21,10 +21,10 @@ from api.v1.schemas.organization import(
 
 
 class OrganizationService(Service):
-    '''Organization service functionality'''
+    """Organization service functionality"""
 
     def create(self, db: Session, schema: CreateUpdateOrganization, user: User):
-        '''Create a new product'''
+        """Create a new product"""
 
         # Create a new organization
         new_organization = Organization(**schema.model_dump())
@@ -39,9 +39,7 @@ class OrganizationService(Service):
 
         # Add user as owner to the new organization
         stmt = user_organization_association.insert().values(
-            user_id=user.id,
-            organization_id=new_organization.id,
-            role='owner'
+            user_id=user.id, organization_id=new_organization.id, role="owner"
         )
         db.execute(stmt)
         db.commit()
@@ -50,7 +48,7 @@ class OrganizationService(Service):
 
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all products with option tto search using query parameters'''
+        """Fetch all products with option tto search using query parameters"""
 
         query = db.query(Organization)
 
@@ -58,7 +56,9 @@ class OrganizationService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Organization, column) and value:
-                    query = query.filter(getattr(Organization, column).ilike(f'%{value}%'))
+                    query = query.filter(
+                        getattr(Organization, column).ilike(f"%{value}%")
+                    )
 
         return query.all()
     
@@ -72,11 +72,19 @@ class OrganizationService(Service):
         return OrganizationBase.from_orm(Organization)
 
 
+    def fetch(self, db: Session, id: str):
+        """Fetches an organization by id"""
+
+        organization = check_model_existence(db, Organization, id)
+
+        return organization
+
+
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
         try:
             stmt = select(user_organization_association.c.role).where(
                 user_organization_association.c.user_id == user_id,
-                user_organization_association.c.organization_id == org_id
+                user_organization_association.c.organization_id == org_id,
             )
             result = db.execute(stmt).scalar_one_or_none()
             return result
@@ -85,14 +93,16 @@ class OrganizationService(Service):
             return None
 
     def update(self, db: Session, id: str, schema, current_user: User):
-        '''Updates a product'''
+        """Updates a product"""
 
         organization = self.fetch(db=db, id=id)
 
         # check if the current user has the permission to update the organization
         role = self.get_organization_user_role(current_user.id, id, db)
-        if role not in ['admin', 'owner']:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        if role not in ["admin", "owner"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
+            )
 
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
@@ -119,7 +129,7 @@ class OrganizationService(Service):
         stmt = user_organization_association.select().where(
             user_organization_association.c.user_id == user.id,
             user_organization_association.c.organization_id == org.id,
-            user_organization_association.c.role == role
+            user_organization_association.c.role == role,
         )
 
         result = db.execute(stmt).fetchone()
