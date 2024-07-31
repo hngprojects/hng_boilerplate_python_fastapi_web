@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock, patch
 from uuid_extensions import uuid7
+from uuid import UUID
 from datetime import datetime, timezone, timedelta
 
 from main import app
@@ -11,7 +12,6 @@ from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
 from api.v1.models.user import User
 from api.v1.services.notification import NotificationCreate
-
 
 
 # Mock database dependency
@@ -96,12 +96,13 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
 @pytest.fixture
 def mock_dependencies():
     with patch('api.utils.dependencies.get_db') as mock_get_db, \
-         patch('api.utils.dependencies.get_current_user') as mock_get_current_user, \
-         patch('api.v1.services.notification.NotificationService.create_notification') as mock_create_notification:
-        
+        patch('api.utils.dependencies.get_current_user') as mock_get_current_user, \
+        patch('api.v1.services.notification.NotificationService.create_notification') as mock_create_notification:
+
         mock_db = MagicMock()
         mock_user = MagicMock(id=uuid7(), username='testuser')
-        
+
+
         mock_get_db.return_value = mock_db
         mock_get_current_user.return_value = mock_user
         mock_create_notification.return_value = MagicMock(
@@ -111,11 +112,14 @@ def mock_dependencies():
             message="Test Message",
             created_at="2024-01-01T00:00:00"
         )
-        
+
         yield mock_db, mock_user, mock_create_notification
-        
-        
-        
+
+
+
+
+
+
 def test_create_notification_success(client, mock_dependencies):
     mock_db, mock_user, mock_create_notification = mock_dependencies
 
@@ -124,9 +128,11 @@ def test_create_notification_success(client, mock_dependencies):
         "message": "Test Message"
     }
 
+
     # Generate a token using the actual method for creating a token
     access_token = user_service.create_access_token(str(mock_user.id))
-    
+
+
     # Debugging output
     print(f"Generated Access Token: {access_token}")
 
@@ -134,13 +140,20 @@ def test_create_notification_success(client, mock_dependencies):
 
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
 
+
     response_json = response.json()
-    
+
+
+
+
     # Check if 'data' key exists in the response
+
     if 'data' not in response_json:
         print("The 'data' key is missing from the response.")
         print("Response JSON:", response_json)
-    
+
+
+
     expected_response = {
         "success": True,
         "status_code": 200,
@@ -152,14 +165,17 @@ def test_create_notification_success(client, mock_dependencies):
             "message": "Test Message",
             "created_at": "2024-01-01T00:00:00"
         }
+
     }
-    
+
+
     # Assert response content
+
     if 'data' in response_json:
         assert response_json['data']['id'] == expected_response['data']['id']
         assert response_json['data']['user_id'] == expected_response['data']['user_id']
         assert response_json['data']['title'] == expected_response['data']['title']
         assert response_json['data']['message'] == expected_response['data']['message']
         assert response_json['data']['created_at'] == expected_response['data']['created_at']
-    
+
     assert response.status_code == 200
