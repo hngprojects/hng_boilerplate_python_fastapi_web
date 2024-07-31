@@ -185,3 +185,4 @@ def test_fetch_all_topic(
 
     response = client.get(f"/api/v1/help-center/topics")
     assert response.status_code == 200
+    

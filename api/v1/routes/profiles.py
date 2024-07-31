@@ -27,11 +27,14 @@ def get_current_user_profile(db: Session = Depends(get_db), current_user: User =
 
 
 @profile.post('/', status_code=status.HTTP_201_CREATED, response_model=success_response)
-def create_user_profile(schema: ProfileCreateUpdate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+def create_user_profile(
+    schema: ProfileCreateUpdate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(user_service.get_current_user)
+):
     '''Endpoint to create user profile from the frontend'''
 
-    user_profile = profile_service.create(db, schema=schema, 
-                                          user_id=current_user.id)
+    user_profile = profile_service.create(db, schema=schema, user_id=current_user.id)
 
     response = success_response(
         status_code=status.HTTP_201_CREATED,
@@ -39,9 +42,10 @@ def create_user_profile(schema: ProfileCreateUpdate, db: Session = Depends(get_d
         data=user_profile.to_dict(),
     )
 
+    return response
 
-@profile.patch("/", status_code=status.HTTP_200_OK, 
-               response_model=success_response)
+
+@profile.patch("/", status_code=status.HTTP_200_OK, response_model=success_response)
 def update_user_profile(
     schema: ProfileCreateUpdate,
     db: Session = Depends(get_db),

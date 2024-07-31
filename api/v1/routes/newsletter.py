@@ -32,11 +32,11 @@ async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
         status_code=status.HTTP_201_CREATED
     )
 
-@newsletter.get('/newsletters', response_model=success_response, 
-                 status_code=200,
-                 )
-def retrieve_subscribers(db: Session = Depends(get_db),
-                              admin: User = Depends(user_service.get_current_super_admin)):
+@newsletter.get('/newsletters', response_model=success_response, status_code=200,)
+def retrieve_subscribers(
+    db: Session = Depends(get_db),
+    admin: User = Depends(user_service.get_current_super_admin)
+):
     """
     Retrieve all newsletter subscription from database
     """
@@ -52,4 +52,4 @@ def retrieve_subscribers(db: Session = Depends(get_db),
         message = "Subscriptions retrieved successfully",
         status_code = 200,
         data = jsonable_encoder(subs_filtered)
-        )
+    )
