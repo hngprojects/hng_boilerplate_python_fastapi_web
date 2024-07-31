@@ -22,7 +22,7 @@ class ProductStatusEnum(Enum):
     low_on_stock = "low_on_stock"
 
 class ProductFilterStatusEnum(Enum):
-    published = "published"
+    published = "active"
     draft = "draft"
 
 class Product(BaseTableModel):
