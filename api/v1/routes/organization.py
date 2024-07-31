@@ -27,3 +27,6 @@ def get_organization(org_id: int, db: Session = Depends(get_db), token: str = De
     if organization is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
     return OrganizationBase.from_orm(organization)  # Use Pydantic model for response
+
+class Config:
+    from_attributes = True  # Enable Pydantic to read ORM attributes
