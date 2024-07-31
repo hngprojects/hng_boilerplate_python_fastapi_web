@@ -1,6 +1,8 @@
 from datetime import datetime
+from typing import Dict, List
 from pydantic import BaseModel, EmailStr, field_validator
 
+from api.utils.success_response import success_response
 
 class OrganizationBase(BaseModel):
     """Base organization schema"""
@@ -50,3 +52,15 @@ class RemoveUserFromOrganization(BaseModel):
 
     user_id: str
     org_id: str
+
+
+class PaginatedOrgUsers(BaseModel):
+    """Describe response object for paginated users in organization"""
+    page: int
+    per_page: int
+    per_page: int
+    total: int
+    status_code: int
+    success: bool
+    message: str
+    data: List[Dict]

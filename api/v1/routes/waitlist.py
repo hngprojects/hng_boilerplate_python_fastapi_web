@@ -17,6 +17,7 @@ from api.v1.services.waitlist_email import (
 )
 from api.utils.logger import logger
 from api.db.database import get_db
+from api.v1.services.waitlist import waitlist_service
 
 waitlist = APIRouter(prefix="/waitlists", tags=["Waitlist"])
 
@@ -113,3 +114,18 @@ def admin_add_user_to_waitlist(
     )
 
     return JsonResponseDict(**resp)
+
+@waitlist.get("/users", response_model=success_response, status_code=200)
+async def get_all_waitlist_emails(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin=Depends(get_super_admin)
+):
+    waitlist_users = waitlist_service.fetch_all(db)
+    emails = [{"email": user.email, "full_name": user.full_name} for user in waitlist_users]
+
+    return success_response(
+        message="Waitlist retrieved successfully",
+        status_code=200,
+        data=emails
+    )
