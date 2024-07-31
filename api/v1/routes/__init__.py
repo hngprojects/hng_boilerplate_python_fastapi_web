@@ -21,6 +21,7 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
+from tests.run_all_test import test_router
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
 
@@ -45,6 +46,7 @@ api_version_one.include_router(blog)
 api_version_one.include_router(comment)
 api_version_one.include_router(sms)
 api_version_one.include_router(jobs)
+api_version_one.include_router(test_router)
 api_version_one.include_router(faq)
 api_version_one.include_router(topic)
 api_version_one.include_router(contact_us)
