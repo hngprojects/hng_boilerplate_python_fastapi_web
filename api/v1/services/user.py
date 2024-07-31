@@ -19,6 +19,7 @@ from api.v1.models.user import User
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
+from api.v1.services.notification_settings import notification_setting_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -132,6 +133,9 @@ class UserService(Service):
         db.commit()
         db.refresh(user)
 
+        # Create notification settings directly for the user
+        notification_setting_service.create(db=db, user=user)
+
         return user
 
     def create_admin(self, db: Session, schema: user.UserCreate):
@@ -156,11 +160,27 @@ class UserService(Service):
         user.is_super_admin = True
         db.commit()
 
+        
         return user
-    
 
-    def update(self, db: Session):
-        return super().update()
+    def update(self, db: Session, current_user : User ,schema : user.UserUpdate, id=None):
+        """Function to update a User"""
+        # Get user from access token if provided, otherwise fetch user by id
+        if db.query(User).filter(User.email == schema.email).first():
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email or username already exists",
+            )
+        if current_user.is_super_admin and id is not None :
+            user = self.fetch(db=db, id=id)
+        else :
+            user = self.fetch(db=db, id=current_user.id)
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(user, key , value)
+        db.commit()
+        db.refresh(user)
+        return user
 
     def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
         """Function to soft delete a user"""

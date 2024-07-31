@@ -1,5 +1,3 @@
-# Dependencies:
-# pip install pytest-mock
 import pytest
 from unittest.mock import patch, MagicMock
 from sqlalchemy.exc import IntegrityError

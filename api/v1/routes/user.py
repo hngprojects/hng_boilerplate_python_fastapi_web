@@ -8,7 +8,8 @@ from api.v1.models.user import User
 from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
-    ChangePwdRet, AllUsersResponse
+    ChangePwdRet,
+    UserUpdate, AllUsersResponse
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -40,17 +41,18 @@ def get_current_user_details(
     )
 
 
-# @user.get('/current-user/delete', status_code=200)
-# async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-#     '''Endpoint to delete a user account'''
+@user.get('/delete', status_code=200)
+async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+    '''Endpoint to delete a user account'''
 
-#     # Delete current user
-#     user_service.delete(db=db)
+    # Delete current user
+    user_service.delete(db=db)
 
-#     return success_response(
-#         status_code=200,
-#         message='User deleted successfully',
-#     )
+    return success_response(
+        status_code=200,
+        message='User deleted successfully',
+    )
+
 
 @user.patch("/me/password", status_code=200)
 async def change_password(
@@ -68,10 +70,11 @@ async def change_password(
     )
 
 @user.get(path="/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(user_id : str,
-             current_user : Annotated[User , Depends(user_service.get_current_user)],
-             db : Session = Depends(get_db)
-             ):
+def get_user(
+    user_id : str,
+    current_user : Annotated[User , Depends(user_service.get_current_user)],
+    db : Session = Depends(get_db)
+):
     
     user = user_service.fetch(db=db, id=user_id)
 
@@ -80,6 +83,38 @@ def get_user(user_id : str,
         message='User retrieved successfully',
         data = jsonable_encoder(
             user, 
+            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+        )
+    )
+@user.patch(path="/",status_code=status.HTTP_200_OK)
+def update_current_user(
+                        current_user : Annotated[User , Depends(user_service.get_current_user)],
+                        schema : UserUpdate,
+                        db : Session = Depends(get_db)):
+    
+    user = user_service.update(db=db, schema= schema, current_user=current_user)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='User Updated Successfully',
+        data= jsonable_encoder(
+            user,
+            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+        )
+    )
+@user.patch(path="/{user_id}", status_code=status.HTTP_200_OK)
+def update_user(user_id : str,
+                current_user : Annotated[User , Depends(user_service.get_current_super_admin)],
+                schema : UserUpdate,
+                db : Session = Depends(get_db)
+               ):
+    user = user_service.update(db=db, schema=schema, id=user_id, current_user=current_user)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='User Updated Successfully',
+        data= jsonable_encoder(
+            user,
             exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
     )
@@ -110,13 +145,15 @@ def delete_user(
     user_service.delete(db=db, id=user_id)
 
 @user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
-async def get_users(current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-                    db: Annotated[Session, Depends(get_db)],
-                    page: int = 1, per_page: int = 10,
-                    is_active: Optional[bool] = Query(None),
-                    is_deleted: Optional[bool] = Query(None),
-                    is_verified: Optional[bool] = Query(None),
-                    is_super_admin: Optional[bool] = Query(None)):
+async def get_users(
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    db: Annotated[Session, Depends(get_db)],
+    page: int = 1, per_page: int = 10,
+    is_active: Optional[bool] = Query(None),
+    is_deleted: Optional[bool] = Query(None),
+    is_verified: Optional[bool] = Query(None),
+    is_super_admin: Optional[bool] = Query(None)
+):
     """
     Retrieves all users.
     Args:
