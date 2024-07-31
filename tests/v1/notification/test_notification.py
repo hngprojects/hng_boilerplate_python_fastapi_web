@@ -92,6 +92,7 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     assert response.json()["status_code"] == 401
     
     
+# New test cases for send_notification endpoint
 @pytest.fixture
 def mock_dependencies():
     with patch('api.utils.dependencies.get_db') as mock_get_db, \
@@ -101,10 +102,6 @@ def mock_dependencies():
         mock_db = MagicMock()
         mock_user = MagicMock(id=uuid7(), username='testuser')
         
-        # Generate a token for the mock user
-        access_token = user_service.create_access_token(str(mock_user.id))
-        
-        # Set up mock return values
         mock_get_db.return_value = mock_db
         mock_get_current_user.return_value = mock_user
         mock_create_notification.return_value = MagicMock(
@@ -115,19 +112,24 @@ def mock_dependencies():
             created_at="2024-01-01T00:00:00"
         )
         
-        yield mock_db, mock_user, mock_create_notification, access_token
+        yield mock_db, mock_user, mock_create_notification
         
         
-  
+        
 def test_create_notification_success(client, mock_dependencies):
-    mock_db, mock_user, mock_create_notification, access_token = mock_dependencies
+    mock_db, mock_user, mock_create_notification = mock_dependencies
 
     notification_data = {
         "title": "Test Title",
         "message": "Test Message"
     }
 
-    # Use the token from the fixture
+    # Generate a token using the actual method for creating a token
+    access_token = user_service.create_access_token(str(mock_user.id))
+    
+    # Debugging output
+    print(f"Generated Access Token: {access_token}")
+
     headers = {"Authorization": f"Bearer {access_token}"}
 
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
