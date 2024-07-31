@@ -6,16 +6,17 @@ from api.v1.models.profile import Profile
 from api.v1.schemas.customer import CustomerUpdate, SuccessResponse
 from api.utils.dependencies import get_super_admin
 from typing import Annotated, Optional
+from api.v1.services.user import user_service
 
 customers = APIRouter(prefix="/customers", tags=["customers"])
-
 
 
 @customers.put("/{customer_id}", response_model=SuccessResponse, status_code=status.HTTP_200_OK)
 def update_customer(
     customer_id: str,
     customer_data: CustomerUpdate,
-    Authorization: Optional[str] = Header(None),
+    current_user: User = Depends(user_service.get_current_user),
+    Authorization: Optional[str] = Header(),
     db: Session = Depends(get_db)
 ):
     """
@@ -27,7 +28,11 @@ def update_customer(
     # Extract the token from the Authorization header
     try:
         if not Authorization:
-            raise IndexError
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token format",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
         token = Authorization.split(" ")[1]
     except IndexError:
         raise HTTPException(

@@ -16,8 +16,8 @@ organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 @organization.post('', response_model=success_response, status_code=status.HTTP_201_CREATED)
 async def create_organization(
     schema: CreateUpdateOrganization,
-    db: Session= Depends(get_db), 
-    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
 ):
     '''Endpoint to create a new organization'''
 

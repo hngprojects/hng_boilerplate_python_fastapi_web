@@ -23,7 +23,7 @@ def mock_db_session(mocker):
 def test_admin():
     return User(
         id="admin_id",  # Ensure the admin has an ID
-        username="admin",
+        # username="admin",
         email="admin@example.com",
         is_super_admin=True,
     )
@@ -33,7 +33,7 @@ def test_admin():
 def test_customer():
     user = User(
         id="customer_id",  # Ensure the customer has an ID
-        username="customer",
+        # username="customer",
         email="customer@example.com",
         first_name="John",
         last_name="Doe",
