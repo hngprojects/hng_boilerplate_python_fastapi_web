@@ -6,13 +6,13 @@ from api.v1.models.base_model import BaseTableModel
 class Notification(BaseTableModel):
     __tablename__ = "notifications"
 
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     title = Column(String, nullable=False)
     message = Column(Text, nullable=False)
     status = Column(String, default="unread")  # unread, read
     
 
-    user = relationship("User", back_populates="notifications")
+    user = relationship("User", back_populates="notifications", primaryjoin="Notification.user_id==User.id", foreign_keys=[user_id])
 
 
 class NotificationSetting(BaseTableModel):
