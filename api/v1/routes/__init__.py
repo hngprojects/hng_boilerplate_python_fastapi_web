@@ -20,6 +20,7 @@ from api.v1.routes.activity_logs import activity_logs
 from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.faq import faq
+import api.v1.routes.payment_flutterwave
 
 api_version_one = APIRouter(prefix="/api/v1")
 

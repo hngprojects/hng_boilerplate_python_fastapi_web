@@ -34,4 +34,6 @@ class Settings(BaseSettings):
     # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
     # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
 
+    # FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
+
 settings = Settings()

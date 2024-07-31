@@ -2,6 +2,7 @@ from typing import Any, Optional
 from sqlalchemy.orm import Session
 from api.v1.models.payment import Payment
 
+from fastapi import HTTPException
 from api.v1.models import User
 from api.v1.models.payment import Payment
 from api.utils.db_validators import check_model_existence
@@ -13,7 +14,7 @@ class PaymentService:
     def create(self, db: Session,  schema):
         '''Create a new payment'''
 
-        new_payment = Payment(**schema.model_dump())
+        new_payment = Payment(**schema)
         db.add(new_payment)
         db.commit()
         db.refresh(new_payment)
@@ -44,6 +45,13 @@ class PaymentService:
     def get_payment_by_id(self, db: Session, payment_id: str):
         payment = check_model_existence(db, Payment, payment_id)
         return payment
+
+    def get_payment_by_transaction_id(self, db: Session, transaction_id: str):
+        try:
+            payment = db.query(Payment).filter(Payment.transaction_id==transaction_id).first()
+            return payment
+        except Exception:
+            raise HTTPException(status_code=404, detail='Payment record not found in the database')
 
     def fetch_by_user(self, db: Session, user_id, limit, page):
         '''Fetches all payments of a user'''
