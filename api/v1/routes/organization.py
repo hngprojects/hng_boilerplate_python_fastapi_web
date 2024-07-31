@@ -13,7 +13,7 @@ from api.v1.services.organization import organization_service
 from api.v1.schemas.organization import OrganizationBase
 from api.v1.services.organization import organization_service
 from api.v1.services.user import user_service, oauth2_scheme
-from typing import Annotated
+
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
@@ -40,26 +40,20 @@ def create_organization(
         data=jsonable_encoder(new_org),
     )
 
-  
-@organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
-async def get_organization(
-    org_id: str,
+@organization.get('/{org_id}', response_model=success_response, status_code=status.HTTP_200_OK)
+def get_organization(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to get an organization by ID"""
+    get_organization = organization_service.fetch(db=db, user=current_user)
+    return success_response(
+        status_code=200,
+        message="Organization retrieved successfully",
+        data=jsonable_encoder(get_organization)
+)
+  
 
-    organization = organization_service.fetch(db, org_id)
-    if not organization:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
-
-    return jsonable_encoder(organization)
-
-
-@organization.patch('/{org_id}', response_model=success_response)
-async def update_organization(org_id: str, schema: CreateUpdateOrganization, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-    """update organization"""
-    
 @organization.patch('/{org_id}', response_model=success_response, status_code=200)
 async def update_organization(
     org_id: str, 
@@ -75,14 +69,4 @@ async def update_organization(
         status_code=status.HTTP_200_OK,
         message='Organization updated successfully',
         data=jsonable_encoder(updated_organization)
-    )
-
-
-@organization.get("", status_code=status.HTTP_200_OK)
-def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
-    orgs = organization_service.fetch_all(db)
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message="Retrived all organizations information Successfully",
-        data = jsonable_encoder(orgs)
     )

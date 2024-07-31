@@ -62,7 +62,7 @@ class OrganizationService(Service):
         return query.all()
 
     
-    def fetch(self, db: Session, id: str) -> Organization:
+    def fetch(self, db: Session, id: id):
         '''Fetches an organization by id'''
         
         organization = check_model_existence(db, Organization, id)
