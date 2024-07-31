@@ -34,6 +34,11 @@ class UserCreate(BaseModel):
             )
         return value
 
+class UserUpdate(BaseModel):
+    
+    first_name : Optional[str] = None
+    last_name : Optional[str] = None
+    email : Optional[str] = None
 class UserData(BaseModel):
     """
     Schema for users to be returned to superadmin
@@ -64,6 +69,31 @@ class AllUsersResponse(BaseModel):
     per_page: int
     total: int
     data: Union[List[UserData], List[None]]    
+
+class AdminCreateUser(BaseModel):
+    """
+    Schema for admin to create a users
+    """
+    email: EmailStr
+    first_name: str
+    last_name: str
+    password: str = ''
+    is_active: bool = False
+    is_deleted: bool = False
+    is_verified: bool = False
+    is_super_admin: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdminCreateUserResponse(BaseModel):
+    """
+    Schema response for user created by admin
+    """
+    message: str
+    status_code: int
+    status: str
+    data: UserData
 
 class LoginRequest(BaseModel):
     email: EmailStr

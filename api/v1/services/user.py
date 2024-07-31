@@ -1,6 +1,6 @@
 import random
 import string
-from typing import Any, Optional
+from typing import Any, Optional, Annotated
 import datetime as dt
 from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
@@ -137,6 +137,36 @@ class UserService(Service):
         notification_setting_service.create(db=db, user=user)
 
         return user
+    
+    def super_admin_create_user(self, db: Annotated[Session, Depends(get_db)],
+                                user_request: user.AdminCreateUser):
+        """
+        Creates a user for super admin
+        Args:
+            db: database Session object
+            user_request: The user details to use for creation
+        Returns:
+            object: the complete details of the newly created user
+        """
+        try:
+            user_exists = db.query(User).filter_by(email=user_request.email).one_or_none()
+            if user_exists:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail=f'User with {user_request.email} already exists')
+            if user_request.password:
+                user_request.password = self.hash_password(user_request.password)
+            new_user = User(**user_request.model_dump())
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user_schema = user.UserData.model_validate(new_user, from_attributes=True)
+            return user.AdminCreateUserResponse(message='User created successfully',
+                                                 status_code=201,
+                                                 status='success',
+                                                 data=user_schema)
+        except Exception as exc:
+            db.rollback()
+            raise Exception(exc) from exc
 
     def create_admin(self, db: Session, schema: user.UserCreate):
         """Creates a new admin"""
@@ -160,11 +190,27 @@ class UserService(Service):
         user.is_super_admin = True
         db.commit()
 
+        
         return user
-    
 
-    def update(self, db: Session):
-        return super().update()
+    def update(self, db: Session, current_user : User ,schema : user.UserUpdate, id=None):
+        """Function to update a User"""
+        # Get user from access token if provided, otherwise fetch user by id
+        if db.query(User).filter(User.email == schema.email).first():
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email or username already exists",
+            )
+        if current_user.is_super_admin and id is not None :
+            user = self.fetch(db=db, id=id)
+        else :
+            user = self.fetch(db=db, id=current_user.id)
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(user, key , value)
+        db.commit()
+        db.refresh(user)
+        return user
 
     def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
         """Function to soft delete a user"""
