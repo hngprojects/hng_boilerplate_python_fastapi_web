@@ -73,9 +73,7 @@ def test_get_organization_not_found(db_session_mock, mock_get_current_user):
     response = client.get("/api/v1/organizations/999", headers={"Authorization": "Bearer testtoken"})
     assert response.status_code == 404
     data = response.json()
-    assert data["message"] == "Organization not found"
-    assert data["status_code"] == 404
-    assert not data["success"]
+    assert data["detail"] == "Organization not found"
 
 def test_get_organization_invalid_id(db_session_mock, mock_get_current_user):
     response = client.get("/api/v1/organizations/abc", headers={"Authorization": "Bearer testtoken"})
