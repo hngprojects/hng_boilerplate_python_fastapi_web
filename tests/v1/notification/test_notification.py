@@ -123,7 +123,7 @@ def test_create_notification_success(client, mock_dependencies):
         "title": "Test Title",
         "message": "Test Message"
     }
-    
+
     # Generate a token using the actual method for creating a token
     access_token = user_service.create_access_token(str(mock_user.id))
     
@@ -131,15 +131,14 @@ def test_create_notification_success(client, mock_dependencies):
     print(f"Generated Access Token: {access_token}")
 
     headers = {"Authorization": f"Bearer {access_token}"}
-    
+
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
-    
-    # Extract the response data for validation
-    response_json = response.json()
     
     # Debugging output
     print(f"Response Status Code: {response.status_code}")
-    print(f"Response JSON: {response_json}")
+    print(f"Response JSON: {response.json()}")
+
+    response_json = response.json()
     
     # Check if 'data' key exists in the response
     if 'data' not in response_json:
@@ -166,5 +165,5 @@ def test_create_notification_success(client, mock_dependencies):
         assert response_json['data']['title'] == expected_response['data']['title']
         assert response_json['data']['message'] == expected_response['data']['message']
         assert response_json['data']['created_at'] == expected_response['data']['created_at']
- 
+    
     assert response.status_code == 200
