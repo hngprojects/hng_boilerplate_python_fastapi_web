@@ -52,7 +52,7 @@ def test_update_profile_user_not_found():
     # Mock get_current_user to return a sample authenticated user
     with patch("api.v1.services.user.user_service.get_current_user", return_value=sample_user):
         # Mock get_db to provide a mock session
-        with patch("api.v1.routes.settings.get_db") as mock_get_db:
+        with patch("api.db.database.get_db") as mock_get_db:
             mock_session = MagicMock(spec=Session)
             mock_get_db.return_value = mock_session
 
