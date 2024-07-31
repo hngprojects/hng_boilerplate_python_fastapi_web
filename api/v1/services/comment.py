@@ -2,10 +2,15 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from api.v1.models.comment import Comment
 from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models import Comment, Blog, User
+from fastapi import Depends
+from api.db.database import get_db
+from api.v1.schemas.comment import CommentsResponse, CommentsSchema
+from sqlalchemy import desc
+from typing import Annotated
 
 class CommentService(Service):
     '''Comment service functionality'''
@@ -67,30 +72,27 @@ class CommentService(Service):
         comment = check_model_existence(db, Comment, id)
         return comment
 
-	def update(self, db: Session, id: str, schema):
-		'''Updates a comment'''
+    def update(self, db: Session, id: str, schema):
+        '''Updates a comment'''
+        comment = self.fetch(db=db, id=id)
 
-		comment = self.fetch(db=db, id=id)
-		
-		# Update the fields with the provided schema data
-		update_data = schema.dict(exclude_unset=True)
-		for key, value in update_data.items():
-			setattr(comment, key, value)
-		
-		db.commit()
-		db.refresh(comment)
-		return comment
-	
+        # Update the fields with the provided schema data
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(comment, key, value)
 
-	def delete(self, db: Session, id: str):
-		'''Deletes a comment'''
-		
-		comment = self.fetch(db=db, id=id)
-		db.delete(comment)
-		db.commit()
+        db.commit()
+        db.refresh(comment)
+        return comment
 
-	def validate_params(self, blog_id: str, page: int, per_page: int, db: Annotated[Session, get_db]):
-		"""
+    def delete(self, db: Session, id: str):
+        '''Deletes a comment'''
+        comment = self.fetch(db=db, id=id)
+        db.delete(comment)
+        db.commit()
+
+    def validate_params(self, blog_id: str, page: int, per_page: int, db: Annotated[Session, Depends(get_db)]):
+        """
         Validate parameters and fetch comments.
 
         Args:
@@ -102,28 +104,28 @@ class CommentService(Service):
             Response: An exception if error occurs
             object: Response object containing the comments
         """
-		try:
-			blog_exists: Union[object, None] = db.query(Blog).filter_by(id=blog_id).one_or_none()
-			if not blog_exists:
-				return 'Blog not found'
-			per_page = per_page if per_page <= 20 else 20
+        try:
+            blog_exists: Union[object, None] = db.query(Blog).filter_by(id=blog_id).one_or_none()
+            if not blog_exists:
+                return 'Blog not found'
+            per_page = per_page if per_page <= 20 else 20
 
-			comments: Union[list, None] =( db.query(Comment)
-                                          .filter_by(blog_id=blog_id)
-                                          .order_by(desc(Comment.created_at))
-                                          .limit(per_page)
-                                          .offset((page - 1) * per_page)
-                                          .all())
-			if not comments:
-				return CommentsResponse()
-			total_comments = db.query(Comment).filter_by(blog_id=blog_id).count()
+            comments: Union[list, None] = (
+                db.query(Comment)
+                .filter_by(blog_id=blog_id)
+                .order_by(desc(Comment.created_at))
+                .limit(per_page)
+                .offset((page - 1) * per_page)
+                .all()
+            )
+            if not comments:
+                return CommentsResponse()
+            total_comments = db.query(Comment).filter_by(blog_id=blog_id).count()
 
-			comment_schema: list = [CommentsSchema.model_validate(comment) for comment in comments]
-			return CommentsResponse(page=page, per_page=per_page,
-                                    total=total_comments,
-                                    data=comment_schema)
-		except Exception:
-			return False
+            comment_schema: list = [CommentsSchema.model_validate(comment) for comment in comments]
+            return CommentsResponse(page=page, per_page=per_page, total=total_comments, data=comment_schema)
+        except Exception:
+            return False
 
 
 comment_service = CommentService()
