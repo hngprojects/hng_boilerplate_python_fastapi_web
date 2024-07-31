@@ -12,14 +12,11 @@ from api.v1.models.associations import user_organization_association
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
 from fastapi import HTTPException
-from api.v1.schemas.organization import (
+from api.v1.schemas.organization import(
     CreateUpdateOrganization, 
     AddUpdateOrganizationRole, 
     RemoveUserFromOrganization,
     OrganizationBase
-    CreateUpdateOrganization,
-    AddUpdateOrganizationRole,
-    RemoveUserFromOrganization
 )
 
 
@@ -65,7 +62,7 @@ class OrganizationService(Service):
 
         return query.all()
     
-    def fetch(db: Session, org_id: int):
+    def fetch(db: Session, org_id: str):
         
         '''Fetches an organization by id'''
         Organization = db.query(Organization).filter(Organization.id == org_id).first()
@@ -73,14 +70,6 @@ class OrganizationService(Service):
         if Organization is None:
             raise HTTPException(status_code=404, detail="Organization not found")
         return OrganizationBase.from_orm(Organization)
-
-    def fetch(self, db: Session, id: str):
-        '''Fetches an organization by id'''
-
-        organization = check_model_existence(db, Organization, id)
-
-        return organization
-
 
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
         try:
