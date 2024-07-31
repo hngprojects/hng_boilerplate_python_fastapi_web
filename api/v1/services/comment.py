@@ -65,7 +65,7 @@ class CommentService(Service):
 	def delete(self, db: Session, id: str):
 		'''Deletes a comment'''
 		
-		comment = self.fetch(id=id)
+		comment = self.fetch(db=db, id=id)
 		db.delete(comment)
 		db.commit()
 

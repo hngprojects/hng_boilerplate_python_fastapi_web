@@ -41,12 +41,12 @@ class TopicService(Service):
         topic = check_model_existence(db, Topic, id)
         return topic
 
-    def update(self, db: Session, id: str, schema: TopicUpdateSchema):
+    def update(self, db: Session, schema: TopicUpdateSchema):
         '''Updates a topic'''
 
-        topic = self.fetch(db=db, id=id)
-
-        update_data = schema.dict(exclude_unset=True)
+        topic = self.fetch(db=db, id=schema.id)
+        
+        update_data = schema.dict(exclude_unset=True, exclude={"id"})
         for key, value in update_data.items():
             setattr(topic, key, value)
 
