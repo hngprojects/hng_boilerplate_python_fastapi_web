@@ -6,13 +6,14 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence, check_user_in_org
+from api.utils.pagination import paginated_response
 from api.v1.models.product import Product
 from api.v1.models.associations import user_organization_association
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
 from api.v1.schemas.organization import (
-    CreateUpdateOrganization, 
-    AddUpdateOrganizationRole, 
+    CreateUpdateOrganization,
+    AddUpdateOrganizationRole,
     RemoveUserFromOrganization
 )
 
@@ -44,7 +45,7 @@ class OrganizationService(Service):
         db.commit()
 
         return new_organization
-    
+
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         '''Fetch all products with option tto search using query parameters'''
@@ -59,12 +60,13 @@ class OrganizationService(Service):
 
         return query.all()
 
-    
+
     def fetch(self, db: Session, id: str):
         '''Fetches an organization by id'''
 
         organization = check_model_existence(db, Organization, id)
-        return organization 
+
+        return organization
 
 
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
@@ -78,7 +80,6 @@ class OrganizationService(Service):
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
-
 
     def update(self, db: Session, id: str, schema, current_user: User):
         '''Updates a product'''
@@ -94,11 +95,10 @@ class OrganizationService(Service):
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(organization, key, value)
-        
+
         db.commit()
         db.refresh(organization)
         return organization
-    
 
     def delete(self, db: Session, id: str):
         '''Deletes a product'''
@@ -107,7 +107,6 @@ class OrganizationService(Service):
         db.delete(organization)
         db.commit()
 
-    
     def check_user_role_in_org(self, db: Session, user: User, org: Organization, role: str):
         '''Check user role in organization'''
 
@@ -125,7 +124,7 @@ class OrganizationService(Service):
         if result is None:
             raise HTTPException(status_code=403, detail=f"Permission denied as user is not of {role} role")
 
-    
+
     # def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session, org_id: str, user_to_update_id: str):
     def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session):
         '''Updates a user role'''
@@ -157,7 +156,7 @@ class OrganizationService(Service):
 
         # Check if user is not in organization
         check_user_in_org(user, organization)
-        
+
         # Check for user role permissions
         self.check_user_role_in_org(db=db, user=user, org=organization, role='admin')\
               or self.check_user_role_in_org(db=db, user=user, org=organization, role='owner')
@@ -197,21 +196,43 @@ class OrganizationService(Service):
         db.execute(stmt)
         db.commit()
 
-    
+
     def get_users_in_organization(self, db: Session, org_id: str):
         '''Fetches all users in an organization'''
 
         organization = check_model_existence(db, Organization, org_id)
-        
+
         # Fetch all users associated with the organization
         return organization.users
-    
+
+
+    def paginate_users_in_organization(
+            self,
+            db: Session,
+            org_id: str,
+            page: int,
+            per_page: int
+    ):
+        '''Fetches all users in an organization'''
+
+        check_model_existence(db, Organization, org_id)
+
+        return paginated_response(
+            db=db,
+            model=User,
+            skip=page,
+            join=user_organization_association,
+            filters={'organization_id': org_id},
+            limit=per_page
+        )
+
+
 
     def get_user_organizations(self, db: Session, user_id: str):
         '''Fetches all organizations that belong to a user'''
 
         user = check_model_existence(db, User, user_id)
-        
+
         # Fetch all users associated with the organization
         return user.organizations
 
@@ -224,7 +245,7 @@ class OrganizationService(Service):
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="an organization with this email already exist")
 
         return False
-    
+
     def check_by_name(self, db: Session, name):
         """Fetches a user by their email"""
 
