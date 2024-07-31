@@ -1,20 +1,44 @@
+import os
 import pytest
+import jwt
 from fastapi.testclient import TestClient
+from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
+from dotenv import load_dotenv
 from main import app
-from api.db.database import get_db, SessionLocal
+from api.db.database import SessionLocal
 from api.v1.models.comment import Comment
 from api.v1.models.user import User
 from api.v1.models.blog import Blog
-import uuid
-import jwt
 
+# Load environment variables from .env file
+load_dotenv()
 
-client = TestClient(app)
+# Secret key for JWT encoding/decoding
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = "HS256"
+
+@pytest.fixture(scope="module")
+def client():
+    with TestClient(app) as c:
+        yield c
 
 @pytest.fixture
-def create_test_comment(db_session):
-    comment = Comment(id="test_comment_id", blog_id="test_blog_id", content="Original content", created_at="2023-07-28T12:00:00")
+def db_session():
+    session = SessionLocal()
+    yield session
+    session.close()
+
+@pytest.fixture
+def create_test_blog(db_session):
+    blog = Blog(id="test_blog_id", author_id="test_user_id", title="Test Blog", content="Blog content")
+    db_session.add(blog)
+    db_session.commit()
+    return blog
+
+@pytest.fixture
+def create_test_comment(db_session, create_test_blog):
+    comment = Comment(id="test_comment_id", user_id="test_user_id", blog_id=create_test_blog.id, content="Original content", created_at=datetime.utcnow())
     db_session.add(comment)
     db_session.commit()
     return comment
@@ -27,8 +51,10 @@ def create_test_user(db_session):
     return user
 
 def generate_token(user_id):
-    # Mock or generate a token for authentication
-    return "your_jwt_token"
+    expire = datetime.utcnow() + timedelta(minutes=30)
+    to_encode = {"sub": str(user_id), "exp": expire}
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 def test_update_comment_success(client, create_test_comment, create_test_user):
     update_data = {"content": "Updated comment content."}
@@ -55,16 +81,8 @@ def test_update_comment_not_found(client, create_test_user):
     response_data = response.json()
     assert response_data["detail"] == "Comment not found"
 
-from api.db.database import db_session
-
-def test_update_comment_unauthorized(client, create_test_comment):
-    another_user = User(
-        id="another_user_id",
-        email="anotheruser@example.com",
-        password="fakehashedpassword",
-        first_name="Another",
-        last_name="User"
-    )
+def test_update_comment_unauthorized(client, create_test_comment, db_session):
+    another_user = User(id="another_user_id", email="anotheruser@example.com", password="fakehashedpassword", first_name="Another", last_name="User")
     db_session.add(another_user)
     db_session.commit()
     token = generate_token(another_user.id)
@@ -76,3 +94,4 @@ def test_update_comment_unauthorized(client, create_test_comment):
     assert response.status_code == 403
     response_data = response.json()
     assert response_data["detail"] == "You do not have permission to update this comment."
+
