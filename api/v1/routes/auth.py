@@ -72,10 +72,14 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
         data={
             'access_token': access_token,
             'token_type': 'bearer',
-            'user': jsonable_encoder(
-                user, 
-                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
+            'user':  {
+            **jsonable_encoder(
+                user,
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
             ),
+            'access_token': access_token,
+            'token_type': 'bearer',
+            }
         }
     )
 
