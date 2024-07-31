@@ -39,17 +39,17 @@ def mock_get_current_user():
 
 def test_get_organization_success(db_session_mock, mock_get_current_user):
     mock_organization = MagicMock(spec=Organization)
-    mock_organization.id = "Str"
-    mock_organization.company_name = "Mock Org 1"
-    mock_organization.company_email = "olawaleisaacjohn@gmail.com"
-    mock_organization.industry = "Technology"
-    mock_organization.organization_type = "Private"
-    mock_organization.country = "Country"
-    mock_organization.state = "State"
-    mock_organization.address = "123 Street"
-    mock_organization.lga = "LGA"
+    mock_organization.id = "066aa666-d660-7c6c-8000-539423b940e3"
     mock_organization.created_at = datetime.now()
     mock_organization.updated_at = datetime.now()
+    mock_organization.company_name = "Updated Organization"
+    mock_organization.company_email = "updated@gmail.com"
+    mock_organization.industry = "Tech"
+    mock_organization.organization_type = "Tech"
+    mock_organization.country = "Nigeria"
+    mock_organization.state = "Lagos"
+    mock_organization.address = "Ikorodu, Lagos"
+    mock_organization.lga = "Ikorodu"
 
     db_session_mock.query().filter().first.return_value = mock_organization
 
@@ -58,14 +58,17 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
     data = response.json()
     assert data["status"] == "success"
     assert data["status_code"] == 200
-    assert data["data"]["id"] == "Str"
-    assert data["data"]["company_name"] == "Mock Org 1"
-    assert data["data"]["company_email"] == "olawaleisaacjohn@gmail.com"
-    assert data["data"]["industry"] == "Technology"
-    assert data["data"]["organization"] == "Private"
-    assert data["data"]["state"] == "State"
-    assert data["data"]["address"] == "123 Street"
-    assert data["data"]["lga"] == "LGA"
+    assert data["data"]["id"] == "066aa666-d660-7c6c-8000-539423b940e3"
+    assert data["data"]["created_at"] == mock_organization.created_at.isoformat()
+    assert data["data"]["updated_at"] == mock_organization.updated_at.isoformat()
+    assert data["data"]["company_name"] == "Updated Organization"
+    assert data["data"]["company_email"] == "updated@gmail.com"
+    assert data["data"]["industry"] == "Tech"
+    assert data["data"]["organization_type"] == "Tech"
+    assert data["data"]["country"] == "Nigeria"
+    assert data["data"]["state"] == "Lagos"
+    assert data["data"]["address"] == "Ikorodu, Lagos"
+    assert data["data"]["lga"] == "Ikorodu"
 
 def test_get_organization_not_found(db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = None
