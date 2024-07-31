@@ -1,17 +1,13 @@
-import logging
 import smtplib
 from api.utils.settings import settings
 from fastapi import HTTPException
 
-
-logging.basicConfig(level=logging.DEBUG)
 
 
 def send_mail(to: str, subject: str, body: str):
     '''Function to send email to a user either as a regular test or as html file'''
     try:
         with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT) as conn:
-            conn.set_debuglevel(1)
             conn.starttls()
             conn.login(user=settings.MAIL_USERNAME, password=settings.MAIL_PASSWORD)
             conn.sendmail(

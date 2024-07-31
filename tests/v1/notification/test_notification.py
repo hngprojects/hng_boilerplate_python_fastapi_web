@@ -129,25 +129,17 @@ def test_create_notification_success(client, mock_dependencies):
 
     headers = {"Authorization": f"Bearer {access_token}"}
 
-    # Logging request data
-    print(f"Sending request with data: {notification_data} and headers: {headers}")
-    
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
-    
-    # Logging response
-    print(f"Response status code: {response.status_code}")
-    print(f"Response data: {response.json()}")
     
     # Extract the response data for validation
     response_json = response.json()
     
-
     # Check if 'data' key exists in the response
     if 'data' not in response_json:
         print("The 'data' key is missing from the response.")
         print("Response JSON:", response_json)
     
-    # If 'data' key is missing, adjust the expected response
+    # Adjust expected response based on the presence of 'data'
     expected_response = {
         "success": True,
         "status_code": 200,
@@ -161,17 +153,16 @@ def test_create_notification_success(client, mock_dependencies):
         }
     }
     
-    # Handle missing 'data' key case
-    if 'data' not in response_json:
-        # Assert that the response matches the expected structure minus 'data'
-        assert response_json['success'] == expected_response['success']
-        assert response_json['status_code'] == expected_response['status_code']
-        assert response_json['message'] == expected_response['message']
-    else:
+    # Assert response content
+    if 'data' in response_json:
         assert response_json['data']['id'] == expected_response['data']['id']
         assert response_json['data']['user_id'] == expected_response['data']['user_id']
         assert response_json['data']['title'] == expected_response['data']['title']
         assert response_json['data']['message'] == expected_response['data']['message']
         assert response_json['data']['created_at'] == expected_response['data']['created_at']
+    else:
+        assert response_json['success'] == expected_response['success']
+        assert response_json['status_code'] == expected_response['status_code']
+        assert response_json['message'] == expected_response['message']
     
     assert response.status_code == 200
