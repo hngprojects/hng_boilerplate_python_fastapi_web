@@ -31,9 +31,7 @@ class Settings(BaseSettings):
     MAIL_PORT: int = config('MAIL_PORT')
     MAIL_SERVER: str = config('MAIL_SERVER')
 
-    # FACEBOOK_APP_ID: str = config("FACEBOOK_APP_ID")
-    # FACEBOOK_APP_SECRET: str = config("FACEBOOK_APP_SECRET")
-
     # FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
+    # PAYSTACK_SECRET: str = config("PAYSTACK_SECRET")
 
 settings = Settings()

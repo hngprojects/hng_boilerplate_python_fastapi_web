@@ -21,6 +21,7 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.faq import faq
 import api.v1.routes.payment_flutterwave
+import api.v1.routes.payment_paystack
 
 api_version_one = APIRouter(prefix="/api/v1")
 
