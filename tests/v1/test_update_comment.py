@@ -5,7 +5,7 @@ from main import app
 from api.db.database import get_db, SessionLocal
 from api.v1.models.comment import Comment
 from api.v1.models.user import User
-from api.v1.models.blog import Blcleog
+from api.v1.models.blog import Blog
 import uuid
 import jwt
 
