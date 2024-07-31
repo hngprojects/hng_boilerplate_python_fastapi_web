@@ -85,7 +85,7 @@ def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_
     )
 
   
-@organization.get('/{org_id}',status_code=status.HTTP_200_OK)
+@organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
 def get_organization(org_id: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = user_service.get_current_user(token, db)
     
@@ -96,7 +96,7 @@ def get_organization(org_id: str, db: Session = Depends(get_db), token: str = De
     return {
         "status": "success",
         "status_code": 200,
-        "data": CreateUpdateOrganization.from_orm(organization)  # Ensure response model compatibility
+        "data": OrganizationBase.from_orm(organization)  # Ensure response model compatibility
 }
     
 
