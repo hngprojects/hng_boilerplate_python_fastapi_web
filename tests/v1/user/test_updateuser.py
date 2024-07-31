@@ -31,12 +31,25 @@ def mock_db_session():
 
 mock_id = str(uuid7())
 
+@pytest.fixture
+def mock_get_current_user():
+    """Fixture to create a mock current user"""
+    with patch(
+        "api.v1.services.user.UserService.get_current_user", autospec=True
+    ) as mock_get_current_user:
+        yield mock_get_current_user
+
+
+
+
+   
+
 
 
 def test_update_user(mock_db_session):
     dummy_mock_user =  User(
         id=mock_id,
-        email="dummyuser1@gmail.com",
+        email= "Testuser1@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name="Mr",
         last_name="Dummy",
@@ -45,24 +58,67 @@ def test_update_user(mock_db_session):
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
-    mock_db_session.query().filter().first.return_value = dummy_mock_user 
-    '''First Login in'''
-    url = 'api/v1/auth/login'
-    login_response = client.post(url,json={'email':'dummyuser1@gmail.com', 'password': 'Testpassword@123'})
-    access_token = login_response.json()['data']['access_token']
-    user_id = login_response.json()['data']['user']['id']
+
+    app.dependency_overrides[user_service.get_current_super_admin] = lambda: User(
+        id=str(uuid7()),
+        email="admintestuser@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="AdminTest",
+        last_name="User",
+        is_active=False,
+        is_super_admin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+  
+
     """Testing the endpoint with an authorized user"""
-    mock_db_session.get.return_value = dummy_mock_user
-    get_user_url = f'api/v1/users/{user_id}'
-    
-    config = {
-        'Authorization': f'Bearer {access_token}'
-    }
     data = {
-        "email": "dummyuser2@gmail.com"
+        "email": "dummyuser20@gmail.com"
     }
-    get_user_response = client.patch(get_user_url,headers=config, json=data)
+    
+    mock_db_session.query().filter().first.return_value = False
+    mock_db_session.get.return_value = dummy_mock_user
+    
+    get_user_url = f'api/v1/users/{dummy_mock_user.id}'
+    
+    get_user_response = client.patch(get_user_url,json=data)
     assert get_user_response.status_code == 200
     assert get_user_response.json()['message'] == 'User Updated Successfully'
     assert get_user_response.json()['data']['email'] == data['email']
+
+    """Testing endpoint with an unauthorized user"""
+
+    app.dependency_overrides[user_service.get_current_super_admin] = user_service.get_current_super_admin
+
+    """Login"""
+    
+    get_bad_response = client.patch(get_user_url,json=data)
+
+    assert get_bad_response.status_code == 401
+
+
+def test_current_user_update(mock_db_session):
+    dummy_mock_user =  User(
+        id=mock_id,
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="Mr",
+        last_name="Dummy",
+        is_active=True,
+        is_super_admin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    data = {
+        "email": "dummyuser20@gmail.com"
+    }
+    app.dependency_overrides[user_service.get_current_user] = lambda : dummy_mock_user
+
+    mock_db_session.query().filter().first.return_value = False
+    mock_db_session.get.return_value = dummy_mock_user
+    get_user_url = 'api/v1/users'
+    get_response = client.patch(get_user_url,json=data)
+    assert get_response.status_code == 200
+    assert get_response.json()['message'] == 'User Updated Successfully'
+    assert get_response.json()['data']['email'] == data['email']
 

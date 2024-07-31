@@ -85,7 +85,7 @@ def get_user(user_id : str,
         )
     )
 @user.patch(path="",status_code=status.HTTP_200_OK)
-def update_current_user(user_id : str,
+def update_current_user(
                         current_user : Annotated[User , Depends(user_service.get_current_user)],
                         schema : UserUpdate,
                         db : Session = Depends(get_db)):
@@ -142,15 +142,3 @@ def delete_user(
 
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
-
-@user.get("", status_code=status.HTTP_200_OK)
-def get_all_users(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
-    users = user_service.fetch_all(db)
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message="Retrived all user information Successfully",
-        data = jsonable_encoder(
-            users, 
-            exclude=['password']
-        )
-    )
