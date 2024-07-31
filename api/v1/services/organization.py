@@ -25,6 +25,11 @@ class OrganizationService(Service):
 
         # Create a new organization
         new_organization = Organization(**schema.model_dump())
+        email = schema.model_dump()["company_email"]
+        name = schema.model_dump()["company_name"]
+        self.check_by_email(db, email)
+        self.check_by_name(db, name)
+
         db.add(new_organization)
         db.commit()
         db.refresh(new_organization)
@@ -59,8 +64,7 @@ class OrganizationService(Service):
         '''Fetches an organization by id'''
 
         organization = check_model_existence(db, Organization, id)
-        return organization
-    
+        return organization 
 
 
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
@@ -211,5 +215,24 @@ class OrganizationService(Service):
     #     # Fetch all users associated with the organization
     #     return user.organizations
 
+    def check_by_email(self, db: Session, email):
+        """Fetches a user by their email"""
+
+        org = db.query(Organization).filter(Organization.company_email == email).first()
+
+        if org:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="an organization with this email already exist")
+
+        return False
+    
+    def check_by_name(self, db: Session, name):
+        """Fetches a user by their email"""
+
+        org = db.query(Organization).filter(Organization.company_name == name).first()
+
+        if org:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="an organization with this name already exist")
+
+        return False
 
 organization_service = OrganizationService()

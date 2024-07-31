@@ -1,8 +1,8 @@
-"""create tables
+"""add avatar_url to user model
 
-Revision ID: 79bf3583c6d3
+Revision ID: 5f9d01dc6cc9
 Revises: 
-Create Date: 2024-07-29 23:00:15.435313
+Create Date: 2024-07-30 18:49:57.557388
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '79bf3583c6d3'
+revision: str = '5f9d01dc6cc9'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -76,11 +76,22 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_product_categories_id'), 'product_categories', ['id'], unique=False)
+    op.create_table('topics',
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('content', sa.String(), nullable=False),
+    sa.Column('tags', sa.ARRAY(sa.String()), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_topics_id'), 'topics', ['id'], unique=False)
     op.create_table('users',
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
+    sa.Column('avatar_url', sa.String(), nullable=True),
     sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=True),
     sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
@@ -264,9 +275,9 @@ def upgrade() -> None:
     sa.Column('phone_number', sa.String(), nullable=True),
     sa.Column('avatar_url', sa.String(), nullable=True),
     sa.Column('recovery_email', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -429,6 +440,8 @@ def downgrade() -> None:
     op.drop_table('waitlist')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_topics_id'), table_name='topics')
+    op.drop_table('topics')
     op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
     op.drop_table('product_categories')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
