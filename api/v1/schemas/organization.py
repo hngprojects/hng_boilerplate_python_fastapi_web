@@ -1,3 +1,4 @@
+from typing import Optional
 from datetime import datetime
 from typing import Dict, List
 from pydantic import BaseModel, EmailStr, field_validator
@@ -11,13 +12,14 @@ class OrganizationBase(BaseModel):
     created_at: datetime
     updated_at: datetime
     company_name: str
-    company_email: EmailStr
-    industry: str
-    organization_type: str
-    country: str
-    state: str
-    address: str
-    lga: str
+    company_email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    organization_type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    lga: Optional[str] = None
+
     
     class Config:
         from_attributes = True  # Enable Pydantic to read ORM attributes
