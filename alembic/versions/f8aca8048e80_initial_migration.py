@@ -1,8 +1,8 @@
-"""create tables
+"""initial migration
 
-Revision ID: 5f8e13d19ccb
+Revision ID: f8aca8048e80
 Revises: 
-Create Date: 2024-07-30 23:48:22.512690
+Create Date: 2024-07-31 12:08:58.130897
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5f8e13d19ccb'
+revision: str = 'f8aca8048e80'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,6 +40,14 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_faqs_id'), 'faqs', ['id'], unique=False)
+    op.create_table('languages',
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_languages_id'), 'languages', ['id'], unique=False)
     op.create_table('newsletters',
     sa.Column('title', sa.String(length=100), nullable=False),
     sa.Column('description', sa.Text(), nullable=True),
@@ -76,6 +84,14 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_product_categories_id'), 'product_categories', ['id'], unique=False)
+    op.create_table('timezones',
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_timezones_id'), 'timezones', ['id'], unique=False)
     op.create_table('topics',
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('content', sa.String(), nullable=False),
@@ -273,6 +289,7 @@ def upgrade() -> None:
     sa.Column('image_url', sa.String(), nullable=False),
     sa.Column('status', sa.Enum('in_stock', 'out_of_stock', 'low_on_stock', name='productstatusenum'), nullable=True),
     sa.Column('archived', sa.Boolean(), nullable=True),
+    sa.Column('filter_status', sa.Enum('published', 'draft', name='productfilterstatusenum'), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -300,6 +317,16 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_profiles_id'), 'profiles', ['id'], unique=False)
+    op.create_table('regions',
+    sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_regions_id'), 'regions', ['id'], unique=False)
     op.create_table('testimonials',
     sa.Column('client_designation', sa.String(), nullable=True),
     sa.Column('client_name', sa.String(), nullable=True),
@@ -429,6 +456,8 @@ def downgrade() -> None:
     op.drop_table('token_logins')
     op.drop_index(op.f('ix_testimonials_id'), table_name='testimonials')
     op.drop_table('testimonials')
+    op.drop_index(op.f('ix_regions_id'), table_name='regions')
+    op.drop_table('regions')
     op.drop_index(op.f('ix_profiles_id'), table_name='profiles')
     op.drop_table('profiles')
     op.drop_index(op.f('ix_products_id'), table_name='products')
@@ -461,12 +490,16 @@ def downgrade() -> None:
     op.drop_table('users')
     op.drop_index(op.f('ix_topics_id'), table_name='topics')
     op.drop_table('topics')
+    op.drop_index(op.f('ix_timezones_id'), table_name='timezones')
+    op.drop_table('timezones')
     op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
     op.drop_table('product_categories')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
     op.drop_table('organizations')
     op.drop_index(op.f('ix_newsletters_id'), table_name='newsletters')
     op.drop_table('newsletters')
+    op.drop_index(op.f('ix_languages_id'), table_name='languages')
+    op.drop_table('languages')
     op.drop_index(op.f('ix_faqs_id'), table_name='faqs')
     op.drop_table('faqs')
     op.drop_index(op.f('ix_contact_us_id'), table_name='contact_us')
