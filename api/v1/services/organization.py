@@ -62,11 +62,15 @@ class OrganizationService(Service):
         return query.all()
 
     
-    def fetch(self, db: Session, id: id):
-        '''Fetches an organization by id'''
+    def fetch(db: Session, org_id: int):
         
-        organization = check_model_existence(db, Organization, id)
-        return organization
+        '''Fetches an organization by id'''
+        Organization = db.query(Organization).filter(Organization.id == org_id).first()
+        
+        if Organization is None:
+            raise HTTPException(status_code=404, detail="Organization not found")
+        return OrganizationBase.from_orm(Organization)
+        
 
 
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):

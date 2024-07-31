@@ -17,17 +17,17 @@ from api.v1.services.user import user_service, oauth2_scheme
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
-
-@organization.get('/{org_id}', response_model=success_response, status_code=status.HTTP_200_OK)
-def get_organization(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to get an organization by ID"""
-    get_organization = organization_service.fetch(db=db, user=current_user)
-    return success_response(
-        status_code=200,
-        message="Organization retrieved successfully",
-        data=jsonable_encoder(get_organization)
-)
   
+@organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
+def get_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    current_user = user_service.get_current_user(token, db)
+    
+    """Endpoint to get an Organization by id"""
+    organization = organization_service.fetch(db, org_id)
+    if organization is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
+    return {
+        "status": "success",
+        "status_code": 200,
+        "data": organization
+    }
