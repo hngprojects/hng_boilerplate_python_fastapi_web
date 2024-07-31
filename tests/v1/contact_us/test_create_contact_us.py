@@ -9,7 +9,6 @@ adabtingMapper = {
     "phone_number": "title",
     "message": "message",
 }
-# '{ "full_name": "John Doe","email": "john@gmail.com","phone_number": "Hello","message": "Hello, I am John Doe"}'
 payload = [
     { # all fields are valid
         "full_name": "John Doe",

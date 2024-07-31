@@ -7,7 +7,7 @@ from api.v1.models.user import User
 from api.utils.dependencies import get_current_user
 from typing import Annotated
 
-sms = APIRouter(prefix="/sms/send", tags=["sms"])
+sms = APIRouter(prefix="/sms/send", tags=["SMS"])
 
 @sms.post("/", status_code=status.HTTP_200_OK, response_model=SMSRequest)
 def send_sms_endpoint(

@@ -3,7 +3,6 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from api.v1.models.base_model import BaseTableModel
 
 
-
 class Newsletter(BaseTableModel):
     __tablename__ = 'newsletters'
 
