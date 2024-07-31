@@ -9,8 +9,6 @@ from api.v1.schemas.organization import CreateUpdateOrganization, PaginatedOrgUs
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
-from api.v1.schemas.organization import OrganizationBase
-from api.v1.services.organization import organization_service
 from api.v1.services.user import user_service, oauth2_scheme
 from typing import Annotated
 
@@ -70,8 +68,21 @@ async def update_organization(
 
     updated_organization = organization_service.update(db, org_id, schema, current_user)
 
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Organization updated successfully',
+        data=jsonable_encoder(updated_organization)
+    )
 
-organization = APIRouter(prefix="/organizations", tags=["Organizations"])
+
+@organization.get("", status_code=status.HTTP_200_OK)
+def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
+    orgs = organization_service.fetch_all(db)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Retrived all organizations information Successfully",
+        data = jsonable_encoder(orgs)
+    )
 
   
 @organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
