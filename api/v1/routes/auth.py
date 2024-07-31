@@ -108,16 +108,18 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
     response = success_response(
-        status_code=200,
-        message='Login successful',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user': jsonable_encoder(
-                user, 
+    status_code=200,
+    message='Login successful',
+    data={
+        'user': {
+            **jsonable_encoder(
+                user,
                 exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
             ),
+            'access_token': access_token,
+            'token_type': 'bearer',
         }
+    }
     )
 
     # Add refresh token to cookies
