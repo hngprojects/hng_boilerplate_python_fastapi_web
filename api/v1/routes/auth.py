@@ -1,19 +1,16 @@
+from datetime import timedelta
 from fastapi import Depends, status, APIRouter, Response, Request
 from fastapi.encoders import jsonable_encoder
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from api.v1.schemas.user import Token
-from datetime import timedelta
 
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
-from typing import Annotated
 
 from api.utils.email_service import send_mail
-from datetime import timedelta
 from api.v1.schemas.user import UserCreate, MagicLinkRequest
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -193,8 +190,7 @@ async def request_signin_token(email_schema: EmailRequest, db: Session = Depends
     # Save the token and expiry
     user_service.save_login_token(db, user, token, token_expiry)
 
-    # Send the token to the user's email
-    # send_mail(to=user.email, subject="Your SignIn Token", body=token)
+    # Send mail notification
 
     return success_response(
         status_code=200,
@@ -232,11 +228,6 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 
     return response
 
-
-# Protected route example: test route
-@auth.get("/admin")
-def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
-    return {"message": "Hello, admin!"}
 
 # Verify Magic Link
 @auth.post("/verify-magic-link")
