@@ -8,8 +8,8 @@ from api.v1.models.user import User
 from api.v1.schemas.user import (
     DeactivateUserSchema,
     ChangePasswordSchema,
-    ChangePwdRet,
-    UserUpdate, AllUsersResponse
+    ChangePwdRet, AllUsersResponse, UserUpdate,
+    AdminCreateUserResponse, AdminCreateUser
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -176,3 +176,17 @@ async def get_users(
     }
     return user_service.fetch_all(db, page, per_page, **query_params)
 
+@user.post("/", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
+def admin_registers_user(user_request: AdminCreateUser,
+             current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+             db: Session = Depends(get_db)):
+    '''
+    Endpoint for an admin to register a user.
+    Args:
+        user_request: the body containing the user details to register
+        current_user: The superadmin registering the user
+        db: database Session object
+    Returns:
+        AdminCreateUserResponse: The full details of the newly created user
+    '''
+    return user_service.super_admin_create_user(db, user_request)

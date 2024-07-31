@@ -284,4 +284,3 @@ def request_magic_link(request: MagicLinkRequest, response: Response, db: Sessio
         message=f"Magic link sent to {user.email}"
     )
     return response
-
