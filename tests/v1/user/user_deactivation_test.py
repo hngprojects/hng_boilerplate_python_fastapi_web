@@ -1,9 +1,3 @@
-# import sys, os
-# import warnings
-
-# warnings.filterwarnings("ignore", category=DeprecationWarning)
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -65,15 +59,6 @@ def test_error_user_deactivation(mock_user_service, mock_db_session):
 
     mock_user = create_mock_user(mock_user_service, mock_db_session)
 
-    # mock_user_service.get_current_user.return_value = create_mock_user(mock_user_service, mock_db_session)
-    # login = client.post('/api/v1/auth/login', data={
-    #     "username": "testuser",
-    #     "password": "Testpassword@123"
-    # })
-    # result = login.json()
-    # print(f"login: {result}")
-    # assert result.get("success") == True
-    # access_token = result['data']['access_token']
     access_token = user_service.create_access_token(user_id=str(uuid7()))
 
     # Missing field test

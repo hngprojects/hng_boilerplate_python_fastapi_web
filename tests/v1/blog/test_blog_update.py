@@ -3,11 +3,6 @@ from fastapi.testclient import TestClient
 from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
-# import sys
-# from pathlib import Path
-
-# Add the project root directory to the Python path
-# sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from main import app
 from api.db.database import get_db
