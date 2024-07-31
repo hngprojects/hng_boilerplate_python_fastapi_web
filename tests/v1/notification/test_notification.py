@@ -126,7 +126,7 @@ def test_create_notification_success(client, mock_dependencies):
     }
     
     # Generate a token using the actual method for creating a token
-    access_token = user_service.create_access_token(str(mock_user.id))
+    access_token = user_service.create_access_token(str(user_id))
 
     headers = {"authorization": f"Bearer {access_token}"}
 
