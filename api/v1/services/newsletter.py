@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 from api.core.base.services import Service
-from api.v1.models.newsletter import Newsletter, NewsletterSubscriber
+from api.v1.models.newsletter import NewsletterSubscriber
 from api.v1.schemas.newsletter import EmailSchema
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
@@ -53,7 +53,7 @@ class NewsletterService(Service):
     def check_nonexisting_subscriber(db: Session, request: EmailSchema):
         """As above, checks if subscription with email already exists, but raises an exception if not found.
         """        
-        subscription = db.query(Newsletter).filter(Newsletter.email == request.email).first()
+        subscription = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
         if not subscription:
             raise HTTPException(status_code=404, detail="Subscriber not found.")
         return subscription
@@ -64,8 +64,8 @@ class NewsletterService(Service):
         """
         Unsubsribes a user for newsletter
         """
-        subscription = NewsletterService.check_nonexisting_subscriber(db=db, request=request)
-        db.delete(subscription)
+        subscriber = NewsletterService.check_nonexisting_subscriber(db=db, request=request)
+        db.delete(subscriber)
         db.commit
         return None
     

@@ -3,7 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from api.db.database import get_db
-from api.v1.models.newsletter import Newsletter
+from api.v1.models.newsletter import NewsletterSubscriber
 from api.v1.schemas.newsletter import EmailSchema
 from api.v1.services.newsletter import NewsletterService
 from fastapi import HTTPException, status
@@ -52,7 +52,7 @@ def test_unsubscribe_success(db_session_mock, client: TestClient, add_test_subsc
 
 def test_unsubscribe_non_existing_email(db_session_mock, client: TestClient):
 
-    db_session_mock.query(Newsletter).filter(Newsletter.email == "non_existing@example.com").first.return_value = None
+    db_session_mock.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == "non_existing@example.com").first.return_value = None
 
     app.dependency_overrides[get_db] = lambda: db_session_mock
     
