@@ -17,7 +17,6 @@ from main import app
 def mock_get_current_user():
     return User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',
@@ -85,7 +84,7 @@ def test_create_organization_success(client, db_session_mock):
 
 
 def test_create_organization_missing_field(client, db_session_mock):
-    '''Test to successfully create a new organization'''
+    '''Test for missing field when creating a new organization'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
@@ -106,7 +105,7 @@ def test_create_organization_missing_field(client, db_session_mock):
     assert response.status_code == 422
 
 def test_create_organization_unauthorized(client, db_session_mock):
-    '''Test to successfully create a new organization'''
+    '''Test for unauthorized user'''
 
     response = client.post(
         '/api/v1/organizations',
