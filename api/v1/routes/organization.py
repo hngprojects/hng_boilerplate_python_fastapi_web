@@ -86,7 +86,7 @@ def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_
 
   
 @organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
-def get_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+def get_organization(org_id: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = user_service.get_current_user(token, db)
     
     """Endpoint to get an Organization by id"""
@@ -98,5 +98,7 @@ def get_organization(org_id: int, db: Session = Depends(get_db), token: str = De
         "status_code": 200,
         "data": OrganizationBase.from_orm(organization)  # Ensure response model compatibility
 }
+    
+
 class Config:
     from_attributes = True  # Enable Pydantic to read ORM attributes
