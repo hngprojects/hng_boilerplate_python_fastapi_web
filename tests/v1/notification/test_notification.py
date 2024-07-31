@@ -3,18 +3,15 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock, patch
 from uuid_extensions import uuid7
-from uuid import UUID
 from datetime import datetime, timezone, timedelta
 
 from main import app
-from api.v1.routes.blog import get_db
+from api.db.database import get_db
 from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
-from api.utils.dependencies import get_current_user
 from api.v1.models.user import User
 from api.v1.services.notification import NotificationCreate
-from api.v1.models.notifications import Notification
-from api.v1.schemas.notification import ResponseModel, NotificationCreate
+
 
 
 # Mock database dependency
@@ -95,22 +92,16 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     assert response.json()["status_code"] == 401
     
     
-    
-    
-def generate_access_token(user_id: str):
-    return user_service.create_access_token(str(user_id))
-
-    
 # New test cases for send_notification endpoint
 @pytest.fixture
 def mock_dependencies():
     with patch('api.utils.dependencies.get_db') as mock_get_db, \
-        patch('api.utils.dependencies.get_current_user') as mock_get_current_user, \
-        patch('api.v1.services.notification.NotificationService.create_notification') as mock_create_notification:
-
+         patch('api.utils.dependencies.get_current_user') as mock_get_current_user, \
+         patch('api.v1.services.notification.NotificationService.create_notification') as mock_create_notification:
+        
         mock_db = MagicMock()
         mock_user = MagicMock(id=uuid7(), username='testuser')
-
+        
         mock_get_db.return_value = mock_db
         mock_get_current_user.return_value = mock_user
         mock_create_notification.return_value = MagicMock(
@@ -120,11 +111,11 @@ def mock_dependencies():
             message="Test Message",
             created_at="2024-01-01T00:00:00"
         )
-
+        
         yield mock_db, mock_user, mock_create_notification
-
-
-
+        
+        
+        
 def test_create_notification_success(client, mock_dependencies):
     mock_db, mock_user, mock_create_notification = mock_dependencies
 
@@ -132,23 +123,29 @@ def test_create_notification_success(client, mock_dependencies):
         "title": "Test Title",
         "message": "Test Message"
     }
-
+    
     # Generate a token using the actual method for creating a token
     access_token = user_service.create_access_token(str(mock_user.id))
-    print(f"Generated Access Token: {access_token}")
 
     headers = {"Authorization": f"Bearer {access_token}"}
+
+    # Logging request data
+    print(f"Sending request with data: {notification_data} and headers: {headers}")
+    
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
-
+    
+    # Logging response
+    print(f"Response status code: {response.status_code}")
+    print(f"Response data: {response.json()}")
+    
+    # Extract the response data for validation
     response_json = response.json()
-    print(f"Response JSON: {response_json}")
+    
+    # Extract the date string from the response
+    created_at_str = response_json["data"]["created_at"]
 
-    # Check if 'data' key exists in the response
-    if 'data' not in response_json:
-        print("The 'data' key is missing from the response.")
-        print("Response JSON:", response_json)
-
-    expected_response = {
+    assert response.status_code == 200
+    assert response_json == {
         "success": True,
         "status_code": 200,
         "message": "Notification created successfully",
@@ -157,16 +154,9 @@ def test_create_notification_success(client, mock_dependencies):
             "user_id": str(mock_user.id),
             "title": "Test Title",
             "message": "Test Message",
-            "created_at": "2024-01-01T00:00:00"
+            "created_at": "2024-01-01T00:00:00"  
         }
     }
 
-    # Assert response content
-    if 'data' in response_json:
-        assert response_json['data']['id'] == expected_response['data']['id']
-        assert response_json['data']['user_id'] == expected_response['data']['user_id']
-        assert response_json['data']['title'] == expected_response['data']['title']
-        assert response_json['data']['message'] == expected_response['data']['message']
-        assert response_json['data']['created_at'] == expected_response['data']['created_at']
-
-    assert response.status_code == 200
+    # Additionally, assert that the 'created_at' field in the response is in the correct ISO format
+    assert created_at_str == "2024-01-01T00:00:00"
