@@ -7,16 +7,13 @@ from api.v1.models.notifications import Notification
 from api.v1.models.user import User
 
 
-
 class NotificationService(Service):
 
     def send_notification(
-        self, user_id: str, title: str, message: str, db: Session = Depends(get_db)
+        self, title: str, message: str, db: Session = Depends(get_db)
     ):
-        """Function to send a notification to a user"""
-        new_notification = Notification(
-            user_id=user_id, title=title, message=message, status="unread"
-        )
+        """Function to send a notification"""
+        new_notification = Notification(title=title, message=message, status="unread")
         db.add(new_notification)
         db.commit()
         db.refresh(new_notification)
@@ -76,18 +73,22 @@ class NotificationService(Service):
         """Endpoint to get current user notifications"""
 
         return {"notifications": user.notifications}
-    
-    def fetch_all_notifications(self, db: Session = Depends(get_db)):
-        """Function to fetch all notifications (for superadmins)"""
-        notifications = db.query(Notification).all()
-        return [notification.to_dict() for notification in notifications]
 
-    def fetch_notification_by_super_admin(self, notification_id: str, db: Session = Depends(get_db)):
-        """Function for admin to fetch any notification by ID"""
-        notification = db.query(Notification).filter(Notification.id == notification_id).first()
+    def fetch_notification_by_id(
+        self, notification_id: str, db: Session = Depends(get_db)
+    ):
+        """Function to fetch any notification by ID"""
+        notification = (
+            db.query(Notification).filter(Notification.id == notification_id).first()
+        )
         if not notification:
             raise HTTPException(status_code=404, detail="Notification not found")
         return notification
+    
+    def fetch_all_notifications(self, db: Session):
+        """Function to fetch all notifications"""
+        notifications = db.query(Notification).all()
+        return [notification.to_dict() for notification in notifications]
 
     def create(self):
         super().create()
@@ -100,8 +101,7 @@ class NotificationService(Service):
 
     def update(self):
         super().update()
-        
-    
+
     def delete(self):
         return super().delete()
 

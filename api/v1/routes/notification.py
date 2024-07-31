@@ -16,15 +16,13 @@ notification = APIRouter(prefix="/notifications", tags=["Notifications"])
 @notification.post(
     "/send",
     summary="Send a notification",
-    description="This endpoint sends a notification to a user. User must be authenticated",
+    description="This endpoint sends a notification",
     status_code=status.HTTP_201_CREATED,
 )
 def send_notification(
-    notification_data: NotificationCreate,
-    db: Session = Depends(get_db),
+    notification_data: NotificationCreate, db: Session = Depends(get_db)
 ):
     notification = notification_service.send_notification(
-        user_id=notification_data.user_id,
         title=notification_data.title,
         message=notification_data.message,
         db=db,
@@ -63,51 +61,37 @@ def get_current_user_notifications(
 
 
 @notification.get(
+    "/{notification_id}",
+    summary="Fetch a notification",
+    description="This endpoint fetches a notification by id",
+    status_code=status.HTTP_200_OK,
+)
+def get_notification_by_id(
+    notification_id: str,
+    db: Session = Depends(get_db),
+):
+    notification = notification_service.fetch_notification_by_id(
+        notification_id=notification_id, db=db
+    )
+    return success_response(
+        status_code=200, message="Notification fetched successfully", data=notification
+    )
+    
+    
+@notification.get(
     "/all",
     summary="Fetch all notifications",
-    description="This endpoint fetches all notifications. User must be authenticated as a `super_admin` to be able fetch it",
+    description="This endpoint fetches all notifications.",
     status_code=status.HTTP_200_OK,
 )
 def get_all_notifications(
-    current_user: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db),
 ):
-    if not current_user.is_super_admin:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to view all notifications",
-        )
-
     notifications = notification_service.fetch_all_notifications(db=db)
     return success_response(
         status_code=200,
         message="All notifications fetched successfully",
         data=notifications,
-    )
-
-
-@notification.get(
-    "/{notification_id}",
-    summary="Fetch a notification",
-    description="This endpoint fetches a notification by id. User must be authenticated as an `super_admin` to be able fetch it",
-    status_code=status.HTTP_200_OK,
-)
-def get_notification_by_super_admin(
-    notification_id: str,
-    current_user: User = Depends(user_service.get_current_super_admin),
-    db: Session = Depends(get_db),
-):
-    if not current_user.is_super_admin:
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to view this notification",
-        )
-
-    notification = notification_service.fetch_notification_by_super_admin(
-        notification_id=notification_id, db=db
-    )
-    return success_response(
-        status_code=200, message="Notification fetched successfully", data=notification
     )
 
 

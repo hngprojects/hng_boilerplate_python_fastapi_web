@@ -11,6 +11,7 @@ class Notification(BaseTableModel):
     message = Column(Text, nullable=False)
     status = Column(String, default="unread")  # unread, read
     
+
     user = relationship("User", back_populates="notifications")
 
 
