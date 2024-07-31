@@ -1,8 +1,9 @@
 # api/v1/schemas/comment.py
 
 from datetime import datetime
-from typing_extensions import Annotated
-from pydantic import BaseModel, StringConstraints, Field
+from pydantic import BaseModel, StringConstraints, Field, ConfigDict
+from typing_extensions import Annotated, List
+
 
 class UpdateCommentRequest(BaseModel):
     content: str = Field(..., min_length=1, max_length=1000)
@@ -12,9 +13,6 @@ class UpdateCommentResponse(BaseModel):
     message: str
     status_code: int
     data: dict
-from typing_extensions import Annotated, List
-from pydantic import BaseModel, StringConstraints, ConfigDict
-
 
 class CommentCreate(BaseModel):
     content: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
@@ -96,8 +94,6 @@ class LikeSuccessResponse(BaseModel):
     status_code: int = 201
     message: str 
     success: bool = True
-    data: CommentDislike
-    data: CommentDislike
     data: CommentLike
 
 class CommentLike(BaseModel):

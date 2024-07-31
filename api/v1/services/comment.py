@@ -1,6 +1,5 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from api.v1.models.comment import Comment
 from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
 from typing import Any, Optional, Union
 from api.core.base.services import Service
@@ -40,24 +39,19 @@ class CommentService(Service):
 
     def create(self, db: Session, schema, user_id, blog_id):
         '''Create a new comment to a blog'''
-        # Check if blog exists
+        # check if blog exists
         blog = check_model_existence(db, Blog, blog_id)
 
-        # Create and add the new comment to the database
+        # create and add the new comment to the database
         new_comment = Comment(**schema.model_dump(), user_id=user_id, blog_id=blog_id)
         db.add(new_comment)
         db.commit()
         db.refresh(new_comment)
         return new_comment
-
-    def fetch_all(self, db: Session, blog_id: str, **query_params: Optional[Any]):
+    
+    def fetch_all(self, db: Session, **query_params: Optional[Any]):
         '''Fetch all comments with option to search using query parameters'''
-        # Check if blog exists
-        blog = db.query(Blog).filter(Blog.id == blog_id).first()
-        if not blog:
-            raise HTTPException(status_code=404, detail="Blog not found.")
-
-        query = db.query(Comment).filter(Comment.blog_id == blog_id)
+        query = db.query(Comment)
 
         # Enable filter by query parameter
         if query_params:
@@ -66,6 +60,31 @@ class CommentService(Service):
                     query = query.filter(getattr(Comment, column).ilike(f'%{value}%'))
 
         return query.all()
+    
+    def fetch(self, db: Session, id: str):
+        '''Fetches a comment by id'''
+        comment = check_model_existence(db, Comment, id)
+        return comment
+
+    def update(self, db: Session, id: str, schema):
+        '''Updates a comment'''
+        comment = self.fetch(db=db, id=id)
+        
+        # Update the fields with the provided schema data
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(comment, key, value)
+        
+        db.commit()
+        db.refresh(comment)
+        return comment
+    
+    def delete(self, db: Session, id: str):
+        '''Deletes a comment'''
+        comment = self.fetch(id=id)
+        db.delete(comment)
+        db.commit()
+        return db.query(Comment).all()
 
     def fetch(self, db: Session, id: str):
         '''Fetches a comment by id'''
@@ -122,6 +141,7 @@ class CommentService(Service):
                 return CommentsResponse()
             total_comments = db.query(Comment).filter_by(blog_id=blog_id).count()
 
+
             comment_schema: list = [CommentsSchema.model_validate(comment) for comment in comments]
             return CommentsResponse(page=page, per_page=per_page, total=total_comments, data=comment_schema)
         except Exception:
@@ -129,3 +149,4 @@ class CommentService(Service):
 
 
 comment_service = CommentService()
+		

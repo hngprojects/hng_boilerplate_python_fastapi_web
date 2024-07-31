@@ -8,6 +8,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+<<<<<<< HEAD
+=======
+
+>>>>>>> d4112f0a988bd9c61fd480443b3d5c01af8e36d4
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, Header
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -53,12 +57,21 @@ async def like_comment(
         data = jsonable_encoder(like)
     )
 
+<<<<<<< HEAD
 @comment.put("/{comment_id}/", response_model=UpdateCommentResponse)
 async def update_comment(comment_id: str, request: UpdateCommentRequest, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     return CommentService.update_comment(db, comment_id, request, current_user.id)
 
 
 
+=======
+@comment.put("/comments/{comment_id}/", response_model=UpdateCommentResponse)
+async def update_comment(comment_id: str, request: UpdateCommentRequest, db: Session = Depends(get_db), current_user=Depends(UserService.get_current_user)):
+    return await CommentService.update_comment(db, comment_id, request, current_user.id)
+
+
+# Endpoint to dislike a comment
+>>>>>>> d4112f0a988bd9c61fd480443b3d5c01af8e36d4
 @comment.post("/{comment_id}/dislike", response_model=DislikeSuccessResponse)
 async def dislike_comment(
     request: Request,
