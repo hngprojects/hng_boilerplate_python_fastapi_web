@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field, PositiveFloat
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, TypeVar, Generic, Union
 from datetime import datetime
 
+T = TypeVar('T')
 
 class ProductUpdate(BaseModel):
     """
@@ -65,3 +66,28 @@ class ProductList(BaseModel):
     success: bool
     message: str
     data: ProductData
+
+#status filter
+class ProductFilterResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    price: float
+    org_id: str
+    category_id: str
+    quantity: Optional[int] = 0
+    image_url: str
+    status: str
+    archived: Optional[bool] = False
+    filter_status: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        orm_mode = True
+        from_attributes = True
+
+class SuccessResponse(Generic[T], BaseModel):
+    message: str
+    status_code: int
+    data: T
