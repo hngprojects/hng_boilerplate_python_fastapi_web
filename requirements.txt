@@ -21,12 +21,9 @@ exceptiongroup==1.2.2
 Faker==26.0.0
 fastapi==0.111.1
 fastapi-cli==0.0.4
-<<<<<<< HEAD
 fastapi-pagination==0.12.26
-=======
 filelock==3.15.4
 flake8==7.1.0
->>>>>>> upstream/dev
 greenlet==3.0.3
 h11==0.14.0
 httpcore==1.0.5
@@ -44,17 +41,14 @@ MarkupSafe==2.1.5
 mccabe==0.7.0
 mdurl==0.1.2
 mypy-extensions==1.0.0
-<<<<<<< HEAD
 packaging==24.1
 passlib==1.7.4
 pathspec==0.12.1
-=======
 nodeenv==1.9.1
 packaging==24.1
 passlib==1.7.4
 pathspec==0.12.1
 pipdeptree==2.23.1
->>>>>>> upstream/dev
 platformdirs==4.2.2
 pluggy==1.5.0
 pre-commit==3.7.1
@@ -68,11 +62,8 @@ pydantic_core==2.20.1
 pyflakes==3.2.0
 Pygments==2.18.0
 PyJWT==2.8.0
-<<<<<<< HEAD
 pymongo==4.8.0
-=======
 pylint==3.2.6
->>>>>>> upstream/dev
 PyMySQL==1.1.1
 pytest==8.2.2
 pytest-asyncio==0.23.8
@@ -103,8 +94,5 @@ uvicorn==0.30.3
 # uvloop==0.19.0
 virtualenv==20.26.3
 watchfiles==0.22.0
-<<<<<<< HEAD
 websockets==12.0
-=======
 websockets==12.0
->>>>>>> upstream/dev
