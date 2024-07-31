@@ -35,6 +35,10 @@ class CreateUpdateOrganization(BaseModel):
     lga: str
 
 
+    
+    class Config:
+        from_attributes = True  # Enable Pydantic to read ORM attributes
+        
 class AddUpdateOrganizationRole(BaseModel):
     '''Schema to update a user role in an organization'''
 

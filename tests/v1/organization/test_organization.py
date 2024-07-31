@@ -53,7 +53,7 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
 
     db_session_mock.query().filter().first.return_value = mock_organization
 
-    response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer testtoken"})
+    response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer token"})
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "success"
