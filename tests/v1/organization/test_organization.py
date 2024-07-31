@@ -88,3 +88,4 @@ def test_get_organization_not_found(client, db_session_mock, mock_get_current_us
 def test_get_organization_invalid_id(client, mock_get_current_user):
     response = client.get("/api/v1/organizations/abc", headers={"Authorization": "Bearer testtoken"})
     assert response.status_code == 422  # Unprocessable Entity due to validation error
+
