@@ -12,47 +12,7 @@ from api.v1.services.user import UserService
 from api.v1.services.organization import organization_service
 from main import app
 
-def mock_get_current_user():
-    return User(
-        id=str(uuid7()),
-        email="testuser@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
-        first_name='Test',
-        last_name='User',
-        is_active=True,
-        is_super_admin=False,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-
-def mock_org():
-    return Organization(
-        id=str(uuid7()),
-        company_name="Test Organization",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-)
-
-@pytest.fixture
-def db_session_mock():
-    db_session = MagicMock(spec=Session)
-    return db_session
-
-@pytest.fixture
-def client(db_session_mock):
-    app.dependency_overrides[get_db] = lambda: db_session_mock
-    client = TestClient(app)
-    yield client
-    app.dependency_overrides = {}
-    
-@pytest.fixture
-def mock_db_session():
-    """Fixture to create a mock database session."""
-    with patch("api.v1.routes.organization.get_db", autospec=True) as mock_get_db:
-        mock_db = MagicMock()
-        app.dependency_overrides[get_db] = lambda: mock_db
-        yield mock_db
-    app.dependency_overrides = {}
+client = TestClient(app)
 
 @pytest.fixture
 def db_session_mock():
