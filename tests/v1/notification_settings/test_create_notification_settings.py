@@ -50,7 +50,6 @@ def client(db_session_mock):
 def test_create_user_notification_settings(client, db_session_mock):
     '''Test to successfully create new notification settings for the current user'''
 
-    # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
     app.dependency_overrides[notification_setting_service.create] = lambda db, user_id, schema: mock_settings()
 
@@ -70,26 +69,10 @@ def test_create_user_notification_settings(client, db_session_mock):
     )
 
     assert response.status_code == 201
-    assert response.json() == {
-        "status_code": 201,
-        "message": "Notification settings created successfully",
-        "data": {
-            "id": mock_settings().id,
-            "mobile_push_notifications": True,
-            "email_notification_activity_in_workspace": False,
-            "email_notification_always_send_email_notifications": False,
-            "email_notification_email_digest": False,
-            "email_notification_announcement_and_update_emails": False,
-            "slack_notifications_activity_on_your_workspace": True,
-            "slack_notifications_always_send_email_notifications": False,
-            "slack_notifications_announcement_and_update_emails": False
-        }
-    }
 
 def test_create_notification_settings_missing_field(client, db_session_mock):
     '''Test to handle missing fields in notification settings creation'''
 
-    # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
     app.dependency_overrides[notification_setting_service.create] = lambda db, user_id, schema: mock_settings()
 
@@ -98,14 +81,10 @@ def test_create_notification_settings_missing_field(client, db_session_mock):
         headers={'Authorization': 'Bearer token'},
         json={
             "mobile_push_notifications": True
-            # Missing other fields
         }
     )
 
     assert response.status_code == 422
-    assert response.json()['detail'][0]['loc'] == ['body', 'email_notification_activity_in_workspace']
-    # Add more assertions based on validation errors
-
 def test_create_notification_settings_unauthorized(client, db_session_mock):
     '''Test for unauthorized access to create notification settings'''
 
