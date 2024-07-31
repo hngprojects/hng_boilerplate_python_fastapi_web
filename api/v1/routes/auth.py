@@ -1,63 +1,25 @@
+from datetime import timedelta
 from fastapi import Depends, status, APIRouter, Response, Request
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session, relationship
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
+from api.utils.send_mail import send_magic_link
 from api.v1.models import User
-from typing_extensions import Annotated
-from datetime import datetime, timedelta
+from api.v1.schemas.user import Token
 
-from api.v1.schemas.user import UserCreate
-from api.v1.schemas.token import TokenRequest, EmailRequest
-from typing import Annotated
-from datetime import datetime, timedelta
+from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
+from api.v1.schemas.token import TokenRequest
 
-from api.v1.schemas.user import UserCreate
-from api.v1.schemas.token import EmailRequest, TokenRequest
 from api.utils.email_service import send_mail
+from api.v1.schemas.user import UserCreate, MagicLinkRequest
 from api.db.database import get_db
 from api.v1.services.user import user_service
+from api.v1.services.auth import AuthService
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
-@auth.post("/login", status_code=status.HTTP_200_OK)
-def login(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    '''Endpoint to log in a user'''
-
-    # Authenticate the user
-    user = user_service.authenticate_user(
-        db=db,
-        username=login_request.username,
-        password=login_request.password
-    )
-
-    # Generate access and refresh tokens
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
-
-    response = success_response(
-        status_code=200,
-        message='Login successful',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-        }
-    )
-
-    # Add refresh token to cookies
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        expires=timedelta(days=30),
-        httponly=True,
-        secure=True,
-        samesite="none",
-    )
-
-    return response
-
-
   
-@auth.post("/register", status_code=status.HTTP_201_CREATED)
+@auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=success_response)
 def register(response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
 
@@ -74,7 +36,10 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
         data={
             'access_token': access_token,
             'token_type': 'bearer',
-            'user': user.to_dict()
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
         }
     )
 
@@ -83,6 +48,83 @@ def register(response: Response, user_schema: UserCreate, db: Session = Depends(
         key="refresh_token",
         value=refresh_token,
         expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+@auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED)
+def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
+    """Endpoint for super admin creation"""
+
+    user = user_service.create_admin(db=db, schema=user)
+
+    # Create access and refresh tokens
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=201,
+        message="User Created Successfully",
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+@auth.post("/login", status_code=status.HTTP_200_OK)
+def login(login_request: LoginRequest, db: Session = Depends(get_db)):
+    '''Endpoint to log in a user'''
+
+    # Authenticate the user
+    user = user_service.authenticate_user(
+        db=db,
+        email=login_request.email,
+        password=login_request.password
+    )
+
+    # Generate access and refresh tokens
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message='Login successful',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
         httponly=True,
         secure=True,
         samesite="none",
@@ -148,12 +190,11 @@ async def request_signin_token(email_schema: EmailRequest, db: Session = Depends
     # Save the token and expiry
     user_service.save_login_token(db, user, token, token_expiry)
 
-    # Send the token to the user's email
-    # send_mail(to=user.email, subject="Your SignIn Token", body=token)
+    # Send mail notification
 
     return success_response(
         status_code=200,
-        message="Sign-in token sent to email"
+        message=f"Sign-in token sent to {user.email}"
     )
 
 @auth.post("/verify-token", status_code=status.HTTP_200_OK)
@@ -164,20 +205,77 @@ async def verify_signin_token(token_schema: TokenRequest, db: Session = Depends(
 
     # Generate JWT token
     access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    return success_response(
+    response = success_response(
         status_code=200,
-        message="Sign-in successful",
+        message='Sign in successful',
         data={
-            "access_token": access_token,
-            "token_type": "bearer"
+            'access_token': access_token,
+            'token_type': 'bearer',
         }
     )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+# Verify Magic Link
+@auth.post("/verify-magic-link")
+async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
+    user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
+
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message='Login successful',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
     
 
-# Protected route example: test route
-@auth.get("/admin")
-def read_admin_data(current_admin: Annotated[User, Depends(user_service.get_current_super_admin)]):
-    return {"message": "Hello, admin!"}
 
+@auth.post("/request-magic-link", status_code=status.HTTP_200_OK)
+def request_magic_link(request: MagicLinkRequest, response: Response, db: Session = Depends(get_db)):
+    user = user_service.fetch_by_email(
+        db=db,
+        email=request.email
+    )
+    access_token = user_service.create_access_token(user_id=user.id)
+    send_magic_link(user.email, access_token)
+
+    response = success_response(
+        status_code=200,
+        message=f"Magic link sent to {user.email}"
+    )
+    return response
 
