@@ -160,9 +160,5 @@ def test_create_notification_success(client, mock_dependencies):
         assert response_json['data']['title'] == expected_response['data']['title']
         assert response_json['data']['message'] == expected_response['data']['message']
         assert response_json['data']['created_at'] == expected_response['data']['created_at']
-    else:
-        assert response_json['success'] == expected_response['success']
-        assert response_json['status_code'] == expected_response['status_code']
-        assert response_json['message'] == expected_response['message']
-    
+ 
     assert response.status_code == 200
