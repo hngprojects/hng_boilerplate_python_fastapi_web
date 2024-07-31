@@ -126,6 +126,7 @@ async def update_a_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
+	
 	updated_topic = topic_service.update(db, id, schema)
 	return success_response(
 		status_code=status.HTTP_200_OK,
@@ -151,6 +152,7 @@ async def create_a_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
+
 	new_topic = topic_service.create(db, schema.title, schema.content, schema.tags)
 	return success_response(
 		status_code=status.HTTP_201_CREATED,

@@ -10,11 +10,11 @@ from fastapi import Depends, APIRouter, status,Query
 from api.utils.success_response import success_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
-from api.utils.pagination import paginated_response
-from api.v1.models.testimonial import Testimonial
+from api.v1.schemas.testimonial import CreateTestimonial
+from api.core.responses import SUCCESS
+from typing import Annotated
 
-
-testimonial = APIRouter(prefix='/testimonials', tags=['Testimonial'])
+testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
 
 
 @testimonial.get('', status_code=status.HTTP_200_OK)
@@ -73,3 +73,18 @@ async def delete_all_testimonials(
     """
 
     testimonial_service.delete_all(db)
+
+@testimonial.post('/', response_model=success_response)
+def create_testimonial(
+    testimonial_data: CreateTestimonial,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: User = Depends(user_service.get_current_user)
+):
+    '''Endpoint to create testimonial'''
+    testimonial = testimonial_service.create(db, current_user, testimonial_data)
+    response = success_response(
+        status_code=201,
+        message=SUCCESS,
+        data={"id": testimonial.id}
+    )
+    return response

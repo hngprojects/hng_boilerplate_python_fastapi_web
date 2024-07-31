@@ -1,5 +1,3 @@
-# Dependencies:
-# pip install pytest-mock
 import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
@@ -91,3 +89,4 @@ class TestCodeUnderTest:
         assert response.status_code == 401
         assert response.json()['success'] == False
         assert response.json()['message'] == 'Not authenticated'
+        
