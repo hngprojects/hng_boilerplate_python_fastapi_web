@@ -97,7 +97,7 @@ class ProductDetailOrganization(BaseModel):
 class ProductDetail(BaseModel):
     id: str
     name: str
-    description: str
+    description: str | None = None
     price: float
     organization: ProductDetailOrganization
     quantity: int

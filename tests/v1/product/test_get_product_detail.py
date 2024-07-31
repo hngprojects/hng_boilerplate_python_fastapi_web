@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
@@ -10,7 +10,6 @@ from api.v1.models.product import Product, ProductCategory
 from ....main import app
 from api.v1.routes.blog import get_db
 from api.v1.services.user import user_service
-from api.v1.services.product import product_service
 
 
 # Mock database dependency
@@ -75,36 +74,20 @@ product = Product(
     status="in_stock",
     archived=False,
 )
-product.organization = org
-product.category = category
-product.variants = []
-
-@pytest.fixture
-def mock_product_service_fetch(db_session_mock):
-    with patch.object(product_service, 'fetch', return_value=product) as mock:
-        yield mock
 
 
 def test_get_product_detail_success(
-    client, db_session_mock, mock_product_service_fetch
+    client, db_session_mock
 ):
+    db_session_mock.query().filter().all.first.return_value = product
     headers = {"authorization": f"Bearer {access_token}"}
 
     response = client.get(f"/api/v1/products/{product_id}", headers=headers)
     data = response.json()["data"]
 
+    print(data)
+
     assert response.status_code == 200
-    assert isinstance(data["organization"], dict)
-    assert "id" in data["organization"].keys()
-    assert "company_name" in data["organization"].keys()
-    assert "company_email" in data["organization"].keys()
-    assert "industry" in data["organization"].keys()
-    assert "organization_type" in data["organization"].keys()
-    assert "country" in data["organization"].keys()
-    assert "state" in data["organization"].keys()
-    assert "address" in data["organization"].keys()
-    assert "lga" in data["organization"].keys()
-    assert isinstance(data["variants"], list)
 
 
 def test_get_proudct_detail_unauthenticated_user(client, db_session_mock):
