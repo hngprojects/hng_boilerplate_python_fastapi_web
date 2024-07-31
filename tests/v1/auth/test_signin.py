@@ -1,12 +1,7 @@
-import sys, os
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from api.v1.models.newsletter import Newsletter
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 from main import app
 from api.v1.models.user import User
 from api.v1.services.user import user_service

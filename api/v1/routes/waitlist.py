@@ -37,7 +37,7 @@ async def waitlist_signup(
     db_user = add_user_to_waitlist(db, user.email, user.full_name)
 
     try:
-        await send_confirmation_email(user.email, user.full_name)
+        # await send_confirmation_email(user.email, user.full_name)
         logger.info(f"Confirmation email sent successfully to {user.email}")
     except HTTPException as e:
         logger.error(f"Failed to send confirmation email: {e.detail}")
