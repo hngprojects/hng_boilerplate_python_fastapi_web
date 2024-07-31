@@ -1,9 +1,12 @@
 from decimal import Decimal
 from pydantic import BaseModel, Field, PositiveFloat, constr
-from typing import List, Optional, Any, Dict
+from typing import List, Optional, Any, Dict, TypeVar, Generic, Union
 from datetime import datetime
 
 from api.v1.models.product import ProductStatusEnum
+from datetime import datetime
+
+T = TypeVar('T')
 
 
 class ProductUpdate(BaseModel):
@@ -82,3 +85,28 @@ class ProductCreate(BaseModel):
 
     class Config:
         orm_mode = True
+
+        
+class ProductFilterResponse(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    price: float
+    org_id: str
+    category_id: str
+    quantity: Optional[int] = 0
+    image_url: str
+    status: str
+    archived: Optional[bool] = False
+    filter_status: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SuccessResponse(BaseModel, Generic[T]):
+    message: str
+    status_code: int
+    data: T
+

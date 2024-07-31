@@ -1,8 +1,4 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    status
-    )
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema
@@ -29,14 +25,14 @@ async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
 
     return success_response(
         message="Thank you for subscribing to our newsletter.",
-        status_code=status.HTTP_201_CREATED
+        status_code=status.HTTP_201_CREATED,
     )
 
-@newsletter.get('/newsletters', response_model=success_response, 
-                 status_code=200,
-                 )
-def retrieve_subscribers(db: Session = Depends(get_db),
-                              admin: User = Depends(user_service.get_current_super_admin)):
+@newsletter.get('/newsletters', response_model=success_response, status_code=200,)
+def retrieve_subscribers(
+    db: Session = Depends(get_db),
+    admin: User = Depends(user_service.get_current_super_admin)
+):
     """
     Retrieve all newsletter subscription from database
     """
@@ -52,4 +48,4 @@ def retrieve_subscribers(db: Session = Depends(get_db),
         message = "Subscriptions retrieved successfully",
         status_code = 200,
         data = jsonable_encoder(subs_filtered)
-        )
+    )
