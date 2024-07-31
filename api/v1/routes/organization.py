@@ -13,13 +13,16 @@ from typing import Annotated
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
-@organization.post('', response_model=success_response, status_code=status.HTTP_201_CREATED)
+
+@organization.post(
+    "", response_model=success_response, status_code=status.HTTP_201_CREATED
+)
 def create_organization(
     schema: CreateUpdateOrganization,
     db: Session= Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    '''Endpoint to create a new organization'''
+    """Endpoint to create a new organization"""
 
     new_org = organization_service.create(
         db=db,
@@ -32,7 +35,7 @@ def create_organization(
 
     return success_response(
         status_code=status.HTTP_201_CREATED,
-        message='Organization created successfully',
+        message="Organization created successfully",
         data=jsonable_encoder(new_org),
     )
 
@@ -69,8 +72,8 @@ async def update_organization(
 
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='Organization updated successfully',
-        data=jsonable_encoder(updated_organization)
+        message="Organization updated successfully",
+        data=jsonable_encoder(updated_organization),
     )
 
 

@@ -54,6 +54,7 @@ async def delete_account(request: Request, db: Session = Depends(get_db), curren
     )
 
 
+
 @user.patch("/me/password", status_code=200)
 async def change_password(
     schema: ChangePasswordSchema,
@@ -64,10 +65,8 @@ async def change_password(
 
     user_service.change_password(schema.old_password, schema.new_password, user, db)
 
-    return success_response(
-        status_code=200,
-        message='Password changed successfully'
-    )
+    return success_response(status_code=200, message="Password changed successfully")
+
 
 @user.get(path="/{user_id}", status_code=status.HTTP_200_OK)
 def get_user(
@@ -118,6 +117,7 @@ def update_user(user_id : str,
             exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
     )
+
 
 @user.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
