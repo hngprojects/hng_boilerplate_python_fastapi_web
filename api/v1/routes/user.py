@@ -86,7 +86,7 @@ def get_user(
             exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
     )
-@user.patch(path="",status_code=status.HTTP_200_OK)
+@user.patch(path="/",status_code=status.HTTP_200_OK)
 def update_current_user(
                         current_user : Annotated[User , Depends(user_service.get_current_user)],
                         schema : UserUpdate,

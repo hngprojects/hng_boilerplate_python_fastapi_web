@@ -136,4 +136,3 @@ def test_get_all_users(mock_db_session, user_service_mock, mock_superadmin, mock
             }
         ]
     }
-
