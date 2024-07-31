@@ -34,11 +34,24 @@ class NewsletterService(Service):
 
         return newsletter
     
+    
     @staticmethod
-    def delete(db: Session, newsletter: Newsletter) -> None:
+    def check_nonexisting_subscriber(db: Session, request: EmailSchema):
+        """As above, checks if subscription with email already exists, but raises an exception if not found.
+        """        
+        subscription = db.query(Newsletter).filter(Newsletter.email == request.email).first()
+        if not subscription:
+            raise HTTPException(status_code=404, detail="Subscriber not found.")
+        return subscription
+
+
+    @staticmethod
+    def delete(db: Session, request: EmailSchema) -> None:
         """
         Unsubsribes a user for newsletter
         """
-        db.delete(newsletter)
+        subscription = NewsletterService.check_nonexisting_subscriber(db=db, request=request)
+        db.delete(subscription)
         db.commit
         return None
+    

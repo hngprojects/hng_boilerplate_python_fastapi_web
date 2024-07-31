@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
 
-from api.utils.success_response import success_response
-from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSchema
-from fastapi.exceptions import HTTPException
-from fastapi.encoders import jsonable_encoder
-
-from fastapi import APIRouter, HTTPException, Depends
-from api.v1.services.user import user_service
-from sqlalchemy.orm import Session
-from api.utils.logger import logger
 from api.db.database import get_db
+from api.utils.logger import logger
+from api.utils.success_response import success_response
 from api.v1.models.user import User
+from api.v1.schemas.jobs import (AddJobSchema, JobCreateResponseSchema,
+                                 PostJobSchema)
 from api.v1.services.jobs import job_service
-
+from api.v1.services.user import user_service
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import HTTPException
+from sqlalchemy.orm import Session
 
 jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
+
 
 @jobs.post("/", response_model=success_response,
            status_code=201,
@@ -42,13 +42,33 @@ async def add_jobs(
         raise HTTPException(status_code=400,
                             detail="Invalid request data"
                             )
-    
+
     job_full = AddJobSchema(author_id=admin.id, **job.model_dump())
     new_job = job_service.create(db, job_full)
     logger.info(f"Job Listing created successfully {new_job.id}")
 
     return success_response(
-        message = "Job listing created successfully",
-        status_code = 201,
-        data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
+        message="Job listing created successfully",
+        status_code=201,
+        data=jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
+    )
+
+
+@jobs.get('/{id}')
+async def get_job(job: PostJobSchema,
+                  db: Session = Depends(get_db),
+                  admin: User = Depends(user_service.get_current_super_admin)
+                  ):
+    job = job_service.fetch(db=db, id=id) | None
+    if job:
+        return success_response(
+            message="Job listing retrieved successfully",
+            status_code=200,
+            data=jsonable_encoder(PostJobSchema.model_validate(job))
         )
+    
+    return success_response(
+        message="Job listing not found!",
+        status_code=404,
+        data={}
+    )

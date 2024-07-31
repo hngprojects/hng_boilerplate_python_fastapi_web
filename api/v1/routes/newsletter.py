@@ -27,9 +27,7 @@ async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
 
 @newsletter.post('/newsletter/unsubscribe')
 async def unsubscribe(request: EmailSchema, db: Session = Depends(get_db)):
-    newsletter = NewsletterService.check_existing_subscriber(db=db, request=request)
-    
-    NewsletterService.delete(newsletter)
+    NewsletterService.delete(db=db,  request=request)
     
     return success_response(
         status_code=200,
