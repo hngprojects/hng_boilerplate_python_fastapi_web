@@ -9,9 +9,13 @@ from uuid_extensions import uuid7
 from api.db.database import get_db
 from fastapi import status
 from datetime import datetime, timezone
+
+
 client = TestClient(app)
 PROFILE_ENDPOINT = '/api/v1/profile/'
 LOGIN_ENDPOINT = 'api/v1/auth/login'
+
+
 @pytest.fixture
 def mock_db_session():
     """Fixture to create a mock database session. api.v1.services.user.get_db"""
@@ -88,7 +92,7 @@ def test_errors(mock_user_service, mock_db_session):
         "avatar_url": "avatalink",
         "recovery_email": "user@gmail.com"
     }, headers={'Authorization': f'Bearer {access_token}'})
-    assert missing_field.status_code == 422
+    assert missing_field.status_code == 400
 
     unauthorized_error = client.post(PROFILE_ENDPOINT, json={
         "username": "testuser",

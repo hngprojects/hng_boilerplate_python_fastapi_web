@@ -10,8 +10,6 @@ BASE_DIR = Path(__file__).resolve().parent
 class Settings(BaseSettings):
     """ Class to hold application's config values."""
     
-    # API_V1_STR: str = "/api/v1"
-    # APP_NAME: str = "TicketHub"
     SECRET_KEY: str = config("SECRET_KEY")
     ALGORITHM: str = config("ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
@@ -33,5 +31,10 @@ class Settings(BaseSettings):
 
     # FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
     # PAYSTACK_SECRET: str = config("PAYSTACK_SECRET")
+
+    TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
+    TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
+    TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
+
 
 settings = Settings()
