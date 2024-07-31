@@ -18,7 +18,7 @@ from api.v1.services.user import user_service, oauth2_scheme
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
   
-@organization.get('/{org_id}', response_model=OrganizationBase, status_code=status.HTTP_200_OK)
+@organization.get('/{org_id}', response_model=success_response, status_code=status.HTTP_200_OK)
 def get_organization(org_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     current_user = user_service.get_current_user(token, db)
     
@@ -26,7 +26,7 @@ def get_organization(org_id: int, db: Session = Depends(get_db), token: str = De
     organization = organization_service.fetch(db, org_id)
     if organization is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
-    return OrganizationBase.from_orm(organization)  # Use Pydantic model for response
+    return success_response.from_orm(organization)  # Use Pydantic model for response
 
 class Config:
     from_attributes = True  # Enable Pydantic to read ORM attributes
