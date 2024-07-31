@@ -92,6 +92,12 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     assert response.json()["status_code"] == 401
     
     
+    
+    
+def generate_access_token(user_id: str):
+    return user_service.create_access_token(str(user_id))
+
+    
 # New test cases for send_notification endpoint
 @pytest.fixture
 def mock_dependencies():
@@ -101,7 +107,6 @@ def mock_dependencies():
 
         mock_db = MagicMock()
         mock_user = MagicMock(id=uuid7(), username='testuser')
-
 
         mock_get_db.return_value = mock_db
         mock_get_current_user.return_value = mock_user
@@ -119,7 +124,6 @@ def mock_dependencies():
 
 
 
-
 def test_create_notification_success(client, mock_dependencies):
     mock_db, mock_user, mock_create_notification = mock_dependencies
 
@@ -128,31 +132,19 @@ def test_create_notification_success(client, mock_dependencies):
         "message": "Test Message"
     }
 
-
-    # Generate a token using the actual method for creating a token
-    access_token = user_service.create_access_token(str(mock_user.id))
-
-
-    # Debugging output
+    access_token = generate_access_token(mock_user.id)
     print(f"Generated Access Token: {access_token}")
+    print(f"Mock User ID: {mock_user.id}")
 
     headers = {"Authorization": f"Bearer {access_token}"}
-
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
 
-
     response_json = response.json()
-
-
-
-
-    # Check if 'data' key exists in the response
+    print(f"Response JSON: {response_json}")
 
     if 'data' not in response_json:
         print("The 'data' key is missing from the response.")
         print("Response JSON:", response_json)
-
-
 
     expected_response = {
         "success": True,
@@ -165,11 +157,7 @@ def test_create_notification_success(client, mock_dependencies):
             "message": "Test Message",
             "created_at": "2024-01-01T00:00:00"
         }
-
     }
-
-
-    # Assert response content
 
     if 'data' in response_json:
         assert response_json['data']['id'] == expected_response['data']['id']
