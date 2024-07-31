@@ -15,10 +15,11 @@ class OrganizationBase(BaseModel):
     state: str
     address: str
     lga: str
-
-
+    
+    
 class Config:
-        from_attributes = True
+    from_attributes = True  # Enable Pydantic to read ORM attributes
+    
 
 class CreateUpdateOrganization(BaseModel):
     '''Organization schema to create or update organization'''
