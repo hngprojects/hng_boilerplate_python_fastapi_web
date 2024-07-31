@@ -84,10 +84,9 @@ class ProductFilterResponse(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
-class SuccessResponse(Generic[T], BaseModel):
+class SuccessResponse(BaseModel, Generic[T]):
     message: str
     status_code: int
     data: T

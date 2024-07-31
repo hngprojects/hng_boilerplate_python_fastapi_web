@@ -2,7 +2,6 @@ from fastapi import (
 	APIRouter,
 	Depends,
 	status,
-	Query,
 	)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -11,7 +10,7 @@ from api.v1.models.user import User
 from api.v1.services.topic import topic_service
 from api.db.database import get_db
 from api.v1.services.user import user_service
-from api.v1.schemas.topic import TopicList, TopicUpdateSchema,TopicBase, TopicData
+from api.v1.schemas.topic import TopicList, TopicUpdateSchema,TopicBase, TopicData, TopicSearchSchema, TopicDeleteSchema
 
 topic = APIRouter(prefix='/help-center', tags=['Help-Center'])
 
@@ -38,7 +37,7 @@ async def retrieve_all_topics(
 		data=jsonable_encoder(topics)
 	)
 
-@topic.get('/topics/{topic_id}', response_model=TopicData)
+@topic.get('/topic/{topic_id}', response_model=TopicData)
 async def retrieve_topic(
     topic_id: str,
 	db: Session = Depends(get_db)
@@ -62,10 +61,10 @@ async def retrieve_topic(
 		data=jsonable_encoder(topic)
 	)
 
-@topic.get('/topics/search', response_model=TopicList)
+@topic.get('/search', response_model=TopicList)
 async def search_for_topic(
-	db: Session = Depends(get_db),
-	search_query: str = Query(..., description="Search query for topics")
+	schema: TopicSearchSchema,
+	db: Session = Depends(get_db)
 ):
 	"""
 	Description
@@ -77,8 +76,7 @@ async def search_for_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
-
-	topics = topic_service.search(db=db,search_query=search_query)
+	topics = topic_service.search(db=db,search_query=schema.query)
 
 	return success_response(
 		status_code=status.HTTP_200_OK,
@@ -88,8 +86,8 @@ async def search_for_topic(
 
 @topic.delete('/topics', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_a_topic(
+	id: TopicDeleteSchema,
 	db: Session = Depends(get_db),
-	id: str = Query(..., description="Topic's id"),
 	current_user: User = Depends(user_service.get_current_super_admin),
 ):
 	"""
@@ -104,13 +102,12 @@ async def delete_a_topic(
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
 
-	topic = topic_service.delete(db, id)
+	topic_service.delete(db, id.id)
 
 
 @topic.patch("/topics")
 async def update_a_topic(
 	schema: TopicUpdateSchema,
-	id: str = Query(..., description="Topic's id"),
 	db: Session = Depends(get_db),
  	current_user: User = Depends(user_service.get_current_super_admin),
 ):
@@ -126,12 +123,11 @@ async def update_a_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
-	
-	updated_topic = topic_service.update(db, id, schema)
+	updated_topic = topic_service.update(db, schema)
 	return success_response(
 		status_code=status.HTTP_200_OK,
 		message='Topic updated successfully!',
-		data=jsonable_encoder(updated_topic)
+		# data=jsonable_encoder(updated_topic)
 	)
 	
 @topic.post("/topics")

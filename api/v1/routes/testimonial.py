@@ -6,13 +6,15 @@ from fastapi.encoders import jsonable_encoder
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
-from fastapi import Depends, APIRouter, status,Query
+from fastapi import Depends, APIRouter, status
 from api.utils.success_response import success_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
 from api.v1.schemas.testimonial import CreateTestimonial
 from api.core.responses import SUCCESS
 from typing import Annotated
+from api.utils.pagination import paginated_response
+from api.v1.models.testimonial import Testimonial
 
 testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
 
