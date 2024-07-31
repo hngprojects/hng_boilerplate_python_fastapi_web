@@ -65,7 +65,7 @@ def test_fetch_user_notification_settings(client, db_session_mock):
     ) as mock_fetch:
         
         response = client.get(
-            f'/api/v1/notification-settings',
+            f'/api/v1/settings/notification-settings',
             headers={'Authorization': 'Bearer token'}
         )
 
@@ -78,7 +78,7 @@ def test_unauthorized_user(client, db_session_mock):
     mock_notification_settings = mock_settings()
 
     response = client.get(
-        f'/api/v1/notification-settings',
+        f'/api/v1/settings/notification-settings',
     )
 
     assert response.status_code == 401

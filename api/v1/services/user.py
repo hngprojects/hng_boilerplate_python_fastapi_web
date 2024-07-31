@@ -103,7 +103,6 @@ class UserService(Service):
         if not user.is_deleted:
             return user
 
-
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
@@ -113,7 +112,6 @@ class UserService(Service):
             raise HTTPException(status_code=404, detail="User not found")
 
         return user
-    
 
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
@@ -176,7 +174,7 @@ class UserService(Service):
                 status_code=400,
                 detail="User with this email already exists",
             )
-        
+
         # Hash password
         schema.password = self.hash_password(password=schema.password)
 
@@ -216,7 +214,11 @@ class UserService(Service):
         """Function to soft delete a user"""
 
         # Get user from access token if provided, otherwise fetch user by id
-        user = self.get_current_user(access_token, db) if id is None else check_model_existence(db, User, id)
+        user = (
+            self.get_current_user(access_token, db)
+            if id is None
+            else check_model_existence(db, User, id)
+        )
 
         user.is_deleted = True
         db.commit()
@@ -235,7 +237,6 @@ class UserService(Service):
             raise HTTPException(status_code=400, detail="Invalid user credentials")
 
         return user
-    
 
     def perform_user_check(self, user: User):
         """This checks if a user is active and verified and not a deleted user"""
@@ -261,7 +262,7 @@ class UserService(Service):
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         data = {"user_id": user_id, "exp": expires, "type": "access"}
-        encoded_jwt =  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
     def create_refresh_token(self, user_id: str) -> str:
@@ -271,9 +272,8 @@ class UserService(Service):
             days=settings.JWT_REFRESH_EXPIRY
         )
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
-        encoded_jwt =  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
-    
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
@@ -337,7 +337,6 @@ class UserService(Service):
 
             return access, refresh
 
-
     def get_current_user(
         self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
     ) -> User:
@@ -351,7 +350,7 @@ class UserService(Service):
 
         token = self.verify_access_token(access_token, credentials_exception)
         user = db.query(User).filter(User.id == token.id).first()
-        
+
         return user
 
     def deactivate_user(
@@ -438,7 +437,9 @@ class UserService(Service):
             )
         return user
 
-    def save_login_token(self, db: Session, user: User, token: str, expiration: datetime):
+    def save_login_token(
+        self, db: Session, user: User, token: str, expiration: datetime
+    ):
         """Save the token and expiration in the user's record"""
 
         db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
@@ -448,10 +449,9 @@ class UserService(Service):
         db.commit()
         db.refresh(token)
 
-
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
-        
+
         user = db.query(User).filter(User.email == schema.email).first()
 
         if not user:
