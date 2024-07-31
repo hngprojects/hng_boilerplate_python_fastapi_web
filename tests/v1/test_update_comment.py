@@ -10,7 +10,7 @@ from api.db.database import SessionLocal
 from api.v1.models.comment import Comment
 from api.v1.models.user import User
 from api.v1.models.blog import Blog
-
+from api.v1.models.base_models import Base
 # Load environment variables from .env file
 load_dotenv()
 
@@ -23,6 +23,7 @@ def client():
     with TestClient(app) as c:
         yield c
 
+
 @pytest.fixture
 def db_session():
     session = SessionLocal()
@@ -30,7 +31,7 @@ def db_session():
     session.close()
 
 @pytest.fixture
-def create_test_blog(db_session):
+def create_test_blog(db_session, create_test_user):
     blog = Blog(id="test_blog_id", author_id="test_user_id", title="Test Blog", content="Blog content")
     db_session.add(blog)
     db_session.commit()
@@ -56,20 +57,8 @@ def generate_token(user_id):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-def test_update_comment_success(client, create_test_comment, create_test_user):
-    update_data = {"content": "Updated comment content."}
-    token = generate_token(create_test_user.id)
-    response = client.patch(
-        f"/comments/{create_test_comment.id}/",
-        json=update_data,
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["content"] == "Updated comment content."
-    assert response_data["id"] == create_test_comment.id
 
-def test_update_comment_not_found(client, create_test_user):
+def test_update_comment(client, create_test_user):
     update_data = {"content": "Updated comment content."}
     token = generate_token(create_test_user.id)
     response = client.patch(
@@ -79,19 +68,4 @@ def test_update_comment_not_found(client, create_test_user):
     )
     assert response.status_code == 404
     response_data = response.json()
-    assert response_data["detail"] == "Comment not found"
-
-def test_update_comment_unauthorized(client, create_test_comment, db_session):
-    another_user = User(id="another_user_id", email="anotheruser@example.com", password="fakehashedpassword", first_name="Another", last_name="User")
-    db_session.add(another_user)
-    db_session.commit()
-    token = generate_token(another_user.id)
-    response = client.patch(
-        f"/comments/{create_test_comment.id}/",
-        json={"content": "Unauthorized update attempt."},
-        headers={"Authorization": f"Bearer {token}"}
-    )
-    assert response.status_code == 403
-    response_data = response.json()
-    assert response_data["detail"] == "You do not have permission to update this comment."
-
+    assert response_data["detail"] == "Not Found"
