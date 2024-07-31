@@ -9,6 +9,9 @@ from api.v1.services.comment_like import comment_like_service
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import DislikeSuccessResponse, CommentDislike, LikeSuccessResponse
 from api.v1.services.comment_dislike import comment_dislike_service
+from api.v1.services.comment import comment_service
+from api.utils.json_response import JsonResponseDict
+from uuid import UUID
 
 comment = APIRouter(prefix="/comments", tags=["Comment"])
 
@@ -75,3 +78,53 @@ async def dislike_comment(
         status_code = 201,
         data = jsonable_encoder(dislike)
     )
+
+@comment.delete("/{comment_id}", response_model=None)
+async def delete_comment(
+    comment_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+) -> JsonResponseDict:
+    try:
+        # Validate comment_id as a UUID
+        try:
+            comment_uuid = UUID(comment_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="An invalid request was sent."
+            )
+        
+        # Fetch the comment
+        comment = comment_service.fetch(db=db, id=str(comment_uuid))
+        
+        if not comment:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Comment does not exist"
+            )
+        
+        # Check if the current user is the owner of the comment
+        if comment.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Unauthorized access."
+            )
+
+        # Perform the deletion
+        comment_service.delete(db=db, id=str(comment_uuid))
+        return JsonResponseDict(
+            message="Comment deleted successfully.",
+            status_code=status.HTTP_200_OK
+        )
+    except HTTPException as e:
+        return JsonResponseDict(
+            message=e.detail,
+            status_code=e.status_code
+        )
+    except Exception as e:
+        return JsonResponseDict(
+            message="Internal server error.",
+            error=str(e),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
