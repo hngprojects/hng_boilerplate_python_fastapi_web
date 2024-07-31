@@ -44,7 +44,7 @@ def mock_plan():
     return BillingPlan(id=1, price=float("100.00"), currency="USD")
 
 @pytest.mark.asyncio
-@patch("api.v1.routes.payment_flutterwave.config")
+@patch("api.v1.routes.payment_flutterwave.settings")
 @patch("api.v1.routes.payment_flutterwave.requests.post")
 @patch("api.v1.routes.payment_flutterwave.check_model_existence")
 @patch("api.v1.routes.payment_flutterwave.PaymentService")
@@ -54,21 +54,20 @@ async def test_pay_with_flutterwave_success(
     mock_payment_service, 
     mock_check_model, 
     mock_post, 
-    mock_config, 
+    mock_settings,
     mock_db_session, 
     test_user, 
     mock_request, 
     mock_plan
 ):
     # Setup mocks
-    mock_config.return_value = "test_secret_key"
-    mock_uuid7.return_value = uuid7()
+    test_uuid = uuid7()
+    mock_settings.FLUTTERWAVE_SECRET = "test_secret_key"
+    mock_uuid7.return_value = test_uuid
     mock_check_model.return_value = mock_plan
     mock_post.return_value.json.return_value = {"data": {"link": "http://payment.url"}}
-    mock_payment_service_instance = MagicMock()
-    mock_payment_service.return_value = mock_payment_service_instance
+    mock_payment_service_instance = mock_payment_service.return_value
 
-    # Call the function
     result = await pay_with_flutterwave(mock_request, test_user, mock_db_session)
 
     # Assertions
@@ -77,7 +76,7 @@ async def test_pay_with_flutterwave_success(
     mock_post.assert_called_once_with(
         "https://api.flutterwave.com/v3/payments",
         json={
-            "tx_ref": str(mock_uuid7.return_value),
+            "tx_ref": str(test_uuid),
             "amount": 100.00,
             "currency": "USD",
             "redirect_url": "http://example.com/redirect",
@@ -96,6 +95,6 @@ async def test_pay_with_flutterwave_success(
             "currency": "USD",
             "status": "pending",
             "method": "card",
-            "transaction_id": str(mock_uuid7.return_value)
+            "transaction_id": str(test_uuid)
         }
     )
