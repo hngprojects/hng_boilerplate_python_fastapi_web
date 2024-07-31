@@ -235,5 +235,11 @@ class OrganizationService(Service):
 
         return False
 
+    def check_organization_exist(self, db: Session, org_id):
+        organization = db.query(Organization).filter(Organization.id == org_id).first()
+        if organization is None:
+            raise HTTPException(status_code=404, detail="Organization not found")
+        else:
+            return True
 
 organization_service = OrganizationService()

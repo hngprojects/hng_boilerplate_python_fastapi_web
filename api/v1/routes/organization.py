@@ -10,7 +10,6 @@ from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
-from api.v1.models import Organization
 
 from typing import Annotated
 
@@ -70,12 +69,9 @@ def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_
 async def delete_organization(org_id: str, db: Session = Depends(get_db), 
                         current_user: User = Depends(user_service.get_current_super_admin),
 ):
-    organization = db.query(Organization).filter(Organization.id == org_id).first()
-
-    if organization is None:
-        raise HTTPException(status_code=404, detail="Organization not found")
-    
-    organization_service.delete(db, id=org_id)
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message='Organization deleted successfully',)
+    check = organization_service.check_organization_exist(db, org_id)
+    if check:
+        organization_service.delete(db, id=org_id)
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            message='Organization deleted successfully',)
