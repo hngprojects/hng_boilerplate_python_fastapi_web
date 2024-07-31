@@ -6,7 +6,7 @@ from api.v1.models.newsletter import NewsletterSubscriber
 from typing import Optional, Any
 
 class NewsletterService(Service):
-    '''Newsletter service functionality'''
+    """Newsletter service functionality"""
 
     @staticmethod
     def create(db: Session, request: EmailSchema) -> NewsletterSubscriber:
@@ -28,7 +28,9 @@ class NewsletterService(Service):
 
         newsletter = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email==request.email).first()
         if newsletter:
-            raise HTTPException(status_code=400, detail='User already subscribed to newsletter')
+            raise HTTPException(
+                status_code=400, detail="User already subscribed to newsletter"
+            )
 
         return newsletter
     

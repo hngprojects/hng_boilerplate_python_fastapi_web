@@ -81,7 +81,7 @@ class ProductFilterResponse(BaseModel):
     image_url: str
     status: str
     archived: Optional[bool] = False
-    filter_status: str
+    filter_status: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 

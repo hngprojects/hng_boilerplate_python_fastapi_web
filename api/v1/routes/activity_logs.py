@@ -12,8 +12,10 @@ activity_logs = APIRouter(prefix="/activity-logs", tags=["Activity Logs"])
 
 
 @activity_logs.post("/create", status_code=status.HTTP_201_CREATED)
-async def create_activity_log(activity_log: ActivityLogCreate, db: Session = Depends(get_db)):
-    '''Create a new activity log'''
+async def create_activity_log(
+    activity_log: ActivityLogCreate, db: Session = Depends(get_db)
+):
+    """Create a new activity log"""
 
     new_activity_log = activity_log_service.create_activity_log(
         db=db,
