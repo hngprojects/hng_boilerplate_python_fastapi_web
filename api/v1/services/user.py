@@ -1,6 +1,6 @@
 import random
 import string
-from typing import Any, Optional
+from typing import Any, Optional, Annotated
 import datetime as dt
 from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
@@ -137,6 +137,36 @@ class UserService(Service):
         notification_setting_service.create(db=db, user=user)
 
         return user
+    
+    def super_admin_create_user(self, db: Annotated[Session, Depends(get_db)],
+                                user_request: user.AdminCreateUser):
+        """
+        Creates a user for super admin
+        Args:
+            db: database Session object
+            user_request: The user details to use for creation
+        Returns:
+            object: the complete details of the newly created user
+        """
+        try:
+            user_exists = db.query(User).filter_by(email=user_request.email).one_or_none()
+            if user_exists:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail=f'User with {user_request.email} already exists')
+            if user_request.password:
+                user_request.password = self.hash_password(user_request.password)
+            new_user = User(**user_request.model_dump())
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user_schema = user.UserData.model_validate(new_user, from_attributes=True)
+            return user.AdminCreateUserResponse(message='User created successfully',
+                                                 status_code=201,
+                                                 status='success',
+                                                 data=user_schema)
+        except Exception as exc:
+            db.rollback()
+            raise Exception(exc) from exc
 
     def create_admin(self, db: Session, schema: user.UserCreate):
         """Creates a new admin"""
