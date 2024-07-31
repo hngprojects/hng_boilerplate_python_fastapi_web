@@ -36,7 +36,6 @@ def before_all(client: client, session: session) -> pytest.fixture:
     user = client.post(
         "/api/v1/auth/register",
         json={
-            "username": "testuser1",
             "password": "strin8Hsg263@",
             "first_name": "string",
             "last_name": "string",
@@ -50,7 +49,7 @@ def before_all(client: client, session: session) -> pytest.fixture:
 def test_create_testimonial(client: client, session: session) -> pytest:
     status_code = payload[0].pop("status_code")
     res = client.post(
-        "api/v1/testimonials",
+        "api/v1/testimonials/",
         json=payload[0],
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -64,7 +63,7 @@ def test_create_testimonial(client: client, session: session) -> pytest:
 def test_create_testimonial_unauthorized(client: client, session: session) -> pytest:
     status_code = 401
     res = client.post(
-        "api/v1/testimonials",
+        "api/v1/testimonials/",
         json=payload[1],
     )
 
@@ -73,7 +72,7 @@ def test_create_testimonial_unauthorized(client: client, session: session) -> py
 def test_create_testimonial_missing_content(client: client, session: session) -> pytest:
     status_code = payload[2].pop("status_code")
     res = client.post(
-        "api/v1/testimonials",
+        "api/v1/testimonials/",
         json=payload[2],
         headers={"Authorization": f"Bearer {auth_token}"},
     )
@@ -83,7 +82,7 @@ def test_create_testimonial_missing_content(client: client, session: session) ->
 def test_create_testimonial_missing_ratings(client: client, session: session) -> pytest:
     status_code = payload[3].pop("status_code")
     res = client.post(
-        "api/v1/testimonials",
+        "api/v1/testimonials/",
         json=payload[3],
         headers={"Authorization": f"Bearer {auth_token}"},
     )

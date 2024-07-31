@@ -2,14 +2,21 @@ from fastapi import Depends, APIRouter, HTTPException, status, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
+from typing import List
 
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
-from api.v1.models.product import Product
+from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service
-from api.v1.schemas.product import ProductCreate, ProductList
-from api.v1.schemas.product import ProductUpdate, ResponseModel
+from api.v1.schemas.product import (
+    ProductCreate,
+    ProductFilterResponse,
+    ProductList,
+    ProductUpdate,
+    ResponseModel,
+    SuccessResponse,
+)
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
@@ -19,24 +26,59 @@ from api.v1.models import User
 product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@product.get('', response_model=success_response, status_code=200)
+@product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
     skip: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
 ):
-    '''Endpoint to get all products. Only accessible to superadmin'''
+    """Endpoint to get all products. Only accessible to superadmin"""
 
-    return paginated_response(
-        db=db,
-        model=Product,
-        limit=limit,
-        skip=skip
-    )
+    return paginated_response(db=db, model=Product, limit=limit, skip=skip)
 
 
-@product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)
+@product.get(
+    "/filter-status",
+    response_model=SuccessResponse[List[ProductFilterResponse]],
+    status_code=200,
+)
+async def get_products_by_filter_status(
+    filter_status: ProductFilterStatusEnum = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get products by filter status"""
+    try:
+        products = product_service.fetch_by_filter_status(db, filter_status)
+        return SuccessResponse(
+            message="Products retrieved successfully", status_code=200, data=products
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+
+
+@product.get(
+    "/status",
+    response_model=SuccessResponse[List[ProductFilterResponse]],
+    status_code=200,
+)
+async def get_products_by_status(
+    status: ProductStatusEnum = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get products by status"""
+    try:
+        products = product_service.fetch_by_status(db, status)
+        return SuccessResponse(
+            message="Products retrieved successfully", status_code=200, data=products
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+
+
+@product.get("/{org_id}", status_code=status.HTTP_200_OK, response_model=ProductList)
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
@@ -150,7 +192,7 @@ def delete_product(
     product_service.delete(db=db, id=id, current_user=current_user)
 
 
-@product.post('/', status_code=status.HTTP_201_CREATED, response_model=success_response)
+@product.post("/", status_code=status.HTTP_201_CREATED, response_model=success_response)
 async def create_product(
     product_data: ProductCreate,
     current_user: Annotated[User, Depends(get_current_user)],
@@ -158,28 +200,32 @@ async def create_product(
 ):
     """
     Endpoint to create a new product.
-    
+
     This endpoint ensures that:
     - The organization exists.
     - The product category exists.
     - The user is authorized to create a product in the given organization.
     """
-    
+
     # Validate organization existence and user's association with it
     organization = organization_service.fetch(db, product_data.org_id)
     if not organization:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found"
+        )
 
     # Validate product category existence
     category = product_category_service.fetch(db=db, id=product_data.category_id)
     if not category:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product category not found")
-    
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Product category not found"
+        )
+
     # Create the product using the product service
     new_product = product_service.create(db, product_data)
-    
+
     return success_response(
         status_code=201,
         message="Product successfully created",
-        data=jsonable_encoder(new_product)
+        data=jsonable_encoder(new_product),
     )
