@@ -36,7 +36,11 @@ def create_user_notification_settings(
 ):
     '''Endpoint to create new notification settings for the current user'''
 
-    settings = notification_setting_service.create(db=db, user_id=current_user.id, schema=schema)
+    settings = notification_setting_service.update(
+        db=db, 
+        user_id=current_user.id,
+        schema=schema
+    )
 
     return success_response(
         status_code=201,
