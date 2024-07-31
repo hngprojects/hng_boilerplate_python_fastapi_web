@@ -15,7 +15,6 @@ from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.product import Product
 from api.v1.services.user import user_service, UserService
-from api.v1.services.product import product_service, ProductService
 
 
 client = TestClient(app)

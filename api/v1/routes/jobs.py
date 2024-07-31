@@ -51,4 +51,4 @@ async def add_jobs(
         message = "Job listing created successfully",
         status_code = 201,
         data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
-        )
+    )

@@ -5,8 +5,6 @@ from sqlalchemy import (
         ForeignKey,
         String,
         Table,
-        DateTime,
-        func,
         Enum
     )
 from api.db.database import Base

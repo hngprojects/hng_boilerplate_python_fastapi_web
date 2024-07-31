@@ -130,8 +130,5 @@ class TestCodeUnderTest:
         assert response.json()['message'] == 'Not authenticated'
 
 
-
-
-
 if __name__ == "__main__":
     pytest.main()
