@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock, patch
 from uuid_extensions import uuid7
+from jose import JWTError
 from datetime import datetime, timezone, timedelta
 
 from main import app
@@ -127,7 +128,7 @@ def test_create_notification_success(client, mock_dependencies):
     # Generate a token using the actual method for creating a token
     access_token = user_service.create_access_token(str(mock_user.id))
 
-    headers = {"Authorization": f"Bearer {access_token}"}
+    headers = {"authorization": f"Bearer {access_token}"}
 
     # Logging request data
     print(f"Sending request with data: {notification_data} and headers: {headers}")
