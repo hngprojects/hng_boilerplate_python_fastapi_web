@@ -14,6 +14,13 @@ from main import app
 
 client = TestClient(app)
 
+def mock_org():
+    return Organization(
+        id=str(uuid7()),
+        company_name="Test Organization",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+)
 # Create a mock database session
 @pytest.fixture
 def db_session_mock():
@@ -38,20 +45,7 @@ def mock_get_current_user():
         yield
 
 def test_get_organization_success(db_session_mock, mock_get_current_user):
-    mock_organization = MagicMock(spec=Organization)
-    mock_organization.id = "Str"
-    mock_organization.company_name = "Mock Org 1"
-    mock_organization.company_email = "olawaleisaacjohn@gmail.com"
-    mock_organization.industry = "Technology"
-    mock_organization.organization_type = "Private"
-    mock_organization.country = "Country"
-    mock_organization.state = "State"
-    mock_organization.address = "123 Street"
-    mock_organization.lga = "LGA"
-    mock_organization.created_at = datetime.now()
-    mock_organization.updated_at = datetime.now()
-
-    db_session_mock.query().filter().first.return_value = mock_organization
+    db_session_mock.query().filter().first.return_value = mock_org
 
     response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer testtoken"})
     assert response.status_code == 200
