@@ -1,14 +1,38 @@
 import pytest
 from tests.database import session, client
-from api.v1.models.contact_us import ContactUs
+from api.v1.models import *
 
 # setup the test database
 adabtingMapper = {
     "full_name": "full_name",
     "email": "email",
-    "phone_number": "title",
+    "phone_number": "phone_number",
     "message": "message",
+    "org_id": "org_id",
 }
+
+org_payload = [
+    {
+        "company_name": "Company 1",
+        "company_email": "contact_us@com1.com",
+        "industry": "Tech",
+        "organization_type": "Tech",
+        "country": "Nigeria",
+        "state": "Lagos",
+        "address": "1, Company Street",
+    },
+    {
+        "company_name": "Company 2",
+        "company_email": "contact_us@com2.com",
+        "industry": "Tech",
+        "organization_type": "Tech",
+        "country": "Nigeria",
+        "state": "Lagos",
+        "address": "2, Company Street",
+    },
+]
+
+
 # '{ "full_name": "John Doe","email": "john@gmail.com","phone_number": "Hello","message": "Hello, I am John Doe"}'
 payload = [
     { # all fields are valid
@@ -57,6 +81,21 @@ payload = [
         "status_code": 422, # will be stripped out later
     },
 ]
+
+
+def get_orgs() -> list:
+    orgs = []
+    for org in org_payload:
+        orgs.append(Organization(**org))
+    return orgs
+
+@pytest.fixture(autouse=True)
+def setup_db(session: session) -> pytest.fixture:
+    orgs = get_orgs()
+    session.add_all(orgs)
+    session.commit()
+    for i, p in enumerate(payload):
+        p["org_id"] = orgs[i%2].id
 
 def test_create_new_contact_us_message(client: client, session: session) -> pytest:
     json_payload = payload[0]
