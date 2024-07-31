@@ -1,5 +1,6 @@
 from typing import Optional, Dict, Any
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 
 
 def success_response(status_code: int, message: str, data: Optional[dict] = None):
