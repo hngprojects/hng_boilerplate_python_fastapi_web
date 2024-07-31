@@ -84,7 +84,7 @@ profile_service = ProfileService()
 
 
 
-from api.v1.schemas import UserAndProfileUpdate
+from api.v1.schemas.profile import UserAndProfileUpdate
 
 def update_user_and_profile(db: Session, user_id: int, user_profile: UserAndProfileUpdate) -> User:
     db_user = db.query(User).filter(User.id == user_id).first()
