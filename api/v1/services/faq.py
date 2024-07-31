@@ -7,7 +7,7 @@ from api.utils.db_validators import check_model_existence
 
 
 class FAQService(Service):
-    """Payment service functionality"""
+    '''FAQ service functionality'''
 
     def create(self, db: Session, schema: CreateFAQ):
         """Create a new FAQ"""

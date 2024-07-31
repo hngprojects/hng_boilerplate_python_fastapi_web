@@ -16,10 +16,10 @@ invites = APIRouter(prefix="/invite", tags=["Invitation Management"])
 # generate invitation link to join organization
 @invites.post("/create", tags=["Invitation Management"])
 async def generate_invite_link(
-    invite_schema: invitations.InvitationCreate,
-    request: Request,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(user_service.get_current_user),
+    invite_schema: invitations.InvitationCreate, 
+    request: Request, 
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(user_service.get_current_user)
 ):
     return invite.InviteService.create(invite_schema, request, session)
 
@@ -27,10 +27,10 @@ async def generate_invite_link(
 # Add user to organization
 @invites.post("/accept", tags=["Invitation Management"])
 async def add_user_to_organization(
-    request: Request,
-    user_data: invitations.UserAddToOrganization,
-    session: Session = Depends(get_session),
-    current_user: User = Depends(user_service.get_current_user),
+    request: Request, 
+    user_data: invitations.UserAddToOrganization, 
+    session: Session = Depends(get_session), 
+    current_user: User = Depends(user_service.get_current_user)
 ):
     logging.info("Received request to accept invitation.")
     query_params = parse_qs(urlparse(user_data.invitation_link).query)

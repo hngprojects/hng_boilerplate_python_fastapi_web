@@ -15,9 +15,6 @@ client = TestClient(app)
 def mock_db_session(mocker):
     db_session_mock = mocker.MagicMock(spec=Session)
     app.dependency_overrides[get_db] = lambda: db_session_mock
-    # db_session_mock.user_service = user_service
-    # ``user_service mock`` above is replaced with ``mock_user_service`` 
-    # fixture below, cos it's failing some tests in `test_superadmin`
     return db_session_mock
 
 

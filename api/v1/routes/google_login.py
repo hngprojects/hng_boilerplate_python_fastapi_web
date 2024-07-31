@@ -11,8 +11,6 @@ from api.db.database import get_db
 from api.core.dependencies.google_oauth_config import google_oauth
 from api.v1.services.google_oauth import GoogleOauthServices
 from api.utils.success_response import success_response
-from api.v1.schemas.user import UserCreate
-from api.v1.models.user import User
 from api.v1.schemas.google_oauth import OAuthToken
 from api.v1.services.user import user_service
 from fastapi.encoders import jsonable_encoder
@@ -82,7 +80,8 @@ async def google_oauth2_callback(
         response: contains message, status code, tokens, and user data
                     on success or HttpException if not authenticated,
     """
-    err_message: str = "Authentication Failed"
+    
+    err_message: str = 'Authentication Failed'
     try:
         # For testing purposes
         if config("TESTING") != "TEST":

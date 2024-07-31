@@ -4,8 +4,12 @@
 from uuid_extensions import uuid7
 from fastapi import Depends
 from api.v1.models.associations import Base
-from sqlalchemy import Column, String, DateTime, func
-
+from sqlalchemy import (
+    Column,
+    String,
+    DateTime,
+    func
+)
 
 class BaseTableModel(Base):
     """This model creates helper methods for all models"""

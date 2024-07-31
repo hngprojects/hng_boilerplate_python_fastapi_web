@@ -1,7 +1,12 @@
 """ Associations
 """
-
-from sqlalchemy import Column, ForeignKey, String, Table, DateTime, func, Enum
+from sqlalchemy import (
+        Column,
+        ForeignKey,
+        String,
+        Table,
+        Enum
+    )
 from api.db.database import Base
 
 

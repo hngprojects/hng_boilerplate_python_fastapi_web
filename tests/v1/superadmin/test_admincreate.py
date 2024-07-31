@@ -66,10 +66,6 @@ def test_super_user_creation(data, db_session_mock):
     # Assert that create_user was called with the correct data
    
     db_session_mock.query().filter().first.return_value = data
-    # Attempt to create the same user again (expect a 400 error)
-  
-
-    # Create a user with missing data (expect a 422 error)
 
     data.pop('email')
     invalid_data_response = client.post(url, json=data)

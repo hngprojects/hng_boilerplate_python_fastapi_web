@@ -1,8 +1,8 @@
 import re
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union, List
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 
 
 class UserBase(BaseModel):
@@ -35,6 +35,41 @@ class UserCreate(BaseModel):
             )
         return value
 
+class UserUpdate(BaseModel):
+    
+    first_name : Optional[str] = None
+    last_name : Optional[str] = None
+    email : Optional[str] = None
+class UserData(BaseModel):
+    """
+    Schema for users to be returned to superadmin
+    """
+    id: str
+    email: EmailStr
+    first_name: str
+    last_name: str
+    is_active: bool
+    is_deleted: bool
+    is_verified: bool
+    is_super_admin: bool
+    created_at: datetime
+    updated_at: datetime
+
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AllUsersResponse(BaseModel):
+    """
+    Schema for all users
+    """
+    message: str
+    status_code: int
+    status: str
+    page: int
+    per_page: int
+    total: int
+    data: Union[List[UserData], List[None]]    
 
 class LoginRequest(BaseModel):
     email: EmailStr

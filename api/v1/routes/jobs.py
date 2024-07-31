@@ -51,7 +51,7 @@ async def add_jobs(
     logger.info(f"Job Listing created successfully {new_job.id}")
 
     return success_response(
-        message="Job listing created successfully",
-        status_code=201,
-        data=jsonable_encoder(JobCreateResponseSchema.model_validate(new_job)),
+        message = "Job listing created successfully",
+        status_code = 201,
+        data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
     )

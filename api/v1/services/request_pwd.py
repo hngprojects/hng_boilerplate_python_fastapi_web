@@ -9,8 +9,7 @@ from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas import request_password_reset
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-
-# from api.core.dependencies.email import mail_service
+from api.core.dependencies.email import mail_service
 from passlib.context import CryptContext
 from typing import Optional
 
@@ -59,7 +58,7 @@ class RequestPasswordService:
         base_url = request.base_url
         reset_link = f"{base_url}api/v1/auth/reset-password?token={token}"
 
-        # Send reset_link via email (mocked here)
+        # uncomment when email is working
         # send_email = mail_service.send_mail(email.user_email, "HNG11 password reset link", reset_link)
         # if send_email:
         #     return success_response(
@@ -70,11 +69,10 @@ class RequestPasswordService:
         # return send_email
 
         return success_response(
-            message="Password reset link sent successfully",
-            data={"reset_link": reset_link},
-            status_code=status.HTTP_201_CREATED,
-        )
-        # return {"msg": "Password reset link sent"}
+                message="Password reset link sent successfully",
+                data={"reset_link":reset_link},
+                status_code=status.HTTP_201_CREATED
+            )
 
     @staticmethod
     def process_reset_link(token: str = Query(...), session: Session = Depends(get_db)):
