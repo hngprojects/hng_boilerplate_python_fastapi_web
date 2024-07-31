@@ -1,8 +1,8 @@
 """create squeeze table
 
-Revision ID: 89d4194d744c
-Revises: 69eb297622a4
-Create Date: 2024-07-31 21:18:31.634353
+Revision ID: 085de908c797
+Revises: 70dab65f6844
+Create Date: 2024-08-01 00:05:04.351726
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '89d4194d744c'
-down_revision: Union[str, None] = '69eb297622a4'
+revision: str = '085de908c797'
+down_revision: Union[str, None] = '70dab65f6844'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
