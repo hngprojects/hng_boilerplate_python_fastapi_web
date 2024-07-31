@@ -105,7 +105,7 @@ async def get_all_waitlist_emails(
     admin=Depends(get_super_admin)
 ):
     waitlist_users = waitlist_service.fetch_all(db)
-    emails = [user.email for user in waitlist_users]
+    emails = [{"email": user.email, "full_name": user.full_name} for user in waitlist_users]
 
     return success_response(
         message="Waitlist retrieved successfully",

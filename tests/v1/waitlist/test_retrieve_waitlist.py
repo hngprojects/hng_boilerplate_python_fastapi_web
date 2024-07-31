@@ -48,15 +48,18 @@ class TestWaitlistEndpoint:
     def test_get_all_waitlist_emails_success(self, mock_service, client):
         print("Current Dependency Override for get_super_admin:", app.dependency_overrides.get(get_super_admin))
         mock_service.return_value = [
-            MagicMock(email="test@example.com"),
-            MagicMock(email="duplicate@example.com")
+            MagicMock(email="test@example.com", full_name="Test User"),
+            MagicMock(email="duplicate@example.com", full_name="Duplicate User")
         ]
 
         response = client.get("/api/v1/waitlists/users")
 
         assert response.status_code == 200
         assert response.json()["message"] == "Waitlist retrieved successfully"
-        assert response.json()["data"] == ["test@example.com", "duplicate@example.com"]
+        assert response.json()["data"] == [
+            {"email": "test@example.com", "full_name": "Test User"},
+            {"email": "duplicate@example.com", "full_name": "Duplicate User"}
+        ]
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_get_all_waitlist_emails_non_superadmin(mock_user_service: UserService, mock_db_session: Session, client: httpx.Client):
