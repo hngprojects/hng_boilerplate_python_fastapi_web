@@ -13,7 +13,7 @@ from api.v1.services.organization import organization_service
 from api.v1.schemas.organization import OrganizationBase
 from api.v1.services.organization import organization_service
 from api.v1.services.user import user_service, oauth2_scheme
-
+from typing import Annotated
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
@@ -75,4 +75,14 @@ async def update_organization(
         status_code=status.HTTP_200_OK,
         message='Organization updated successfully',
         data=jsonable_encoder(updated_organization)
+    )
+
+
+@organization.get("", status_code=status.HTTP_200_OK)
+def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
+    orgs = organization_service.fetch_all(db)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Retrived all organizations information Successfully",
+        data = jsonable_encoder(orgs)
     )
