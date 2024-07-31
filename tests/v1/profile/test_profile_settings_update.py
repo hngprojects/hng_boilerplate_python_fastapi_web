@@ -28,6 +28,8 @@ sample_user_and_profile_update = {
 @patch("api.v1.services.user.user_service.get_current_user", return_value=sample_user)
 # Mock get_db to provide a mock session
 @patch("api.db.database.get_db")
+
+@pytest.fixture
 def test_update_profile_settings(mock_get_db, mock_get_current_user):
     # Mocking the db session and the update_user_and_profile function
     mock_session = MagicMock(spec=Session)
@@ -48,6 +50,7 @@ def test_update_profile_settings(mock_get_db, mock_get_current_user):
     assert response.json()["user"]["email"] == sample_user_and_profile_update["email"]
     assert response.json()["user"]["preferences"]["newsletter"] == sample_user_and_profile_update["preferences"]["newsletter"]
 
+@pytest.fixture
 def test_update_profile_user_not_found():
     # Mock get_current_user to return a sample authenticated user
     with patch("api.v1.services.user.user_service.get_current_user", return_value=sample_user):
