@@ -125,8 +125,6 @@ def mock_dependencies():
 
 
 
-
-
 def test_create_notification_success(client, mock_dependencies):
     mock_db, mock_user, mock_create_notification = mock_dependencies
 
@@ -135,9 +133,9 @@ def test_create_notification_success(client, mock_dependencies):
         "message": "Test Message"
     }
 
-    access_token = generate_access_token(mock_user.id)
+    # Generate a token using the actual method for creating a token
+    access_token = user_service.create_access_token(str(mock_user.id))
     print(f"Generated Access Token: {access_token}")
-    print(f"Mock User ID: {mock_user.id}")
 
     headers = {"Authorization": f"Bearer {access_token}"}
     response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
@@ -145,6 +143,7 @@ def test_create_notification_success(client, mock_dependencies):
     response_json = response.json()
     print(f"Response JSON: {response_json}")
 
+    # Check if 'data' key exists in the response
     if 'data' not in response_json:
         print("The 'data' key is missing from the response.")
         print("Response JSON:", response_json)
@@ -162,6 +161,7 @@ def test_create_notification_success(client, mock_dependencies):
         }
     }
 
+    # Assert response content
     if 'data' in response_json:
         assert response_json['data']['id'] == expected_response['data']['id']
         assert response_json['data']['user_id'] == expected_response['data']['user_id']
