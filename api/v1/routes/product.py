@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 from fastapi import Depends, APIRouter, HTTPException, status, Query
+=======
+
+from fastapi import Depends, APIRouter, status, Query,  HTTPException
+>>>>>>> 28fe5303d498b2355320d7f95825c3c44b2136fd
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -9,6 +14,7 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service
+<<<<<<< HEAD
 from api.v1.schemas.product import (
     ProductCreate,
     ProductFilterResponse,
@@ -17,6 +23,10 @@ from api.v1.schemas.product import (
     ResponseModel,
     SuccessResponse,
 )
+=======
+from api.v1.schemas.product import ProductList, ProductList
+from api.v1.schemas.product import ProductUpdate, ResponseModel, ProductFilterResponse, SuccessResponse
+>>>>>>> 28fe5303d498b2355320d7f95825c3c44b2136fd
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
