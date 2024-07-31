@@ -106,7 +106,6 @@ def update_user(user_id : str,
                 schema : UserUpdate,
                 db : Session = Depends(get_db)
                ):
-    
     user = user_service.update(db=db, schema=schema, id=user_id, current_user=current_user)
 
     return success_response(
