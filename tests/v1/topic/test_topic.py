@@ -95,9 +95,10 @@ def test_update_topic(
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     data = {
+        "id": test_topic.id,
         "title": "Uploading profile picture."
     }
-    response = client.patch(f"/api/v1/help-center/topics?id={test_topic.id}", headers=headers, json=data)    
+    response = client.patch(f"/api/v1/help-center/topics", headers=headers, json=data)    
     assert response.status_code == 200
 
 def test_delete_topic(
@@ -118,8 +119,8 @@ def test_delete_topic(
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.delete(f"/api/v1/help-center/topics?id={test_topic.id}", headers=headers)    
-    assert response.status_code == 200
+    response = client.request("DELETE",f"/api/v1/help-center/topics", headers=headers, json={"id":test_topic.id})    
+    assert response.status_code == 204
 
 def test_search_topic(
     mock_db_session, 
@@ -137,11 +138,8 @@ def test_search_topic(
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
-    response = client.get(f"/api/v1/help-center/topics/search?search_query={test_topic.id}")    
-    if response.status_code != 200:
-        assert response.status_code == 404, f"Expected status code 200, got {response.status_code}"
-    else:
-        assert response.status_code == 200
+    response = client.request("GET","/api/v1/help-center/search", json={"query":test_topic.title})    
+    assert response.status_code == 200
 
 def test_fetch_a_topic(
     mock_db_session, 
@@ -160,7 +158,7 @@ def test_fetch_a_topic(
     
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
-    response = client.get(f"/api/v1/help-center/topics/{test_topic.id}")
+    response = client.request("GET", f"/api/v1/help-center/topic/{test_topic.id}")
     if response.status_code != 200:
         assert response.status_code == 404, f"Expected status code 200, got {response.status_code}"
     else:
