@@ -1,4 +1,4 @@
-# app/models/message.py
+
 from sqlalchemy import Column, String, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
