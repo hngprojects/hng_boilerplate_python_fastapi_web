@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, status, Query
+from fastapi import Depends, APIRouter, HTTPException, status, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -8,10 +8,12 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product
 from api.v1.services.product import product_service
-from api.v1.schemas.product import ProductList
+from api.v1.schemas.product import ProductCreate, ProductList
 from api.v1.schemas.product import ProductUpdate, ResponseModel
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
+from api.v1.services.organization import organization_service
+from api.v1.services.product_category import product_category_service
 from api.v1.models import User
 
 product = APIRouter(prefix="/products", tags=["Products"])
@@ -146,3 +148,38 @@ def delete_product(
     """
 
     product_service.delete(db=db, id=id, current_user=current_user)
+
+
+@product.post('/', status_code=status.HTTP_201_CREATED, response_model=success_response)
+async def create_product(
+    product_data: ProductCreate,
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Session = Depends(get_db),
+):
+    """
+    Endpoint to create a new product.
+    
+    This endpoint ensures that:
+    - The organization exists.
+    - The product category exists.
+    - The user is authorized to create a product in the given organization.
+    """
+    
+    # Validate organization existence and user's association with it
+    organization = organization_service.fetch(db, product_data.org_id)
+    if not organization:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
+
+    # Validate product category existence
+    category = product_category_service.fetch(db=db, id=product_data.category_id)
+    if not category:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product category not found")
+    
+    # Create the product using the product service
+    new_product = product_service.create(db, product_data)
+    
+    return success_response(
+        status_code=201,
+        message="Product successfully created",
+        data=jsonable_encoder(new_product)
+    )
