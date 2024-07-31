@@ -10,8 +10,11 @@ from main import app
 from api.v1.routes.blog import get_db
 from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
+from api.utils.dependencies import get_current_user
 from api.v1.models.user import User
 from api.v1.services.notification import NotificationCreate
+from api.v1.models.notifications import Notification
+from api.v1.schemas.notification import ResponseModel, NotificationCreate
 
 
 # Mock database dependency
