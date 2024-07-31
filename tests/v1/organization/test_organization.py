@@ -59,6 +59,11 @@ def test_get_organization_success(db_session_mock, mock_get_current_user):
     assert data["data"]["id"] == 1
     assert data["data"]["company_name"] == "Mock Org 1"
     assert data["data"]["company_email"] == "contact@mockorg1.com"
+    assert data["data"]["industry"] == "Technology"
+    assert data["data"]["organization_type"] == "Private"
+    assert data["data"]["state"] == "State"
+    assert data["data"]["address"] == "123 Street"
+    assert data["data"]["lga"] == "LGA"
 
 def test_get_organization_not_found(db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = None
