@@ -103,8 +103,8 @@ class OrganizationService(Service):
     def delete(self, db: Session, id: str):
         '''Deletes a product'''
         
-        product = self.fetch(db, id=id)
-        db.delete(product)
+        organization = self.fetch(db, id=id)
+        db.delete(organization)
         db.commit()
 
     

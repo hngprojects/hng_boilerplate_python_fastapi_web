@@ -74,4 +74,4 @@ async def delete_organization(org_id: str, db: Session = Depends(get_db),
         organization_service.delete(db, id=org_id)
         return success_response(
             status_code=status.HTTP_200_OK,
-            message='Organization deleted successfully',)
+            message='Organization with ID {org_id} deleted successfully')
