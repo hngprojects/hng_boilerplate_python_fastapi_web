@@ -49,6 +49,7 @@ class RemoveUserFromOrganization(BaseModel):
 
     user_id: str
     org_id: str 
+    
 
 
 class AddUserToOrganization(BaseModel):
