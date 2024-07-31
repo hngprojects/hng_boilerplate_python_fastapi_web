@@ -1,4 +1,5 @@
 from typing import Any, Optional
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.notifications import NotificationSetting
@@ -10,10 +11,14 @@ from api.utils.db_validators import check_model_existence
 class NotificationSettingService(Service):
     '''Notification settings service functionality'''
 
-    def create(self, db: Session, user: User):
+    def create(self, db: Session, user: User, schema: NotificationSettingsBase):
         '''Create a new notification setting for a user'''
 
-        new_setting = NotificationSetting(user_id=user.id)
+        existing_settings = db.query(NotificationSetting).filter(NotificationSetting.user_id == user.id).first()
+        if existing_settings:
+           self.update(db=db, user_id=user.id, schema=schema)
+           
+        new_setting = NotificationSetting(user_id=user.id, **schema.dict())
         db.add(new_setting)
         db.commit()
         db.refresh(new_setting)
