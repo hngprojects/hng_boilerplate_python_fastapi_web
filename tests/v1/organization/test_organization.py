@@ -26,13 +26,15 @@ def mock_get_current_user():
     )
 
 client = TestClient(app)
-
-# Mock data
-MOCK_ORGANIZATIONS = [
-    Organization(id=1, name="Mock Org 1", description="A test organization", created_at="2023-01-01T12:00:00Z", updated_at="2023-06-01T12:00:00Z"),
-    Organization(id=2, name="Mock Org 2", description="Another test organization", created_at="2023-02-01T12:00:00Z", updated_at="2023-07-01T12:00:00Z"),
-]
-
+def MOCK_ORGANIZATIONS():
+    return Organization(
+        id=str(uuid7()),
+        company_name="Test Organization",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    
+    
 @pytest.fixture
 def override_get_db():
     # This will be our "mock" database session
