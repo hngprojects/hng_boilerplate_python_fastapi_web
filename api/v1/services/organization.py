@@ -71,6 +71,7 @@ class OrganizationService(Service):
             raise HTTPException(status_code=404, detail="Organization not found")
         return OrganizationBase.from_orm(Organization)
 
+
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
         try:
             stmt = select(user_organization_association.c.role).where(
