@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.product import Product, ProductFilterStatusEnum
+from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.models.user import User
 from api.v1.models import Organization
 from api.utils.db_validators import check_user_in_org
@@ -66,8 +66,20 @@ class ProductService(Service):
     
     def fetch_by_filter_status(self, db: Session, filter_status: ProductFilterStatusEnum):
         '''Fetch products by filter status'''
-        products = db.query(Product).filter(Product.filter_status == filter_status.value).all()
-        return [ProductFilterResponse.from_orm(product) for product in products]
+        try:
+            products = db.query(Product).filter(Product.filter_status == filter_status.value).all()
+            return [ProductFilterResponse.from_orm(product) for product in products]
+        except Exception as e:
+            raise
+    
+    def fetch_by_status(self, db: Session, status: ProductStatusEnum):
+        '''Fetch products by filter status'''
+        try:
+            products = db.query(Product).filter(Product.status == status.value).all()
+            response_data = [ProductFilterResponse.from_orm(product) for product in products]
+            return response_data
+        except Exception as e:
+            raise
 
     def update(self, db: Session, id: str, schema):
         """Updates a product"""
