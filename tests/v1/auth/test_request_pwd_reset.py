@@ -1,18 +1,10 @@
-import sys
-import os
-import warnings
 from unittest.mock import patch, MagicMock
 import pytest
 from fastapi.testclient import TestClient
 from datetime import datetime, timezone
-from fastapi import Request
 from api.v1.models.user import User
-from api.v1.services.request_pwd import reset_service
 from api.db.database import get_db
 from sqlalchemy.exc import SQLAlchemyError
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from main import app
 

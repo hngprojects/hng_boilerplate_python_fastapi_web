@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Dict, Any
 from fastapi.responses import JSONResponse
 
 
@@ -10,8 +10,8 @@ def success_response(status_code: int, message: str, data: Optional[dict] = None
         "success": True,
         "message": message
     }
-
-    if data:
+    
+    if data is not None:
         response_data['data'] = data
 
     return JSONResponse(

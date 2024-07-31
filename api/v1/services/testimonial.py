@@ -2,15 +2,25 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.testimonial import Testimonial
+from api.v1.models.user import User
+from api.v1.schemas.testimonial import CreateTestimonial
 
 
 
 class TestimonialService(Service):
     '''Product service functionality'''
 
-    def create(self, db: Session,  schema):
+    def create(self, db: Session,  user: User, data: CreateTestimonial):
         '''Create testimonial'''
-        pass
+        new_testimonial = Testimonial(
+            content=data.content,
+            ratings=data.ratings,
+            author_id=user.id
+        )
+        db.add(new_testimonial)
+        db.commit()
+        db.refresh(new_testimonial)
+        return new_testimonial
 
 
     def fetch_all(self, page :int , page_size : int, db: Session):
