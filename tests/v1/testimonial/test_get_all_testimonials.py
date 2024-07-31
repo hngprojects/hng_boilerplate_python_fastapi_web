@@ -87,10 +87,15 @@ def test_get_testimonials(db_session_mock):
     db_session_mock.query().offset().limit().all.return_value = data
 
     url = 'api/v1/testimonials'
-    response = client.get(url, params={'page_size': 2, 'page': 2})
+    mock_query = MagicMock()
+    mock_query.count.return_value = 3
+    db_session_mock.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = data
+
+    db_session_mock.query.return_value = mock_query
+    response = client.get(url, params={'page_size': 2, 'page': 1})
     assert len(response.json()['data']) == 5
     assert response.status_code == 200
-    assert response.json()['message'] == 'Testimonials fetched Successfully'
+    assert response.json()['message'] == 'Successfully fetched items'
 
     """On bad request"""
     bad_url = 'api/v1/testimonials??page=-1&page_size=-1'

@@ -29,7 +29,7 @@ def get_testimonials(
         db=db,
         model=Testimonial,
         limit=page_size,
-        skip=(page - 1) * page_size,
+        skip=max((page - 1),2) * page_size,
     )
 
 
