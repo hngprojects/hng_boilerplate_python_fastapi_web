@@ -5,6 +5,7 @@ from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.profile import Profile
 from api.v1.schemas.profile import ProfileCreateUpdate
+from api.v1.models.user import User
 
 
 class ProfileService(Service):
@@ -79,5 +80,34 @@ class ProfileService(Service):
         db.commit()
 
 profile_service = ProfileService()
+
+
+
+
+from api.v1.schemas import UserAndProfileUpdate
+
+def update_user_and_profile(db: Session, user_id: int, user_profile: UserAndProfileUpdate) -> User:
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if db_user:
+        # Update User fields
+        user_data = user_profile.dict(exclude_unset=True, include={"first_name", "last_name", "email", "preferences"})
+        for key, value in user_data.items():
+            setattr(db_user, key, value)
+        
+        # Update Profile fields
+        profile_data = user_profile.dict(exclude_unset=True, exclude={"first_name", "last_name", "email", "preferences"})
+        db_profile = db_user.profile
+        if db_profile:
+            for key, value in profile_data.items():
+                setattr(db_profile, key, value)
+        else:
+            db_profile = Profile(user_id=user_id, **profile_data)
+            db.add(db_profile)
+        
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    return None
+
 
     

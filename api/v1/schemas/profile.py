@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, field_validator
-from typing import Optional
+from typing import Optional, Dict
 import re
 from api.v1.schemas.user import UserBase
 
@@ -38,3 +38,23 @@ class ProfileCreateUpdate(BaseModel):
             raise ValueError('Please use a valid phone number format')
         return value
   
+
+
+class UserProfileUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    preferences: Optional[Dict[str, Optional[str]]] = None
+
+class ProfileUpdate(BaseModel):
+    pronouns: Optional[str] = None
+    job_title: Optional[str] = None
+    department: Optional[str] = None
+    social: Optional[str] = None
+    bio: Optional[str] = None
+    phone_number: Optional[str] = None
+    avatar_url: Optional[str] = None
+    recovery_email: Optional[EmailStr] = None
+
+class UserAndProfileUpdate(UserProfileUpdate, ProfileUpdate):
+    pass

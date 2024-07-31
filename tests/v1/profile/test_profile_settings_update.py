@@ -3,15 +3,12 @@ from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 from sqlalchemy.orm import Session
 from main import app
-from api.v1.schemas import UserAndProfileUpdate, success_response
-from api.v1.models import User
-from api.v1.services.user_service import get_current_user
-from api.v1.routes.settings import update_profile_settings
+from api.v1.models.user import User
 
-# Create a TestClient instance for testing the FastAPI app
+
 client = TestClient(app)
 
-# Define a sample user and profile data
+
 sample_user = {
     "id": "123",
     "username": "johndoe",
@@ -40,7 +37,7 @@ def test_update_profile_settings(mock_get_db, mock_get_current_user):
 
     # Send the PATCH request to the endpoint
     response = client.patch(
-        "/api/v1/users",
+        "/api/v1/users/settings",
         json=sample_user_and_profile_update
     )
 
@@ -63,7 +60,7 @@ def test_update_profile_user_not_found():
 
             # Send the PATCH request to the endpoint
             response = client.patch(
-                "/api/v1/users",
+                "/api/v1/users/settings",
                 json=sample_user_and_profile_update
             )
 
