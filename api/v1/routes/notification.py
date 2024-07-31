@@ -36,6 +36,8 @@ async def create_notification(
             "created_at": created_notification.created_at
         }
         
+        
+        
         response = {
             "success": True,
             "status_code": 200,
