@@ -27,3 +27,6 @@ class UpdateSqueeze(BaseModel):
     sub_headline: str = None
     body: str = None
     full_name: str = None
+
+class FilterSqueeze(BaseModel):
+    status: SqueezeStatusEnum = None

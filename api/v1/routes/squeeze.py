@@ -4,7 +4,7 @@ from api.db.database import get_db
 from api.core.responses import SUCCESS
 from api.utils.success_response import success_response
 from api.v1.services.squeeze import squeeze_service
-from api.v1.schemas.squeeze import CreateSqueeze, UpdateSqueeze
+from api.v1.schemas.squeeze import CreateSqueeze, UpdateSqueeze, FilterSqueeze
 from api.v1.services.user import user_service
 from api.v1.models import *
 
@@ -38,3 +38,27 @@ def update_squeeze(
     if squeeze:
         return success_response(status.HTTP_200_OK, SUCCESS, squeeze.to_dict())
     return success_response(status.HTTP_404_NOT_FOUND, "Squeeze page not found!")
+
+@squeeze.get("", response_model=success_response, status_code=200)
+def get_all_squeeze(
+    filter: FilterSqueeze = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Get all squeeze pages"""
+    squeeze_pages = squeeze_service.fetch_all(db, filter)
+    return success_response(status.HTTP_200_OK, SUCCESS, squeeze_pages)
+
+
+@squeeze.get("/{squeeze_id}", response_model=success_response, status_code=200)
+def get_squeeze(
+    squeeze_id: str,
+    filter: FilterSqueeze = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Get a squeeze page"""
+    squeeze_page = squeeze_service.fetch(db, squeeze_id, filter)
+    if not squeeze_page:
+        return success_response(status.HTTP_404_NOT_FOUND, "Squeeze page not found!")
+    return success_response(status.HTTP_200_OK, SUCCESS, squeeze_page)

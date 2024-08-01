@@ -3,7 +3,6 @@ import os
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
@@ -15,7 +14,7 @@ from api.utils.json_response import JsonResponseDict
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
 from api.utils.logger import logger
-from api.core.dependencies.email_service import send_email
+from api.core.dependencies.email_sender import send_email
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 
@@ -25,14 +24,8 @@ async def lifespan(app: FastAPI):
     yield
 
 
-# Directory to save images
-IMAGE_DIR = "media"
-if not os.path.exists(IMAGE_DIR):
-    os.makedirs(IMAGE_DIR)
-
-
 app = FastAPI(lifespan=lifespan)
-app.mount("/media/images", StaticFiles(directory=IMAGE_DIR), name="mediafiles")
+
 
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
