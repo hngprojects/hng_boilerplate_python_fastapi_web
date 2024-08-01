@@ -120,7 +120,6 @@ def get_organization(
         }
 
     return {
-        "status_code": status.HTTP_200_OK,
         "message": "Retrieved organization successfully",
         "data": jsonable_encoder(organization),
         "success": True
