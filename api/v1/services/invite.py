@@ -3,12 +3,11 @@ from datetime import datetime, timedelta
 from pytz import utc
 from sqlalchemy.orm import Session
 from sqlalchemy import insert
-from fastapi import HTTPException, Request, Depends, status, BackgroundTasks
+from fastapi import HTTPException, Request, Depends, status
 from collections import OrderedDict
 from fastapi.responses import JSONResponse
 from api.v1.models.invitation import Invitation
 from api.v1.models.organization import Organization
-from api.v1.services.email_services import EmailService 
 from api.v1.models.user import User
 from api.v1.models.associations import user_organization_association
 from api.v1.schemas import invitations
@@ -17,8 +16,8 @@ from urllib.parse import urlencode
 
 class InviteService:
     @staticmethod
-    async def create(
-        invite: invitations.InvitationCreate, request: Request, session: Session, background_tasks: BackgroundTasks
+    def create(
+        invite: invitations.InvitationCreate, request: Request, session: Session
     ):
 
         user_email = session.query(User).filter_by(email=invite.user_email).first()
@@ -56,18 +55,6 @@ class InviteService:
 
         base_url = request.base_url
         invite_link = f'{base_url}api/v1/invite/accept?{urlencode({"invitation_id": str(new_invite.id)})}'
-
-        # Sending the email
-        email_service = EmailService()
-        subject = "HNG11 Password Reset"
-        body = f"Please click on this link to join your organization: {invite_link}"
-        await email_service.send_email(
-            background_tasks=background_tasks,
-            to_email=user_email,
-            subject=subject,
-            body=body,
-            from_name="HNG11 Support"
-        )
 
         response = {
             "message": "Invitation link created successfully",

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from urllib.parse import urlparse, parse_qs
 from api.v1.schemas import invitations
@@ -15,14 +15,13 @@ invites = APIRouter(prefix="/invite", tags=["Invitation Management"])
 
 # generate invitation link to join organization
 @invites.post("/create", tags=["Invitation Management"])
-async def generate_invite_link( 
+async def generate_invite_link(
     invite_schema: invitations.InvitationCreate, 
     request: Request, 
-    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session), 
-    current_user: User = Depends(user_service.get_current_user), 
+    current_user: User = Depends(user_service.get_current_user)
 ):
-    return await invite.InviteService.create(invite_schema, request, session, background_tasks)
+    return invite.InviteService.create(invite_schema, request, session)
 
 
 # Add user to organization
