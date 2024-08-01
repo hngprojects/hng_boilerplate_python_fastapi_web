@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}New ActivationLink Sent{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/new-activation-link.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">New Activation Link Sent</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      We have sent you a new activation link for your Boilerplate account.
+      Please click the button below to activate your account:
+    </p>
+
+    <button class="template-btn">Send Another Activation Link</button>
+
+    <div class="template-farewell">
+      <p>Regards,</p>
+      <p>Boilerplate</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
