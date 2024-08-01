@@ -65,7 +65,7 @@ def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_
         data = jsonable_encoder(orgs)
     )
 
-@organization.delete("/{org_id}")
+@organization.delete("superadmin/{org_id}")
 async def delete_organization(org_id: str, db: Session = Depends(get_db), 
                         current_user: User = Depends(user_service.get_current_super_admin),
 ):
