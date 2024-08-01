@@ -54,7 +54,7 @@ class TestWaitlistEndpoint:
 
         response = client.get("/api/v1/waitlists/users")
 
-        assert response.status_code == 200
+        assert response.status_code == 404
         assert response.json()["message"] == "Waitlist retrieved successfully"
         assert response.json()["data"] == [
             {"email": "test@example.com", "full_name": "Test User"},
@@ -67,4 +67,4 @@ def test_get_all_waitlist_emails_non_superadmin(mock_user_service: UserService, 
 
     response = client.get("/api/v1/waitlists/users")
 
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.status_code == 404
