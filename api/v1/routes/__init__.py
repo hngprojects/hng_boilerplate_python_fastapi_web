@@ -27,7 +27,9 @@ from tests.run_all_test import test_router
 
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
+from api.v1.routes.regions import regions
 from api.v1.routes.api_tests import test_router
+from api.v1.routes.squeeze import squeeze
 
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -57,4 +59,6 @@ api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(testimonial)
+api_version_one.include_router(regions)
 api_version_one.include_router(test_router)
+api_version_one.include_router(squeeze)

@@ -24,10 +24,10 @@ class Settings(BaseSettings):
     DB_TYPE: str = config("DB_TYPE")
 
     MAIL_USERNAME: str = config("MAIL_USERNAME")
-    MAIL_PASSWORD: str = config('MAIL_PASSWORD')
-    MAIL_FROM: str = config('MAIL_FROM')
-    MAIL_PORT: int = config('MAIL_PORT')
-    MAIL_SERVER: str = config('MAIL_SERVER')
+    MAIL_PASSWORD: str = config("MAIL_PASSWORD")
+    MAIL_FROM: str = config("MAIL_FROM")
+    MAIL_PORT: int = config("MAIL_PORT")
+    MAIL_SERVER: str = config("MAIL_SERVER")
 
     FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
 

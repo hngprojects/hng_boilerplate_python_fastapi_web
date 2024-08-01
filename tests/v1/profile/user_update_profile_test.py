@@ -15,14 +15,14 @@ import jwt
 client = TestClient(app)
 
 
-# Mock the database dependency
+
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock()
     yield db_session
 
 
-# Override the dependency with the mock
+
 @pytest.fixture(autouse=True)
 def override_get_db(db_session_mock):
     def get_db_override():
@@ -144,8 +144,6 @@ def test_success_profile_update(
         json=jsonable_encoder(profile_update),
         headers={"Authorization": f"Bearer {token}"},
     )
-
-    print("Update response:", response.json())  # Debugging output
 
     assert response.status_code == 200
     assert response.json()["data"]["bio"] == "Updated bio"
