@@ -1,26 +1,29 @@
-from typing import List, Annotated
-
-from fastapi import APIRouter, Depends, HTTPException, status, HTTPException, Response
+from fastapi import (
+    APIRouter, Depends, HTTPException, status, 
+    HTTPException, Response, Request
+)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 from api.db.database import get_db
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.models.blog import Blog, BlogDislike
+from api.v1.models.blog import Blog, BlogDislike, BlogLike
 from api.v1.schemas.blog import (
     BlogCreate,
     BlogPostResponse,
     BlogRequest,
     BlogUpdateResponseModel,
-    BlogDislikeResponse,
+    BlogLikeDislikeResponse
 )
 from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
 from api.v1.services.comment import comment_service
 from api.v1.services.comment import CommentService
+from api.utils.client_helpers import get_ip_address
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -105,7 +108,50 @@ async def update_blog(
     )
 
 
-@blog.put("/{blog_id}/dislike", response_model=BlogDislikeResponse)
+@blog.put("/{blog_id}/like", response_model=BlogLikeDislikeResponse)
+def like_blog_post(
+    blog_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+
+    blog_service = BlogService(db)
+    # print(current_user)
+
+    # GET blog post
+    blog_p = blog_service.fetch(blog_id)
+    if not isinstance(blog_p, Blog):
+        raise HTTPException(
+            detail="Post not found", status_code=status.HTTP_404_NOT_FOUND
+        )
+
+    # CONFIRM current user has NOT liked before
+    existing_like = blog_service.fetch_blog_like(blog_p.id, current_user.id)
+    if isinstance(existing_like, BlogLike):
+        raise HTTPException(
+            detail="You have already liked this blog post",
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    # UPDATE ikes
+    new_like = blog_service.create_blog_like(
+        db, blog_p.id, current_user.id, ip_address=get_ip_address(request))
+
+    if not isinstance(new_like, BlogLike):
+        raise HTTPException(
+            detail="Unable to record like.", status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    # Return success response
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Like recorded successfully.",
+        data=new_like.to_dict(),
+    )
+
+
+@blog.put("/{blog_id}/dislike", response_model=BlogLikeDislikeResponse)
 def dislike_blog_post(
     blog_id: str,
     db: Session = Depends(get_db),
