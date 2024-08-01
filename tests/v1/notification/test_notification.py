@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
-from ....main import app
+from main import app
 from api.v1.routes.blog import get_db
 from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
@@ -75,7 +75,7 @@ def test_mark_notification_as_read(client, db_session_mock):
     assert response.status_code == 200
     assert response.json()["success"] == True
     assert response.json()["status_code"] == 200
-    assert response.json()["message"] == "Notifcation marked as read"
+    assert response.json()["message"] == "Notification marked as read"
 
 
 def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock):
