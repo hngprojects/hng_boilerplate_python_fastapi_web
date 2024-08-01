@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 
+
 class NotificationBase(BaseModel):
     id: str
     title: str
@@ -28,4 +29,8 @@ class NotificationRead(NotificationBase):
     updated_at: datetime
     class Config:
         orm_mode = True
+
+    status: str
+
+
 
