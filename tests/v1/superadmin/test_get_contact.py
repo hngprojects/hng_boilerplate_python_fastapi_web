@@ -56,7 +56,7 @@ def test_get_message(mock_db_session, test_message, access_token_admin, test_adm
 
     headers = {'Authorization': f'Bearer {access_token_admin}'}
 
-    response = client.get(f"/api/v1/contact/messages/{test_message.id}", headers=headers)
+    response = client.get(f"/api/v1/contact/{test_message.id}", headers=headers)
     assert response.status_code == 200
     assert response.json()['data']['full_name'] == test_message.full_name
     assert response.json()['data']['email'] == test_message.email
@@ -71,7 +71,7 @@ def test_invalid_id(mock_db_session, test_message, access_token_admin, test_admi
 
     headers = {'Authorization': f'Bearer {access_token_admin}'}
 
-    response = client.get(f"/api/v1/contact/messages/invalid_id", headers=headers)
+    response = client.get(f"/api/v1/contact/invalid_id", headers=headers)
     assert response.status_code == 404
 
 
@@ -81,5 +81,5 @@ def test_unauthorized(mock_db_session, test_message, test_admin):
     mock_db_session.query.return_value.filter_by.return_value.first.side_effect = [test_message]
     mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
 
-    response = client.get(f"/api/v1/contact/messages/{test_message.id}")
+    response = client.get(f"/api/v1/contact/{test_message.id}")
     assert response.status_code == 401  # Expecting 401 Unauthorized

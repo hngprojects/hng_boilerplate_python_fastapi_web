@@ -13,14 +13,14 @@ contact = APIRouter(prefix="/contact", tags=['contact'])
 
 @contact.get('/{id}', response_model=AdminGet200Response, status_code=status.HTTP_200_OK)
 def get_contact(
-        message_id: str,
+        id: str,
         current_admin: User = Depends(user_service.get_current_super_admin),
         db: Session = Depends(get_db),
 ):
 
     contact_message = ContactMessage()
 
-    message = contact_message.fetch_message(db, message_id)
+    message = contact_message.fetch_message(db, id)
 
     contact_message.check_admin_access(db, current_admin.id, message.org_id)
 
