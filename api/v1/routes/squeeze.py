@@ -4,7 +4,7 @@ from api.db.database import get_db
 from api.core.responses import SUCCESS
 from api.utils.success_response import success_response
 from api.v1.services.squeeze import squeeze_service
-from api.v1.schemas.squeeze import CreateSqueeze
+from api.v1.schemas.squeeze import CreateSqueeze, UpdateSqueeze
 from api.v1.services.user import user_service
 from api.v1.models import *
 
