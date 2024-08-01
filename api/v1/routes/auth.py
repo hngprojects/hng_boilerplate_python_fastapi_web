@@ -32,16 +32,16 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
     # Send email in the background
-    background_tasks.add_task(
-        send_email, 
-        recipient=user.email,
-        template_name='welcome.html',
-        subject='Welcome to HNG Boilerplate',
-        context={
-            'first_name': user.first_name,
-            'last_name': user.last_name
-        }
-    )
+    # background_tasks.add_task(
+    #     send_email, 
+    #     recipient=user.email,
+    #     template_name='welcome.html',
+    #     subject='Welcome to HNG Boilerplate',
+    #     context={
+    #         'first_name': user.first_name,
+    #         'last_name': user.last_name
+    #     }
+    # )
 
     response = success_response(
         status_code=201,
