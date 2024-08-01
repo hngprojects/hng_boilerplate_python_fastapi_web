@@ -12,6 +12,9 @@ class ReplyService(Service):
     def create(self, db: Session, schema: ReplyCreate):
         """
         """
-        pass
-
-
+        reply = Reply(**schema.model_dump())
+        db.add(reply)
+        db.commit()
+        db.refresh(reply)
+        
+        return reply
