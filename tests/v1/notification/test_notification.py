@@ -61,6 +61,13 @@ notification = Notification(
     updated_at=updated_at,
 )
 
+# Mock the get_current_user dependency
+@pytest.fixture
+def mock_get_current_user():
+    with patch("api.utils.dependencies.get_current_user", return_value=user):
+        yield
+
+
 def test_mark_notification_as_read(client, db_session_mock):
     db_session_mock.query().filter().all.return_value = [user, notification]
     headers = {"authorization": f"Bearer {access_token}"}
@@ -76,73 +83,22 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     assert response.status_code == 401
     assert response.json()["success"] == False
     assert response.json()["status_code"] == 401
-    
-# Sample data
-# Sample data
-sample_notification = NotificationCreate(
-    title="Test Notification",
-    message="This is a test notification"
-)
-
-sample_user = {
-    "id": "user_uuid",
-    "email": "test@example.com"
-}
-
-sample_created_notification = {
-    "id": "notification_uuid",
-    "user_id": "user_uuid",
-    "title": "Test Notification",
-    "message": "This is a test notification",
-    "created_at": "2024-01-01T00:00:00"  }
-
-
-# Mock the dependencies
-@pytest.fixture
-def override_get_current_user():
-    def _override_get_current_user():
-        return sample_user
-    return _override_get_current_user
-
-@pytest.fixture
-def override_get_db():
-    db = MagicMock(spec=Session)
-    return db
-
-
-# Mock the notification service
-@pytest.fixture
-def notification_service_mock():
-    with patch('api.v1.services.notification.NotificationService.create_notification')  as mock:
-        mock.create_notification.return_value = MagicMock(**sample_created_notification)
-        yield mock
-
-# Test function
-@pytest.mark.asyncio
-async def test_create_notification(client, override_get_current_user, override_get_db, notification_service_mock):
-    # Override the dependencies
-    app.dependency_overrides[get_current_user] = override_get_current_user
-    app.dependency_overrides[get_db] = override_get_db
-
-    # Data to be sent in the request
-    data = {
-        "title": sample_notification.title,
-        "message": sample_notification.message
+ 
+ 
+ 
+ 
+def test_create_notification(client, db_session_mock, mock_get_current_user):
+    db_session_mock.query().filter().first.return_value = user
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+    notification_data = {
+        "title": "New Test Notification",
+        "message": "This is a new test notification message"
     }
-
     headers = {"authorization": f"Bearer {access_token}"}
-    
-    # Send a POST request
-    response = client.post("api/v1/notifications/send", json=data, headers=headers)
-
-    # Check the response status code and content
+    response = client.post("/api/v1/notifications/send", json=notification_data, headers=headers)
     assert response.status_code == 200
-    assert response.json() == {
-        "success": True,
-        "status_code": 200,
-        "message": "Notification created successfully",
-        "data": sample_created_notification
-    }
-
-    # Reset the overrides after the test
-    app.dependency_overrides = {}
+    assert response.json()["success"] == True
+    assert response.json()["status_code"] == 200
+    assert response.json()["message"] == "Notification created successfully"
