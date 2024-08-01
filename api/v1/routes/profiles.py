@@ -11,11 +11,17 @@ from api.v1.services.user import user_service
 from api.v1.services.profile import profile_service
 
 
-profile = APIRouter(prefix='/profile', tags=['Profiles'])
+profile = APIRouter(prefix="/profile", tags=["Profiles"])
 
-@profile.get('/current-user', status_code=status.HTTP_200_OK, response_model=success_response)
-def get_current_user_profile(db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
-    '''Endpoint to get current user profile details'''
+
+@profile.get(
+    "/current-user", status_code=status.HTTP_200_OK, response_model=success_response
+)
+def get_current_user_profile(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get current user profile details"""
 
     profile = profile_service.fetch_by_user_id(db, user_id=current_user.id)
 
@@ -52,11 +58,8 @@ def update_user_profile(
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to update user profile"""
-    
-    updated_profile = profile_service.update(
-        db, schema=schema, 
-        user_id=current_user.id
-    )
+
+    updated_profile = profile_service.update(db, schema=schema, user_id=current_user.id)
 
     response = success_response(
         status_code=status.HTTP_200_OK,
@@ -65,7 +68,6 @@ def update_user_profile(
     )
 
     return response
-
 
 
 @profile.post("/deactivate", status_code=status.HTTP_200_OK)

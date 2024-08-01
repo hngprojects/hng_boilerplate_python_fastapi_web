@@ -6,41 +6,43 @@ from api.v1.schemas.plans import CreateSubscriptionPlan
 
 
 class BillingPlanService(Service):
-	'''Product service functionality'''
+    """Product service functionality"""
 
-	def create(db: Session, request: CreateSubscriptionPlan):
-		"""
-		Create and return a new billing plan
-		"""
+    def create(db: Session, request: CreateSubscriptionPlan):
+        """
+        Create and return a new billing plan
+        """
 
-		plan = BillingPlan(**request.dict())
-		db.add(plan)
-		db.commit()
-		db.refresh(plan)
+        plan = BillingPlan(**request.dict())
+        db.add(plan)
+        db.commit()
+        db.refresh(plan)
 
-		return plan
+        return plan
 
-	def delete():
-		pass
+    def delete():
+        pass
 
-	def fetch():
-		pass
+    def fetch():
+        pass
 
-	def update():
-		pass
+    def update():
+        pass
 
-	def fetch_all(db: Session, **query_params: Optional[Any]):
-		'''Fetch all products with option tto search using query parameters'''
+    def fetch_all(db: Session, **query_params: Optional[Any]):
+        """Fetch all products with option tto search using query parameters"""
 
-		query = db.query(BillingPlan)
+        query = db.query(BillingPlan)
 
-		# Enable filter by query parameter
-		if query_params:
-			for column, value in query_params.items():
-				if hasattr(BillingPlan, column) and value:
-					query = query.filter(getattr(BillingPlan, column).ilike(f'%{value}%'))
+        # Enable filter by query parameter
+        if query_params:
+            for column, value in query_params.items():
+                if hasattr(BillingPlan, column) and value:
+                    query = query.filter(
+                        getattr(BillingPlan, column).ilike(f"%{value}%")
+                    )
 
-		return query.all()
+        return query.all()
 
 
 billing_plan_service = BillingPlanService
