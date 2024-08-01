@@ -13,7 +13,6 @@ from api.v1.services.organization import organization_service
 from main import app
 
 
-client = TestClient(app)
 
 # Mock user
 def mock_get_current_user():
@@ -45,6 +44,13 @@ def mock_org():
         updated_at=datetime.now(timezone.utc)
     )
     
+# Fixture for the TestClient
+@pytest.fixture
+def client():
+    app.dependency_overrides[get_db] = lambda: MagicMock(spec=Session)
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides.clear()
 
 # Fixture to mock the database session
 @pytest.fixture
