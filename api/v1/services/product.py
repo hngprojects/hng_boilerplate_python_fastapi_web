@@ -165,6 +165,18 @@ class ProductService(Service):
 
 class ProductCategoryService(Service):
     """Product categories service functionality"""
+    def fetch_single_by_organization(self, db: Session, org_id: str, product_id: str, current_user: User) -> Product:
+        """Fetches a product by id"""
+
+        # check if user belongs to org
+
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        product = check_model_existence(db, Product, product_id)
+        return product
+
 
     @staticmethod
     def create():

@@ -12,7 +12,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
 from api.core.base.services import Service
-from api.core.dependencies.email_service import send_email
+from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
