@@ -70,6 +70,21 @@ def mock_get_current_user():
     with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
         yield
 
+# Fixture to mock the database session
+@pytest.fixture
+def db_session_mock():
+    db_session = MagicMock(spec=Session)
+    return db_session
+
+# Fixture to set up the test client with dependency overrides
+@pytest.fixture
+def client(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    client = TestClient(app)
+    yield client
+    app.dependency_overrides = {}
+
+# Test case to verify successful organization retrieval
 def test_get_organization_success(client, db_session_mock):
     '''Test to successfully retrieve an existing organization'''
     current_user = mock_get_current_user()
@@ -84,6 +99,7 @@ def test_get_organization_success(client, db_session_mock):
     assert data["company_name"] == "Test Organization"
     assert data["company_email"] == "testorg@gmail.com"
 
+# Test case to handle organization not found scenario
 def test_get_organization_not_found(client, db_session_mock):
     '''Test to handle organization not found scenario'''
     current_user = mock_get_current_user()
