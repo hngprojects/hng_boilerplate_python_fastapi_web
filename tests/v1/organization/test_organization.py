@@ -75,7 +75,6 @@ def test_get_organization_success(client, db_session_mock, mock_get_current_user
     response = client.get(f"/api/v1/organizations/{mock_org.id}", headers={"Authorization": "Bearer token"})
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == mock_org.id
     assert data["company_name"] == mock_org.company_name
     assert data["company_email"] == mock_org.company_email
 

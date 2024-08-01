@@ -99,7 +99,7 @@ def get_organization(org_id: str, db: Session = Depends(get_db), token: str = De
     return {
         "status": "success",
         "status_code": 200,
-        "data": success_response.from_orm(organization)  # Ensure response model compatibility
+        "data": success_response
 }
 class Config:
     from_attributes = True  # Enable Pydantic to read ORM attributes
