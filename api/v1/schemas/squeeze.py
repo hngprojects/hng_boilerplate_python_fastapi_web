@@ -1,5 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from enum import Enum
+from typing import Optional
 
 class SqueezeStatusEnum(str, Enum):
     online = "online"
