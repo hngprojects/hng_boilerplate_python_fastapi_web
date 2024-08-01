@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<table role="presentation" width="100%" style="padding: 3.5rem;">
+  <tr>
+      <td>
+          <div style="text-align: center; margin-bottom: 1.5rem;">
+              <h1 style="font-size: 1.5rem; color: #0A0A0A; font-weight: 600;">Welcome to Boilerplate</h1>
+              <p style="font-size: 1.125rem; color: rgba(0, 0, 0, 0.8); font-weight: 500;">Thanks for signing up</p>
+          </div>
+
+          <div>
+              <p style="color: #111; font-size: 1.125rem; font-weight: 600;">Hi {{first_name}}, {{last_name}}</p>
+              <p style="color: rgba(17, 17, 17, 0.9); font-weight: 400;">We're thrilled to have you join us. Experience quality and innovation
+                like never before. Our product is made to fit your needs and make your
+                life easier.</p>
+          </div>
+
+          <div style="margin-bottom: 1.75rem;">
+              <h3 style="color: #0A0A0A; font-weight: 600;">Here's what you can look forward to.</h3>
+              <div style="margin-bottom: 1.25rem;">
+                <ul>
+                  <li>
+                    <span style="font-weight: 600;">Exclusive Offers:</span> Enjoy special promotions and
+                    discounts available only to our members.
+                  </li>
+                  <li>
+                    <span style="font-weight: 600;">Exclusive Offers:</span> Enjoy special promotions and
+                    discounts available only to our members.
+                  </li>
+                  <li>
+                    <span style="font-weight: 600;">Exclusive Offers:</span> Enjoy special promotions and
+                    discounts available only to our members.
+                  </li>
+                </ul>
+              </div>
+          </div>
+
+          <a href="{{cta_link}}" style="display: block; width: fit-content; padding: 0.5rem 2.5rem; background-color: #F97316; color: white; text-decoration: none; border-radius: 0.5rem; margin: 0 auto; text-align: center;">
+              Learn more about us
+          </a>
+
+          <!-- <div style="margin-top: 2rem;">
+              <p style="color: #111; font-size: 0.875rem; font-weight: 500;">Thank you for joining Boilerplate</p>
+          </div> -->
+
+          <div style="margin-top: 2rem;">
+            <p>Regards,</p>
+            <p>Boilerplate</p>
+          </div>
+      </td>
+  </tr>
+</table>
+{% endblock %}
