@@ -1,16 +1,18 @@
 from typing import Any, Optional
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from sqlalchemy.orm import Session
 from sqlalchemy import select
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence, check_user_in_org
+from api.utils.pagination import paginated_response
+from api.v1.models.product import Product
 from api.v1.models.associations import user_organization_association
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
 from api.v1.schemas.organization import (
     CreateUpdateOrganization,
     AddUpdateOrganizationRole,
+    RemoveUserFromOrganization
 )
 
 
@@ -19,9 +21,12 @@ class OrganizationService(Service):
 
     def create(self, db: Session, schema: CreateUpdateOrganization, user: User):
         """Create a new organization"""
-
-        # Create a new organization
         new_organization = Organization(**schema.model_dump())
+        email = schema.model_dump()["company_email"]
+        name = schema.model_dump()["company_name"]
+        self.check_by_email(db, email)
+        self.check_by_name(db, name)
+
         db.add(new_organization)
         db.commit()
         db.refresh(new_organization)
@@ -36,8 +41,7 @@ class OrganizationService(Service):
         return new_organization
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all organization with option tto search using query parameters"""
-
+        """Fetch all organizations with option to search using query parameters"""
         query = db.query(Organization)
 
         # Enable filter by query parameter
@@ -52,7 +56,6 @@ class OrganizationService(Service):
 
     def fetch(self, db: Session, id: str):
         """Fetches an organization by id"""
-
         organization = check_model_existence(db, Organization, id)
         return organization
 
@@ -69,8 +72,7 @@ class OrganizationService(Service):
             return None
 
     def update(self, db: Session, id: str, schema, current_user: User):
-        """Updates a organization"""
-
+        """Updates an organization"""
         organization = self.fetch(db=db, id=id)
 
         # check if the current user has the permission to update the organization
@@ -89,11 +91,22 @@ class OrganizationService(Service):
         db.refresh(organization)
         return organization
 
-    def check_user_role_in_org(
-        self, db: Session, user: User, org: Organization, role: str
-    ):
-        """Check user role in organization"""
+    def delete(self, db: Session, id: str, user: User):
+        """Deletes an organization"""
+        organization = self.fetch(id=id, db=db)
+        stmt = user_organization_association.select().where(
+            user_organization_association.c.user_id == user.id,
+            user_organization_association.c.organization_id == id,
+            user_organization_association.c.role == 'owner'
+        )
+        result = db.execute(stmt).fetchone()
+        if not result or not user.is_super_admin:
+            raise HTTPException(status_code=403, detail="Only the organization owner can delete an organization")
+        db.delete(organization)
+        db.commit()
 
+    def check_user_role_in_org(self, db: Session, user: User, org: Organization, role: str):
+        """Check user role in organization"""
         if role not in ["user", "guest", "admin", "owner"]:
             raise HTTPException(status_code=400, detail="Invalid role")
 
@@ -113,7 +126,6 @@ class OrganizationService(Service):
 
     def add_user_to_organization(self, schema: AddUpdateOrganizationRole, db: Session):
         """Deletes a user from an organization"""
-
         # Fetch the user and organization
         user = check_model_existence(db, User, schema.user_id)
         organization = check_model_existence(db, Organization, schema.org_id)
@@ -136,21 +148,72 @@ class OrganizationService(Service):
         db.execute(stmt)
         db.commit()
 
-    def delete(self, db: Session, id: str, user: User):
-        '''Deletes a organization'''
+    def remove_user_from_organization(self, schema: RemoveUserFromOrganization, db: Session):
+        """Deletes a user from an organization"""
+        # Fetch the user and organization
+        user = check_model_existence(db, User, schema.user_id)
+        organization = check_model_existence(db, Organization, schema.org_id)
 
-        organization = self.fetch(id=id, db=db)
-        stmt = user_organization_association.select().where(
-            user_organization_association.c.user_id==user.id,
-            user_organization_association.c.organization_id==id,
-            user_organization_association.c.role=='owner'
+        # Check if user is not in organization
+        check_user_in_org(user, organization)
+
+        # Check for user role permissions
+        self.check_user_role_in_org(db=db, user=user, org=organization, role='admin')\
+          or self.check_user_role_in_org(db=db, user=user, org=organization, role='owner')
+
+        # Update user role
+        stmt = user_organization_association.delete().where(
+            user_organization_association.c.user_id == schema.user_id,
+            user_organization_association.c.organization_id == schema.org_id,
         )
-        result = db.execute(stmt).fetchone()
-        if not result or not user.is_super_admin:
-            raise HTTPException(status_code=403, detail="Only the organization owner can delete an organization")
-        db.delete(organization)
+
+        db.execute(stmt)
         db.commit()
 
+    def get_users_in_organization(self, db: Session, org_id: str):
+        """Fetches all users in an organization"""
+        organization = check_model_existence(db, Organization, org_id)
+
+        # Fetch all users associated with the organization
+        return organization.users
+
+    def paginate_users_in_organization(self, db: Session, org_id: str, page: int, per_page: int):
+        """Fetches all users in an organization"""
+        check_model_existence(db, Organization, org_id)
+
+        return paginated_response(
+            db=db,
+            model=User,
+            skip=page,
+            join=user_organization_association,
+            filters={'organization_id': org_id},
+            limit=per_page
+        )
+
+    def get_user_organizations(self, db: Session, user_id: str):
+        """Fetches all organizations that belong to a user"""
+        user = check_model_existence(db, User, user_id)
+
+        # Fetch all users associated with the organization
+        return user.organizations
+
+    def check_by_email(self, db: Session, email):
+        """Fetches an organization by their email"""
+        org = db.query(Organization).filter(Organization.company_email == email).first()
+
+        if org:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An organization with this email already exists")
+
+        return False
+
+    def check_by_name(self, db: Session, name):
+        """Fetches an organization by their name"""
+        org = db.query(Organization).filter(Organization.company_name == name).first()
+
+        if org:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="An organization with this name already exists")
+
+        return False
 
 
 organization_service = OrganizationService()

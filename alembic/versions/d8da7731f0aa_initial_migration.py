@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial migration
 
-Revision ID: dce3ec9fb4b9
+Revision ID: d8da7731f0aa
 Revises: 
-Create Date: 2024-07-30 01:02:10.292728
+Create Date: 2024-07-31 15:17:00.616620
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'dce3ec9fb4b9'
+revision: str = 'd8da7731f0aa'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -76,11 +76,22 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_product_categories_id'), 'product_categories', ['id'], unique=False)
+    op.create_table('topics',
+    sa.Column('title', sa.String(), nullable=False),
+    sa.Column('content', sa.String(), nullable=False),
+    sa.Column('tags', sa.ARRAY(sa.String()), nullable=True),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_topics_id'), 'topics', ['id'], unique=False)
     op.create_table('users',
     sa.Column('email', sa.String(), nullable=False),
     sa.Column('password', sa.String(), nullable=True),
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
+    sa.Column('avatar_url', sa.String(), nullable=True),
     sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=True),
     sa.Column('is_super_admin', sa.Boolean(), server_default=sa.text('false'), nullable=True),
     sa.Column('is_deleted', sa.Boolean(), server_default=sa.text('false'), nullable=True),
@@ -194,6 +205,23 @@ def upgrade() -> None:
     sa.UniqueConstraint('email', 'newsletter_id', name='uq_subscriber_newsletter')
     )
     op.create_index(op.f('ix_newsletter_subscribers_id'), 'newsletter_subscribers', ['id'], unique=False)
+    op.create_table('notification_settings',
+    sa.Column('mobile_push_notifications', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('email_notification_activity_in_workspace', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('email_notification_always_send_email_notifications', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('email_notification_email_digest', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('email_notification_announcement_and_update_emails', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('slack_notifications_activity_on_your_workspace', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('slack_notifications_always_send_email_notifications', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('slack_notifications_announcement_and_update_emails', sa.Boolean(), server_default='false', nullable=True),
+    sa.Column('user_id', sa.String(), nullable=False),
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_notification_settings_id'), 'notification_settings', ['id'], unique=False)
     op.create_table('notifications',
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
@@ -245,6 +273,7 @@ def upgrade() -> None:
     sa.Column('image_url', sa.String(), nullable=False),
     sa.Column('status', sa.Enum('in_stock', 'out_of_stock', 'low_on_stock', name='productstatusenum'), nullable=True),
     sa.Column('archived', sa.Boolean(), nullable=True),
+    sa.Column('filter_status', sa.Enum('published', 'draft', name='productfilterstatusenum'), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
@@ -411,6 +440,8 @@ def downgrade() -> None:
     op.drop_table('oauth')
     op.drop_index(op.f('ix_notifications_id'), table_name='notifications')
     op.drop_table('notifications')
+    op.drop_index(op.f('ix_notification_settings_id'), table_name='notification_settings')
+    op.drop_table('notification_settings')
     op.drop_index(op.f('ix_newsletter_subscribers_id'), table_name='newsletter_subscribers')
     op.drop_table('newsletter_subscribers')
     op.drop_index(op.f('ix_messages_id'), table_name='messages')
@@ -429,6 +460,8 @@ def downgrade() -> None:
     op.drop_table('waitlist')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
+    op.drop_index(op.f('ix_topics_id'), table_name='topics')
+    op.drop_table('topics')
     op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
     op.drop_table('product_categories')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')

@@ -4,17 +4,9 @@ from api.v1.models.user import User
 from api.db.database import get_db
 from uuid_extensions import uuid7
 from fastapi.testclient import TestClient
-from fastapi import status
 import pytest
 from unittest.mock import MagicMock, patch
 from datetime import datetime, timezone
-import os
-import sys
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "../..")))
 
 
 client = TestClient(app)
@@ -70,7 +62,7 @@ def test_autheniticated_user(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["access_token"]
+    access_token = login.json()["data"]["user"]["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
@@ -90,7 +82,7 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["access_token"]
+    access_token = login.json()["data"]["user"]["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
@@ -111,7 +103,7 @@ def test_user_password(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["access_token"]
+    access_token = login.json()["data"]["user"]["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,

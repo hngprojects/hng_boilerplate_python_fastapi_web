@@ -1,5 +1,4 @@
-
-from fastapi import (Depends, APIRouter, Response, Request, status)
+from fastapi import Depends, APIRouter, status, HTTPException, Response, Request
 from sqlalchemy.orm import Session
 from typing import Annotated
 from starlette.responses import RedirectResponse
@@ -11,97 +10,143 @@ from decouple import config
 from api.db.database import get_db
 from api.core.dependencies.google_oauth_config import google_oauth
 from api.v1.services.google_oauth import GoogleOauthServices
+from api.utils.success_response import success_response
+from api.v1.schemas.google_oauth import OAuthToken
+from api.v1.services.user import user_service
+from fastapi.encoders import jsonable_encoder
+import requests
+from datetime import timedelta
 
 google_auth = APIRouter(prefix="/auth", tags=["Authentication"])
-# FRONTEND_URL = config('FRONTEND_URL')
 
-# @google_auth.get("/google")
-# async def google_oauth2(request: Request) -> RedirectResponse:
-#     """
-#     Allows users to login using their google accounts.
+FRONTEND_URL = config("FRONTEND_URL")
 
-#     Args:
-#         request: request object
-
-#     Returns:
-#         RedirectResponse: A redirect to google authorization server for authorization
-#     """
-#     redirect_uri = request.url_for('google_oauth2_callback')
-#     # generate a state value and stre it in the session
-#     state = secrets.token_urlsafe(16)
-#     request.session['state'] = state
-#     response =  await google_oauth.google.authorize_redirect(request,
-#                                                              redirect_uri,
-#                                                              state=state)
-#     return response
+@google_auth.post("/google")
+async def google_login(token_request: OAuthToken, db: Session = Depends(get_db)):
+    access_token = token_request.id_token
+    profile_endpoint = 'https://www.googleapis.com/oauth2/v1/userinfo'
+    headers = {'Authorization': f'Bearer {access_token}'}
+    
+    profile_response = requests.get(profile_endpoint, headers=headers)
+    
+    if profile_response.status_code != 200:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
 
 
-# @google_auth.get('/callback/google')
-# async def google_oauth2_callback(request: Request,
-#                                  db: Annotated[Session, Depends(get_db)]) -> Response:
-#     """
-#     Handles request from google after user has authenticated or
-#     fails to authenticate with google account.
+    profile_data = profile_response.json()
+    user = GoogleOauthServices.create_oauth_user(db=db, google_response=profile_data)
 
-#     Args:
-#         request: request object
-#         db: database session object
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-#     Returns:
-#         response: contains message, status code, tokens, and user data
-#                     on success or HttpException if not authenticated,
-#     """
-#     err_message: str = 'Authentication Failed'
-#     try:
-#         # For testing purposes
-#         if config('TESTING') != 'TEST':
-#             state_in_session = request.session.get('state')
-#             state_from_params = request.query_params.get('state')
-#             # verify the state value to prevent CSRF
-#             if state_from_params != state_in_session:
-#                 return RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
-#                                         status_code=status.HTTP_302_FOUND)
+    response = success_response(
+        status_code=200,
+        message='success',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user,
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
 
-#         # get the user access token and information from google authorization/resource server
-#         google_response: OAuth2Token = await google_oauth.google.authorize_access_token(request)
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
 
-#         # check if id_token is present
-#         if 'id_token' not in google_response:
-#             RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
-#                                     status_code=status.HTTP_302_FOUND)
+    return response
 
-#     except OAuthError:
-#         RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
-#                                 status_code=status.HTTP_302_FOUND)
 
-#     try:
-#         if not google_response.get("access_token"):
-#             RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
-#                                     status_code=status.HTTP_302_FOUND)
+@google_auth.get("/callback/google")
+async def google_oauth2_callback(
+    request: Request, db: Annotated[Session, Depends(get_db)]
+) -> Response:
+    """
+    Handles request from google after user has authenticated or
+    fails to authenticate with google account.
 
-#         # if google has not verified the user email
-#         if not google_response.get('userinfo').get('email_verified'):
-#             RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
-#                                     status_code=status.HTTP_302_FOUND)
+    Args:
+        request: request object
+        db: database session object
 
-#         google_oauth_service = GoogleOauthServices()
+    Returns:
+        response: contains message, status code, tokens, and user data
+                    on success or HttpException if not authenticated,
+    """
+    
+    err_message: str = 'Authentication Failed'
+    try:
+        # For testing purposes
+        if config("TESTING") != "TEST":
+            state_in_session = request.session.get("state")
+            state_from_params = request.query_params.get("state")
+            # verify the state value to prevent CSRF
+            if state_from_params != state_in_session:
+                return RedirectResponse(
+                    url=f"{FRONTEND_URL}?error=true&message{err_message}",
+                    status_code=status.HTTP_302_FOUND,
+                )
 
-#         tokens: object = google_oauth_service.create(google_response, db)
+        # get the user access token and information from google authorization/resource server
+        google_response: OAuth2Token = await google_oauth.google.authorize_access_token(
+            request
+        )
 
-#         if not tokens:
-#             RedirectResponse(url=f"{FRONTEND_URL}?error=true&message{err_message}",
-#                                     status_code=status.HTTP_302_FOUND)
+        # check if id_token is present
+        if "id_token" not in google_response:
+            RedirectResponse(
+                url=f"{FRONTEND_URL}?error=true&message{err_message}",
+                status_code=status.HTTP_302_FOUND,
+            )
 
-#         response = RedirectResponse(url=f"{FRONTEND_URL}/dashboard/products",
-#                                     status_code=status.HTTP_302_FOUND)
+    except OAuthError:
+        RedirectResponse(
+            url=f"{FRONTEND_URL}?error=true&message{err_message}",
+            status_code=status.HTTP_302_FOUND,
+        )
 
-#         access_token = tokens.access_token
+    try:
+        if not google_response.get("access_token"):
+            RedirectResponse(
+                url=f"{FRONTEND_URL}?error=true&message{err_message}",
+                status_code=status.HTTP_302_FOUND,
+            )
 
-#         refresh_token = tokens.refresh_token
-        
-#         response.set_cookie(key='access_token', value=access_token)
+        # if google has not verified the user email
+        if not google_response.get("userinfo").get("email_verified"):
+            RedirectResponse(
+                url=f"{FRONTEND_URL}?error=true&message{err_message}",
+                status_code=status.HTTP_302_FOUND,
+            )
 
-#         response.set_cookie(key='refresh_token', value=refresh_token)
-#         return response
-#     except Exception:
-#         return RedirectResponse(url=FRONTEND_URL , status_code=status.HTTP_302_FOUND)
+        google_oauth_service = GoogleOauthServices()
+
+        tokens: object = google_oauth_service.create(google_response, db)
+
+        if not tokens:
+            RedirectResponse(
+                url=f"{FRONTEND_URL}?error=true&message{err_message}",
+                status_code=status.HTTP_302_FOUND,
+            )
+
+        response = RedirectResponse(
+            url=f"{FRONTEND_URL}/dashboard/products", status_code=status.HTTP_302_FOUND
+        )
+
+        access_token = tokens.access_token
+
+        refresh_token = tokens.refresh_token
+
+        response.set_cookie(key="access_token", value=access_token)
+
+        response.set_cookie(key="refresh_token", value=refresh_token)
+        return response
+    except Exception:
+        return RedirectResponse(url=FRONTEND_URL, status_code=status.HTTP_302_FOUND)

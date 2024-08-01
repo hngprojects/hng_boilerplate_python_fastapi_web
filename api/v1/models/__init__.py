@@ -19,3 +19,5 @@ from api.v1.models.invitation import Invitation
 from api.v1.models.faq import FAQ
 from api.v1.models.newsletter import Newsletter, NewsletterSubscriber
 from api.v1.models.topic import Topic
+from api.v1.models.regions import Region
+from api.v1.models.squeeze import Squeeze
