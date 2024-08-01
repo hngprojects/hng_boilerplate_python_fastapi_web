@@ -95,14 +95,11 @@ def test_get_organization_not_found(client, db_session_mock, mock_get_current_us
     response = client.get("/api/v1/organizations/nonexistent-id", headers={"Authorization": "Bearer token"})
     assert response.status_code == 404
     data = response.json()
-    assert data["status_code"] == 404
-    assert data["message"] == "Organization not found"
-    assert not data.get("success", False)  # Ensure success is False
+    assert data["detail"] == "Organization not found"
 
 def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user):
     response = client.get("/api/v1/organizations/invalid-id", headers={"Authorization": "Bearer token"})
-    assert response.status_code == 422
+    assert response.status_code == 422  # Unprocessable Entity due to validation error
     data = response.json()
-    assert data["status_code"] == 422
-    assert data["message"] == "Invalid UUID format"
-    assert not data.get("success", False)  # Ensure success is False
+    assert "detail" in data
+    assert data["detail"] == "Invalid UUID format"

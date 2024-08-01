@@ -11,9 +11,7 @@ from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
 from api.v1.services.user import user_service, oauth2_scheme
 from typing import Annotated
-from uuid import UUID
-from fastapi.security import OAuth2PasswordBearer
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+import uuid
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
@@ -101,26 +99,18 @@ def get_organization(
     
     """Endpoint to get an Organization by id"""
     
-    # Validate UUID format
     try:
-        UUID(org_id)
+        uuid.UUID(org_id)  # Validate UUID format
     except ValueError:
-        return {
-            "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
-            "message": "Invalid UUID format",
-            "success": False
-        }
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid UUID format")
     
     organization = organization_service.fetch(db, org_id)
+    
     if organization is None:
-        return {
-            "status_code": status.HTTP_404_NOT_FOUND,
-            "message": "Organization not found",
-            "success": False
-        }
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
     return {
+        "status": "success",
+        "status_code": status.HTTP_200_OK,
         "message": "Retrieved organization successfully",
-        "data": jsonable_encoder(organization),
-        "success": True
+        "data": jsonable_encoder(organization)
 }
