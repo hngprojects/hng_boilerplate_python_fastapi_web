@@ -6,11 +6,12 @@ from sqlalchemy.orm import Session
 from api.v1.services.reply import ReplyService
 from api.v1.models.user import User
 from api.v1.services.user import user_service
+from api.utils.success_response import success_response
 
 
 reply_router = APIRouter(prefix='/comments', tags=['comments_reply'])
 
-@reply_router.post('/{comment_id}/reply', status_code=200)
+@reply_router.post('/{comment_id}/reply', response_model=success_response, status_code=200)
 async def reply_to_a_comment(comment_id: str, reply: ReplyCreate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     """
     """
