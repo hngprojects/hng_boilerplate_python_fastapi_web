@@ -19,7 +19,7 @@ from api.utils.logger import logger
 from api.db.database import get_db
 from api.v1.services.waitlist import waitlist_service
 
-waitlist = APIRouter(prefix="/waitlists", tags=["Waitlist"])
+waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
 
 
 @waitlist.post("/", response_model=success_response, status_code=201)

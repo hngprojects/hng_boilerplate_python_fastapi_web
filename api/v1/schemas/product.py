@@ -6,7 +6,7 @@ from datetime import datetime
 from api.v1.models.product import ProductStatusEnum
 from datetime import datetime
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 class ProductUpdate(BaseModel):
     """
@@ -86,7 +86,8 @@ class ProductCreate(BaseModel):
         orm_mode = True
 
 
-#status filter
+
+# status filter
 class ProductFilterResponse(BaseModel):
     id: str
     name: str
@@ -104,6 +105,7 @@ class ProductFilterResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 class SuccessResponse(BaseModel, Generic[T]):
     message: str

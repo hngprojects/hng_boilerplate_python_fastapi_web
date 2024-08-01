@@ -1,21 +1,64 @@
 from typing import Any, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import func
+from fastapi import HTTPException, status
+
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
+from api.v1.models.product import (
+    Product,
+    ProductFilterStatusEnum,
+    ProductStatusEnum,
+    ProductCategory,
+)
 from api.v1.models.user import User
 from api.v1.models import Organization
+from api.v1.schemas.product import ProductCreate
 from api.utils.db_validators import check_user_in_org
 from api.v1.schemas.product import ProductFilterResponse
+
 
 class ProductService(Service):
     """Product service functionality"""
 
-    def create(self, db: Session, schema):
+    def create(
+        self, db: Session, schema: ProductCreate, org_id: str, current_user: User
+    ):
         """Create a new product"""
 
-        new_product = Product(**schema.model_dump())
+        # check if user belongs to org
+
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        # check if user inputted a valid category
+
+        category_name = schema.category
+        category = (
+            db.query(ProductCategory)
+            .filter(func.lower(ProductCategory.name) == func.lower(category_name))
+            .first()
+        )
+
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"{category_name} category does not exist",
+            )
+
+        # add org_id, category_id and remove category field from schema
+
+        product_schema = schema.model_dump()
+        product_schema.pop("category")
+        product_schema["category_id"] = category.id
+        product_schema["org_id"] = org_id
+
+        # create new product
+
+        new_product = Product(**product_schema)
+
         db.add(new_product)
         db.commit()
         db.refresh(new_product)
@@ -63,20 +106,28 @@ class ProductService(Service):
         )
 
         return products
-    
-    def fetch_by_filter_status(self, db: Session, filter_status: ProductFilterStatusEnum):
-        '''Fetch products by filter status'''
+
+    def fetch_by_filter_status(
+        self, db: Session, filter_status: ProductFilterStatusEnum
+    ):
+        """Fetch products by filter status"""
         try:
-            products = db.query(Product).filter(Product.filter_status == filter_status.value).all()
+            products = (
+                db.query(Product)
+                .filter(Product.filter_status == filter_status.value)
+                .all()
+            )
             return [ProductFilterResponse.from_orm(product) for product in products]
         except Exception as e:
             raise
-    
+
     def fetch_by_status(self, db: Session, status: ProductStatusEnum):
-        '''Fetch products by filter status'''
+        """Fetch products by filter status"""
         try:
             products = db.query(Product).filter(Product.status == status.value).all()
-            response_data = [ProductFilterResponse.from_orm(product) for product in products]
+            response_data = [
+                ProductFilterResponse.from_orm(product) for product in products
+            ]
             return response_data
         except Exception as e:
             raise

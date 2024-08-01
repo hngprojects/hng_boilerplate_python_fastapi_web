@@ -11,10 +11,10 @@ from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatu
 from api.v1.services.product import product_service
 from api.v1.schemas.product import (
     ProductCreate,
-    ProductFilterResponse,
     ProductList,
     ProductUpdate,
     ResponseModel,
+    ProductFilterResponse,
     SuccessResponse,
 )
 from api.utils.dependencies import get_current_user, get_super_admin
@@ -24,6 +24,24 @@ from api.v1.services.product_category import product_category_service
 from api.v1.models import User
 
 product = APIRouter(prefix="/products", tags=["Products"])
+
+
+@product.post("/{org_id}", status_code=status.HTTP_201_CREATED)
+def product_create(
+    org_id: str,
+    product: ProductCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    created_product = product_service.create(
+        db=db, schema=product, org_id=org_id, current_user=current_user
+    )
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product created successfully",
+        data=jsonable_encoder(created_product),
+    )
 
 
 @product.get("", response_model=success_response, status_code=200)
@@ -199,12 +217,11 @@ async def create_product(
     db: Session = Depends(get_db),
 ):
     """
-    Endpoint to create a new product.
+    Endpoint to create a new product by admin.
 
     This endpoint ensures that:
     - The organization exists.
     - The product category exists.
-    - The user is authorized to create a product in the given organization.
     """
 
     # Validate organization existence
