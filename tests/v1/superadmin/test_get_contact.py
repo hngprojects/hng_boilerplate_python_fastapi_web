@@ -76,7 +76,7 @@ def test_invalid_id(mock_db_session, test_message, access_token_admin, test_admi
 
 
 # Test unauthorized access
-def test_update_customer_unauthorized(mock_db_session, test_message, test_admin):
+def test_unauthorized(mock_db_session, test_message, test_admin):
     mock_db_session.query.return_value.filter.return_value.first.side_effect = [test_admin]
     mock_db_session.query.return_value.filter_by.return_value.first.side_effect = [test_message]
     mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
