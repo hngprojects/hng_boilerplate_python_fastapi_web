@@ -49,6 +49,7 @@ def test_user():
         first_name="test",
         last_name="user",
         is_active=True,
+        is_super_admin=True,
     )
 
 
