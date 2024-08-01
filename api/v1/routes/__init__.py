@@ -21,6 +21,7 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
+from api.v1.routes.reply import reply_router
 from tests.run_all_test import test_router
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
@@ -35,6 +36,7 @@ api_version_one.include_router(fb_auth)
 api_version_one.include_router(pwd_reset)
 api_version_one.include_router(user)
 api_version_one.include_router(profile)
+api_version_one.include_router(reply_router)
 api_version_one.include_router(organization)
 api_version_one.include_router(product)
 api_version_one.include_router(payment)
