@@ -17,7 +17,7 @@ from api.v1.schemas.product import (
     ResponseModel,
     SuccessResponse,
 )
-from api.utils.dependencies import get_current_user
+from api.utils.dependencies import get_current_user, get_super_admin
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
 from api.v1.services.product_category import product_category_service
@@ -195,7 +195,7 @@ def delete_product(
 @product.post("/", status_code=status.HTTP_201_CREATED, response_model=success_response)
 async def create_product(
     product_data: ProductCreate,
-    current_user: Annotated[User, Depends(get_current_user)],
+    current_user: Annotated[User, Depends(get_super_admin)],
     db: Session = Depends(get_db),
 ):
     """
@@ -207,7 +207,7 @@ async def create_product(
     - The user is authorized to create a product in the given organization.
     """
 
-    # Validate organization existence and user's association with it
+    # Validate organization existence
     organization = organization_service.fetch(db, product_data.org_id)
     if not organization:
         raise HTTPException(
