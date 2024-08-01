@@ -133,9 +133,6 @@ async def delete_organization(
             status_code=status.HTTP_200_OK,
             message='Organization with ID {org_id} deleted successfully')
 
-            message="Organization with ID {org_id} deleted successfully",
-        )
-
 
 @organization.get(
     "/{org_id}/products/{product_id}",
