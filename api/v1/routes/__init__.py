@@ -21,10 +21,12 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
-from tests.run_all_test import test_router
+from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
+from api.v1.routes.regions import regions
 from api.v1.routes.api_tests import test_router
+from api.v1.routes.email_routes import email_sender
 from api.v1.routes.squeeze import squeeze
 from api.v1.routes.email_template import email_template
 
@@ -57,5 +59,8 @@ api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(testimonial)
+api_version_one.include_router(test_rout)
+api_version_one.include_router(email_sender)
+api_version_one.include_router(regions)
 api_version_one.include_router(test_router)
 api_version_one.include_router(squeeze)
