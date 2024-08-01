@@ -101,4 +101,5 @@ def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_u
     response = client.get("/api/v1/organizations/invalid-id", headers={"Authorization": "Bearer token"})
     assert response.status_code == 422  # Unprocessable Entity due to validation error
     data = response.json()
-    assert data['detail'] == "Invalid UUID format"  # Ensure the error detail matches
+    assert "detail" in data
+    assert data["detail"] == "Invalid UUID format"
