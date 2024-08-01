@@ -76,12 +76,15 @@ async def update_organization(
         data=jsonable_encoder(updated_organization),
     )
 
-
-@organization.get("", status_code=status.HTTP_200_OK)
-def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
-    orgs = organization_service.fetch_all(db)
+@organization.get("/", response_model=success_response, status_code=status.HTTP_200_OK)
+def get_user_organizations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(organization_service.get_current_user),
+):
+    """Endpoint to get organizations based on user role (superuser or normal user)."""
+    organizations = organization_service.get_user_organizations(db=db, user=current_user)
     return success_response(
-        status_code=status.HTTP_200_OK,
-        message="Retrived all organizations information Successfully",
-        data = jsonable_encoder(orgs)
+        status_code=200,
+        message="Organizations retrieved successfully",
+        data=[org.to_dict() for org in organizations],
     )
