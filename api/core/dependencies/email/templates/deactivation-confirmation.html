@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Deactivation in Two Days{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/deactivation-confirmation.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Account Deactivation In Two Days</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      We hope this email finds you well. We noticed that you haven't logged
+      into your Boilerplate account for quite some time. As part of our
+      ongoing efforts to maintain a secure and efficient service, we will be
+      deactivating inactive accounts.
+    </p>
+    <div class="editable-content">
+      <div class="editable-content-list">
+        <p><span>Your deactivation details:</span></p>
+        <p><span>Account Email: </span>johndoe@gmail.com</p>
+        <p><span>Last Active:</span> 17th June, 2024 / 11:56pm</p>
+        <p><span>Deactivation Date:</span> 20th July, 2024 / 11:56pm</p>
+      </div>
+      <p>
+        To keep your account active, simply log in before the deactivation
+        date. However, if you no longer wish to use your account, no further
+        action is needed on your part.
+      </p>
+      <button class="template-btn">Learn More About Us</button>
+    </div>
+    <div class="template-farewell">
+      <p>Regards,</p>
+      <p>Boilerplate</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
