@@ -44,29 +44,7 @@ def mock_org():
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
-
-from datetime import datetime, timezone
-from unittest.mock import MagicMock, patch
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-from uuid_extensions import uuid7
-from api.db.database import get_db
-from api.v1.services.user import user_service
-from api.v1.models.user import User
-from api.v1.models.organization import Organization
-from api.v1.services.user import UserService
-from api.v1.services.organization import organization_service
-from main import app
-
-# Create a test client for FastAPI
-client = TestClient(app)
-
-# Mock the current user function
-@pytest.fixture
-def mock_get_current_user():
-    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
-        yield
+    
 
 # Fixture to mock the database session
 @pytest.fixture
@@ -83,6 +61,12 @@ def override_get_db(db_session_mock):
     app.dependency_overrides[get_db] = _get_db_override
     yield
     app.dependency_overrides.clear()
+    
+# Mock the current user function
+@pytest.fixture
+def mock_get_current_user():
+    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
+        yield
 
 # Test case to verify successful organization retrieval
 def test_get_organization_success(client, db_session_mock, mock_get_current_user):
