@@ -3,8 +3,9 @@ from fastapi.testclient import TestClient
 from main import app
 from api.db.database import get_db
 from unittest.mock import MagicMock, patch
-from api.v1.models.user import User, Squeeze
+from api.v1.models.user import User
 from api.v1.services.user import user_service
+from api.v1.schema.squeeze import CreateSqueeze, UpdateSqueeze 
 from uuid_extensions import uuid7
 from fastapi import status
 
