@@ -108,8 +108,9 @@ def get_organization(
     
     if organization is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message="Retrieved organization successfully",
-        data=jsonable_encoder(organization)
-)
+    return {
+        "status": "success",
+        "status_code": status.HTTP_200_OK,
+        "message": "Retrieved organization successfully",
+        "data": jsonable_encoder(organization)
+}
