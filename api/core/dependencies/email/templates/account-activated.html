@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Activation{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/account-activated.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Your Account is Now Active!</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      Congratulations! Your account with Boilerplate is now active and ready
+      to use.
+    </p>
+    <div class="editable-content">
+      <p>
+        We're thrilled to have you as part of our community and look forward
+        to helping you make the most out of your experience with us.
+      </p>
+      <p>
+        You can now log in and start exploring all the features and benefits
+        we have to offer.
+      </p>
+
+      <p>Thank you for joining Boilerplate!</p>
+
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

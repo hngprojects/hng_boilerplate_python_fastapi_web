@@ -1,18 +1,21 @@
-from fastapi.responses import JSONResponse
 import uvicorn
 import os
+from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+from api.utils.email_service import send_mail
 from api.utils.json_response import JsonResponseDict
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
 from api.utils.logger import logger
+from api.core.dependencies.email_service import send_email
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 
@@ -31,13 +34,21 @@ if not os.path.exists(IMAGE_DIR):
 app = FastAPI(lifespan=lifespan)
 app.mount("/media/images", StaticFiles(directory=IMAGE_DIR), name="mediafiles")
 
+# Set up email templates and css static files
+email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
+app.mount(
+    '/api/core/dependencies/email/static/css', 
+    StaticFiles(directory='api/core/dependencies/email/static'),
+    name='email_static'
+)
+
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
 ]
 
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -47,7 +58,6 @@ app.add_middleware(
 )
 
 app.include_router(api_version_one)
-
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:
@@ -62,8 +72,6 @@ async def probe():
 
 
 # REGISTER EXCEPTION HANDLERS
-
-
 @app.exception_handler(HTTPException)
 async def http_exception(request: Request, exc: HTTPException):
     """HTTP exception handler"""
@@ -94,6 +102,22 @@ async def validation_exception(request: Request, exc: RequestValidationError):
             "status_code": 422,
             "message": "Invalid input",
             "errors": errors,
+        },
+    )
+
+
+@app.exception_handler(IntegrityError)
+async def exception(request: Request, exc: IntegrityError):
+    """Integrity error exception handlers"""
+
+    logger.exception(f"Exception occured; {exc}")
+
+    return JSONResponse(
+        status_code=400,
+        content={
+            "success": False,
+            "status_code": 400,
+            "message": f"An unexpected error occurred: {exc}",
         },
     )
 

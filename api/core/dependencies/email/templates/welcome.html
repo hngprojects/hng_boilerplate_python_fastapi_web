@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Welcome to Boilerplate</p>
+    <p class="template-subheader">Thanks for signing up</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi {{first_name}} {{last_name}},</p>
+    <p class="template-welcome-message">
+      We're thrilled to have you join us. Experience quality and innovation
+      like never before. Our product is made to fit your needs and make your
+      life easier.
+    </p>
+    <div class="editable-content">
+      <p class="editable-content-title">
+        Here’s what you can look forward to
+      </p>
+      <div class="editable-content-list">
+        <p>
+          <span>Exclusive Offers:</span> Enjoy special promotions and
+          discounts available only to our members.
+        </p>
+        <p>
+          <span>Exclusive Offers:</span> Enjoy special promotions and
+          discounts available only to our members.
+        </p>
+        <p>
+          <span>Exclusive Offers:</span> Enjoy special promotions and
+          discounts available only to our members.
+        </p>
+      </div>
+    </div>
+    <button class="template-btn">Learn More About Us</button>
+    <div class="template-farewell">
+      <p>Regards,</p>
+      <p>Boilerplate</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
