@@ -56,5 +56,19 @@ class TestimonialService(Service):
         except Exception as e:
             db.rollback()
             raise e
+    
+    def get_testimonial_by_rating(self, db: Session, ratings):
+        query = db.query(Testimonial)
+        query_rating = query.filter(Testimonial.ratings == ratings)
+        return (query_rating)
+
+    def get_testimonial_by_created_at(self, db: Session, created_at):
+        query = db.query(Testimonial)
+        query_created_at = query.filter(Testimonial.created_at == created_at)
+        return (query_created_at)
  
+    def get_all_testimonial(self, db: Session):
+        query = db.query(Testimonial)
+        return (query)
+    
 testimonial_service = TestimonialService()

@@ -118,6 +118,10 @@ async def get_testimonials(
 ):
     if ratings is not None and (ratings < 1 or ratings > 5):
         raise HTTPException(status_code=400, detail="Rating must be between 1 and 5")
+    
+    if ratings:
+        rating = testimonial_service.get_testimonial_by_rating(db, ratings)
+        return (rating)
 
     if created_at:
         try:
@@ -125,12 +129,10 @@ async def get_testimonials(
         except ValueError:
             raise HTTPException(status_code=400, detail="Date must be in YYYY-MM-DD format")
 
-    query = db.query(Testimonial)
-
-    if ratings:
-        query = query.filter(Testimonial.ratings == ratings)
-    
     if created_at:
-        query = query.filter(Testimonial.created_at == created_at)
+        date_created = testimonial_service.get_testimonial_by_created_at(db, created_at)
+        return (date_created)
 
-    return paginate(query, params)
+    all = testimonial_service.get_all_testimonial(db)
+    return paginate(all, params)
+
