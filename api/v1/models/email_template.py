@@ -1,10 +1,10 @@
-from sqlalchemy import Column, String, Text, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, Text
 from api.v1.models.base_model import BaseTableModel
 
 
 class EmailTemplate(BaseTableModel):
     __tablename__ = "email_templates"
 
-    name = Column(Text, nullable=False)
-    html_content = Column(Text, nullable=False)
+    title = Column(Text, nullable=False)
+    template = Column(Text, nullable=False)
+    status = Column(Boolean, server_default='true')

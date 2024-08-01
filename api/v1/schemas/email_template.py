@@ -21,9 +21,9 @@ ALLOWED_STYLES = [
 ]
 
 
-def sanitize_html(html_content: str) -> str:
+def sanitize_html(template: str) -> str:
     cleaned_html = bleach.clean(
-        html_content,
+        template,
         tags=ALLOWED_TAGS,
         attributes=ALLOWED_ATTRIBUTES,
         strip=False
@@ -32,10 +32,11 @@ def sanitize_html(html_content: str) -> str:
 
 class EmailTemplateSchema(BaseModel):
 
-    name: str
-    html_content: str
+    title: str
+    template: str
+    status: bool = True
 
-    @field_validator("html_content")
+    @field_validator("template")
     @classmethod
-    def html_content_validator(cls, value):
+    def template_validator(cls, value):
         return sanitize_html(value)

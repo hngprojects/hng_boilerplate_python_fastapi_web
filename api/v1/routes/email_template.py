@@ -63,3 +63,32 @@ async def get_single_template(
         message="Successfully fetched email template",
         status_code=status.HTTP_200_OK,
     )
+
+
+@email_template.patch("/{template_id}", response_model=success_response, status_code=200)
+async def update_template(
+    template_id: str,
+    schema: EmailTemplateSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Endpoint to update a single template"""
+
+    template = email_template_service.update(db, template_id=template_id, schema=schema)
+
+    return success_response(
+        data=jsonable_encoder(template),
+        message="Successfully updated template",
+        status_code=status.HTTP_200_OK,
+    )
+
+
+@email_template.delete("/{template_id}", status_code=204)
+async def delete_email_template(
+    template_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Endpoint to delete a single template"""
+
+    email_template_service.delete(db, template_id=template_id)

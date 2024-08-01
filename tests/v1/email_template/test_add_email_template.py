@@ -45,8 +45,8 @@ def mock_get_current_admin():
 def mock_email_template():
     return EmailTemplate(
         id=str(uuid7()),
-        name="Test name",
-        html_content="<h1>Hello</h1>",
+        title="Test name",
+        template="<h1>Hello</h1>",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -84,8 +84,8 @@ def test_create_template_success(client, db_session_mock):
             '/api/v1/email-templates',
             headers={'Authorization': 'Bearer token'},
             json={
-                "name": "Test name?",
-                "html_content": "<h1>Testing</h1>",
+                "title": "Test title?",
+                "template": "<h1>Testing</h1>",
             }
         )
 
@@ -111,7 +111,7 @@ def test_create_template_missing_field(client, db_session_mock):
             '/api/v1/email-templates',
             headers={'Authorization': 'Bearer token'},
             json={
-                "html_content": "<h1>Testing</h1>",
+                "template": "<h1>Testing</h1>",
             }
         )
 
@@ -124,8 +124,8 @@ def test_create_template_unauthorized(client, db_session_mock):
     response = client.post(
         '/api/v1/email-templates',
         json={
-            "name": "Test name?",
-            "html_content": "<h1>Testing</h1>",
+            "title": "Test title?",
+            "template": "<h1>Testing</h1>",
         }
     )
 
