@@ -5,7 +5,13 @@ from api.v1.models import User
 from typing import Annotated
 from api.db.database import get_db
 from api.v1.services.user import user_service
+from api.utils.email_service import send_mail
 from api.v1.services.notification import notification_service
+# from api.v1.schemas.notification import NotificationRead
+from api.utils.dependencies import get_current_user
+from api.v1.models.notifications import Notification
+from api.v1.schemas.notification import ResponseModel, NotificationCreate
+
 
 from api.v1.schemas.notification import NotificationCreate
 
@@ -13,23 +19,46 @@ from api.v1.schemas.notification import NotificationCreate
 notification = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 
-@notification.post(
-    "/send",
-    summary="Send a notification",
-    description="This endpoint sends a notification",
-    status_code=status.HTTP_201_CREATED,
-)
-def send_notification(
-    notification_data: NotificationCreate, db: Session = Depends(get_db)
+@notification.post("/send", response_model=ResponseModel)
+async def create_notification(
+    notification: NotificationCreate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
-    notification = notification_service.send_notification(
-        title=notification_data.title,
-        message=notification_data.message,
-        db=db,
-    )
-    return success_response(
-        status_code=201, message="Notification sent successfully", data=notification
-    )
+    try:
+        # Create the notification
+        created_notification = notification_service.create_notification(notification, user, db)
+        
+        # Convert the notification to a dictionary format if needed
+        notification_data = {
+            "id": created_notification.id,
+            "user_id": created_notification.user_id,
+            "title": created_notification.title,
+            "message": created_notification.message,
+            "created_at": created_notification.created_at
+        }
+        
+        
+        
+        response = {
+            "success": True,
+            "status_code": 200,
+            "message": "Notification created successfully",
+            "data": notification_data
+        }
+        return response
+
+    except Exception as e:
+        # Construct an error response
+        response = {
+            "success": False,
+            "status_code": 500,
+            "message": f"An unexpected error occurred: {str(e)}",
+            "error_details": str(e)
+        }
+        raise HTTPException(status_code=500, detail=str(response))
+
+
 
 
 @notification.patch(

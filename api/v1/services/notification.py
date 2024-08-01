@@ -1,13 +1,36 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.db.database import get_db
 from api.v1.models.notifications import Notification
 from api.v1.models.user import User
+from api.utils.email_service import send_mail
+from typing import List
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from api.v1.schemas.notification import NotificationCreate
+
+# from api.v1.schemas.notification import NotificationRead
+
+
 
 
 class NotificationService(Service):
+    
+    def create_notification(
+        self,
+        notification: NotificationCreate,
+        user: User,
+        db: Session = Depends(get_db),
+    ):
+        new_notification = Notification(
+            user_id=user.id,
+            title=notification.title,
+            message=notification.message,
+        )
+
 
     def send_notification(
         self, title: str, message: str, db: Session = Depends(get_db)
@@ -18,6 +41,10 @@ class NotificationService(Service):
         db.commit()
         db.refresh(new_notification)
         return new_notification
+    
+    
+    
+    
 
     def mark_notification_as_read(
         self,
@@ -42,7 +69,9 @@ class NotificationService(Service):
         notification.status = "read"
 
         # commit changes
-        db.commit()
+        db.commit()        
+
+
         db.refresh(notification)
         return notification
 

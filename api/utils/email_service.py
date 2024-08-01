@@ -3,6 +3,7 @@ from api.utils.settings import settings
 from fastapi import HTTPException
 
 
+
 def send_mail(to: str, subject: str, body: str):
     """Function to send email to a user either as a regular test or as html file"""
     try:
