@@ -4,8 +4,10 @@ from email.mime.multipart import MIMEMultipart
 from api.utils.settings import settings
 
 url = "deployment.api-python.boilerplate.hng.tech"
+
+
 def send_magic_link(email: str, token: str):
-    '''Sends magic-kink to user email'''
+    """Sends magic-kink to user email"""
     sender_email = settings.MAIL_USERNAME
     receiver_email = email
     password = settings.MAIL_PASSWORD

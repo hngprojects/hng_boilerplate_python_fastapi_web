@@ -17,6 +17,7 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
+
     email: EmailStr
     password: str
     first_name: str
@@ -34,6 +35,11 @@ class UserCreate(BaseModel):
             )
         return value
 
+class UserUpdate(BaseModel):
+    
+    first_name : Optional[str] = None
+    last_name : Optional[str] = None
+    email : Optional[str] = None
 class UserData(BaseModel):
     """
     Schema for users to be returned to superadmin
@@ -65,12 +71,39 @@ class AllUsersResponse(BaseModel):
     total: int
     data: Union[List[UserData], List[None]]    
 
+class AdminCreateUser(BaseModel):
+    """
+    Schema for admin to create a users
+    """
+    email: EmailStr
+    first_name: str
+    last_name: str
+    password: str = ''
+    is_active: bool = False
+    is_deleted: bool = False
+    is_verified: bool = False
+    is_super_admin: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AdminCreateUserResponse(BaseModel):
+    """
+    Schema response for user created by admin
+    """
+    message: str
+    status_code: int
+    status: str
+    data: UserData
+
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 class EmailRequest(BaseModel):
     email: EmailStr
+
 
 class Token(BaseModel):
     access_token: str
@@ -103,12 +136,14 @@ class ChangePwdRet(BaseModel):
     status_code: int
     message: str
 
+
 class MagicLinkRequest(BaseModel):
-    '''Schema for magic link creation'''
+    """Schema for magic link creation"""
 
     email: EmailStr
 
+
 class MagicLinkResponse(BaseModel):
-    '''Schema for magic link respone'''
+    """Schema for magic link respone"""
 
     message: str

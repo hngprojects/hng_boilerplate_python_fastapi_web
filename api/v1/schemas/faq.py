@@ -2,8 +2,9 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel
 
+
 class FAQBase(BaseModel):
-    '''Base schema for FAQ'''
+    """Base schema for FAQ"""
 
     id: str
     question: str
@@ -13,15 +14,14 @@ class FAQBase(BaseModel):
 
 
 class CreateFAQ(BaseModel):
-    '''Schema for creating FAQ'''
+    """Schema for creating FAQ"""
 
     question: str
     answer: str
 
 
 class UpdateFAQ(BaseModel):
-    '''Schema for updating FAQ'''
+    """Schema for updating FAQ"""
 
     question: Optional[str]
     answer: Optional[str]
-

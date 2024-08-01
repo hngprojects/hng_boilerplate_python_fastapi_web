@@ -54,7 +54,7 @@ class GoogleOauthServices(Service):
         """
         pass
 
-    def fetch_all(self, db: Annotated[Session, Depends(get_db)])-> Union[list, bool]:
+    def fetch_all(self, db: Annotated[Session, Depends(get_db)]) -> Union[list, bool]:
         """
         Retrieves all users information from the oauth table
 
@@ -76,8 +76,12 @@ class GoogleOauthServices(Service):
         """
         pass
 
-    def update(self, oauth_data: object, google_response: dict,
-               db: Annotated[Session, Depends(get_db)]) -> Union[None, bool]:
+    def update(
+        self,
+        oauth_data: object,
+        google_response: dict,
+        db: Annotated[Session, Depends(get_db)],
+    ) -> Union[None, bool]:
         """
         Updates a user information in the oauth table
 
@@ -93,7 +97,7 @@ class GoogleOauthServices(Service):
         try:
             # update the access and refresh token
             oauth_data.access_token = google_response.get("access_token")
-            oauth_data.refresh_token = google_response.get("refresh_token", '')
+            oauth_data.refresh_token = google_response.get("refresh_token", "")
             oauth_data.updated_at = datetime.now(timezone.utc)
             # commit and return the user object
             db.commit()
@@ -116,15 +120,21 @@ class GoogleOauthServices(Service):
             # create refresh token
             refresh_token = user_service.create_access_token(user.id)
             # create a token data for response
-            tokens = Tokens(access_token=access_token,
-                            refresh_token=refresh_token,
-                            token_type="bearer")
+            tokens = Tokens(
+                access_token=access_token,
+                refresh_token=refresh_token,
+                token_type="bearer",
+            )
             return tokens
         except Exception:
             return False
 
-    def create_oauth_data(self, user_id: int, google_response: dict,
-                          db: Annotated[Session, Depends(get_db)]) -> Union[None, bool]:
+    def create_oauth_data(
+        self,
+        user_id: int,
+        google_response: dict,
+        db: Annotated[Session, Depends(get_db)],
+    ) -> Union[None, bool]:
         """
         Creates OAuth data for a new user.
 
@@ -143,7 +153,7 @@ class GoogleOauthServices(Service):
                 user_id=user_id,
                 sub=google_response["userinfo"].get("sub"),
                 access_token=google_response.get("access_token"),
-                refresh_token=google_response.get("refresh_token", '')
+                refresh_token=google_response.get("refresh_token", ""),
             )
             db.add(oauth_data)
             db.commit()
@@ -151,8 +161,9 @@ class GoogleOauthServices(Service):
             db.rollback()
             return False
 
-    def create_new_user(self, google_response: dict,
-                        db: Annotated[Session, Depends(get_db)]) -> Union[User, bool]:
+    def create_new_user(
+        self, google_response: dict, db: Annotated[Session, Depends(get_db)]
+    ) -> Union[User, bool]:
         """
         Creates a new user and their associated profile and OAuth data.
 
