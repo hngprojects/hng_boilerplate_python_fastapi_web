@@ -17,3 +17,13 @@ class CreateSqueeze(BaseModel):
     type: str = "product"
     status: SqueezeStatusEnum = SqueezeStatusEnum.offline
     full_name: str = None
+
+class UpdateSqueeze(BaseModel):
+    title: str = None
+    type: str = None
+    status: SqueezeStatusEnum = None
+    url_slug: str = None
+    headline: str = None
+    sub_headline: str = None
+    body: str = None
+    full_name: str = None

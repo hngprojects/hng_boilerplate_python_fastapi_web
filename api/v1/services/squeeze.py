@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.squeeze import Squeeze
-from api.v1.schemas.squeeze import CreateSqueeze
+from api.v1.schemas.squeeze import CreateSqueeze, UpdateSqueeze
 
 
 class SqueezeService(Service):
@@ -34,9 +34,17 @@ class SqueezeService(Service):
         """Fetch a specific squeeze page"""
         pass
 
-    def update(self, db: Session, id: str, schema):
+    def update(self, db: Session, id: str, data: UpdateSqueeze):
         """Update a specific squeeze page"""
-        pass
+        squeeze = db.query(Squeeze).filter(Squeeze.id == id).first()
+        if squeeze:
+            for key, value in data.model_dump().items():
+                if value is not None:
+                    setattr(squeeze, key, value)
+            db.commit()
+            db.refresh(squeeze)
+            return squeeze
+        return None
 
     def delete(self, db: Session, id: str):
         """Delete a specific squeeze page"""

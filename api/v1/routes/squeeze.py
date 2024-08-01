@@ -4,7 +4,7 @@ from api.db.database import get_db
 from api.core.responses import SUCCESS
 from api.utils.success_response import success_response
 from api.v1.services.squeeze import squeeze_service
-from api.v1.schemas.squeeze import CreateSqueeze
+from api.v1.schemas.squeeze import CreateSqueeze, UpdateSqueeze
 from api.v1.services.user import user_service
 from api.v1.models import *
 
@@ -25,3 +25,16 @@ def create_squeeze(
     data.full_name = f"{user.first_name} {user.last_name}"
     new_squeeze = squeeze_service.create(db, data)
     return success_response(status.HTTP_201_CREATED, SUCCESS, new_squeeze.to_dict())
+
+@squeeze.put("/{id}", response_model=success_response, status_code=200)
+def update_squeeze(
+    data: UpdateSqueeze,
+    id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Update a squeeze page"""
+    squeeze = squeeze_service.update(db, id, data)
+    if squeeze:
+        return success_response(status.HTTP_200_OK, SUCCESS, squeeze.to_dict())
+    return success_response(status.HTTP_404_NOT_FOUND, "Squeeze page not found!")
