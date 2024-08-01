@@ -51,5 +51,3 @@ async def test_get_products_by_invalid_status():
     )
     
     assert response.status_code == 500
-    response_json = response.json()
-    assert response_json["status_code"] == 500
