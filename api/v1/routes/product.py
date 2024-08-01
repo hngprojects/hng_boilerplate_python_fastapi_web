@@ -14,7 +14,6 @@ from api.v1.schemas.product import (
     ProductList,
     ProductUpdate,
     ResponseModel,
-    ProductDetail,
     ProductFilterResponse,
     SuccessResponse,
 )
@@ -190,44 +189,6 @@ async def update_product(
         message="Product updated successfully",
         data=jsonable_encoder(updated_product),
     )
-
-
-@product.get(
-    "/{id}",
-    response_model=dict[str, int | str | bool | ProductDetail],
-    summary="Get product detail",
-    description="Endpoint to get detail about the product with the given `id`",
-)
-async def get_product_detail(
-    id: str,
-    db: Session = Depends(get_db),
-    _: User = Depends(user_service.get_current_user),
-):
-    """
-    Retrieve product detail
-
-    This endpoint retrieve details about a product
-
-    Args:
-        id (UUID): The unique identifier of the product to be retrieved.
-        db (Session): The database session, provided by the `get_db` dependency.
-        _ (User): The currently authenticated user, obtained from the `get_current_user` dependency.
-
-    Returns:
-        ProductDetail: The detail of the product matching the given id
-
-    Raises:
-        HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
-    """
-
-    product = product_service.fetch(db, id)
-
-    return {
-        "status_code": status.HTTP_200_OK,
-        "success": True,
-        "message": "Product fetched successfully",
-        "data": product,
-    }
 
 
 @product.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)

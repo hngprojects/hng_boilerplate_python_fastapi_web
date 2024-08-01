@@ -7,6 +7,7 @@ from datetime import datetime, timezone, timedelta
 
 from api.v1.models.organization import Organization
 from api.v1.models.product import Product, ProductCategory
+from api.v1.models.user import User
 from ....main import app
 from api.v1.routes.blog import get_db
 from api.v1.services.user import user_service
@@ -39,6 +40,17 @@ timeinfo = datetime.now(tzinfo)
 created_at = timeinfo
 updated_at = timeinfo
 access_token = user_service.create_access_token(str(user_id))
+access_token2 = user_service.create_access_token(str(uuid7()))
+
+# create test user
+
+user = User(
+    id=str(user_id),
+    email="testuser@test.com",
+    password="password123",
+    created_at=created_at,
+    updated_at=updated_at,
+)
 
 # Create test organization
 
@@ -76,22 +88,22 @@ product = Product(
 )
 
 
-def test_get_product_detail_success(
-    client, db_session_mock
-):
+# user.organization = org
+
+
+def test_get_product_detail_success(client, db_session_mock):
     db_session_mock.query().filter().all.first.return_value = product
     headers = {"authorization": f"Bearer {access_token}"}
 
-    response = client.get(f"/api/v1/products/{product_id}", headers=headers)
-    data = response.json()["data"]
-
-    print(data)
+    response = client.get(
+        f"/api/v1/organizations/{org_id}/products/{product_id}", headers=headers
+    )
 
     assert response.status_code == 200
 
 
-def test_get_proudct_detail_unauthenticated_user(client, db_session_mock):
+def test_get_product_detail_unauthenticated_user(client, db_session_mock):
     db_session_mock.query().filter().all.first.return_value = product
-    response = client.get(f"/api/v1/products/{product_id}")
+    response = client.get(f"/api/v1/organizations/{org_id}/products/{product_id}")
 
     assert response.status_code == 401

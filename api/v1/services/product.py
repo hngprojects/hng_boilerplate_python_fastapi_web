@@ -78,10 +78,16 @@ class ProductService(Service):
 
         return query.all()
 
-    def fetch(self, db: Session, id: str) -> Product:
+    def fetch(self, db: Session, org_id: str, product_id: str, current_user: User) -> Product:
         """Fetches a product by id"""
 
-        product = check_model_existence(db, Product, id)
+        # check if user belongs to org
+
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        product = check_model_existence(db, Product, product_id)
         return product
 
     def fetch_by_organization(self, db: Session, user, org_id, limit, page):
