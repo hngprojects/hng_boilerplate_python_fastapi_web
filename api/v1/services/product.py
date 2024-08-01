@@ -1,5 +1,6 @@
 from typing import Any, Optional
 from sqlalchemy.orm import Session
+from typing import List, Union
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
@@ -72,10 +73,13 @@ class ProductService(Service):
         except Exception as e:
             raise
     
-    def fetch_by_status(self, db: Session, status: ProductStatusEnum):
-        '''Fetch products by filter status'''
+    def fetch_by_status(self, db: Session, status: str):
+        '''Fetch products by status'''
         try:
-            products = db.query(Product).filter(Product.status == status.value).all()
+            if status == 'all':
+                products = db.query(Product).all()
+            else:
+                products = db.query(Product).filter(Product.status == status).all()
             response_data = [ProductFilterResponse.from_orm(product) for product in products]
             return response_data
         except Exception as e:

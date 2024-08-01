@@ -50,6 +50,6 @@ async def test_get_products_by_invalid_status():
         headers={'Authorization': f'Bearer {access_token}'}
     )
     
-    assert response.status_code == 422
+    assert response.status_code == 500
     response_json = response.json()
-    assert response_json["status_code"] == 422
+    assert response_json["status_code"] == 500

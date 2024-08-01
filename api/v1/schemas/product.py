@@ -1,6 +1,8 @@
-from pydantic import BaseModel, Field, PositiveFloat
+from pydantic import BaseModel, Field, PositiveFloat, field_validator
 from typing import List, Optional, Any, Dict, TypeVar, Generic, Union
 from datetime import datetime
+
+from api.v1.models.product import ProductStatusEnum
 
 T = TypeVar('T')
 
@@ -90,3 +92,16 @@ class SuccessResponse(BaseModel, Generic[T]):
     message: str
     status_code: int
     data: T
+
+
+
+
+class ProductStatusQueryModel(BaseModel):
+    status: str
+
+    @field_validator('status')
+    def validate_status(cls, v):
+        allowed_values = ["in_stock", "out_of_stock", "low_on_stock", 'all']
+        if v not in allowed_values:
+            raise ValueError(f"Input should be  'all', 'in_stock', 'out_of_stock' or 'low_on_stock'. Received value: '{v}'")
+        return v
