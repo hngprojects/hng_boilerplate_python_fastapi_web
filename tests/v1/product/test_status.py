@@ -43,11 +43,11 @@ async def test_get_products_by_status():
     assert response["message"] == "Products retrieved successfully"
 
 @pytest.mark.asyncio
-async def test_get_products_by_invalid_status():
+async def test_get_products_by_valid_status_all():
     access_token = user_service.create_access_token(str(user_id))
     response = client.get(
-        '/api/v1/products/status?status=invalid_status', 
+        '/api/v1/products/status?status=all', 
         headers={'Authorization': f'Bearer {access_token}'}
     )
     
-    assert response.status_code == 500
+    assert response.status_code == 200
