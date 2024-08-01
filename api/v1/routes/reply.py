@@ -15,6 +15,10 @@ reply_router = APIRouter(prefix='/comments', tags=['comments_reply'])
 @reply_router.post('/{comment_id}/reply', response_model=success_response, status_code=status.HTTP_201_CREATED)
 async def reply_to_a_comment(comment_id: str, schema: ReplyCreate, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     """
+    Endpoint to add reply to a comment
+    
+    Request Params:
+        comment_id: id of comment user want to reply to
     """
     user_id = current_user.id
     
