@@ -7,7 +7,7 @@ from typing import List
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
-from api.v1.models.product import Product, ProductFilterStatusEnum
+from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service
 from api.v1.schemas.product import (
     ProductUpdate,
@@ -52,6 +52,24 @@ async def get_products_by_filter_status(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to retrieve products")
+    
+@product.get('/status', response_model=SuccessResponse[List[ProductFilterResponse]], status_code=200)
+async def get_products_by_status(
+    status: ProductStatusEnum = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    '''Endpoint to get products by status'''
+    try:
+        products = product_service.fetch_by_status(db, status)
+        return SuccessResponse(
+            message="Products retrieved successfully",
+            status_code=200,
+            data=products
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+
 
 @product.get(
     "/organizations/{org_id}",

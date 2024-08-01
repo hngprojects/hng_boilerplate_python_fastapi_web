@@ -131,16 +131,15 @@ class ProductFilterResponse(BaseModel):
     image_url: str
     status: str
     archived: Optional[bool] = False
-    filter_status: str
+    filter_status: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
     class Config:
-        orm_mode = True
         from_attributes = True
 
 
-class SuccessResponse(Generic[T], BaseModel):
+class SuccessResponse(BaseModel, Generic[T]):
     message: str
     status_code: int
     data: T

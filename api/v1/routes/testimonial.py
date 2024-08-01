@@ -13,40 +13,42 @@ from api.v1.services.user import user_service
 from api.v1.schemas.testimonial import CreateTestimonial
 from api.core.responses import SUCCESS
 from typing import Annotated
+from api.utils.pagination import paginated_response
+from api.v1.models.testimonial import Testimonial
 
 testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
 
 
-@testimonial.get('', status_code=status.HTTP_200_OK)
+@testimonial.get("", status_code=status.HTTP_200_OK)
 def get_testimonials(
+    page_size: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
-    page : int = Query(1, gt=0),
-    page_size : int = Query(10, gt=0)
 ):
     """End point to Query Testimonials with pagination"""
 
-    testimonials = testimonial_service.fetch_all(page= page , page_size=page_size, db=db)
-    return {
-        'status_code' :  status.HTTP_200_OK,
-        'message' : 'Testimonials fetched Successfully',
-        'data': [jsonable_encoder(testimonial) for testimonial in testimonials]
-        }
+    return paginated_response(
+        db=db,
+        model=Testimonial,
+        limit=page_size,
+        skip=max(page,0),
+    )
 
 
-@testimonial.get('/{testimonial_id}', status_code=status.HTTP_200_OK)
+@testimonial.get("/{testimonial_id}", status_code=status.HTTP_200_OK)
 def get_testimonial(
     testimonial_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user)
+    current_user: User = Depends(user_service.get_current_user),
 ):
-    '''Endpoint to get testimonial by id'''
+    """Endpoint to get testimonial by id"""
 
     testimonial = testimonial_service.fetch(db, testimonial_id)
 
     return success_response(
         status_code=200,
-        message=f'Testimonial {testimonial_id} retrieved successfully',
-        data=jsonable_encoder(testimonial)
+        message=f"Testimonial {testimonial_id} retrieved successfully",
+        data=jsonable_encoder(testimonial),
     )
 
 
@@ -54,7 +56,7 @@ def get_testimonial(
 def delete_testimonial(
     testimonial_id: str,
     current_user: User = Depends(user_service.get_current_super_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Function for deleting a testimonial based on testimonial id

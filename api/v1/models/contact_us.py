@@ -3,6 +3,7 @@ from sqlalchemy import Column, String, Text
 from sqlalchemy.sql import func
 from api.v1.models.base_model import BaseTableModel
 
+
 class ContactUs(BaseTableModel):
     __tablename__ = "contact_us"
 

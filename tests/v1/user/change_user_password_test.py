@@ -62,7 +62,7 @@ def test_autheniticated_user(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["access_token"]
+    access_token = login.json()["data"]["user"]["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
@@ -82,7 +82,7 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["access_token"]
+    access_token = login.json()["data"]["user"]["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
@@ -103,7 +103,7 @@ def test_user_password(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["access_token"]
+    access_token = login.json()["data"]["user"]["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
