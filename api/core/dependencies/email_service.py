@@ -24,6 +24,7 @@ async def send_email(
     context: Optional[dict] = None
 ):
     from main import email_templates
+    from premailer import transform
     
     message = MessageSchema(
         subject=subject,
@@ -33,7 +34,7 @@ async def send_email(
     
     # Render the template with context
     html = email_templates.get_template(template_name).render(context)
-    message.body = html
+    message.body = transform(html)
     
     fm = FastMail(conf)
     await fm.send_message(message)
