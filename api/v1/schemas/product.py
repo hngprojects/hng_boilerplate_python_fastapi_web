@@ -137,7 +137,7 @@ class ProductFilterResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
+        
 
 class SuccessResponse(BaseModel, Generic[T]):
     message: str
