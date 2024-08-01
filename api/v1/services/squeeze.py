@@ -26,7 +26,7 @@ class SqueezeService(Service):
         db.refresh(new_squeeze)
         return new_squeeze
 
-   def fetch_all(self, db: Session):
+    def fetch_all(self, db: Session):
         """Fetch all squeeze pages"""
         return db.query(Squeeze).all()
 
