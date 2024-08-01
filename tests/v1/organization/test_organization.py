@@ -4,6 +4,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
+from uuid import uuid4
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.models import User
@@ -61,27 +62,37 @@ def override_get_db(db_session_mock):
     yield
     app.dependency_overrides.clear()
     
-# Mock the current user function
 @pytest.fixture
 def mock_get_current_user():
-    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
+    user = {"id": 1, "email": "test@example.com"}
+    with patch.object(UserService, 'get_current_user', return_value=user):
         yield
 
-# Test case to verify successful organization retrieval
 def test_get_organization_success(client, db_session_mock, mock_get_current_user):
-    '''Test to successfully retrieve an existing organization'''
-    db_session_mock.query().filter().first.return_value = mock_org()
+    mock_organization = Organization(
+        id=str(uuid4()),
+        company_name="Test Organization",
+        company_email="testorg@gmail.com",
+        industry="Tech",
+        organization_type="Tech",
+        country="Nigeria",
+        state="Lagos",
+        address="123 Street",
+        lga="LGA",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
 
-    response = client.get(f"/api/v1/organizations/{mock_org.id}", headers={"Authorization": "Bearer token"})
+    db_session_mock.query().filter().first.return_value = mock_organization
+
+    response = client.get(f"/api/v1/organizations/{mock_organization.id}", headers={"Authorization": "Bearer token"})
     assert response.status_code == 200
     data = response.json()
-    assert data["company_name"] == mock_org.company_name
-    assert data["company_email"] == mock_org.company_email
+    assert data["id"] == mock_organization.id
+    assert data["company_name"] == mock_organization.company_name
+    assert data["company_email"] == mock_organization.company_email
 
-
-# Test case to handle organization not found scenario
 def test_get_organization_not_found(client, db_session_mock, mock_get_current_user):
-    '''Test to handle organization not found scenario'''
     db_session_mock.query().filter().first.return_value = None
 
     response = client.get("/api/v1/organizations/nonexistent-id", headers={"Authorization": "Bearer token"})
@@ -89,8 +100,6 @@ def test_get_organization_not_found(client, db_session_mock, mock_get_current_us
     data = response.json()
     assert data["detail"] == "Organization not found"
 
-
-# Test case to handle invalid organization ID format
 def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user):
-    response = client.get("/api/v1/organizations/abc", headers={"Authorization": "Bearer token"})
+    response = client.get("/api/v1/organizations/invalid-id", headers={"Authorization": "Bearer token"})
     assert response.status_code == 422  # Unprocessable Entity due to validation error
