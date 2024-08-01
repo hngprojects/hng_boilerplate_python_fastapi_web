@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Deactivation due to Inactivity{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/account-inactivity.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Account Deactivation Due To Inactivity</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      We hope this email finds you well. We wanted to inform you that your
+      Boilerplate account has been deactivated due to a prolonged period of
+      inactivity.
+    </p>
+    <div class="editable-content">
+      <div class="editable-content-list">
+        <p><span>Your deactivation details:</span></p>
+        <p><span>Account Email: </span>johndoe@gmail.com</p>
+        <p><span>Last Active:</span> 17th June, 2024 / 11:56pm</p>
+        <p><span>Deactivation Date:</span> 20th July, 2024 / 11:56pm</p>
+      </div>
+      <p>
+        If you would like to re-activate your account, you can easily do so
+        by contacting our support team via the details below.
+      </p>
+      <p>
+        Give us a call at
+        <span style="font-weight: 600">(+234)-456-7890</span> or shoot us an
+        email at <span style="font-weight: 600">support@llaihng.com</span>
+      </p>
+      <p>We value your membership and would love to have you back.</p>
+    </div>
+    <div class="template-farewell">
+      <p>Regards,</p>
+      <p>Boilerplate</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

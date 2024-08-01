@@ -3,11 +3,12 @@ from api.v1.models.activity_logs import ActivityLog
 from typing import Optional, List
 
 
+
 class ActivityLogService:
-    '''Activity Log service'''
+    """Activity Log service"""
 
     def create_activity_log(self, db: Session, user_id: str, action: str):
-        '''Creates a new activity log'''
+        """Creates a new activity log"""
 
         activity_log = ActivityLog(user_id=user_id, action=action)
         db.add(activity_log)

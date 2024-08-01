@@ -86,7 +86,7 @@ def paginated_response(
         status_code=200,
         message="Successfully fetched items",
         data={
-            'pages': total_pages,
+            "pages": total_pages,
             "total": total,
             "skip": skip,
             "limit": limit,

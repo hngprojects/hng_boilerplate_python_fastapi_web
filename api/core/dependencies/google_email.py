@@ -6,10 +6,10 @@ from api.utils.settings import settings
 
 
 class MailService:
-    '''Class to send different emails for different services'''
+    """Class to send different emails for different services"""
 
     def send_mail(self, to: str, subject: str, body: str):
-        '''Function to send email to a user either as a regular test or as html file'''
+        """Function to send email to a user either as a regular test or as html file"""
 
         try:
             with smtplib.SMTP(settings.MAIL_SERVER, settings.MAIL_PORT) as conn:
@@ -24,7 +24,7 @@ class MailService:
         except smtplib.SMTPException as smtp_error:
             raise HTTPException(500, f'SMTP ERROR- {smtp_error}')
 
-        print('Email sent successfully')
+        print("Email sent successfully")
 
 
 mail_service = MailService()

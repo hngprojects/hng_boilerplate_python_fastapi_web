@@ -17,6 +17,7 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
+
     email: EmailStr
     password: str
     first_name: str
@@ -99,8 +100,10 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 class EmailRequest(BaseModel):
     email: EmailStr
+
 
 class Token(BaseModel):
     access_token: str
@@ -133,12 +136,14 @@ class ChangePwdRet(BaseModel):
     status_code: int
     message: str
 
+
 class MagicLinkRequest(BaseModel):
-    '''Schema for magic link creation'''
+    """Schema for magic link creation"""
 
     email: EmailStr
 
+
 class MagicLinkResponse(BaseModel):
-    '''Schema for magic link respone'''
+    """Schema for magic link respone"""
 
     message: str
