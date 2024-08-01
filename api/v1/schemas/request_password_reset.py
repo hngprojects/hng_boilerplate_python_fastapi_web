@@ -4,7 +4,7 @@ import re
 
 class RequestEmail(BaseModel):
     user_email: EmailStr
-    
+
 
 class ResetPassword(BaseModel):
     new_password: str = Field(min_length=8)
