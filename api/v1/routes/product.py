@@ -212,9 +212,9 @@ def delete_product(
 
 
 @product.post("/admin/", status_code=status.HTTP_201_CREATED, response_model=success_response)
-async def create_product(
+async def admin_create_product(
     product_data: ProductCreate,
-    current_user: Annotated[User, Depends(get_super_admin)],
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     db: Session = Depends(get_db),
 ):
     """
