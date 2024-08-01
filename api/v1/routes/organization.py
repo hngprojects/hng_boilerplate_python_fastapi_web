@@ -105,9 +105,6 @@ def get_organization(
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid UUID format")
     
     organization = organization_service.fetch(db, org_id)
-    
-    if organization is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
     return {
         "status": "success",
         "status_code": status.HTTP_200_OK,

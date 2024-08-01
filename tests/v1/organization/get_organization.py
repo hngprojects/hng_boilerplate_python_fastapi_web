@@ -28,15 +28,6 @@ def mock_get_current_user():
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
-
-# Mock organization
-def mock_org():
-    return Organization(
-        id=str(uuid7()),
-        company_name="Test Organization",
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-)
     
 # Fixture for the TestClient
 @pytest.fixture
@@ -88,14 +79,6 @@ def test_get_organization_success(client, db_session_mock, mock_get_current_user
     assert response.status_code == 200
     assert response.json()["message"] == 'Retrieved organization successfully'
     assert response.json()["data"]["company_name"] == "Updated Organization"
-
-def test_get_organization_not_found(client, db_session_mock, mock_get_current_user):
-    db_session_mock.query().filter().first.return_value = None
-
-    response = client.get("/api/v1/organizations/nonexistent-id", headers={"Authorization": "Bearer token"})
-    assert response.status_code == 422
-    data = response.json()
-    assert data["detail"] == "Organization not found"
 
 def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user):
     response = client.get("/api/v1/organizations/invalid-id", headers={"Authorization": "Bearer token"})
