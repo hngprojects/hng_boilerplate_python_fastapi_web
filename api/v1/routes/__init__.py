@@ -30,6 +30,7 @@ from api.v1.routes.regions import regions
 from api.v1.routes.api_tests import test_router
 from api.v1.routes.email_routes import email_sender
 from api.v1.routes.squeeze import squeeze
+from api.v1.routes.dashboard import dashboard
 from api.v1.routes.email_template import email_template
 from api.v1.routes.contact import contact
 
@@ -70,3 +71,4 @@ api_version_one.include_router(regions)
 api_version_one.include_router(test_router)
 api_version_one.include_router(squeeze)
 api_version_one.include_router(contact)
+api_version_one.include_router(dashboard)
