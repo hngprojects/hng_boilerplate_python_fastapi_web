@@ -140,7 +140,7 @@ async def get_product_detail(
         HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
     """
 
-    product = product_service.fetch(db, org_id, product_id, current_user)
+    product = product_service.fetch_single_by_organization(db, org_id, product_id, current_user)
 
     return {
         "status_code": status.HTTP_200_OK,
