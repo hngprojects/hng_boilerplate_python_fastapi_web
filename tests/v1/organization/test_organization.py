@@ -72,22 +72,24 @@ def test_get_organization_success(client, db_session_mock, mock_get_current_user
     '''Test to successfully retrieve an existing organization'''
     db_session_mock.query().filter().first.return_value = mock_org()
 
-    response = client.get("/api/v1/organizations/1", headers={"Authorization": "Bearer token"})
+    response = client.get(f"/api/v1/organizations/{mock_org.id}", headers={"Authorization": "Bearer token"})
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] is not None
-    assert data["company_name"] == "Test Organization"
-    assert data["company_email"] == "testorg@gmail.com"
+    assert data["id"] == mock_org.id
+    assert data["company_name"] == mock_org.company_name
+    assert data["company_email"] == mock_org.company_email
+
 
 # Test case to handle organization not found scenario
 def test_get_organization_not_found(client, db_session_mock, mock_get_current_user):
     '''Test to handle organization not found scenario'''
     db_session_mock.query().filter().first.return_value = None
 
-    response = client.get("/api/v1/organizations/999", headers={"Authorization": "Bearer token"})
+    response = client.get("/api/v1/organizations/nonexistent-id", headers={"Authorization": "Bearer token"})
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Organization not found"
+
 
 # Test case to handle invalid organization ID format
 def test_get_organization_invalid_id(client, db_session_mock, mock_get_current_user):

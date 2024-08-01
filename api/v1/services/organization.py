@@ -62,7 +62,7 @@ class OrganizationService(Service):
 
         return query.all()
     
-    def fetch(db: Session, org_id: str):
+    def fetch(db: Session, org_id: str) -> OrganizationBase:
         
         '''Fetches an organization by id'''
         Organization = db.query(Organization).filter(Organization.id == org_id).first()
