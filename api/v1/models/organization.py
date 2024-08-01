@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 """ The Organization model
 """
 from sqlalchemy import Column, String, Text, Enum
@@ -22,6 +22,11 @@ class Organization(BaseTableModel):
     users = relationship(
         "User", secondary=user_organization_association, back_populates="organizations"
     )
+    billing_plans = relationship("BillingPlan", back_populates="organization", cascade="all, delete-orphan")
+    invitations = relationship("Invitation", back_populates="organization", cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="organization", cascade="all, delete-orphan")
+    contact_us = relationship("ContactUs", back_populates="organization", cascade="all, delete-orphan")
+    
     billing_plans = relationship(
         "BillingPlan", back_populates="organization", cascade="all, delete-orphan"
     )

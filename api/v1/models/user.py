@@ -46,6 +46,8 @@ class User(BaseTableModel):
     comment_likes = relationship("CommentLike", back_populates="user", cascade="all, delete-orphan")
     comment_dislikes = relationship("CommentDislike", back_populates="user", cascade="all, delete-orphan")
     notification_setting = relationship("NotificationSetting", back_populates="user",  cascade="all, delete-orphan", uselist=False)
+    region = relationship("Region", back_populates="user", cascade="all, delete-orphan")
+    squeeze = relationship("Squeeze", back_populates="user", cascade="all, delete-orphan")
 
     
     def to_dict(self):
