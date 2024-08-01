@@ -86,7 +86,7 @@ def test_get_organization_success(client, db_session_mock, mock_get_current_user
 
     response = client.get(f"/api/v1/organizations/{mock_organization.id}", headers={"Authorization": "Bearer token"})
     assert response.status_code == 200
-    assert response.json()["message"] == 'Get Organization successfully'
+    assert response.json()["message"] == 'Retrieved organization successfully'
     assert response.json()["data"]["company_name"] == "Get Organization"
 
 def test_get_organization_not_found(client, db_session_mock, mock_get_current_user):
