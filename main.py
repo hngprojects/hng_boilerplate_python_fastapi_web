@@ -36,11 +36,6 @@ app.mount("/media/images", StaticFiles(directory=IMAGE_DIR), name="mediafiles")
 
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
-app.mount(
-    '/api/core/dependencies/email/static/css', 
-    StaticFiles(directory='api/core/dependencies/email/static'),
-    name='email_static'
-)
 
 origins = [
     "http://localhost:3000",

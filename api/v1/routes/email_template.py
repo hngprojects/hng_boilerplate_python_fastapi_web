@@ -46,3 +46,20 @@ async def create_email_template(
         message="Successfully created email template",
         status_code=status.HTTP_201_CREATED,
     )
+
+
+@email_template.get("/{template_id}", response_model=success_response, status_code=200)
+async def get_single_template(
+    template_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Endpoint to get a single template"""
+
+    template = email_template_service.fetch(db, template_id=template_id)
+
+    return success_response(
+        data=jsonable_encoder(template),
+        message="Successfully fetched email template",
+        status_code=status.HTTP_200_OK,
+    )
