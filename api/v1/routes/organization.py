@@ -104,4 +104,4 @@ def get_organization(
         status_code=status.HTTP_200_OK,
         message="Retrieved organization successfully",
         data=jsonable_encoder(organization)
-    )
+)
