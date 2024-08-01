@@ -6,11 +6,12 @@ from api.v1.models.reply import Reply
 
 class ReplyService(Service):
     """
+    CRUD class for the reply service
     """ 
     
-    # @staticmethod
     def create(self, db: Session, schema: ReplyCreate, comment_id: str, user_id: str):
         """
+        creates new reply
         """
         reply = Reply(**schema.model_dump(), user_id=user_id, comment_id=comment_id)
         db.add(reply)
