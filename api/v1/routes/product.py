@@ -11,6 +11,7 @@ from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatu
 from api.v1.services.product import product_service
 from api.v1.schemas.product import (
     ProductCreate,
+    ProductFilterResponse,
     ProductList,
     ProductUpdate,
     ResponseModel,
