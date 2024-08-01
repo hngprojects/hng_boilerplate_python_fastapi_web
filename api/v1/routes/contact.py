@@ -15,14 +15,14 @@ contact = APIRouter(prefix="/contact/messages", tags=['contact'])
 def get_contact(
         message_id: str,
         current_admin: User = Depends(user_service.get_current_super_admin),
-        db: Session = Depends(get_db)
+        db: Session = Depends(get_db),
 ):
 
     contact_message = ContactMessage()
 
     message = contact_message.fetch_message(db, message_id)
 
-    contact_message.check_admin_access(current_admin.id, message_id)
+    contact_message.check_admin_access(db, current_admin.id, message.org_id)
 
     if not message:
         contact_message.raise_not_found()
