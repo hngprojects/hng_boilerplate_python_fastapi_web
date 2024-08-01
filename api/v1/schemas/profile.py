@@ -64,6 +64,7 @@ from typing import Optional
 import re
 from api.v1.schemas.user import UserBase
 
+
 class ProfileBase(BaseModel):
     """
     Pydantic model for a profile.
@@ -85,6 +86,7 @@ class ProfileBase(BaseModel):
         user (UserBase): The user information associated with this profile.
         updated_at (datetime): The date and time when the profile was last updated.
     """
+
     id: str
     created_at: datetime
     pronouns: str
@@ -96,7 +98,7 @@ class ProfileBase(BaseModel):
     avatar_url: str
     recovery_email: Optional[EmailStr]
     user: UserBase
-    
+
 
 class ProfileCreateUpdate(BaseModel):
     """
@@ -116,6 +118,7 @@ class ProfileCreateUpdate(BaseModel):
         avatar_url (Optional[str]): The URL to the user's avatar image.
         recovery_email (Optional[EmailStr]): The user's recovery email address.
     """
+
     pronouns: Optional[str] = None
     job_title: Optional[str] = None
     department: Optional[str] = None
