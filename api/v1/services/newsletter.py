@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 
 class NewsletterService(Service):
-    '''Newsletter service functionality'''
+    """Newsletter service functionality"""
 
     @staticmethod
     def create(db: Session, request: EmailSchema) -> NewsletterSubscriber:
@@ -30,7 +30,9 @@ class NewsletterService(Service):
 
         newsletter = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email==request.email).first()
         if newsletter:
-            raise HTTPException(status_code=400, detail='User already subscribed to newsletter')
+            raise HTTPException(
+                status_code=400, detail="User already subscribed to newsletter"
+            )
 
         return newsletter
     
@@ -47,6 +49,7 @@ class NewsletterService(Service):
                     query = query.filter(getattr(NewsletterSubscriber, column).ilike(f'%{value}%'))
 
         return query.all()
+
     
     
     @staticmethod

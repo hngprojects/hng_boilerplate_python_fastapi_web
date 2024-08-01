@@ -1,4 +1,3 @@
-from api.db.database import get_db
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import EmailSchema
 from api.v1.services.newsletter import NewsletterService
@@ -21,7 +20,7 @@ async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
 
     return success_response(
         message="Thank you for subscribing to our newsletter.",
-        status_code=status.HTTP_201_CREATED
+        status_code=status.HTTP_201_CREATED,
     )
 
 
