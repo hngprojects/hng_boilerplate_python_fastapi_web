@@ -138,7 +138,8 @@ class OrganizationService(Service):
 
     def delete(self, db: Session, id: str, user: User):
         '''Deletes a organization'''
-        organization = self.fetch(id=id)
+
+        organization = self.fetch(id=id, db=db)
         stmt = user_organization_association.select().where(
             user_organization_association.c.user_id==user.id,
             user_organization_association.c.organization_id==id,
