@@ -215,5 +215,21 @@ class OrganizationService(Service):
 
         return False
 
+    def update_user_role(self, schema: AddUpdateOrganizationRole, db: Session):
+        '''Updates a user role'''
+
+        # Fetch the user and organization
+        user = check_model_existence(db, User, schema.user_id)
+        organization = check_model_existence(db, Organization, schema.org_id)
+
+        # Check if user is not in organization
+        check_user_in_org(user, organization)
+
+        # Update user role
+        stmt = user_organization_association.update().where(
+            user_organization_association.c.user_id == schema.user_id,
+            user_organization_association.c.organization_id == schema.org_id,
+        ).values(role=schema.role)
+
 
 organization_service = OrganizationService()
