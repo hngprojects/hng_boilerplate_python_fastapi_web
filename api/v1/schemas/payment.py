@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import List
 from typing import Optional
 from datetime import datetime
@@ -40,3 +40,11 @@ class PaymentListResponse(BaseModel):
     success: bool
     message: str
     data: PaymentsData
+
+
+class PaymentDetail(BaseModel):
+    organization_id: str
+    plan_id: str
+    full_name: str
+    billing_option: str
+    redirect_url: str

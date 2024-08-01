@@ -29,8 +29,11 @@ class Settings(BaseSettings):
     MAIL_PORT: int = config("MAIL_PORT")
     MAIL_SERVER: str = config("MAIL_SERVER")
 
+    FLUTTERWAVE_SECRET: str = config("FLUTTERWAVE_SECRET")
+
     TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
     TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
+
 
 settings = Settings()
