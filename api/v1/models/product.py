@@ -22,7 +22,7 @@ class ProductStatusEnum(Enum):
     low_on_stock = "low_on_stock"
 
 class ProductFilterStatusEnum(Enum):
-    published = "published"
+    active = "active"
     draft = "draft"
 
 class Product(BaseTableModel):
@@ -44,7 +44,7 @@ class Product(BaseTableModel):
     )
     archived = Column(Boolean, default=False)
     filter_status = Column(
-        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.published)
+        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active)
 
     variants = relationship(
         "ProductVariant", back_populates="product", cascade="all, delete-orphan"
