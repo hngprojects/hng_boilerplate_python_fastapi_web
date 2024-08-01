@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Activate Your Account{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/activate-account.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Activate Your Account</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      We recently detected a login attempt to your account from an
+      unfamiliar device. To ensure the security of your account, we haven't
+      granted access.
+    </p>
+    <p class="template-message">
+      To activate your account and secure it, please click the button below:
+    </p>
+    <div class="editable-content">
+      <a href="#" class="template-btn">Activate Account</a>
+
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
