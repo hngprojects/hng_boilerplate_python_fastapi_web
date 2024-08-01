@@ -23,7 +23,6 @@ from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
 
 from api.v1.routes.reply import reply_router
-from tests.run_all_test import test_router
 import api.v1.routes.payment_flutterwave
 
 from tests.run_all_test import test_rout
