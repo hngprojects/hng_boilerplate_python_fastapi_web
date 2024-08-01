@@ -11,6 +11,7 @@ from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
 from api.v1.services.user import user_service, oauth2_scheme
 from typing import Annotated
+import uuid
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
 
@@ -97,7 +98,14 @@ def get_organization(
     current_user = user_service.get_current_user(token, db)
     
     """Endpoint to get an Organization by id"""
+    
+    try:
+        uuid.UUID(org_id)  # Validate UUID format
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="Invalid UUID format")
+    
     organization = organization_service.fetch(db, org_id)
+    
     if organization is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
     return success_response(
