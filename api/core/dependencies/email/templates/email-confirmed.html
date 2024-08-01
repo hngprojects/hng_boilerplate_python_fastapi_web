@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Email Confirmed{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/email-confirmed.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Email Confirmed</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      We are thrilled to inform you that your email has been successfully
+      verified and confirmed!
+    </p>
+    <div class="editable-content">
+      <p>
+        You can now fully enjoy all the features and benefits we offer,
+        including exclusive access to key features, special discounts, and
+        personalized content.
+      </p>
+
+      <a class="template-btn">Proceed to Account</a>
+
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
