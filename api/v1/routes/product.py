@@ -98,7 +98,11 @@ async def get_products_by_status(
         raise HTTPException(status_code=500, detail="Failed to retrieve products")
 
 
-@product.get("/{org_id}", status_code=status.HTTP_200_OK, response_model=ProductList)
+@product.get(
+    "/organizations/{org_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ProductList,
+)
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
