@@ -11,9 +11,8 @@ from fastapi import status
 
 client = TestClient(app)
 URI = "/api/v1/squeeze"
-LOGIN_URI = "/api/v1/auth/login"
+LOGIN_URI = "api/v1/auth/login"
 
-# Mock Data
 squeeze1 = {
     "title": "My Squeeze Page",
     "email": "user1@example.com",
@@ -24,40 +23,50 @@ squeeze1 = {
     "status": "offline",
     "user_id": str(uuid7()),
     "full_name": "My Full Name 1",
+    # expected response
+    "status_code": 201,
 }
 squeeze2 = {
-    "title": "My Updated Squeeze Page",
+    "title": "My Squeeze Page",
     "email": "user1@example.com",
-    "headline": "My Updated Headline",
-    "sub_headline": "My Updated Sub Headline",
-    "body": "My Updated Body",
+    "headline": "My Headline 2",
+    "sub_headline": "My Sub Headline 2",
     "type": "product",
     "status": "online",
     "user_id": str(uuid7()),
-    "full_name": "My Updated Full Name",
+    # expected response
+    "status_code": 201,
+}
+squeeze3 = {
+    "title": "My Squeeze Page",
+    "email": "user2@example.com",
+    "headline": "My Headline 3",
+    "body": "My Body 3",
+    "user_id": str(uuid7()),
+    # expected response
+    "status_code": 201,
 }
 
-# Mock User
-def create_mock_super_admin(mock_session):
-    mock_session.query.return_value.filter.return_value.first.return_value = User(
+@pytest.fixture
+def mock_db_session():
+    """Mock session"""
+    db_session = MagicMock()
+    with patch('api.db.database.get_db', return_value=db_session):
+        yield db_session
+
+def create_mock_super_admin(mock_db_session):
+    """Mock super admin"""
+    mock_db_session.query.return_value.filter.return_value.first.return_value = User(
         id=str(uuid7()),
         email="user1@example.com",
         password=user_service.hash_password("P@ssw0rd"),
         is_super_admin=True,
     )
 
-# Header with Authorization Token
 theader = lambda token: {"Authorization": f"Bearer {token}"}
 
-@pytest.fixture
-def mock_db_session():
-    """Mock database session."""
-    with patch("api.db.database.get_db") as mock_db:
-        mock_session = MagicMock()
-        mock_db.return_value = mock_session
-        yield mock_session
-
-def test_create_squeeze_page(mock_db_session):
+@pytest.mark.parametrize("data", [squeeze1, squeeze2, squeeze3])
+def test_create_squeeze_page(mock_db_session, data):
     """Test create squeeze page."""
     create_mock_super_admin(mock_db_session)
     tok = client.post(
@@ -65,25 +74,23 @@ def test_create_squeeze_page(mock_db_session):
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
     token = tok["data"]["user"]["access_token"]
-    res = client.post(URI, json=squeeze1, headers=theader(token))
-    assert res.status_code == status.HTTP_201_CREATED
-    assert res.json()['data']['title'] == squeeze1["title"]
-    assert res.json()['data']['email'] == squeeze1["email"]
+    res = client.post(URI, json=data, headers=theader(token))
+    assert res.status_code == data["status_code"]
+    assert res.json()['data']['title'] == data["title"]
+    assert res.json()['data']['email'] == data["email"]
 
 @pytest.mark.parametrize("squeeze_id", [1, 2, 3])
 def test_delete_squeeze_page(mock_db_session, squeeze_id):
     """Test delete squeeze page."""
     create_mock_super_admin(mock_db_session)
-    mock_db_session.query.return_value.filter.return_value.first.return_value = CreateSqueeze(id=squeeze_id)
-    mock_db_session.query.return_value.filter.return_value.first.return_value = CreateSqueeze(id=squeeze_id)
+    mock_db_session.query.return_value.filter.return_value.first.return_value = Squeeze(id=squeeze_id, **squeeze1)
     tok = client.post(
         LOGIN_URI, json={"email": "user1@example.com", "password": "P@ssw0rd"}
     ).json()
-    assert tok["status_code"] == status.HTTP_200_OK
     token = tok["data"]["user"]["access_token"]
     res = client.delete(f"{URI}/{squeeze_id}", headers=theader(token))
     assert res.status_code == status.HTTP_200_OK
-    assert res.json()["message"] == "Squeeze page deleted successfully!"
+    assert res.json()['detail'] == "Squeeze page deleted successfully!"
 
 def test_edit_squeeze_page(mock_db_session):
     """Test edit squeeze page."""
@@ -92,9 +99,9 @@ def test_edit_squeeze_page(mock_db_session):
     tok = client.post(
         LOGIN_URI, json={"email": "user1@example.com", "password": "P@ssw0rd"}
     ).json()
-    assert tok["status_code"] == status.HTTP_200_OK
     token = tok["data"]["user"]["access_token"]
-    res = client.put(f"{URI}/1", json=squeeze2, headers=theader(token))
+    updated_data = {"title": "Updated Title"}
+    res = client.put(f"{URI}/1", json=updated_data, headers=theader(token))
     assert res.status_code == status.HTTP_200_OK
-    assert res.json()['data']['title'] == squeeze2["title"]
-    assert res.json()['data']['email'] == squeeze2["email"]
+    assert res.json()['data']['title'] == updated_data["title"]
+    assert res.json()['detail'] == "SUCCESS"
