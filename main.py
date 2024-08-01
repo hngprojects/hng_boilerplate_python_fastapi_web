@@ -15,7 +15,7 @@ from api.utils.json_response import JsonResponseDict
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
 from api.utils.logger import logger
-from api.core.dependencies.email_service import send_email
+from api.core.dependencies.email_sender import send_email
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 

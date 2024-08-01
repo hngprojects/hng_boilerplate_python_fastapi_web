@@ -3,7 +3,7 @@ from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Reque
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
-from api.core.dependencies.email_service import send_email
+from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User

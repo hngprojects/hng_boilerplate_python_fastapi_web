@@ -23,7 +23,8 @@ async def send_email(
         VALIDATE_CERTS=True,
         MAIL_STARTTLS = False,
         MAIL_SSL_TLS = True,
-        MAIL_FROM_NAME='HNG Boilerplate'
+        MAIL_FROM_NAME='HNG Boilerplate',
+        SUPPRESS_SEND=True  # suppress sending of email in testing environment
     )
     
     message = MessageSchema(
