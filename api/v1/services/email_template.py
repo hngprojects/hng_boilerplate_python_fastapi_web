@@ -38,7 +38,7 @@ class EmailTemplateService(Service):
         email_template = check_model_existence(db, EmailTemplate, template_id)
         return email_template
 
-    def update(self, db: Session, template_id: str, schema: EmailTemplate):
+    def update(self, db: Session, template_id: str, schema: EmailTemplateSchema):
         """Updates an email template"""
 
         template = self.fetch(db=db, template_id=template_id)
