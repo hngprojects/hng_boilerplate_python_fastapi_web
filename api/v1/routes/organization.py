@@ -96,10 +96,8 @@ def get_organization(org_id: str, db: Session = Depends(get_db), token: str = De
     organization = organization_service.fetch(db, org_id)
     if organization is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
-    return {
-        "status": "success",
-        "status_code": 200,
-        "data": success_response
-}
-class Config:
-    from_attributes = True  # Enable Pydantic to read ORM attributes
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Retrived organization Successfully",
+        data = jsonable_encoder(organization)
+)
