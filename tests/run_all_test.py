@@ -2,9 +2,9 @@ from fastapi import APIRouter, Response
 import subprocess
 
 
-test_router = APIRouter(prefix='/all', tags=['project test cases'])
+test_rout = APIRouter(prefix='/all', tags=['project test cases'])
 
-@test_router.get("/run-tests")
+@test_rout.get("/run-tests")
 async def run_tests():
     # Run pytest and capture the output
     result = subprocess.run(['pytest', '--maxfail=1', '--disable-warnings', '--tb=short'], 

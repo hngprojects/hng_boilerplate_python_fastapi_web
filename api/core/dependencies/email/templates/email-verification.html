@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Email Verification{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/email-verification.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Email Verification</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      Thanks for registering your account with us Boilerplate. Before we get
+      started, we just need to confirm that this is you.
+    </p>
+    <div class="editable-content">
+      <p>
+        This link will expire 30 minutes after this email has been sent. If
+        you did not make this request, you can ignore this email.
+      </p>
+      <p>To verify your email, please click the button below:</p>
+      <button class="template-btn">Verify Account</button>
+      <p>
+        Or copy this link:
+        <a
+          href="https://carbonated-umbra-a35.notion.site/Language-Learning-AI-game-608b687875cf4b48a9a0194ee82ae17d"
+          class="copy-link"
+        >
+          https://carbonated-umbra-a35.notion.site/Language-Learning-AI-game-608b687875cf4b48a9a0194ee82ae17d
+        </a>
+      </p>
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 from api.utils.success_response import success_response
 
 class OrganizationBase(BaseModel):
-    '''Base organization schema'''
+    """Base organization schema"""
 
     id: str
     created_at: datetime
@@ -21,7 +21,7 @@ class OrganizationBase(BaseModel):
 
 
 class CreateUpdateOrganization(BaseModel):
-    '''Organization schema to create or update organization'''
+    """Organization schema to create or update organization"""
 
     company_name: str
     company_email: EmailStr
@@ -34,21 +34,21 @@ class CreateUpdateOrganization(BaseModel):
 
 
 class AddUpdateOrganizationRole(BaseModel):
-    '''Schema to update a user role in an organization'''
+    """Schema to update a user role in an organization"""
 
     role: str
     user_id: str
     org_id: str
 
-    @field_validator('role')
+    @field_validator("role")
     def role_validator(cls, value):
-        if value not in ['admin', 'user', 'guest', 'owner']:
-            raise ValueError('Role has to be one of admin, guest, user, or owner')
+        if value not in ["admin", "user", "guest", "owner"]:
+            raise ValueError("Role has to be one of admin, guest, user, or owner")
         return value
 
 
 class RemoveUserFromOrganization(BaseModel):
-    '''Schema to delete a user role in an organization'''
+    """Schema to delete a user role in an organization"""
 
     user_id: str
     org_id: str
