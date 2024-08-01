@@ -74,8 +74,8 @@ def test_create_squeeze_page(mock_db_session):
 def test_delete_squeeze_page(mock_db_session, squeeze_id):
     """Test delete squeeze page."""
     create_mock_super_admin(mock_db_session)
-    mock_db_session.query.return_value.filter.return_value.first.return_value = Squeeze(id=squeeze_id)
-    mock_db_session.query.return_value.filter.return_value.first.return_value = Squeeze(id=squeeze_id)
+    mock_db_session.query.return_value.filter.return_value.first.return_value = CreateSqueeze(id=squeeze_id)
+    mock_db_session.query.return_value.filter.return_value.first.return_value = CreateSqueeze(id=squeeze_id)
     tok = client.post(
         LOGIN_URI, json={"email": "user1@example.com", "password": "P@ssw0rd"}
     ).json()
