@@ -6,6 +6,7 @@ from api.v1.models.product import ProductStatusEnum
 
 T = TypeVar('T')
 
+
 class ProductUpdate(BaseModel):
     """
     Pydantic model for updating a product.
@@ -69,7 +70,8 @@ class ProductList(BaseModel):
     message: str
     data: ProductData
 
-#status filter
+
+# status filter
 class ProductFilterResponse(BaseModel):
     id: str
     name: str
@@ -88,10 +90,38 @@ class ProductFilterResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SuccessResponse(BaseModel, Generic[T]):
     message: str
     status_code: int
     data: T
+
+
+class ProductCreate(BaseModel):
+    name: str
+    category: str
+    price: PositiveFloat
+    description: str = None
+    quantity: int = 0
+    image_url: str = "placeholder-image"
+
+class ProductStatusQueryModel(BaseModel):
+    status: str
+
+    @field_validator('status')
+    def validate_status(cls, v):
+        allowed_values = ["in_stock", "out_of_stock", "low_on_stock", 'all']
+        if v not in allowed_values:
+            raise ValueError(f"Input should be  'all', 'in_stock', 'out_of_stock' or 'low_on_stock'. Received value: '{v}'")
+        return v
+    
+class ProductCreate(BaseModel):
+    name: str
+    category: str
+    price: PositiveFloat
+    description: str = None
+    quantity: int = 0
+    image_url: str = "placeholder-image"
 
 
 
