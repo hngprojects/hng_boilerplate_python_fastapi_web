@@ -25,7 +25,7 @@ async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
     )
 
 
-@newsletter.post('/newsletter/unsubscribe')
+@newsletter.post('/pages/newsletter/unsubscribe')
 async def unsubscribe(request: EmailSchema, db: Session = Depends(get_db)):
     NewsletterService.delete(db=db,  request=request)
     

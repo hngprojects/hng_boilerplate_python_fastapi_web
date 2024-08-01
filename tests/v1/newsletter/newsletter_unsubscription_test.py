@@ -27,7 +27,7 @@ def client(db_session_mock):
 
 @pytest.fixture
 def test_email():
-    return EmailSchema(email="tesat@example.com")
+    return EmailSchema(email="test@example.com")
 
 
 @pytest.fixture
@@ -42,7 +42,7 @@ def test_unsubscribe_success(db_session_mock, client: TestClient, add_test_subsc
     app.dependency_overrides[NewsletterService.check_nonexisting_subscriber] = lambda: add_test_subscriber
 
     response = client.post(
-                "/api/v1/newsletter/unsubscribe",
+                "/api/v1/pages/newsletter/unsubscribe",
                 json={"email": add_test_subscriber.email}
             )
 
@@ -60,7 +60,7 @@ def test_unsubscribe_non_existing_email(db_session_mock, client: TestClient):
     app.dependency_overrides[NewsletterService.check_nonexisting_subscriber] = lambda: None
 
     response = client.post(
-        "/api/v1/newsletter/unsubscribe",
+        "/api/v1/pages/newsletter/unsubscribe",
         json={"email": "non_existing@example.com"}
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -68,7 +68,7 @@ def test_unsubscribe_non_existing_email(db_session_mock, client: TestClient):
 
 def test_unsubscribe_invalid_email(client: TestClient):
     response = client.post(
-        "/api/v1/newsletter/unsubscribe",
+        "/api/v1/pages/newsletter/unsubscribe",
         json={"email": "invalid-email-format"}
     )
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
