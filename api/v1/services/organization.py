@@ -116,9 +116,9 @@ class OrganizationService(Service):
 
     def delete(self, db: Session, id: str):
         '''Deletes a product'''
-
-        product = self.fetch(id=id)
-        db.delete(product)
+        
+        organization = self.fetch(db, id=id)
+        db.delete(organization)
         db.commit()
 
     def check_user_role_in_org(self, db: Session, user: User, org: Organization, role: str):
@@ -272,5 +272,11 @@ class OrganizationService(Service):
 
         return False
 
+    def check_organization_exist(self, db: Session, org_id):
+        organization = db.query(Organization).filter(Organization.id == org_id).first()
+        if organization is None:
+            raise HTTPException(status_code=404, detail="Organization not found")
+        else:
+            return True
 
 organization_service = OrganizationService()

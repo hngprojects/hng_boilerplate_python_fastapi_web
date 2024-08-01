@@ -78,7 +78,6 @@ async def update_organization(
         data=jsonable_encoder(updated_organization),
     )
 
-
 @organization.get("", status_code=status.HTTP_200_OK)
 def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_current_super_admin)], db: Session = Depends(get_db)):
     orgs = organization_service.fetch_all(db)
@@ -111,3 +110,14 @@ def get_organization(
         "message": "Retrieved organization successfully",
         "data": jsonable_encoder(organization)
 }
+  
+@organization.delete("/{org_id}")
+async def delete_organization(org_id: str, db: Session = Depends(get_db), 
+                        current_user: User = Depends(user_service.get_current_super_admin),
+):
+    check = organization_service.check_organization_exist(db, org_id)
+    if check:
+        organization_service.delete(db, id=org_id)
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            message='Organization with ID {org_id} deleted successfully')

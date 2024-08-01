@@ -12,6 +12,7 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
 from api.core.base.services import Service
+from api.core.dependencies.email_service import send_email
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
@@ -131,7 +132,7 @@ class UserService(Service):
         db.commit()
         db.refresh(user)
 
-        # Create notification settings directly for the user
+        # # Create notification settings directly for the user
         notification_setting_service.create(db=db, user=user)
 
         return user
