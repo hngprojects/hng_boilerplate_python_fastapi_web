@@ -64,8 +64,7 @@ def override_get_db(db_session_mock):
     
 @pytest.fixture
 def mock_get_current_user():
-    user = {"id": 1, "email": "test@example.com"}
-    with patch.object(UserService, 'get_current_user', return_value=user):
+    with patch.object(UserService, 'get_current_user', return_value={"id": 1, "email": "test@example.com"}):
         yield
 
 def test_get_organization_success(client, db_session_mock, mock_get_current_user):
@@ -88,9 +87,9 @@ def test_get_organization_success(client, db_session_mock, mock_get_current_user
     response = client.get(f"/api/v1/organizations/{mock_organization.id}", headers={"Authorization": "Bearer token"})
     assert response.status_code == 200
     data = response.json()
-    assert data["id"] == mock_organization.id
-    assert data["company_name"] == mock_organization.company_name
-    assert data["company_email"] == mock_organization.company_email
+    assert data["data"]["id"] == mock_organization.id
+    assert data["data"]["company_name"] == mock_organization.company_name
+    assert data["data"]["company_email"] == mock_organization.company_email
 
 def test_get_organization_not_found(client, db_session_mock, mock_get_current_user):
     db_session_mock.query().filter().first.return_value = None

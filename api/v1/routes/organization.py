@@ -88,8 +88,12 @@ def get_all_organizations(super_admin: Annotated[User, Depends(user_service.get_
     )
 
   
-@organization.get('/{org_id}', response_model=success_response, status_code=status.HTTP_200_OK)
-def get_organization(org_id: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+@organization.get('/{org_id}', status_code=status.HTTP_200_OK)
+def get_organization(
+    org_id: str, 
+    db: Session = Depends(get_db), 
+    token: str = Depends(oauth2_scheme)
+):
     current_user = user_service.get_current_user(token, db)
     
     """Endpoint to get an Organization by id"""
@@ -98,6 +102,6 @@ def get_organization(org_id: str, db: Session = Depends(get_db), token: str = De
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Organization not found")
     return success_response(
         status_code=status.HTTP_200_OK,
-        message="Retrived organization Successfully",
-        data = jsonable_encoder(organization)
-)
+        message="Retrieved organization successfully",
+        data=jsonable_encoder(organization)
+    )
