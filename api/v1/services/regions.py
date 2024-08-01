@@ -7,12 +7,12 @@ from api.utils.db_validators import check_model_existence
 
 
 class RegionService(Service):
-    '''Payment service functionality'''
+    """Region Services"""
 
-    def create(self, db: Session, schema: RegionCreate):
-        '''Create a new FAQ'''
+    def create(self, db: Session, schema: RegionCreate, user_id: str):
+        '''Create a new Region'''
 
-        new_region = Region(**schema.model_dump())
+        new_region = Region(**schema.model_dump(), user_id=user_id)
         db.add(new_region)
         db.commit()
         db.refresh(new_region)
@@ -21,7 +21,7 @@ class RegionService(Service):
     
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all FAQs with option to search using query parameters'''
+        '''Fetch all Region with option to search using query parameters'''
 
         query = db.query(Region)
 
@@ -57,7 +57,7 @@ class RegionService(Service):
     
 
     def delete(self, db: Session, region_id: str):
-        '''Deletes an FAQ'''
+        '''Deletes a region service'''
         
         region = self.fetch(db=db, region_id=region_id)
         db.delete(region)

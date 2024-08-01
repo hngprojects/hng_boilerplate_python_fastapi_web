@@ -6,24 +6,20 @@ from typing import List
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas.regions import (
-    LanguageCreate, LanguageOut, LanguageUpdate,
-    RegionCreate, RegionOut, RegionUpdate,
-    TimezoneCreate, TimezoneOut, TimezoneUpdate
+    RegionCreate, RegionOut, RegionUpdate
 )
 from api.db.database import get_db
 from api.v1.services.regions import region_service
-from api.v1.services.languages import lang_service
-from api.v1.services.timezones import timezone_service
+from api.v1.services.user import user_service
 
 
-regions = APIRouter(prefix="/regions", tags=["Regions"])
-timezones = APIRouter(prefix="/timezones", tags=["Timezones"])
-languages = APIRouter(prefix="/languages", tags=["Languages"])
+regions = APIRouter(prefix="/regions", tags=["Regions, Timezone and Language"])
 
 # Region Endpoints
 @regions.post("", response_model=RegionOut, status_code=status.HTTP_201_CREATED)
-def create_region(region: RegionCreate, db: Session = Depends(get_db)):
-    region = region_service.create(db, RegionCreate)
+def create_region(region: RegionCreate, db: Session = Depends(get_db),
+                  current_user: User = Depends(user_service.get_current_user)):
+    region = region_service.create(db, region, current_user.id)
 
     return success_response(
         status_code=status.HTTP_201_CREATED,
@@ -42,26 +38,26 @@ def get_regions(db: Session = Depends(get_db)):
         data=jsonable_encoder(regions)
     )
 
-@regions.get("/{user_id}", response_model=RegionOut)
-def get_region_by_user(user_id: str, db: Session = Depends(get_db)):
-    region = region_service.fetch(db, user_id)
+@regions.get("/{region_id}", response_model=RegionOut)
+def get_region_by_user(region_id: str, db: Session = Depends(get_db)):
+    region = region_service.fetch(db, region_id)
     
-    return success_response(
+    return success_response (
         status_code=200,
         message='Region retrieved successfully',
         data=jsonable_encoder(region)
     )
 
-@regions.put("/{user_id}", response_model=RegionOut)
-def update_region(user_id: str, region: RegionUpdate, db: Session = Depends(get_db)):
-    db_region = region_service.update(db, user_id, RegionUpdate)
+@regions.put("/{region_id}", response_model=RegionOut)
+def update_region(region_id: str, region: RegionUpdate, db: Session = Depends(get_db)):
+    db_region = region_service.update(db, region_id, region)
     return success_response(
         status_code=200,
         message='Region updated successfully',
         data=jsonable_encoder(db_region)
     )
 
-@regions.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_region(user_id: str, db: Session = Depends(get_db)):
-    region = region_service.delete(db, user_id)
+@regions.delete("/{region_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_region(region_id: str, db: Session = Depends(get_db)):
+    region = region_service.delete(db, region_id)
     return

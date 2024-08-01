@@ -23,6 +23,7 @@ from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
+from api.v1.routes.regions import regions
 
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -51,3 +52,4 @@ api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(testimonial)
+api_version_one.include_router(regions)
