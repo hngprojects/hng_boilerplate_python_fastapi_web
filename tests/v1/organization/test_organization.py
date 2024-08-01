@@ -33,16 +33,9 @@ def mock_org():
     return Organization(
         id=str(uuid7()),
         company_name="Test Organization",
-        company_email="testorg@gmail.com",
-        industry="Tech",
-        organization_type="Tech",
-        country="Nigeria",
-        state="Lagos",
-        address="123 Street",
-        lga="LGA",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
-    )
+)
     
 # Fixture for the TestClient
 @pytest.fixture
