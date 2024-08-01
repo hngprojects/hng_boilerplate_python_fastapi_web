@@ -1,3 +1,4 @@
+from api.db.database import get_db
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import EmailSchema
 from api.v1.services.newsletter import NewsletterService
