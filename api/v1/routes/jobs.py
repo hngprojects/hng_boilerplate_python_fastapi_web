@@ -19,14 +19,10 @@ jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
 
 
 @jobs.post(
-    "/",
+    "",
     response_model=success_response,
     status_code=201,
-    responses={
-        422: {"descritption": "Invalid request data"},
-        401: {"description": "Unauthorized"},
-        500: {"description": "Server Error"},
-    },
+    
 )
 async def add_jobs(
     job: PostJobSchema,
