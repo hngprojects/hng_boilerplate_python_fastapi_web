@@ -16,6 +16,7 @@ from api.v1.schemas.product import (
     ResponseModel,
     ProductFilterResponse,
     SuccessResponse,
+    ProductStatusQueryModel
 )
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
@@ -80,16 +81,19 @@ async def get_products_by_filter_status(
     status_code=200,
 )
 async def get_products_by_status(
-    status: ProductStatusEnum = Query(...),
+    status: ProductStatusQueryModel = Depends(),
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to get products by status"""
     try:
-        products = product_service.fetch_by_status(db, status)
+        products = product_service.fetch_by_status(db, status.status)
         return SuccessResponse(
             message="Products retrieved successfully", status_code=200, data=products
         )
+    except ValueError as e:
+        error_message = str(e).replace("Value error, ", "").strip()
+        raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to retrieve products")
 
