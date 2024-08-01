@@ -8,10 +8,10 @@ from api.v1.services.contact import ContactMessage
 from api.v1.services.user import user_service
 from api.v1.models.user import User
 
-contact = APIRouter(prefix="/contact/messages", tags=['contact'])
+contact = APIRouter(prefix="/contact", tags=['contact'])
 
 
-@contact.get('/{message_id}', response_model=AdminGet200Response, status_code=status.HTTP_200_OK)
+@contact.get('/{id}', response_model=AdminGet200Response, status_code=status.HTTP_200_OK)
 def get_contact(
         message_id: str,
         current_admin: User = Depends(user_service.get_current_super_admin),
