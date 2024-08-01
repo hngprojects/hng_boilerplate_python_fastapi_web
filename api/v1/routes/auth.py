@@ -2,16 +2,14 @@ from datetime import timedelta
 from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Request
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+
 from api.core.dependencies.email_service import send_email
 from api.utils.success_response import success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from api.v1.schemas.user import Token
-
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
-
-from api.utils.email_service import send_mail
 from api.v1.schemas.user import UserCreate, MagicLinkRequest
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -32,16 +30,16 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
     # Send email in the background
-    # background_tasks.add_task(
-    #     send_email, 
-    #     recipient=user.email,
-    #     template_name='welcome.html',
-    #     subject='Welcome to HNG Boilerplate',
-    #     context={
-    #         'first_name': user.first_name,
-    #         'last_name': user.last_name
-    #     }
-    # )
+    background_tasks.add_task(
+        send_email, 
+        recipient=user.email,
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    )
 
     response = success_response(
         status_code=201,
@@ -116,7 +114,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK)
-def login(login_request: LoginRequest, db: Session = Depends(get_db)):
+def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Session = Depends(get_db)):
     """Endpoint to log in a user"""
 
     # Authenticate the user
@@ -128,21 +126,33 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
+    # Send email in the background
+    background_tasks.add_task(
+        send_email, 
+        recipient=user.email,
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    )
+
     response = success_response(
-    status_code=200,
-    message='Login successful',
-    data={
-        'access_token': access_token,
-        'token_type': 'bearer',
-        'user': {
-            **jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
+        status_code=200,
+        message='Login successful',
+        data={
             'access_token': access_token,
             'token_type': 'bearer',
+            'user': {
+                **jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                ),
+                'access_token': access_token,
+                'token_type': 'bearer',
+            }
         }
-    }
     )
 
     # Add refresh token to cookies
