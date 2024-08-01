@@ -137,9 +137,18 @@ class ProductFilterResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        
+
 
 class SuccessResponse(BaseModel, Generic[T]):
     message: str
     status_code: int
     data: T
+
+
+class ProductCreate(BaseModel):
+    name: str
+    category: str
+    price: PositiveFloat
+    description: str = None
+    quantity: int = 0
+    image_url: str = "placeholder-image"

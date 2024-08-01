@@ -1,5 +1,6 @@
 from pydantic import EmailStr
-from api.core.dependencies.email import mail_service
+from api.core.dependencies.email_service import send_email
+from api.core.dependencies.google_email import mail_service
 from fastapi import HTTPException
 from api.utils.logger import logger
 from sqlalchemy.orm import Session
