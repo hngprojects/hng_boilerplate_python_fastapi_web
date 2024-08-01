@@ -9,8 +9,8 @@ from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas import request_password_reset
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-#from api.core.dependencies.google_email import mail_service
-from api.core.dependencies.mailjet import MailjetService
+from fastapi import BackgroundTasks
+from api.v1.services.email_services import EmailService 
 from passlib.context import CryptContext
 from typing import Optional
 
@@ -45,9 +45,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 class RequestPasswordService:
     @staticmethod
-    def create(
-        email: request_password_reset.RequestEmail, request: Request, session: Session
-    ):
+    async def create(email: request_password_reset.RequestEmail, request: Request, session: Session, background_tasks: BackgroundTasks):
 
         user = session.query(User).filter_by(email=email.user_email).first()
 
@@ -59,33 +57,30 @@ class RequestPasswordService:
         base_url = request.base_url
         reset_link = f"{base_url}api/v1/auth/reset-password?token={token}"
 
-        email_payload = {
-            "to_email": email.user_email,
-            "subject": "HNG11 Password Reset",
-            "text_part": f"Please use the following link to reset your password: {reset_link}",
-            "from_name": "HNG11 Support", 
-            "html_part": f"<p>Please use the following link to reset your password:</p><a href='{reset_link}'>Reset Password</a>"
-        }
+        # Sending the email
+        email_service = EmailService()
+        subject = "HNG11 Password Reset"
+        body = f"Please use the following link to reset your password: {reset_link}"
+        await email_service.send_email(
+            background_tasks=background_tasks,
+            to_email=email.user_email,
+            subject=subject,
+            body=body,
+            from_name="HNG11 Support"
+        )
 
-        # Sending email using Mailjet service
-        mailjet_service = MailjetService()
-        try:
-            mailjet_service.send_mail(
-            to_email=email_payload["to_email"],
-            subject=email_payload["subject"],
-            text_part=email_payload["text_part"],
-            from_name=email_payload.get("from_name"),
-            to_name=email_payload.get("to_name"),
-            html_part=email_payload.get("html_part")
-            )
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Failed to send email try again: {str(e)}")
-
+        # Return the success response
         return success_response(
             message="Password reset link sent successfully",
             data={"reset_link": reset_link},
             status_code=status.HTTP_201_CREATED
         )
+    
+        # return success_response(
+        #     message="Password reset link sent successfully",
+        #     data={"reset_link": reset_link},
+        #     status_code=status.HTTP_201_CREATED
+        # )
 
     @staticmethod
     def process_reset_link(token: str = Query(...), session: Session = Depends(get_db)):

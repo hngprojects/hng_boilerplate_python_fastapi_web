@@ -25,7 +25,7 @@ from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
 from api.v1.routes.api_tests import test_router
-from api.core.dependencies.mailjet import email_sender
+from api.v1.routes.email_routes import email_sender
 
 
 api_version_one = APIRouter(prefix="/api/v1")
