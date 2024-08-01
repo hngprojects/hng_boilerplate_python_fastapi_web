@@ -211,7 +211,7 @@ def delete_product(
     product_service.delete(db=db, id=id, current_user=current_user)
 
 
-@product.post("/", status_code=status.HTTP_201_CREATED, response_model=success_response)
+@product.post("/admin/", status_code=status.HTTP_201_CREATED, response_model=success_response)
 async def create_product(
     product_data: ProductCreate,
     current_user: Annotated[User, Depends(get_super_admin)],

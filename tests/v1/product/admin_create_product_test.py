@@ -102,7 +102,7 @@ def test_create_product(
          patch.object(product_service, 'create', return_value=mock_product) as mock_product_service:
         
         headers = {'Authorization': f'Bearer {access_token_user1}'}
-        response = client.post('/api/v1/products/', json=product_data, headers=headers)
+        response = client.post('/api/v1/products/admin/', json=product_data, headers=headers)
         
         print("Response JSON:", response.json())
         
@@ -132,7 +132,7 @@ def test_create_product_missing_field(
     }
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.post('/api/v1/products/', json=product_data, headers=headers)
+    response = client.post('/api/v1/products/admin/', json=product_data, headers=headers)
     
     print("Response JSON:", response.json())
 
