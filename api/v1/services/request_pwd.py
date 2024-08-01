@@ -9,7 +9,8 @@ from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas import request_password_reset
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
-from api.core.dependencies.email import mail_service
+from fastapi import BackgroundTasks
+from api.v1.services.email_services import EmailService 
 from passlib.context import CryptContext
 from typing import Optional
 
@@ -44,9 +45,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 class RequestPasswordService:
     @staticmethod
-    def create(
-        email: request_password_reset.RequestEmail, request: Request, session: Session
-    ):
+    async def create(email: request_password_reset.RequestEmail, request: Request, session: Session, background_tasks: BackgroundTasks):
 
         user = session.query(User).filter_by(email=email.user_email).first()
 
@@ -58,21 +57,30 @@ class RequestPasswordService:
         base_url = request.base_url
         reset_link = f"{base_url}api/v1/auth/reset-password?token={token}"
 
-        # uncomment when email is working
-        # send_email = mail_service.send_mail(email.user_email, "HNG11 password reset link", reset_link)
-        # if send_email:
-        #     return success_response(
-        #         message="Password reset link sent successfully",
-        #         data=reset_link,
-        #         status_code=status.HTTP_201_CREATED
-        #     )
-        # return send_email
+        # Sending the email
+        email_service = EmailService()
+        subject = "HNG11 Password Reset"
+        body = f"Please use the following link to reset your password: {reset_link}"
+        await email_service.send_email(
+            background_tasks=background_tasks,
+            to_email=email.user_email,
+            subject=subject,
+            body=body,
+            from_name="HNG11 Support"
+        )
 
+        # Return the success response
         return success_response(
-                message="Password reset link sent successfully",
-                data={"reset_link":reset_link},
-                status_code=status.HTTP_201_CREATED
-            )
+            message="Password reset link sent successfully",
+            data={"reset_link": reset_link},
+            status_code=status.HTTP_201_CREATED
+        )
+    
+        # return success_response(
+        #     message="Password reset link sent successfully",
+        #     data={"reset_link": reset_link},
+        #     status_code=status.HTTP_201_CREATED
+        # )
 
     @staticmethod
     def process_reset_link(token: str = Query(...), session: Session = Depends(get_db)):
