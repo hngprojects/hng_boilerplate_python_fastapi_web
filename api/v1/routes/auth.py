@@ -123,6 +123,8 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     status_code=200,
     message='Login successful',
     data={
+        'access_token': access_token,
+        'token_type': 'bearer',
         'user': {
             **jsonable_encoder(
                 user,
