@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Request, Query, BackgroundTasks
 from sqlalchemy.orm import Session
 from api.v1.schemas.request_password_reset import RequestEmail, ResetPassword
 from api.db.database import get_db as get_session
@@ -13,9 +13,10 @@ pwd_reset = APIRouter(prefix="/auth", tags=["Authentication"])
 async def request_reset_link(
     reset_schema: RequestEmail,
     request: Request,
+    background_tasks: BackgroundTasks,
     session: Session = Depends(get_session),
 ):
-    return reset_service.create(reset_schema, request, session)
+    return await reset_service.create(reset_schema, request, session, background_tasks)
 
 
 # process password link
