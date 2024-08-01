@@ -13,7 +13,7 @@ class Comment(BaseTableModel):
     blog = relationship("Blog", back_populates="comments")
     likes = relationship("CommentLike", back_populates="comment", cascade="all, delete-orphan")
     dislikes = relationship("CommentDislike", back_populates="comment", cascade="all, delete-orphan")
-    replies = relationship("Reply", backref="replies")
+    replies = relationship("Reply", back_populates="comments")
 
 
 class CommentLike(BaseTableModel):
