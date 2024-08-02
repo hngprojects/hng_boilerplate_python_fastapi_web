@@ -36,8 +36,6 @@ from api.v1.routes.email_template import email_template
 from api.v1.routes.contact import contact
 
 
-
-
 api_version_one = APIRouter(prefix="/api/v1")
 
 api_version_one.include_router(auth)
