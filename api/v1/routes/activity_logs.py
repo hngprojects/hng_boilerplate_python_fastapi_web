@@ -30,14 +30,44 @@ async def create_activity_log(
     )
 
 
-@activity_logs.get("/", response_model=list[ActivityLogResponse])
+@activity_logs.get("", response_model=list[ActivityLogResponse])
 async def get_all_activity_logs(current_user: User = Depends(user_service.get_current_super_admin), db: Session = Depends(get_db)):
     '''Get all activity logs'''
 
-    activity_logs = activity_log_service.get_all_activity_logs(db=db)
+    activity_logs = activity_log_service.fetch_all(db=db)
 
     return success_response(
         status_code=200,
         message="Activity logs retrieved successfully",
+        data=jsonable_encoder(activity_logs)
+    )
+
+@activity_logs.get("/{user_id}", status_code=status.HTTP_200_OK)
+async def fetch_all_users_activity_log(
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    """
+    Get endpoint for admin users get a users activity logs.
+
+    Args:
+        user_id (str): the id of user
+        current_user: the admin user
+        db: the database session object
+
+    Returns:
+        Response: a response object containing details if successful or appropriate errors if not
+    """
+
+
+    activity_logs = activity_log_service.fetch_all(
+        db=db,
+        user_id=user_id
+    )
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Activity logs fetched successfully!",
         data=jsonable_encoder(activity_logs)
     )
