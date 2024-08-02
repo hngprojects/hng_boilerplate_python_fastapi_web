@@ -1,4 +1,13 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
+from api.v1.services.comment import CommentService
+from api.db.database import get_db
+from api.v1.services.user import UserService
 from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, Header
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -55,6 +64,11 @@ async def like_comment(
         data=jsonable_encoder(like),
     )
 
+@comment.patch("/comments/{comment_id}/", response_model=UpdateCommentResponse)
+async def update_comment(comment_id: str, request: UpdateCommentRequest, db: Session = Depends(get_db), current_user=Depends(UserService.get_current_user)):
+    return await CommentService.update_comment(db, comment_id, request, current_user.id)
+
+
 @comment.post("/{comment_id}/dislike", response_model=DislikeSuccessResponse)
 async def dislike_comment(
     request: Request,
@@ -72,9 +86,10 @@ async def dislike_comment(
 
     Returns:
         Response: a response object containing details if successful or appropriate errors if not
+    Post endpoint for authenticated users to dislike a comment.
     """
-
     user_id = current_user.id
+    client_ip = request.headers.get("X-Forwarded-For") or request.client.host
 
     client_ip = request.headers.get("X-Forwarded-For")
     if client_ip is None or client_ip == "":

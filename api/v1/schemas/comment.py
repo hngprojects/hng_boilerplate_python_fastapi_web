@@ -1,7 +1,18 @@
-from datetime import datetime
-from typing_extensions import Annotated, List
-from pydantic import BaseModel, StringConstraints, ConfigDict
+# api/v1/schemas/comment.py
 
+from datetime import datetime
+from pydantic import BaseModel, StringConstraints, Field, ConfigDict
+from typing_extensions import Annotated, List
+
+
+class UpdateCommentRequest(BaseModel):
+    content: str = Field(..., min_length=1, max_length=1000)
+
+class UpdateCommentResponse(BaseModel):
+    status: str
+    message: str
+    status_code: int
+    data: dict
 
 class CommentCreate(BaseModel):
     content: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]

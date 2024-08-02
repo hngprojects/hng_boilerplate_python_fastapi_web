@@ -1,15 +1,15 @@
+from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
+from api.v1.schemas.comment import UpdateCommentRequest, UpdateCommentResponse
+from typing import Any, Optional, Union
 from api.core.base.services import Service
-from api.v1.models.comment import Comment, CommentLike
-from typing import Any, Optional, Union, Annotated
-from sqlalchemy import desc
-from api.db.database import get_db
-from sqlalchemy.orm import Session
 from api.utils.db_validators import check_model_existence
-from api.v1.models.blog import Blog
-from api.v1.schemas.comment import CommentsSchema, CommentsResponse
-
+from api.v1.models import Comment, Blog, User
+from fastapi import Depends
+from api.db.database import get_db
+from api.v1.schemas.comment import CommentsResponse, CommentsSchema
+from sqlalchemy import desc
+from typing import Annotated
 
 class CommentService(Service):
     """Comment service functionality"""
@@ -112,4 +112,3 @@ class CommentService(Service):
 
 
 comment_service = CommentService()
-

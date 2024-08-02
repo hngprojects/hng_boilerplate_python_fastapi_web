@@ -1,3 +1,5 @@
+#api/v1/models/comment.py
+
 from sqlalchemy import Column, String, Text, ForeignKey
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
