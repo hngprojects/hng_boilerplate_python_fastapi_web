@@ -1,6 +1,6 @@
 from decimal import Decimal
-from pydantic import BaseModel, Field, PositiveFloat, constr
-from typing import List, Optional, Any, Dict, TypeVar, Generic, Union
+from pydantic import BaseModel, EmailStr, Field, PositiveFloat, constr
+from typing import List, Optional, Any, Dict, TypeVar, Generic
 from datetime import datetime
 
 from api.v1.models.product import ProductStatusEnum
@@ -87,6 +87,56 @@ class ProductCreate(BaseModel):
 
 
 
+class ProductCategoryBase(BaseModel):
+    id: str
+    name: str
+
+
+class ProductVariantBase(BaseModel):
+    id: str
+    size: str
+    price: float
+    stock: int
+
+
+class ProductDetailOrganization(BaseModel):
+    id: str
+    company_name: str
+    company_email: EmailStr | None = None
+    industry: str | None = None
+    organization_type: str | None = None
+    country: str | None = None
+    state: str | None = None
+    address: str | None = None
+    lga: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ProductDetail(BaseModel):
+    id: str
+    name: str
+    description: str | None = None
+    price: float
+    organization: ProductDetailOrganization
+    quantity: int
+    image_url: str
+    status: str
+    archived: bool
+    variants: list[ProductVariantBase]
+    category: ProductCategoryBase
+
+    class Config:
+        from_attributes = True
+
+
+class ProductDetailResponse(BaseModel):
+    success: bool
+    status_code: int
+    message: str
+    data: ProductDetail
+
+
 # status filter
 class ProductFilterResponse(BaseModel):
     id: str
@@ -112,3 +162,17 @@ class SuccessResponse(BaseModel, Generic[T]):
     status_code: int
     data: T
 
+
+# class ProductCategoryRetrieve(BaseModel):
+#     name: str
+#     category: str
+#     price: PositiveFloat
+#     description: str = None
+#     quantity: int = 0
+#     image_url: str = "placeholder-image"
+
+class ProductCategoryRetrieve(BaseModel):
+    name: str
+    id: str
+    class Config:
+        from_attributes = True

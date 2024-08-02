@@ -8,7 +8,7 @@ from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
-from api.v1.services.product import product_service
+from api.v1.services.product import product_service, ProductCategoryService
 from api.v1.schemas.product import (
     ProductCreate,
     ProductFilterResponse,
@@ -17,6 +17,7 @@ from api.v1.schemas.product import (
     ResponseModel,
     ProductFilterResponse,
     SuccessResponse,
+    ProductCategoryRetrieve
 )
 from api.utils.dependencies import get_current_user, get_super_admin
 from api.v1.services.user import user_service
@@ -97,7 +98,35 @@ async def get_products_by_status(
         raise HTTPException(status_code=500, detail="Failed to retrieve products")
 
 
+@product.get("/categories", response_model=success_response, status_code=200)
+def retrieve_categories(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    """
+    Retrieve all product categories from database
+    """
+
+    categories = ProductCategoryService.fetch_all(db)
+
+    categories_filtered = list(map(lambda x: ProductCategoryRetrieve.model_validate(x), categories))
+        
+    if (len(categories_filtered) == 0):
+        categories_filtered = [{}]
+
+    return success_response(
+        message = "Categories retrieved successfully",
+        status_code = 200,
+        data = jsonable_encoder(categories_filtered)
+    )
+
+
 @product.get("/{org_id}", status_code=status.HTTP_200_OK, response_model=ProductList)
+@product.get(
+    "/organizations/{org_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ProductList,
+)
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
