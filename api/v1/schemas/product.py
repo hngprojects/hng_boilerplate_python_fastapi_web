@@ -1,6 +1,6 @@
 from decimal import Decimal
-from pydantic import BaseModel, EmailStr, Field, PositiveFloat, constr
-from typing import List, Optional, Any, Dict, TypeVar, Generic
+from pydantic import BaseModel, Field, PositiveFloat, constr, EmailStr
+from typing import List, Optional, Any, Dict, TypeVar, Generic, Union
 from datetime import datetime
 
 from api.v1.models.product import ProductStatusEnum
@@ -85,8 +85,7 @@ class ProductCreate(BaseModel):
     class Config:
         orm_mode = True
 
-
-
+        
 class ProductCategoryBase(BaseModel):
     id: str
     name: str
