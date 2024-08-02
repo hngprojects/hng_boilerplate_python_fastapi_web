@@ -22,6 +22,7 @@ from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
 import api.v1.routes.payment_flutterwave
+import api.v1.routes.payment_paystack
 
 from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
@@ -33,8 +34,6 @@ from api.v1.routes.squeeze import squeeze
 from api.v1.routes.dashboard import dashboard
 from api.v1.routes.email_template import email_template
 from api.v1.routes.contact import contact
-
-
 
 
 api_version_one = APIRouter(prefix="/api/v1")
