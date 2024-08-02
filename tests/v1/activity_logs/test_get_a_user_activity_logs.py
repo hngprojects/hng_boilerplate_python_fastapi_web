@@ -12,7 +12,7 @@ from datetime import datetime, timezone, timedelta
 
 
 client = TestClient(app)
-ACTIVITY_LOGS_ENDPOINT = '/api/v1/activity-logs'
+ACTIVITY_LOGS_ENDPOINT = '/api/v1/activity-logs/066abb38-fe41-74c4-8000-40699b6b4139'
 
 
 @pytest.fixture

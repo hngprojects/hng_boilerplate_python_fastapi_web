@@ -8,7 +8,7 @@ from api.v1.schemas.plans import CreateSubscriptionPlan
 class BillingPlanService(Service):
     """Product service functionality"""
 
-    def create(db: Session, request: CreateSubscriptionPlan):
+    def create(self, db: Session, request: CreateSubscriptionPlan):
         """
         Create and return a new billing plan
         """
@@ -29,7 +29,7 @@ class BillingPlanService(Service):
     def update():
         pass
 
-    def fetch_all(db: Session, **query_params: Optional[Any]):
+    def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all products with option tto search using query parameters"""
 
         query = db.query(BillingPlan)
@@ -45,4 +45,4 @@ class BillingPlanService(Service):
         return query.all()
 
 
-billing_plan_service = BillingPlanService
+billing_plan_service = BillingPlanService()

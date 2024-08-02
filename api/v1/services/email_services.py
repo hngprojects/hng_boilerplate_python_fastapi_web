@@ -22,7 +22,14 @@ class EmailService:
         )
         self.fast_mail = FastMail(self.conf)
 
-    async def send_email(self, background_tasks: BackgroundTasks, to_email: EmailStr, subject: str, body: str, from_name: Optional[str] = None):
+    async def send_email(
+        self, 
+        background_tasks: BackgroundTasks, 
+        to_email: EmailStr, 
+        subject: str, 
+        body: str, 
+        from_name: Optional[str] = None
+    ):
         message = MessageSchema(
             subject=subject,
             recipients=[to_email],
