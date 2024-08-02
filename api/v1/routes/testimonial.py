@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
-from fastapi import Depends, APIRouter, status
+from fastapi import Depends, APIRouter, status,Query
 from api.utils.success_response import success_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
@@ -21,8 +21,8 @@ testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
 
 @testimonial.get("", status_code=status.HTTP_200_OK)
 def get_testimonials(
-    page_size: int = 10 ,
-    page: int =0 ,
+    page_size: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
 ):
     """End point to Query Testimonials with pagination"""
