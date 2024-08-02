@@ -269,7 +269,7 @@ async def admin_create_product(
         )
 
     # Create the product using the product service
-    new_product = product_service.create(db, product_data)
+    new_product = product_service.create(db, product_data, current_user=current_user)
 
     return success_response(
         status_code=201,

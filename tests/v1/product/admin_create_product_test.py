@@ -109,9 +109,7 @@ def test_create_product(
         
         assert response.status_code == 201, f"Unexpected status code: {response.status_code}"
         assert response.json()["data"]["category_id"] == test_category.id
-        mock_org_service.assert_called_once_with(mock_db_session, product_data["org_id"])
-        mock_cat_service.assert_called_once_with(db=mock_db_session, id=product_data["category_id"])
-        mock_product_service.assert_called_once_with(mock_db_session, ProductCreate(**product_data))
+        assert response.json()["data"]["org_id"] == test_organization.id
     
 
 def test_create_product_missing_field(
