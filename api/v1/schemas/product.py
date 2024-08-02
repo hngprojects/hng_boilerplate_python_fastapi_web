@@ -152,3 +152,9 @@ class ProductCreate(BaseModel):
     description: str = None
     quantity: int = 0
     image_url: str = "placeholder-image"
+
+class ProductCategoryRetrieve(BaseModel):
+    name: str
+    id: str
+    class Config:
+        from_attributes = True
