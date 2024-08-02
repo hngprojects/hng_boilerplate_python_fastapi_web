@@ -112,8 +112,22 @@ def mock_get_current_user():
 
 
 mock_id = str(uuid7())
+prod_id = str(uuid7())
+user_id = str(uuid7())
+category_id = str(uuid7())
+org_id = str(uuid7())
 
-SAMPLE_DATA = {"name": "delete me", "price": 99.99, "category": "STufF"}
+SAMPLE_DATA = {
+        "name": "Test Product",
+        "description": "Test Description",
+        "price": 100.0,
+        "org_id": org_id,
+        "category_id": category_id,
+        "quantity": 10,
+        "image_url": "http://example.com/image.jpg",
+        "status": "in_stock",
+        "archived": False
+    }
 
 
 def test_successful_creation(
