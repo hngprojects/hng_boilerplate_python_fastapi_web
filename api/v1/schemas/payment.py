@@ -16,9 +16,9 @@ class PaymentResponse(BaseModel):
     updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
-        
+
 class PaymentBase(BaseModel):
     amount: float
     currency: str
@@ -26,7 +26,7 @@ class PaymentBase(BaseModel):
     method: str
     created_at: datetime
 
-      
+
 class PaymentsData(BaseModel):
     current_page: int
     total_pages: int
@@ -34,7 +34,7 @@ class PaymentsData(BaseModel):
     total_items: int
     Payments: List[PaymentBase]
 
-      
+
 class PaymentListResponse(BaseModel):
     status_code: int = 200
     success: bool

@@ -6,10 +6,10 @@ from api.v1.models.job import Job
 
 
 class JobService(Service):
-    '''Job service functionality'''
+    """Job service functionality"""
 
-    def create(self, db: Session,  schema) -> Job:
-        '''Create a new job'''
+    def create(self, db: Session, schema) -> Job:
+        """Create a new job"""
 
         new_job = Job(**schema.model_dump())
         db.add(new_job)
@@ -17,10 +17,9 @@ class JobService(Service):
         db.refresh(new_job)
 
         return new_job
-    
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all jobs with option to search using query parameters'''
+        """Fetch all jobs with option to search using query parameters"""
 
         query = db.query(Job)
 
@@ -28,37 +27,36 @@ class JobService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Job, column) and value:
-                    query = query.filter(getattr(Job, column).ilike(f'%{value}%'))
+                    query = query.filter(getattr(Job, column).ilike(f"%{value}%"))
 
         return query.all()
 
-    
     def fetch(self, db: Session, id: str):
-        '''Fetches a job by id'''
+        """Fetches a job by id"""
 
-        job = db.query(Job).where(Job.id==id)
+        job = db.query(Job).where(Job.id == id)
         return job
-    
+
     def update(self, db: Session, id: str, schema):
-        '''Updates a job'''
+        """Updates a job"""
 
         job = self.fetch(db=db, id=id)
-        
+
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(job, key, value)
-        
+
         db.commit()
         db.refresh(job)
         return job
-    
 
     def delete(self, db: Session, id: str):
-        '''Deletes a job'''
-        
+        """Deletes a job"""
+
         job = self.fetch(id=id)
         db.delete(job)
         db.commit()
-    
+
+
 job_service = JobService()

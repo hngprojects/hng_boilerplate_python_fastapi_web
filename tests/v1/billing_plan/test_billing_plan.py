@@ -1,9 +1,3 @@
-# import sys, os
-# import warnings
-
-# warnings.filterwarnings("ignore", category=DeprecationWarning)
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
-
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -17,7 +11,6 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-BILLPLAN_ENDPOINT = '/api/v1/organizations/billing-plans'
 
 
 @pytest.fixture
@@ -61,7 +54,7 @@ def test_fetch_all_plans(mock_user_service, mock_db_session):
     """Test for user deactivation errors."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
-    response = client.get(BILLPLAN_ENDPOINT
+    response = client.get("/api/v1/organizations/123-1221-090/billing-plans"
                                , headers={'Authorization': f'Bearer {access_token}'})
     
     assert response.status_code == status.HTTP_200_OK
@@ -85,7 +78,7 @@ def test_create_new_plans(mock_user_service, mock_db_session):
             }
     
     response = client.post(
-        BILLPLAN_ENDPOINT,
+        "/api/v1/organizations/billing-plans",
         headers={'Authorization': f'Bearer {access_token}'},
         json=data
         )
