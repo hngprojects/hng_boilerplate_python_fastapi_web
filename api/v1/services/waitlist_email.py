@@ -1,4 +1,5 @@
 from pydantic import EmailStr
+from api.core.dependencies.email_sender import send_email
 from api.core.dependencies.google_email import mail_service
 from fastapi import HTTPException
 from api.utils.logger import logger

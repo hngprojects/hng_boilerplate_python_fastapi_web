@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from api.v1.models.activity_logs import ActivityLog
-from typing import Optional, List
+from typing import Optional, Any
 
 
 
@@ -16,10 +16,20 @@ class ActivityLogService:
         db.refresh(activity_log)
         return activity_log
 
-    def get_all_activity_logs(self, db: Session):
-        '''Retrieve all activity logs'''
+    def fetch_all(self, db: Session, **query_params: Optional[Any]):
+        """Fetch all products with option tto search using query parameters"""
 
-        return db.query(ActivityLog).all()
+        query = db.query(ActivityLog)
+
+        # Enable filter by query parameter
+        if query_params:
+            for column, value in query_params.items():
+                if hasattr(ActivityLog, column) and value:
+                    query = query.filter(
+                        getattr(ActivityLog, column).ilike(f"%{value}%")
+                    )
+        
+        return query.all()
 
 
 activity_log_service = ActivityLogService()
