@@ -13,3 +13,10 @@ class AdminGet200Response(BaseModel):
     status: str = "success"
     message: str = "Message retrieved successfully"
     data: dict
+
+
+class AdminGet200ResponseAllMessage(BaseModel):
+    status_code: int = 200
+    status: str = "success"
+    message: str = "Message retrieved successfully"
+    data: list
