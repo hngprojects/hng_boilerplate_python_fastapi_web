@@ -22,7 +22,6 @@ from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
 import api.v1.routes.payment_flutterwave
-
 from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting

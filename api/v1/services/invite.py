@@ -140,5 +140,4 @@ class InviteService:
                 detail="An error occurred while adding the user to the organization",
             )
 
-
 invite_service = InviteService()
