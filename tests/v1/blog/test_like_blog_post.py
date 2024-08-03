@@ -1,11 +1,12 @@
 import pytest
 from main import app
-from datetime import datetime
 from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from api.db.database import get_db
+from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
+from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
 from api.v1.models import User, Blog, BlogLike
 
@@ -26,9 +27,9 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_blog_service():
-    with patch("api.v1.services.user.blog_service", autospec=True) as blog_service_mock:
-        yield blog_service_mock
+def mock_blog_service(mock_db_session):
+    with patch("api.v1.services.blog.BlogService", autospec=True) as blog_service_mock:
+        yield blog_service_mock(mock_db_session)
 
 
 # Test User
@@ -55,8 +56,11 @@ def test_blog(test_user):
 @pytest.fixture()
 def test_blog_like(test_user, test_blog):
     return BlogLike(
+            id=str(uuid7()),
             user_id=test_user.id,
             blog_id=test_blog.id,
+            ip_address="192.168.1.0",
+            created_at=datetime.now(tz=timezone.utc)
         )
 
 @pytest.fixture
@@ -75,28 +79,26 @@ def test_successful_like(
     test_user, 
     test_blog,
     test_blog_like,
-    access_token_user,
+    access_token_user
 ):
-    # mock_blog_service.fetch = test_blog
-    mock_db_session.query.return_value.filter.return_value.first.return_value = test_blog
-    mock_user_service.get_current_user = test_user
-    # mock_db_session.query.return_value.filter.return_value.first.side_effects = [test_user, test_blog]
-    mock_db_session.query.return_value.filter_by.return_value.first.return_value = None
+    # mock current-user AND blog-post
+    mock_db_session.query().filter().first.side_effect = [test_user, test_blog]
+
+    # mock existing-blog-like AND new-blog-like
+    mock_db_session.query().filter_by().first.side_effect = [None, test_blog_like]
 
     resp = make_request(test_blog.id, access_token_user)
     resp_d = resp.json()
+    print(resp_d)
     assert resp.status_code == 200
     assert resp_d['success'] == True
     assert resp_d['message'] == "Like recorded successfully."
 
     like_data = resp_d['data']
-    print(test_user.id)
-    print(resp_d)
     assert like_data['id'] == test_blog_like.id
     assert like_data['blog_id'] == test_blog.id
     assert like_data['user_id'] == test_user.id
-    assert len(like_data['ip_address'].split('.')) == 4
-    assert all(item.isnumeric() for item in like_data['ip_address'].split('.'))
+    assert like_data['ip_address'] == test_blog_like.ip_address
     assert datetime.fromisoformat(like_data['created_at']) == test_blog_like.created_at
 
 

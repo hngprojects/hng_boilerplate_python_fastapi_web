@@ -117,7 +117,6 @@ def like_blog_post(
 ):
 
     blog_service = BlogService(db)
-    # print(current_user)
 
     # GET blog post
     blog_p = blog_service.fetch(blog_id)
@@ -134,10 +133,12 @@ def like_blog_post(
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
-    # UPDATE ikes
-    new_like = blog_service.create_blog_like(
+    # UPDATE likes
+    blog_service.create_blog_like(
         db, blog_p.id, current_user.id, ip_address=get_ip_address(request))
-
+    
+    # CONFIRM new like
+    new_like = blog_service.fetch_blog_like(blog_p.id, current_user.id)
     if not isinstance(new_like, BlogLike):
         raise HTTPException(
             detail="Unable to record like.", status_code=status.HTTP_400_BAD_REQUEST
