@@ -104,3 +104,33 @@ def test_get_all_messages(mock_db_session, test_message, access_token_admin, tes
     assert response.json()['data'][0]['email'] == test_message.email
     assert response.json()['data'][0]['title'] == test_message.title
     assert response.json()['data'][0]['message'] == test_message.message
+
+
+def test_get_all_messages_with_false_org_id(mock_db_session, test_message, access_token_admin, test_admin):
+    mock_db_session.query.return_value.filter.return_value.first.side_effect = [test_admin]
+    mock_db_session.query.return_value.filter.return_value.all.return_value = None
+    mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
+
+    headers = {'Authorization': f'Bearer {access_token_admin}'}
+
+    data = {
+        'org_id': 'fake_id'
+    }
+
+    response = client.get(f"/api/v1/contacts", headers=headers, params=data)
+
+    assert response.status_code == 404
+
+
+def test_unauthorized_for_all_message(mock_db_session, test_message, test_admin):
+    mock_db_session.query.return_value.filter.return_value.first.side_effect = [test_admin]
+    mock_db_session.query.return_value.filter.return_value.all.return_value = [test_message]
+    mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
+
+    data = {
+        'org_id': test_message.org_id
+    }
+
+    response = client.get(f"/api/v1/contacts", params=data)
+
+    assert response.status_code == 401  # Expecting 401 Unauthorized
