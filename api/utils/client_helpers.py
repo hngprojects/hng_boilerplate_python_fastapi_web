@@ -1,4 +1,4 @@
-# All helper functins relating to user clients
+# All helper functions relating to user clients
 
 
 def get_ip_address(request):
