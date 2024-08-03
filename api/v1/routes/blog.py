@@ -1,6 +1,9 @@
 from typing import List, Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status, HTTPException, Response
+from fastapi import (
+    APIRouter, Depends, HTTPException, status, 
+    HTTPException, Response, Request
+)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -21,6 +24,7 @@ from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
 from api.v1.services.comment import comment_service
 from api.v1.services.comment import CommentService
+from api.utils.client_helpers import get_ip_address
 
 blog = APIRouter(prefix="/blogs", tags=["Blog"])
 
@@ -108,6 +112,7 @@ async def update_blog(
 @blog.put("/{blog_id}/dislike", response_model=BlogLikeDislikeResponse)
 def dislike_blog_post(
     blog_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
@@ -130,7 +135,8 @@ def dislike_blog_post(
         )
 
     # UPDATE disikes
-    blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
+    blog_service.create_blog_dislike(
+        db, blog_p.id, current_user.id, ip_address=get_ip_address(request))
 
     # CONFIRM new dislike
     new_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
