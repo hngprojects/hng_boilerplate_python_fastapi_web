@@ -12,7 +12,6 @@ class ContactMessage(object):
         pass
 
     def fetch_message(self, db, message_id):
-        # result = ContactUs.get_by_id(message_id)
         result = db.query(ContactUs).filter_by(id=message_id).first()
         if not result:
             raise self.raise_not_found()
@@ -48,6 +47,7 @@ class ContactMessage(object):
             )
         return response_data
 
+
     def check_admin_access(self, db, admin_id, org_id):
         org_service_obj = OrganizationService()
         role = org_service_obj.get_organization_user_role(user_id=admin_id, org_id=org_id, db=db)
@@ -68,6 +68,13 @@ class ContactMessage(object):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Admin is unauthorized",
         )
+
+    @staticmethod
+    def raise_unauthorized_admin():
+        raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Admin is unauthorized",
+            )
 
     @staticmethod
     def raise_not_found():

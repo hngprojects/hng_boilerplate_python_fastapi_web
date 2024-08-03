@@ -34,6 +34,7 @@ def get_all_contacts(
 
 
 @contact.get('/contact/{id}', response_model=AdminGet200Response, status_code=status.HTTP_200_OK)
+
 def get_contact(
         id: str,
         current_admin: User = Depends(user_service.get_current_super_admin),

@@ -17,3 +17,7 @@ class CreateSqueeze(BaseModel):
     type: str = "product"
     status: SqueezeStatusEnum = SqueezeStatusEnum.offline
     full_name: str = None
+
+
+class FilterSqueeze(BaseModel):
+    status: SqueezeStatusEnum = None
