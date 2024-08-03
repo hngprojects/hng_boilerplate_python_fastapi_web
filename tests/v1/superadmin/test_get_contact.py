@@ -97,8 +97,7 @@ def test_get_all_messages(mock_db_session, test_message, access_token_admin, tes
     }
 
     response = client.get(f"/api/v1/contacts", headers=headers, params=data)
-    with open('text.txt', 'w') as f:
-        f.write(f"{response.json()['data']}")
+
     assert response.status_code == 200
     assert type(response.json()['data']) == list
     assert response.json()['data'][0]['full_name'] == test_message.full_name
