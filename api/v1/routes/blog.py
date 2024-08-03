@@ -14,7 +14,7 @@ from api.v1.schemas.blog import (
     BlogPostResponse,
     BlogRequest,
     BlogUpdateResponseModel,
-    BlogDislikeResponse,
+    BlogLikeDislikeResponse,
 )
 from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
@@ -105,7 +105,7 @@ async def update_blog(
     )
 
 
-@blog.put("/{blog_id}/dislike", response_model=BlogDislikeResponse)
+@blog.put("/{blog_id}/dislike", response_model=BlogLikeDislikeResponse)
 def dislike_blog_post(
     blog_id: str,
     db: Session = Depends(get_db),
@@ -130,8 +130,10 @@ def dislike_blog_post(
         )
 
     # UPDATE disikes
-    new_dislike = blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
+    blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
 
+    # CONFIRM new dislike
+    new_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
     if not isinstance(new_dislike, BlogDislike):
         raise HTTPException(
             detail="Unable to record dislike.", status_code=status.HTTP_400_BAD_REQUEST
