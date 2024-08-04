@@ -3,16 +3,26 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
+class ProductPaginationBase(BaseModel):
+    limit: int
+    offset: int
+    pages: int
+    total_items: int
+
 
 class DashboardProductBase(BaseModel):
+    id: str
     name: str
     description: str
     price: str
-    category: str
     quantity: int
     image_url: str
     archived: bool
+    category_name: str
+    organization_name: str
     created_at: datetime
+    category_id: str
+    organization_id: str
 
 
 class DashboardResponseBase(BaseModel):
@@ -34,4 +44,5 @@ class DashboardSingleProductResponse(DashboardResponseBase):
 
 
 class DashboardProductListResponse(DashboardResponseBase):
+    pagination: ProductPaginationBase
     data: List[DashboardProductBase]
