@@ -203,7 +203,7 @@ async def get_product_stock(
     Raises:
         HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
     """
-    stock_info = product_service.fetch_stock(db, id)
+    stock_info = product_service.fetch_stock(db, id, current_user)
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Product stock fetched successfully",

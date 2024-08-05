@@ -120,7 +120,8 @@ class ProductService(Service):
     def fetch_by_status(self, db: Session, status: ProductStatusEnum):
         """Fetch products by filter status"""
         try:
-            products = db.query(Product).filter(Product.status == status.value).all()
+            products = db.query(Product).filter(
+                Product.status == status.value).all()
             response_data = [
                 ProductFilterResponse.from_orm(product) for product in products
             ]
@@ -128,9 +129,13 @@ class ProductService(Service):
         except Exception as e:
             raise
 
-    def fetch_stock(self, db: Session, product_id: str):
+    def fetch_stock(self, db: Session, product_id: str, current_user: User) -> dict:
         """Fetches the current stock level for a specific product"""
         product = check_model_existence(db, Product, product_id)
+
+        organization = check_model_existence(db, Organization, product.org_id)
+        
+        check_user_in_org(user=current_user, organization=organization)
 
         total_stock = product.quantity
 
@@ -182,27 +187,29 @@ class ProductService(Service):
 
         product = check_model_existence(db, Product, product_id)
         return product
-    
+
+
 class ProductCategoryService(Service):
-        """Product categories service functionality"""
-        
-        @staticmethod
-        def create():
-            pass
-    
-        @staticmethod
-        def fetch_all(db: Session, **query_params: Optional[Any]):
-            '''Fetch all newsletter subscriptions with option to search using query parameters'''
+    """Product categories service functionality"""
 
-            query = db.query(ProductCategory)
+    @staticmethod
+    def create():
+        pass
 
-            # Enable filter by query parameter
-            if query_params:
-                for column, value in query_params.items():
-                    if hasattr(ProductCategory, column) and value:
-                        query = query.filter(getattr(ProductCategory, column).ilike(f'%{value}%'))
+    @staticmethod
+    def fetch_all(db: Session, **query_params: Optional[Any]):
+        '''Fetch all newsletter subscriptions with option to search using query parameters'''
 
-            return query.all()
+        query = db.query(ProductCategory)
+
+        # Enable filter by query parameter
+        if query_params:
+            for column, value in query_params.items():
+                if hasattr(ProductCategory, column) and value:
+                    query = query.filter(
+                        getattr(ProductCategory, column).ilike(f'%{value}%'))
+
+        return query.all()
 
 
 product_service = ProductService()
