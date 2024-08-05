@@ -174,6 +174,27 @@ class ProductService(Service):
 
         product = check_model_existence(db, Product, product_id)
         return product
+    
+class ProductCategoryService(Service):
+        """Product categories service functionality"""
+        
+        @staticmethod
+        def create():
+            pass
+    
+        @staticmethod
+        def fetch_all(db: Session, **query_params: Optional[Any]):
+            '''Fetch all newsletter subscriptions with option to search using query parameters'''
+
+            query = db.query(ProductCategory)
+
+            # Enable filter by query parameter
+            if query_params:
+                for column, value in query_params.items():
+                    if hasattr(ProductCategory, column) and value:
+                        query = query.filter(getattr(ProductCategory, column).ilike(f'%{value}%'))
+
+            return query.all()
 
 
 product_service = ProductService()
