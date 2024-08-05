@@ -16,7 +16,7 @@ from api.v1.schemas.product import (
     ResponseModel,
     ProductFilterResponse,
     SuccessResponse,
-    ProductStatusQueryModel
+    ProductStatusQueryModel,
     ProductCategoryRetrieve
 )
 from api.utils.dependencies import get_current_user
