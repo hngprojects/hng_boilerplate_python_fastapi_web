@@ -108,7 +108,7 @@ async def update_blog(
     )
 
 
-@blog.put("/{blog_id}/like", response_model=BlogLikeDislikeResponse)
+@blog.post("/{blog_id}/like", response_model=BlogLikeDislikeResponse)
 def like_blog_post(
     blog_id: str,
     request: Request,

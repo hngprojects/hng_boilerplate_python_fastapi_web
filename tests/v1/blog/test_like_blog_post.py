@@ -68,7 +68,7 @@ def access_token_user(test_user):
     return user_service.create_access_token(user_id=test_user.id)
 
 def make_request(blog_id, token):
-    return client.put(
+    return client.post(
         f"/api/v1/blogs/{blog_id}/like",
         headers={"Authorization": f"Bearer {token}"}
     )
