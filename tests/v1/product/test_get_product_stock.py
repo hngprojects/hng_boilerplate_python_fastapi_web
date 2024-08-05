@@ -67,7 +67,7 @@ def access_token_2(mock_non_member_user):
 
 def test_get_product_stock(mock_db, mock_get_current_user, mock_product, access_token, monkeypatch):
     # Mock the product_service.fetch_stock method
-    def mock_fetch_stock(db, product_id):
+    def mock_fetch_stock(db, product_id, mock_get_current_user):
         if product_id == mock_product.id:
             return {
                 "product_id": mock_product.id,
