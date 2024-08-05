@@ -6,12 +6,7 @@ from fastapi import HTTPException, status
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.product import (
-    Product,
-    ProductFilterStatusEnum,
-    ProductStatusEnum,
-    ProductCategory,
-)
+from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum, ProductCategory
 from api.v1.models.user import User
 from api.v1.models import Organization
 from api.v1.schemas.product import ProductCreate
@@ -74,7 +69,8 @@ class ProductService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Product, column) and value:
-                    query = query.filter(getattr(Product, column).ilike(f"%{value}%"))
+                    query = query.filter(
+                        getattr(Product, column).ilike(f"%{value}%"))
 
         return query.all()
 
@@ -131,6 +127,18 @@ class ProductService(Service):
             return response_data
         except Exception as e:
             raise
+
+    def fetch_stock(self, db: Session, product_id: str):
+        """Fetches the current stock level for a specific product"""
+        product = check_model_existence(db, Product, product_id)
+
+        total_stock = product.quantity
+
+        return {
+            "product_id": product_id,
+            "current_stock": total_stock,
+            "last_updated": product.updated_at
+        }
 
     def update(self, db: Session, id: str, schema):
         """Updates a product"""
