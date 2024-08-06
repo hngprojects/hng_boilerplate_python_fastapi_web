@@ -46,6 +46,7 @@ def mock_email_template():
     return EmailTemplate(
         id=str(uuid7()),
         title="Test name",
+        type="Test type",
         template="<h1>Hello</h1>",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
@@ -85,6 +86,7 @@ def test_create_template_success(client, db_session_mock):
             headers={'Authorization': 'Bearer token'},
             json={
                 "title": "Test title?",
+                "type": "Test title?",
                 "template": "<h1>Testing</h1>",
             }
         )
@@ -125,6 +127,7 @@ def test_create_template_unauthorized(client, db_session_mock):
         '/api/v1/email-templates',
         json={
             "title": "Test title?",
+            "type": "Test title?",
             "template": "<h1>Testing</h1>",
         }
     )
