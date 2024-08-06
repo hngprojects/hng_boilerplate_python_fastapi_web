@@ -1,7 +1,35 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr, field_validator
+
+"""
+Job application schemas
+"""
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+
+
+from typing import Union, Optional
 import re
 
+class JobApplicationData(BaseModel):
+    """
+    Schema for job application base
+    """
+    job_id: str
+    applicant_name: str
+    applicant_email: str
+    resume_link: str
+    portfolio_link: Union[str, None]
+    cover_letter: Union[str, None]
+    application_status: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class SingleJobAppResponse(BaseModel):
+    """
+    Single job application response schema
+    """
+    status: str
+    message: str
+    status_code: int
+    data: JobApplicationData
 
 class JobApplicationBase(BaseModel):
     '''Base model for job application'''
@@ -12,7 +40,6 @@ class JobApplicationBase(BaseModel):
     resume_link: str
     portfolio_link: str
     application_status: str
-
 
 class CreateJobApplication(BaseModel):
     '''Schema for creating job application'''
@@ -58,3 +85,4 @@ class UpdateJobApplication(BaseModel):
         if not url_regex.match(v):
             raise ValueError('Invalid URL format')
         return v
+
