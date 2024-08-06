@@ -11,7 +11,7 @@ class RoleResponse(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoleAssignRequest(BaseModel):
     role_id: str
@@ -22,7 +22,7 @@ class RoleDeleteResponse(BaseModel):
     message: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
         
         
 class ResponseModel(BaseModel):
@@ -30,3 +30,4 @@ class ResponseModel(BaseModel):
     status_code: int
     message: str
     data: Optional[Dict[str, Any]] = None
+    

@@ -10,7 +10,7 @@ class PermissionResponse(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class PermissionAssignRequest(BaseModel):
     permission_id: str
