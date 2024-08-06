@@ -1,3 +1,6 @@
+from api.v1.routes.settings import settings
+from api.v1.routes.privacy import privacies
+from api.v1.routes.team import team
 from fastapi import APIRouter
 from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
@@ -35,6 +38,9 @@ from api.v1.routes.contact import contact
 from api.v1.routes.permissions.permisions import perm_role
 from api.v1.routes.permissions.roles import role_perm
 from api.v1.routes.analytics import analytics
+from api.v1.routes.job_application import job_application
+from api.v1.routes.privacy import privacies
+
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
 
@@ -76,5 +82,8 @@ api_version_one.include_router(dashboard)
 api_version_one.include_router(perm_role)
 api_version_one.include_router(role_perm)
 api_version_one.include_router(analytics)
+api_version_one.include_router(job_application)
+api_version_one.include_router(privacies)
 api_version_one.include_router(settings)
+api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
