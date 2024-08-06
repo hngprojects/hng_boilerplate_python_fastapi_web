@@ -39,7 +39,7 @@ async def update_user_data_privacy_setting(
     """
     Endpoint to update a user's data privacy setting'
     """
-    updated_settings = data_privacy_service.update(db=db, schema=schema)
+    updated_settings = data_privacy_service.update(db=db, schema=schema, user=current_user)
 
     return success_response(
         status_code=status.HTTP_200_OK,
