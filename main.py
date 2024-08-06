@@ -32,7 +32,7 @@ if not os.path.exists(MEDIA_DIR):
     os.makedirs(MEDIA_DIR)
 
 # Load up media static files
-app.mount(MEDIA_DIR, StaticFiles(directory='media'), name='media')
+app.mount(MEDIA_DIR, StaticFiles(directory=MEDIA_DIR), name='media')
 
 origins = [
     "http://localhost:3000",
