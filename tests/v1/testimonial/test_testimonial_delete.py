@@ -38,7 +38,6 @@ def mock_current_admin():
     with patch("api.utils.dependencies.get_super_admin", autospec=True) as mock_admin:
         mock_admin.return_value = User(
             id=str(uuid7()),
-            username="testadmin",
             email="testadmin@gmail.com",
             password=user_service.hash_password("Adminpassword@123"),
             first_name='Admin',
@@ -55,7 +54,6 @@ def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
 
     mock_user = User(
         id=str(uuid7()),
-        username="testuser",
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
         first_name='Test',

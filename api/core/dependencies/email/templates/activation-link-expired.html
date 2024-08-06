@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Activation Link Expired{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/activation-link-expired.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Activation Link Expired</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-message">
+      We noticed that your account activation link has expired. For your
+      security, activation links are only valid for a specific time period.
+    </p>
+    <div class="editable-content">
+      <p>
+        Don’t worry, you can easily request a new activation link by
+        clicking the button below:
+      </p>
+      <a class="template-btn">Send Another Activation Link</a>
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
