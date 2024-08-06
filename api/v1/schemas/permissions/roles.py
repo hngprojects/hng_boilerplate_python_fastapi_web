@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 from uuid_extensions import uuid7
+from typing import Dict, Any, Optional
+
 
 class RoleCreate(BaseModel):
     name: str
@@ -20,4 +22,12 @@ class RoleDeleteResponse(BaseModel):
     message: str
 
     class Config:
+        orm_mode = True
+        
+        
+class ResponseModel(BaseModel):
+    success: bool
+    status_code: int
+    message: str
+    data: Optional[Dict[str, Any]] = None
         from_attributes = True
