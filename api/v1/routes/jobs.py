@@ -166,7 +166,7 @@ async def create_application(
     updated_application = job_application_service.update(db, application_id=application_id, job_id=job_id, schema=update_data)
     return success_response(
         status_code=status.HTTP_200_OK,
-        message="Application updated successfully!",
+        message="Job Application updated successfully!",
         data=jsonable_encoder(updated_application)
     )
     
