@@ -9,7 +9,7 @@ from api.v1.services.user import user_service
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from api.v1.schemas.permissions.permissions import PermissionCreate
-from api.v1.schemas.permissions.roles import RoleDeleteResponse
+from api.v1.schemas.permissions.roles import RoleDeleteResponse, ResponseModel
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -97,7 +97,12 @@ def test_create_role_success(mock_db_session):
 
 def test_delete_role_success(mock_db_session, access_token):
     role_id = "test-role-id"
-    response_data = RoleDeleteResponse(id=role_id, message="Role successfully deleted")
+    response_data = {
+        "success": True,
+        "status_code": 200,
+        "message": "Role successfully deleted.",
+        "data": {"id": role_id}
+    }
 
     # Mock the delete_role method
     role_service.delete_role = MagicMock(return_value=response_data)
@@ -105,8 +110,9 @@ def test_delete_role_success(mock_db_session, access_token):
     response = client.delete(f"/api/v1/roles/{role_id}", headers={'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == 200
-    assert response.json() == {"id": role_id, "message": "Role successfully deleted"}
+    assert response.json() == response_data
     role_service.delete_role.assert_called_once_with(mock_db_session, role_id)
+
     
     
     
