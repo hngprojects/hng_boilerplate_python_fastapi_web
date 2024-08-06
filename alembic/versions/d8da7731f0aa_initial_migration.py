@@ -273,7 +273,7 @@ def upgrade() -> None:
     sa.Column('image_url', sa.String(), nullable=False),
     sa.Column('status', sa.Enum('in_stock', 'out_of_stock', 'low_on_stock', name='productstatusenum'), nullable=True),
     sa.Column('archived', sa.Boolean(), nullable=True),
-    sa.Column('filter_status', sa.Enum('published', 'draft', name='productfilterstatusenum'), nullable=True),
+    sa.Column('filter_status', sa.Enum('active', 'draft', name='productfilterstatusenum'), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),

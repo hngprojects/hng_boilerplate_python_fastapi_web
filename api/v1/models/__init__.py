@@ -11,7 +11,7 @@ from api.v1.models.profile import Profile
 from api.v1.models.notifications import Notification
 from api.v1.models.product import ProductVariant, ProductCategory, Product
 from api.v1.models.blog import Blog, BlogLike, BlogDislike
-from api.v1.models.job import Job
+from api.v1.models.job import Job, JobApplication
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.token_login import TokenLogin
 from api.v1.models.oauth import OAuth
@@ -23,3 +23,5 @@ from api.v1.models.email_template import EmailTemplate
 from api.v1.models.regions import Region
 from api.v1.models.squeeze import Squeeze
 from api.v1.models.sales import Sales
+from api.v1.models.team import TeamMember
+from api.v1.models.data_privacy import DataPrivacySetting

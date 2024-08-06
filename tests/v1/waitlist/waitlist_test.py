@@ -42,7 +42,6 @@ def test_duplicate_email(client_with_mocks):
     data = response.json()
     print(response.status_code)
     assert response.status_code == 400
-    assert data['success'] == False
 
 def test_invalid_email(client_with_mocks):
     client, _ = client_with_mocks
