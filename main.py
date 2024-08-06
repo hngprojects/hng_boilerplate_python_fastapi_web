@@ -1,4 +1,4 @@
-import uvicorn
+import uvicorn, os
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
 from fastapi.templating import Jinja2Templates
@@ -27,8 +27,12 @@ app = FastAPI(lifespan=lifespan)
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
 
+MEDIA_DIR = '/media'
+if not os.path.exists(MEDIA_DIR):
+    os.makedirs(MEDIA_DIR)
+
 # Load up media static files
-app.mount('/media', StaticFiles(directory='media'), name='media')
+app.mount(MEDIA_DIR, StaticFiles(directory='media'), name='media')
 
 origins = [
     "http://localhost:3000",
