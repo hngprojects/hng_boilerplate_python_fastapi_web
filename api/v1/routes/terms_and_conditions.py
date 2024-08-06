@@ -63,7 +63,7 @@ async def create_terms_and_conditions(
     )
   
   
-  @terms_and_conditions.delete("/{id}", response_model=DeleteResponseModel)
+@terms_and_conditions.delete("/{id}", response_model=DeleteResponseModel)
 async def delete_terms_and_conditions(id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
     try:
         result = terms_and_conditions_service.delete(terms_id=id, db=db, current_user=current_user)
