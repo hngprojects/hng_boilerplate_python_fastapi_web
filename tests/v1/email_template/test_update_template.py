@@ -46,7 +46,7 @@ def mock_email_template():
     return EmailTemplate(
         id=str(uuid7()),
         title="Test name",
-        type="Test type",
+        type="Test name",
         template="<h1>Hello</h1>",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
@@ -66,12 +66,12 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 
-def test_create_template_success(client, db_session_mock):
-    '''Test to successfully create a new email template'''
+def test_update_template_success(client, db_session_mock):
+    '''Test to successfully update an email template'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-    app.dependency_overrides[email_template_service.create] = lambda: mock_email_template
+    app.dependency_overrides[email_template_service.update] = lambda: mock_email_template
 
     # Mock email_template creation
     db_session_mock.add.return_value = None
@@ -80,9 +80,9 @@ def test_create_template_success(client, db_session_mock):
 
     mock_template = mock_email_template()
 
-    with patch("api.v1.services.email_template.email_template_service.create", return_value=mock_template) as mock_create:
-        response = client.post(
-            '/api/v1/email-templates',
+    with patch("api.v1.services.email_template.email_template_service.update", return_value=mock_template) as mock_update:
+        response = client.patch(
+            f'/api/v1/email-templates/{mock_template.id}',
             headers={'Authorization': 'Bearer token'},
             json={
                 "title": "Test title?",
@@ -91,15 +91,15 @@ def test_create_template_success(client, db_session_mock):
             }
         )
 
-        assert response.status_code == 201
+        assert response.status_code == 200
 
 
-def test_create_template_missing_field(client, db_session_mock):
+def test_update_template_missing_field(client, db_session_mock):
     '''Test for missing field'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-    app.dependency_overrides[email_template_service.create] = lambda: mock_email_template
+    app.dependency_overrides[email_template_service.update] = lambda: mock_email_template
 
     # Mock email_template creation
     db_session_mock.add.return_value = None
@@ -108,9 +108,9 @@ def test_create_template_missing_field(client, db_session_mock):
 
     mock_template = mock_email_template()
 
-    with patch("api.v1.services.email_template.email_template_service.create", return_value=mock_template) as mock_create:
-        response = client.post(
-            '/api/v1/email-templates',
+    with patch("api.v1.services.email_template.email_template_service.update", return_value=mock_template) as mock_update:
+        response = client.patch(
+            f'/api/v1/email-templates/{mock_template.id}',
             headers={'Authorization': 'Bearer token'},
             json={
                 "template": "<h1>Testing</h1>",
@@ -120,11 +120,13 @@ def test_create_template_missing_field(client, db_session_mock):
         assert response.status_code == 422
 
     
-def test_create_template_unauthorized(client, db_session_mock):
+def test_update_template_unauthorized(client, db_session_mock):
     '''Test for unauthorized user'''
 
-    response = client.post(
-        '/api/v1/email-templates',
+    mock_template = mock_email_template()
+
+    response = client.patch(
+        f'/api/v1/email-templates/{mock_template.id}',
         json={
             "title": "Test title?",
             "type": "Test title?",
