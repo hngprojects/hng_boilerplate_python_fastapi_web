@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from api.v1.services.job_application import JobApplicationService
 from api.v1.models.job import JobApplication
 from api.v1.schemas.job_application import (SingleJobAppResponse,
-                                            JobApplicationBase)
+                                            JobApplicationData)
 
 
 # Sample data to be used in tests
@@ -58,7 +58,7 @@ def test_fetch_success(job_application_service, mock_db_session):
         status='success',
         status_code=status.HTTP_200_OK,
         message='successfully retrieved job application.',
-        data=JobApplicationBase(**mock_application_data)
+        data=JobApplicationData(**mock_application_data)
     )
     
     assert result == expected_response
