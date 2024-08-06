@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Depends, Path, Query, HTTPException,status
 from sqlalchemy.orm import Session
 from api.v1.schemas.permissions.roles import RoleCreate, RoleResponse, RoleAssignRequest
 from api.v1.services.permissions.role_service import role_service
@@ -16,6 +16,15 @@ def create_role_endpoint(
     current_user: User = Depends(user_service.get_current_user)):
     return  role_service.create_role(db, role)
 
+@role_perm.delete("/roles/{role_id}", tags=["delete roles"], status_code=status.HTTP_204_NO_CONTENT)
+def delete_role_endpoint(
+    role_id : str,
+    db : Session=Depends(get_db),
+    admin_user : User = Depends(user_service.get_current_super_admin),
+   
+):
+    return role_service.delete_role(db=db,role_id=role_id)
+    
 
 @role_perm.post("/organizations/{org_id}/users/{user_id}/roles", tags=["assign role to a user"])
 def assign_role(
