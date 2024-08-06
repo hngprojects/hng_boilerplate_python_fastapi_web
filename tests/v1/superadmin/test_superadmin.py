@@ -104,7 +104,7 @@ def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Se
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
 
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+@pytest.mark.usefixtures("mock_get_current_user", "mock_db_session", "mock_user_service")
 def test_non_admin_access(
     mock_get_current_user, mock_user_service: UserService, mock_db_session: Session
 ):
@@ -126,7 +126,6 @@ def test_non_admin_access(
         f"{USER_DELETE_ENDPOINT}/{str(uuid7())}",
         headers={"Authorization": "Bearer dummy_token"},
     )
-
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
