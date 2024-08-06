@@ -13,7 +13,7 @@ from api.v1.services.privacy_policies import privacy_service
 from api.v1.services.user import user_service
 
 
-privacies = APIRouter(prefix="/privacy_policy", tags=["Privacy Policy"])
+privacies = APIRouter(prefix="/privacy-policy", tags=["Privacy Policy"])
 
 @privacies.post("", response_model=PrivacyPolicyResponse, status_code=status.HTTP_201_CREATED)
 def create_privacy(privacy: PrivacyPolicyCreate, db: Session = Depends(get_db),
@@ -24,25 +24,4 @@ def create_privacy(privacy: PrivacyPolicyCreate, db: Session = Depends(get_db),
         status_code=status.HTTP_201_CREATED,
         message='Privacy created successfully',
         data=jsonable_encoder(privacy_item)
-    )
-
-@privacies.get("", response_model=List[PrivacyPolicyResponse])
-def get_privacies(db: Session = Depends(get_db)):
-    """Get All Privacies"""
-    privacy_items = privacy_service.fetch_all(db)
-    
-    return success_response(
-        status_code=200,
-        message='Privacies retrieved successfully',
-        data=jsonable_encoder(privacy_items)
-    )
-
-@privacies.get("/{privacy_id}", response_model=PrivacyPolicyResponse)
-def get_privacy_by_user(privacy_id: str, db: Session = Depends(get_db)):
-    region = privacy_service.fetch(db, privacy_id)
-    
-    return success_response (
-        status_code=200,
-        message='privacy retrieved successfully',
-        data=jsonable_encoder(region)
     )
