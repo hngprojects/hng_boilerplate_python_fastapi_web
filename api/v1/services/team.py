@@ -45,7 +45,11 @@ class TeamServices(Service):
 
     def delete(self, db, id):
         """Delete a team"""
-        pass
+        check_model_existence(db, TeamMember, id)
+
+        db.query(TeamMember).filter(TeamMember.id == id).delete()
+        db.commit()
+        return None
 
     def delete_all(self, db):
         """Delete all teams"""

@@ -99,3 +99,23 @@ async def add_team_members(
         data=jsonable_encoder(
             TeamMemberCreateResponseSchema.model_validate(new_member))
     )
+
+
+@team.delete(
+    "/members/{team_id}",
+    response_model=success_response,
+    status_code=status.HTTP_200_OK
+)
+def delete_team_member_by_id(
+    team_id: Annotated[str, Path(description="Team Member ID")],
+    db: Session = Depends(get_db),
+    su: User = Depends(user_service.get_current_super_admin)
+):
+    '''Endpoint to delete a team by id'''
+
+    team_response = team_service.delete(db, team_id)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Team deleted successfully',
+        data=jsonable_encoder(team_response),
+    )
