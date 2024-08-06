@@ -18,6 +18,7 @@ import requests
 from datetime import timedelta
 
 google_auth = APIRouter(prefix="/auth", tags=["Authentication"])
+
 FRONTEND_URL = config("FRONTEND_URL")
 
 
