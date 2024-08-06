@@ -1,6 +1,7 @@
 from fastapi import Depends, APIRouter, status, Query, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import Annotated
 from typing import List
 
@@ -14,6 +15,7 @@ from api.v1.schemas.product import (
     ProductList,
     ProductUpdate,
     ResponseModel,
+    ProductStockResponse,
     ProductFilterResponse,
     SuccessResponse,
     ProductStatusQueryModel,
@@ -26,29 +28,13 @@ from api.v1.models import User
 product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@product.post("/{org_id}", status_code=status.HTTP_201_CREATED)
-def product_create(
-    org_id: str,
-    product: ProductCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    created_product = product_service.create(
-        db=db, schema=product, org_id=org_id, current_user=current_user
-    )
-
-    return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="Product created successfully",
-        data=jsonable_encoder(created_product),
-    )
-
-
 @product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    skip: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    skip: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
 ):
     """Endpoint to get all products. Only accessible to superadmin"""
@@ -73,7 +59,8 @@ async def get_products_by_filter_status(
             message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve products")
 
 
 @product.get(
@@ -96,7 +83,8 @@ async def get_products_by_status(
         error_message = str(e).replace("Value error, ", "").strip()
         raise HTTPException(status_code=400, detail=error_message)
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve products")
 
 
 @product.get("/categories", response_model=success_response, status_code=200)
@@ -110,15 +98,16 @@ def retrieve_categories(
 
     categories = ProductCategoryService.fetch_all(db)
 
-    categories_filtered = list(map(lambda x: ProductCategoryRetrieve.model_validate(x), categories))
-        
+    categories_filtered = list(
+        map(lambda x: ProductCategoryRetrieve.model_validate(x), categories))
+
     if (len(categories_filtered) == 0):
         categories_filtered = [{}]
 
     return success_response(
-        message = "Categories retrieved successfully",
-        status_code = 200,
-        data = jsonable_encoder(categories_filtered)
+        message="Categories retrieved successfully",
+        status_code=200,
+        data=jsonable_encoder(categories_filtered)
     )
 
 
@@ -131,8 +120,10 @@ def retrieve_categories(
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 1,
     db: Session = Depends(get_db),
 ):
     """
@@ -175,6 +166,37 @@ def get_organization_products(
     )
 
 
+@product.get("/{id}/stock", response_model=ResponseModel)
+async def get_product_stock(
+    id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve the current stock level for a specific product.
+
+    This endpoint fetches the current stock information for a given product,
+    including the total stock across all variants and the last update time.
+
+    Args:
+        id (str): The unique identifier of the product.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+
+    Returns:
+        ResponseModel: A success response containing the product stock information.
+
+    Raises:
+        HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
+    """
+    stock_info = product_service.fetch_stock(db, id, current_user)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Product stock fetched successfully",
+        data=jsonable_encoder(stock_info),
+    )
+
+
 @product.put("/{id}", response_model=ResponseModel)
 async def update_product(
     id: str,
@@ -210,7 +232,8 @@ async def update_product(
         }
     """
 
-    updated_product = product_service.update(db, id=str(id), schema=product_update)
+    updated_product = product_service.update(
+        db, id=str(id), schema=product_update)
 
     # Prepare the response
     return success_response(
@@ -218,24 +241,3 @@ async def update_product(
         message="Product updated successfully",
         data=jsonable_encoder(updated_product),
     )
-
-
-@product.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(
-    id: str,
-    current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Enpoint to delete a product
-
-    Args:
-        id (str): The unique identifier of the product to be deleted
-        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
-        db (Session): The database session, provided by the `get_db` dependency.
-
-    Raises:
-        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
-        HTTPException: 404 NOT FOUND (Product to be deleted cannot be found)
-    """
-
-    product_service.delete(db=db, id=id, current_user=current_user)

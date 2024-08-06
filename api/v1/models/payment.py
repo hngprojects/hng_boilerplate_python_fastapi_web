@@ -14,3 +14,4 @@ class Payment(BaseTableModel):
     transaction_id = Column(String, unique=True, nullable=False)
 
     user = relationship("User", back_populates="payments")
+    sales = relationship("Sales", back_populates="payment")
