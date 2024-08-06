@@ -62,7 +62,7 @@ def test_delete_terms_and_conditions_success(client, db_session_mock):
         "message": "Terms and Conditions deleted successfully",
         "status_code": 200,
         "success": True,
-        "terms_id": mock_terms_and_conditions_instance.id
+        "data": {"terms_id": mock_terms_and_conditions_instance.id}
     }) as mock_delete:
         response = client.delete(
             f'api/v1/terms-and-conditions/{mock_terms_and_conditions_instance.id}',
@@ -74,7 +74,7 @@ def test_delete_terms_and_conditions_success(client, db_session_mock):
             "message": "Terms and Conditions deleted successfully",
             "status_code": 200,
             "success": True,
-            "terms_id": mock_terms_and_conditions_instance.id
+            "data": {"terms_id": mock_terms_and_conditions_instance.id}
         }
 
 def test_delete_terms_and_conditions_not_found(client, db_session_mock):
