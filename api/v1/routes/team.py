@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from api.utils.success_response import success_response
-from api.v1.schemas.team import PostTeamMemberSchema, AddTeamSchema, TeamMemberCreateResponseSchema
+from api.v1.schemas.team import PostTeamMemberSchema, TeamMemberCreateResponseSchema
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 
