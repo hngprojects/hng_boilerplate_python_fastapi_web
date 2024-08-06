@@ -214,24 +214,3 @@ async def update_product(
         message="Product updated successfully",
         data=jsonable_encoder(updated_product),
     )
-
-
-@product.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(
-    id: str,
-    current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Enpoint to delete a product
-
-    Args:
-        id (str): The unique identifier of the product to be deleted
-        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
-        db (Session): The database session, provided by the `get_db` dependency.
-
-    Raises:
-        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
-        HTTPException: 404 NOT FOUND (Product to be deleted cannot be found)
-    """
-
-    product_service.delete(db=db, id=id, current_user=current_user)
