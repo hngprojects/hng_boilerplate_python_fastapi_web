@@ -13,7 +13,7 @@ from api.v1.services.privacy_policies import privacy_service
 from api.v1.services.user import user_service
 
 
-privacies = APIRouter(prefix="/privacy", tags=["Privacy Policy"])
+privacies = APIRouter(prefix="/privacy_policy", tags=["Privacy Policy"])
 
 @privacies.post("", response_model=PrivacyPolicyResponse, status_code=status.HTTP_201_CREATED)
 def create_privacy(privacy: PrivacyPolicyCreate, db: Session = Depends(get_db),
