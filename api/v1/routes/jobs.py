@@ -57,9 +57,8 @@ async def add_jobs(
         status_code=201,
         data=jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
     )
-    
-    
-    
+
+
 @jobs.get("/{job_id}", response_model=success_response)
 async def get_job(
     job_id: str,
@@ -75,13 +74,12 @@ async def get_job(
     - db: The database session
     """
     job = job_service.fetch(db, job_id)
-    
+
     return success_response(
         message="Retrieved Job successfully",
         status_code=200,
         data=jsonable_encoder(job)
     )
-    
 
 
 @jobs.get("")
@@ -169,7 +167,7 @@ async def apply_to_job(
     )
 
 
-@jobs.patch("/{job_id}/applications/{application_id}") 
+@jobs.patch("/{job_id}/applications/{application_id}")
 async def create_application(
     job_id: str,
     application_id: str,
@@ -179,28 +177,28 @@ async def create_application(
 ):
     """
     Description
-		Get endpoint for admin users to update a job application.
+                Get endpoint for admin users to update a job application.
 
-	Args:
-		db: the database session object
+        Args:
+                db: the database session object
         job_id: the ID of the Job
 
-	Returns:
-		Response: a response object containing details if successful or appropriate errors if not
-	"""	
-   
+        Returns:
+                Response: a response object containing details if successful or appropriate errors if not
+        """
+
     check_model_existence(db, Job, job_id)
     check_model_existence(db, JobApplication, application_id)
-    updated_application = job_application_service.update(db, application_id=application_id, job_id=job_id, schema=update_data)
+    updated_application = job_application_service.update(
+        db, application_id=application_id, job_id=job_id, schema=update_data)
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Job Application updated successfully!",
         data=jsonable_encoder(updated_application)
     )
-    
-    
 
-@jobs.delete('/{job_id}/applications/{application_id}')
+
+@jobs.delete('/{job_id}/applications/{application_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_application(job_id: str,
                              application_id: str,
                              db: Annotated[Session, Depends(get_db)],
@@ -213,10 +211,7 @@ async def delete_application(job_id: str,
         db: database Session object
         current_user: the super admin user
     Returns:
-        HTTP 200 on success
+        HTTP 204 No Content on success
     """
     job_application_service.delete(job_id, application_id, db)
-    return success_response(
-        message="Job application deleted successfully",
-        status_code=200,
-    )
+    return {"detail": "Job Application deleted successfully."}

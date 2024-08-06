@@ -21,8 +21,9 @@ class JobApplicationService(Service):
             JobApplication.applicant_email == schema.applicant_email,
             JobApplication.job_id == job_id,
         ).first():
-            raise HTTPException(status_code=400, detail='You have already applied for this role')
-        
+            raise HTTPException(
+                status_code=400, detail='You have already applied for this role')
+
         db.add(job_application)
         db.commit()
         db.refresh(job_application)
@@ -86,8 +87,8 @@ class JobApplicationService(Service):
         application: object | None = db.query(JobApplication).filter_by(job_id=job_id,
                                                                         id=application_id).first()
         if not application:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                                detail='Invalid id')
+            raise HTTPException(
+                status_code=404, detail='Invalid id')
         db.delete(application)
         db.commit()
 
