@@ -439,23 +439,6 @@ class UserService(Service):
             )
         return user
 
-    def get_current_admin(
-        self, org_id: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
-    ):
-        """
-        ***THIS IS NOT YET FIT FOR USE***
-        
-        Get the current admin
-        """
-        user = self.get_current_user(db=db, access_token=token)
-        role = org_service.get_organization_user_role(user.id, org_id, db)
-        if (not role) or (role.name != "admin"):
-            raise HTTPException(
-                status_code=403,
-                detail="You do not have permission to access this resource",
-            )
-        return user
-
     def save_login_token(
         self, db: Session, user: User, token: str, expiration: datetime
     ):

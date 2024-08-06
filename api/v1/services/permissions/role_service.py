@@ -70,9 +70,14 @@ class RoleService:
         return relation
 
     def remove_user_from_role(self, db: Session, org_id: str, user_id: str, role: Role):
-        relation = self.get_user_role_relation(db, user_id, org_id, role)
-        db.delete(relation)
-        db.commit()
+        """Delete user role relationship"""
+        if self.get_user_role_relation(db, user_id, org_id, role):
+            db.execute(user_organization_roles.delete().where(
+                user_organization_roles.c.user_id == user_id,
+                user_organization_roles.c.organization_id == org_id,
+                user_organization_roles.c.role_id == role.id,
+            ))
+            db.commit()
 
 
 role_service = RoleService()

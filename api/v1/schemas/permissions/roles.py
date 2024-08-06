@@ -13,3 +13,8 @@ class RoleResponse(BaseModel):
 
 class RoleAssignRequest(BaseModel):
     role_id: str
+
+
+class RemoveUserFromRoleResponse(BaseModel):
+    status_code: int
+    message: str
