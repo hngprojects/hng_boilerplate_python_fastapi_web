@@ -25,3 +25,14 @@ def create_privacy(privacy: PrivacyPolicyCreate, db: Session = Depends(get_db),
         message='Privacy created successfully',
         data=jsonable_encoder(privacy_item)
     )
+
+@privacies.get("", response_model=List[PrivacyPolicyResponse])
+def get_privacies(db: Session = Depends(get_db)):
+    """Get All Privacies"""
+    privacy_items = privacy_service.fetch_all(db)
+    
+    return success_response(
+        status_code=200,
+        message='Privacies retrieved successfully',
+        data=jsonable_encoder(privacy_items)
+    )
