@@ -9,17 +9,30 @@ from sqlalchemy.orm import Session
 from api.utils.db_validators import check_model_existence
 from api.utils.pagination import paginated_response
 from api.v1.models.job import Job, JobApplication
-from api.v1.schemas.job_application import JobApplicationBase, JobApplicationData
+from api.v1.schemas.job_application import JobApplicationBase, JobApplicationData, CreateJobApplication, UpdateJobApplication
 from api.utils.success_response import success_response
 
+
 class JobApplicationService(Service):
-    """Job applications service functionality"""
+    '''Job application service functionality'''
 
-    def create():
-        pass
+    def create(self, db: Session, job_id: str, schema: CreateJobApplication):
+        """Create a new job application"""
 
-    def fetch():
-        pass
+        job_application = JobApplication(**schema.model_dump(), job_id=job_id)
+
+        # Check if user has already applied by checking through the email
+        if db.query(JobApplication).filter(
+            JobApplication.applicant_email == schema.applicant_email,
+            JobApplication.job_id == job_id,
+        ).first():
+            raise HTTPException(status_code=400, detail='You have already applied for this role')
+        
+        db.add(job_application)
+        db.commit()
+        db.refresh(job_application)
+
+        return job_application
 
     def fetch_all(
         self, job_id: str, page: int, per_page: int, db: Annotated[Session, get_db]
@@ -63,13 +76,39 @@ class JobApplicationService(Service):
             data=application_data
         )
 
+    def fetch(self, db: Session, job_id: str, application_id: str):
+        """Fetches a, FAQ by id"""
+
+        job_application = db.query(JobApplication).filter(
+            JobApplication.id == application_id,
+            JobApplication.job_id == job_id,
+        ).first()
+
+        if not job_application:
+            raise HTTPException(status_code=404, detail='Job application not found')
         
+        return job_application
 
-    def update():
-        pass
+    def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
+        """Updates an application"""
 
-    def delete():
-        pass
+        job_application = self.fetch(db=db, job_id=job_id, application_id=application_id)
+
+        # Update the fields with the provided schema data
+        update_data = schema.dict(exclude_unset=True, exclude={"id"})
+        for key, value in update_data.items():
+            setattr(job_application, key, value)
+
+        db.commit()
+        db.refresh(job_application)
+        return job_application
+
+    def delete(self, db: Session, job_id: str, application_id: str):
+        """Deletes an FAQ"""
+
+        faq = self.fetch(db=db, job_id=job_id, application_id=application_id)
+        db.delete(faq)
+        db.commit()
+
 
 job_application_service = JobApplicationService()
-
