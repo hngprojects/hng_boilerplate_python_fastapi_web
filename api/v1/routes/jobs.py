@@ -214,4 +214,3 @@ async def delete_application(job_id: str,
         HTTP 204 No Content on success
     """
     job_application_service.delete(job_id, application_id, db)
-    return {"detail": "Job Application deleted successfully."}
