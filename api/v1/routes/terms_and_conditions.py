@@ -33,8 +33,37 @@ async def update_terms_and_conditions(
         status_code=status.HTTP_200_OK,
     )
 
+  
+@terms_and_conditions.post("/", response_model=success_response, status_code=201)
+async def create_terms_and_conditions(
+    schema: UpdateTermsAndConditions,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Endpoint to create terms and conditions. Only accessible to superadmins"""
 
-@terms_and_conditions.delete("/{id}", response_model=DeleteResponseModel)
+    # Check if terms and conditions already exist
+    existing_tc = db.query(TermsAndConditions).first()
+    if existing_tc:
+        return success_response(
+            message="Terms and conditions already exist. Use PATCH to update.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Create new terms and conditions
+    new_tc = TermsAndConditions(title=schema.title, content=schema.content)
+    db.add(new_tc)
+    db.commit()
+    db.refresh(new_tc)
+
+    return success_response(
+        data=new_tc.to_dict(),
+        message="Successfully created terms and conditions",
+        status_code=status.HTTP_201_CREATED,
+    )
+  
+  
+  @terms_and_conditions.delete("/{id}", response_model=DeleteResponseModel)
 async def delete_terms_and_conditions(id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
     try:
         result = terms_and_conditions_service.delete(terms_id=id, db=db, current_user=current_user)
@@ -44,4 +73,4 @@ async def delete_terms_and_conditions(id: str, db: Session = Depends(get_db), cu
         # Catch any other exceptions and raise an HTTP 500 error
         raise HTTPException(status_code=500, detail={"message": "An unexpected error occurred", "status_code": 500, "success": False})
 
-    return result
+    return result 
