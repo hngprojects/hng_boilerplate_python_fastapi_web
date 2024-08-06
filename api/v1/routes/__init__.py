@@ -40,6 +40,8 @@ from api.v1.routes.permissions.roles import role_perm
 from api.v1.routes.analytics import analytics
 from api.v1.routes.job_application import job_application
 from api.v1.routes.privacy import privacies
+from api.v1.routes.settings import settings
+from api.v1.routes.terms_and_conditions import terms_and_conditions
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -83,3 +85,4 @@ api_version_one.include_router(job_application)
 api_version_one.include_router(privacies)
 api_version_one.include_router(settings)
 api_version_one.include_router(team)
+api_version_one.include_router(terms_and_conditions)

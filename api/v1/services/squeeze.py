@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.squeeze import Squeeze
@@ -54,7 +55,14 @@ class SqueezeService(Service):
 
     def delete(self, db: Session, id: str):
         """Delete a specific squeeze page"""
-        pass
+        squeeze = db.query(Squeeze).filter(Squeeze.id == id).first()
+
+        if not squeeze:
+            raise HTTPException(status_code=404, detail="Squeeze page not found")
+        
+        db.delete(squeeze)
+        db.commit()
+        db.refresh()
 
     def delete_all(self, db: Session):
         """Delete all squeeze pages"""
