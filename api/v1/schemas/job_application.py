@@ -3,8 +3,7 @@ Job application schemas
 """
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
-
-from typing import Union, Optional
+from typing import Union, Optional, List
 import re
 
 class JobApplicationData(BaseModel):
