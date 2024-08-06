@@ -38,7 +38,7 @@ class TermsAndConditionsService(Service):
         # Delete the terms and conditions
         db.delete(tc)
         db.commit()
-        return {"message": "Terms and Conditions deleted successfully", "status_code": 200, "success": True, "terms_id": terms_id}
+        return {"message": "Terms and Conditions deleted successfully", "status_code": 200, "success": True, "data": {"terms_id": terms_id}}
 
 
 terms_and_conditions_service = TermsAndConditionsService()

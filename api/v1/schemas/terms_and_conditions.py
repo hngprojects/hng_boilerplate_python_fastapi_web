@@ -8,4 +8,4 @@ class DeleteResponseModel(BaseModel):
     message: str
     status_code: int
     success: bool
-    terms_id: str
+    data: dict
