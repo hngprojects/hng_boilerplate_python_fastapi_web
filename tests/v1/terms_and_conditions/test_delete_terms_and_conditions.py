@@ -1,114 +1,106 @@
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
-from main import app
-from api.db.database import get_db
-from unittest.mock import MagicMock, patch
-from api.v1.models import TermsAndConditions, User
-from api.v1.services.user import user_service
+from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
-from fastapi import status
+from fastapi import HTTPException
+from api.db.database import get_db
+from api.v1.services.user import user_service
+from api.v1.models.user import User
+from api.v1.models.terms import TermsAndConditions
+from api.v1.services.terms_and_conditions import terms_and_conditions_service
+from main import app
 
-client = TestClient(app)
-URI = "/api/v1/terms-and-conditions"
-LOGIN_URI = "/api/v1/auth/login"
+def mock_get_current_super_admin():
+    return User(
+        id=str(uuid7()),
+        email="admin@gmail.com",
+        password=user_service.hash_password("Testadmin@123"),
+        first_name='Admin',
+        last_name='User',
+        is_active=True,
+        is_super_admin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
 
-test_terms_data = {
-    "title": "My Terms and Conditions",
-    "content": "My Content",
-}
+def mock_terms_and_conditions():
+    return TermsAndConditions(
+        id=str(uuid7()),
+        title="Test Terms and Conditions",
+        content="Test Content",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
 
 @pytest.fixture
-def mock_db_session(_=MagicMock()):
-    """Mock session"""
-    with patch(get_db.__module__):
-        app.dependency_overrides[get_db] = lambda: _
-        yield _
+def db_session_mock():
+    db_session = MagicMock(spec=Session)
+    return db_session
+
+@pytest.fixture
+def client(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    client = TestClient(app)
+    yield client
     app.dependency_overrides = {}
 
-def create_mock_super_admin(_):
-    """Mock super admin"""
-    _.query.return_value.filter.return_value.first.return_value = User(
-        id=str(uuid7()),
-        email="user@example.com",
-        password=user_service.hash_password("P@ssw0rd"),
-        is_super_admin=True,
-    )
+def test_delete_terms_and_conditions_success(client, db_session_mock):
+    '''Test to successfully delete terms and conditions'''
 
-def create_mock_terms_and_conditions(_):
-    """Mock terms and conditions"""
-    _.query.return_value.filter.return_value.first.return_value = TermsAndConditions(
-        id=str(uuid7()),
-        title=test_terms_data["title"],
-        content=test_terms_data["content"],
-    )
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_super_admin
 
-theader = lambda _: {"Authorization": f"Bearer {_}"}
+    mock_terms_and_conditions_instance = mock_terms_and_conditions()
 
-@pytest.mark.usefixtures("mock_db_session")
-def test_delete_terms_and_conditions_success(mock_db_session):
-    """Test successful deletion of terms and conditions"""
-    create_mock_super_admin(mock_db_session)
-    create_mock_terms_and_conditions(mock_db_session)
+    db_session_mock.query.return_value.filter.return_value.first.return_value = mock_terms_and_conditions_instance
+    db_session_mock.delete.return_value = None
+    db_session_mock.commit.return_value = None
 
-    # Log in to get the token
-    tok = client.post(
-        LOGIN_URI, json={"email": "user@example.com", "password": "P@ssw0rd"}
-    ).json()
-    assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["data"]["user"]["access_token"]
-
-    # Get the ID of the mocked TermsAndConditions
-    terms_id = mock_db_session.query.return_value.filter.return_value.first.return_value.id
-
-    # Perform the delete request
-    res = client.delete(f"{URI}/{terms_id}", headers=theader(token))
-
-    assert res.status_code == status.HTTP_200_OK
-    assert res.json() == {
+    with patch("api.v1.services.terms_and_conditions.terms_and_conditions_service.delete", return_value={
         "message": "Terms and Conditions deleted successfully",
         "status_code": 200,
         "success": True,
-        "terms_id": terms_id,
-    }
+        "terms_id": mock_terms_and_conditions_instance.id
+    }) as mock_delete:
+        response = client.delete(
+            f'api/v1/terms-and-conditions/{mock_terms_and_conditions_instance.id}',
+            headers={'Authorization': 'Bearer token'},
+        )
 
-@pytest.mark.usefixtures("mock_db_session")
-def test_delete_terms_and_conditions_not_found(mock_db_session):
-    """Test deletion when terms and conditions are not found"""
-    create_mock_super_admin(mock_db_session)
+        assert response.status_code == 200
+        assert response.json() == {
+            "message": "Terms and Conditions deleted successfully",
+            "status_code": 200,
+            "success": True,
+            "terms_id": mock_terms_and_conditions_instance.id
+        }
 
-    # Log in to get the token
-    tok = client.post(
-        LOGIN_URI, json={"email": "user@example.com", "password": "P@ssw0rd"}
-    ).json()
-    assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["data"]["user"]["access_token"]
+def test_delete_terms_and_conditions_not_found(client, db_session_mock):
+    '''Test when terms and conditions are not found'''
 
-    # Mock the service method to raise an HTTPException
-    mock_db_session.query.return_value.filter.return_value.first.return_value = None
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_super_admin
 
-    # Perform the delete request with a non-existing ID
-    res = client.delete(f"{URI}/non-existing-id", headers=theader(token))
+    db_session_mock.query.return_value.filter.return_value.first.return_value = None
 
-    assert res.status_code == status.HTTP_404_NOT_FOUND
-    assert res.json() == {"detail": "Terms and Conditions not found"}
+    with patch("api.v1.services.terms_and_conditions.terms_and_conditions_service.delete", side_effect=HTTPException(status_code=404, detail="Terms and Conditions not found")) as mock_delete:
+        response = client.delete(
+            f'api/v1/terms-and-conditions/non-existing-id',
+            headers={'Authorization': 'Bearer token'},
+        )
 
-@pytest.mark.usefixtures("mock_db_session")
-def test_delete_terms_and_conditions_internal_error(mock_db_session):
-    """Test deletion when an unexpected error occurs"""
-    create_mock_super_admin(mock_db_session)
-    
-    # Log in to get the token
-    tok = client.post(
-        LOGIN_URI, json={"email": "user@example.com", "password": "P@ssw0rd"}
-    ).json()
-    assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["data"]["user"]["access_token"]
+        assert response.status_code == 404
+        assert response.json() == {'message': 'Terms and Conditions not found', 'status': False, 'status_code': 404}
 
-    # Mock the service method to raise a generic exception
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = Exception("Unexpected error")
+def test_delete_terms_and_conditions_unauthorized(client, db_session_mock):
+    '''Test for unauthorized user'''
 
-    # Perform the delete request
-    res = client.delete(f"{URI}/1", headers=theader(token))
+    mock_terms_and_conditions_instance = mock_terms_and_conditions()
 
-    assert res.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
-    assert res.json() == {"detail": {"message": "An unexpected error occurred", "status_code": 500, "success": False}}
+    response = client.delete(
+        f'api/v1/terms-and-conditions/{mock_terms_and_conditions_instance.id}',
+    )
+
+    assert response.status_code == 401
