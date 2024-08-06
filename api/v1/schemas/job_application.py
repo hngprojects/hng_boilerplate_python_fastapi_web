@@ -29,7 +29,7 @@ class SingleJobAppResponse(BaseModel):
     status: str
     message: str
     status_code: int
-    data: JobApplicationBase
+    data: JobApplicationData
 
 class JobApplicationBase(BaseModel):
     '''Base model for job application'''
