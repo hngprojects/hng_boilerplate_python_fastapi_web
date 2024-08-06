@@ -27,7 +27,12 @@ class TeamServices(Service):
 
     def update(self, db, id, data):
         """Update a team"""
-        pass
+        team = check_model_existence(db, TeamMember, id)
+
+        db.query(TeamMember).filter(TeamMember.id == id).update(data)
+        db.commit()
+        db.refresh(team)
+        return team
 
     def delete(self, db, id):
         """Delete a team"""
