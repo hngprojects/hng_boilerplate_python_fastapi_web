@@ -4,7 +4,7 @@ from api.utils.success_response import success_response
 from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSchema, UpdateJobSchema
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
-
+from typing import Annotated
 from fastapi import APIRouter, HTTPException, Depends, status
 from api.v1.services.user import user_service
 from sqlalchemy.orm import Session
@@ -24,7 +24,7 @@ jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
     "",
     response_model=success_response,
     status_code=201,
-    
+
 )
 async def add_jobs(
     job: PostJobSchema,
@@ -50,33 +50,33 @@ async def add_jobs(
     logger.info(f"Job Listing created successfully {new_job.id}")
 
     return success_response(
-        message = "Job listing created successfully",
-        status_code = 201,
-        data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
+        message="Job listing created successfully",
+        status_code=201,
+        data=jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
     )
 
 
-@jobs.get("") 
+@jobs.get("")
 async def fetch_all_jobs(
     db: Session = Depends(get_db),
-    page_size: int = 10 ,
-    page: int = 0 ,
+    page_size: int = 10,
+    page: int = 0,
 ):
     """
-	Description
-		Get endpoint for unauthenticated users to retrieve all jobs.
+        Description
+                Get endpoint for unauthenticated users to retrieve all jobs.
 
-	Args:
-		db: the database session object
+        Args:
+                db: the database session object
 
-	Returns:
-		Response: a response object containing details if successful or appropriate errors if not
-	"""	
+        Returns:
+                Response: a response object containing details if successful or appropriate errors if not
+        """
     return paginated_response(
         db=db,
         model=Job,
         limit=page_size,
-        skip=max(page,0),
+        skip=max(page, 0),
     )
 
 
@@ -84,7 +84,7 @@ async def fetch_all_jobs(
     "/{job_id}",
     response_model=success_response,
     status_code=200,
-    
+
 )
 async def delete_job_by_id(
     job_id: str,
@@ -97,8 +97,8 @@ async def delete_job_by_id(
     job_service.delete(db, job_id)
 
     return success_response(
-        message = "Job listing deleted successfully",
-        status_code = 200,
+        message="Job listing deleted successfully",
+        status_code=200,
     )
 
 
@@ -131,10 +131,30 @@ async def apply_to_job(
 ):
     '''Endpoint to apply for a job'''
 
-    job_application = job_application_service.create(db=db, schema=application, job_id=job_id)
+    job_application = job_application_service.create(
+        db=db, schema=application, job_id=job_id)
 
     return success_response(
         status_code=201,
         message="Job application submitted successfully",
         data=jsonable_encoder(job_application)
     )
+
+
+@jobs.delete('/{job_id}/applications/{application_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_application(job_id: str,
+                             application_id: str,
+                             db: Annotated[Session, Depends(get_db)],
+                             current_user: Annotated[User, Depends(user_service.get_current_super_admin)]):
+    """
+    Deletes a single application.
+    Args:
+        job_id: The id of the job for the applicant
+        application_id: The id of the application for the job
+        db: database Session object
+        current_user: the super admin user
+    Returns:
+        HTTP 204 No Content on success
+    """
+    job_application_service.delete(job_id, application_id, db)
+    return {"message": "Application deleted successfully."}
