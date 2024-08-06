@@ -8,8 +8,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 from typing import Union, Optional
 import re
 
-
-class JobApplicationBase(BaseModel):
+class JobApplicationData(BaseModel):
     """
     Schema for job application base
     """
@@ -20,7 +19,6 @@ class JobApplicationBase(BaseModel):
     portfolio_link: Union[str, None]
     cover_letter: Union[str, None]
     application_status: str
-
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -33,10 +31,6 @@ class SingleJobAppResponse(BaseModel):
     status_code: int
     data: JobApplicationBase
 
-
-
-
-
 class JobApplicationBase(BaseModel):
     '''Base model for job application'''
 
@@ -46,7 +40,6 @@ class JobApplicationBase(BaseModel):
     resume_link: str
     portfolio_link: str
     application_status: str
-
 
 class CreateJobApplication(BaseModel):
     '''Schema for creating job application'''
