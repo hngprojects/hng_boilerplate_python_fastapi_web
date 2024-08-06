@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
+
 from api.v1.models.blog import Blog, BlogDislike, BlogLike
 from api.v1.models.user import User
 from api.v1.schemas.blog import BlogCreate
@@ -75,6 +76,7 @@ class BlogService:
 
         return blog_post
 
+
     def create_blog_like(
         self, db: Session, blog_id: str, user_id: str, ip_address: str = None
     ):
@@ -99,6 +101,7 @@ class BlogService:
         db.refresh(blog_dislike)
         return blog_dislike
 
+
     def fetch_blog_like(self, blog_id: str, user_id: str):
         """Fetch a blog like by blog ID & ID of user who liked it"""
         blog_like = (
@@ -116,6 +119,7 @@ class BlogService:
             .first()
         )
         return blog_dislike
+
 
     def num_of_likes(self, blog_id: str) -> int:
         """Get the number of likes a blog post has"""

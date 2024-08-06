@@ -1,3 +1,4 @@
+
 from fastapi import Depends, APIRouter, Request, logger, status,  File, UploadFile, HTTPException
 from sqlalchemy.orm import Session
 import logging
@@ -16,6 +17,7 @@ from api.v1.services.profile import profile_service
 
 
 profile = APIRouter(prefix="/profile", tags=["Profiles"])
+
 
 
 @profile.get(
@@ -69,6 +71,7 @@ def update_user_profile(
         status_code=status.HTTP_200_OK,
         message="User profile updated successfully",
         data=updated_profile.to_dict(),
+
     )
 
     return response

@@ -62,6 +62,7 @@ class ProductData(BaseModel):
     products: List[ProductBase]
 
 
+
 class ProductStockResponse(BaseModel):
     product_id: str
     current_stock: int

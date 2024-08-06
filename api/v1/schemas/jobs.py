@@ -26,6 +26,7 @@ class JobCreateResponseSchema(PostJobSchema):
     class Config:
         from_attributes = True
 
+
 class UpdateJobSchema(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None

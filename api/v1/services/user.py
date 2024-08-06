@@ -30,6 +30,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserService(Service):
     """User service"""
 
+
     def fetch_all(
         self, db: Session, page: int, per_page: int, **query_params: Optional[Any]
     ):
@@ -42,6 +43,7 @@ class UserService(Service):
             query_params: params to filter by
         """
         per_page = min(per_page, 10)
+
 
         # Enable filter by query parameter
         filters = []
@@ -82,6 +84,7 @@ class UserService(Service):
             total_users: total number of users
         """
         if not users or len(users) == 0:
+
             return user.AllUsersResponse(
                 message="No User(s) for this query",
                 status="success",
@@ -144,6 +147,7 @@ class UserService(Service):
         # # Create notification settings directly for the user
         notification_setting_service.create(db=db, user=user)
 
+
         # create data privacy setting
 
         data_privacy = DataPrivacySetting(user_id=user.id)
@@ -153,6 +157,37 @@ class UserService(Service):
         db.refresh(data_privacy)
 
         return user
+    
+    def super_admin_create_user(self, db: Annotated[Session, Depends(get_db)],
+                                user_request: user.AdminCreateUser):
+        """
+        Creates a user for super admin
+        Args:
+            db: database Session object
+            user_request: The user details to use for creation
+        Returns:
+            object: the complete details of the newly created user
+        """
+        try:
+            user_exists = db.query(User).filter_by(email=user_request.email).one_or_none()
+            if user_exists:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                    detail=f'User with {user_request.email} already exists')
+            if user_request.password:
+                user_request.password = self.hash_password(user_request.password)
+            new_user = User(**user_request.model_dump())
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            user_schema = user.UserData.model_validate(new_user, from_attributes=True)
+            return user.AdminCreateUserResponse(message='User created successfully',
+                                                 status_code=201,
+                                                 status='success',
+                                                 data=user_schema)
+        except Exception as exc:
+            db.rollback()
+            raise Exception(exc) from exc
+
 
     def super_admin_create_user(
         self,
@@ -215,6 +250,7 @@ class UserService(Service):
         user.is_super_admin = True
         db.commit()
 
+
         return user
 
     def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
@@ -225,6 +261,7 @@ class UserService(Service):
                 status_code=400,
                 detail="User with this email or username already exists",
             )
+
         if current_user.is_super_admin and id is not None:
             user = self.fetch(db=db, id=id)
         else:

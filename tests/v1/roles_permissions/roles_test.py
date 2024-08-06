@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timezone
 from uuid_extensions import uuid7
 from api.v1.services.user import user_service
+
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from api.v1.schemas.permissions.permissions import PermissionCreate
@@ -18,6 +19,7 @@ from main import app
 from api.v1.models.user import User
 from api.v1.models.permissions.permissions import Permission
 from api.v1.models.permissions.role import Role
+
 from api.v1.services.permissions.role_service import role_service
 from api.v1.services.permissions.permison_service import permission_service
 from api.db.database import get_db
@@ -30,6 +32,7 @@ client = TestClient(app)
 def mock_db_session():
     with patch("api.db.database.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
+
         mock_get_db.return_value = mock_db
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
@@ -54,6 +57,7 @@ def create_mock_user(mock_db_session, user_id):
     mock_db_session.query(User).filter_by(id=user_id).first.return_value = mock_user
     return mock_user
 
+
 def create_mock_permissions(mock_db_session, name, permision_id):
     mock_permission = Permission(
         id=permision_id,
@@ -66,6 +70,7 @@ def create_mock_role(mock_db_session, role_name):
     role = Role(id=str(uuid7()), name=role_name)
     mock_db_session.add(role)
     mock_db_session.commit()
+
 
 @pytest.fixture
 def access_token(mock_db_session):
@@ -91,6 +96,7 @@ def test_create_role_success(mock_db_session):
     response = client.post("/api/v1/roles", json=role_data, headers={'Authorization': f'Bearer {access_token}'})
     assert response.status_code == 200
     assert response.json()["name"] == role_name
+
     
     
     

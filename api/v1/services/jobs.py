@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.v1.models.job import Job
+
 from fastapi import HTTPException
 
 
@@ -31,6 +32,7 @@ class JobService(Service):
                     query = query.filter(getattr(Job, column).ilike(f"%{value}%"))
 
         return query.all()
+
 
 
     @staticmethod
@@ -62,6 +64,7 @@ class JobService(Service):
 
     def delete(self, db: Session, id: str):
         """Deletes a job"""
+
 
         job = self.fetch(db=db, id=id)
         db.delete(job)

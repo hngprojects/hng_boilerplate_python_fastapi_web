@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from uuid_extensions import uuid7
+
 from typing import Dict, Any, Optional
 
 
@@ -11,6 +12,7 @@ class RoleResponse(BaseModel):
     name: str
 
     class Config:
+
         from_attributes = True
 
 class RoleAssignRequest(BaseModel):

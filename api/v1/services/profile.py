@@ -6,6 +6,7 @@ from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.profile import Profile
 from api.v1.schemas.profile import ProfileCreateUpdate
+
 from api.v1.models.user import User
 
 
@@ -79,6 +80,7 @@ class ProfileService(Service):
         profile = self.fetch(id=id)
         db.delete(profile)
         db.commit()
+
 
     def fetch_user_by_id(self, db: Session, user_id: str):
         """Fetches a user by their id"""

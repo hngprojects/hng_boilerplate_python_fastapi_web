@@ -15,6 +15,7 @@ from api.v1.schemas.product import (
     ProductList,
     ProductUpdate,
     ResponseModel,
+
     ProductStockResponse,
     ProductFilterResponse,
     SuccessResponse,
@@ -30,6 +31,7 @@ product = APIRouter(prefix="/products", tags=["Products"])
 @product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+
     limit: Annotated[int, Query(
         ge=1, description="Number of products per page")] = 10,
     skip: Annotated[int, Query(
@@ -58,6 +60,7 @@ async def get_products_by_filter_status(
             message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
+
         raise HTTPException(
             status_code=500, detail="Failed to retrieve products")
 
@@ -79,6 +82,7 @@ async def get_products_by_status(
             message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
+
         raise HTTPException(
             status_code=500, detail="Failed to retrieve products")
 
@@ -94,6 +98,7 @@ def retrieve_categories(
 
     categories = ProductCategoryService.fetch_all(db)
 
+
     categories_filtered = list(
         map(lambda x: ProductCategoryRetrieve.model_validate(x), categories))
 
@@ -101,6 +106,7 @@ def retrieve_categories(
         categories_filtered = [{}]
 
     return success_response(
+
         message="Categories retrieved successfully",
         status_code=200,
         data=jsonable_encoder(categories_filtered)
@@ -116,6 +122,7 @@ def retrieve_categories(
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
+
     limit: Annotated[int, Query(
         ge=1, description="Number of products per page")] = 10,
     page: Annotated[int, Query(
@@ -159,6 +166,7 @@ def get_organization_products(
         status_code=200,
         message="Successfully fetched organizations products",
         data=data,
+
     )
 
 

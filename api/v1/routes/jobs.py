@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from api.utils.success_response import success_response
+
 from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSchema, UpdateJobSchema
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
@@ -11,6 +12,7 @@ from sqlalchemy.orm import Session
 from api.utils.logger import logger
 from api.db.database import get_db
 from api.v1.models.user import User
+
 from api.v1.models.job import Job, JobApplication
 from api.v1.services.jobs import job_service
 from api.v1.services.job_application import job_application_service, UpdateJobApplication
@@ -57,7 +59,7 @@ async def add_jobs(
         status_code = 201,
         data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
     )
-    
+
     
     
 @jobs.get("/{job_id}", response_model=success_response)
@@ -105,6 +107,7 @@ async def fetch_all_jobs(
         model=Job,
         limit=page_size,
         skip=max(page,0),
+
     )
 
 

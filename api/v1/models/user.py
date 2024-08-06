@@ -33,6 +33,7 @@ class User(BaseTableModel):
         "ActivityLog", back_populates="user", cascade="all, delete-orphan"
     )
     jobs = relationship("Job", back_populates="author", cascade="all, delete-orphan")
+
     token_login = relationship(
         "TokenLogin", back_populates="user", uselist=False, cascade="all, delete-orphan"
     )

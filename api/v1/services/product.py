@@ -6,6 +6,7 @@ from fastapi import HTTPException, status
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
+
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum, ProductCategory
 from api.v1.models.user import User
 from api.v1.models import Organization
@@ -69,6 +70,7 @@ class ProductService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Product, column) and value:
+
                     query = query.filter(
                         getattr(Product, column).ilike(f"%{value}%"))
 
@@ -120,6 +122,7 @@ class ProductService(Service):
     def fetch_by_status(self, db: Session, status: ProductStatusEnum):
         """Fetch products by filter status"""
         try:
+
             products = db.query(Product).filter(
                 Product.status == status.value).all()
             response_data = [
@@ -128,6 +131,7 @@ class ProductService(Service):
             return response_data
         except Exception as e:
             raise
+
 
     def fetch_stock(self, db: Session, product_id: str, current_user: User) -> dict:
         """Fetches the current stock level for a specific product"""
@@ -192,6 +196,7 @@ class ProductService(Service):
 
         product = check_model_existence(db, Product, product_id)
         return product
+
 
 
 class ProductCategoryService(Service):
