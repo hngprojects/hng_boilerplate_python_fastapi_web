@@ -1,5 +1,3 @@
-# Dependencies:
-# pip install pytest-mock
 import pytest
 from unittest.mock import patch, MagicMock
 from sqlalchemy.exc import IntegrityError
@@ -35,7 +33,7 @@ class TestCodeUnderTest:
 
         mock_service.return_value = None
         
-        response = client.post("/api/v1/waitlists/admin", json={"email": "test@example.com", "full_name": "Here"})
+        response = client.post("/api/v1/waitlist/admin", json={"email": "test@example.com", "full_name": "Here"})
 
         assert response.status_code == 201
         assert response.json()["message"] == "User added to waitlist successfully"
@@ -44,14 +42,14 @@ class TestCodeUnderTest:
     def test_add_user_to_waitlist_empty_full_name(self, mocker, client):
         app.dependency_overrides[get_super_admin] = mock_deps
 
-        response = client.post("/api/v1/waitlists/admin", json={"email": "test@example.com", "full_name": ""})
+        response = client.post("/api/v1/waitlist/admin", json={"email": "test@example.com", "full_name": ""})
     
         assert response.status_code == 400
         assert response.json()["message"] == "full_name field cannot be blank"
 
     # # Handling invalid email format and raising appropriate exception
     def test_add_user_to_waitlist_invalid_email(self, client):    
-        response = client.post("/api/v1/waitlists/admin", json={"email": "invalid-email", "full_name": "Test User"})
+        response = client.post("/api/v1/waitlist/admin", json={"email": "invalid-email", "full_name": "Test User"})
     
         assert response.status_code == 422
 
@@ -62,7 +60,7 @@ class TestCodeUnderTest:
         client = TestClient(app)
     
         # Simulate IntegrityError when adding duplicate email
-        response = client.post("/api/v1/waitlists/admin", json={"email": "duplicate@example.com", "full_name": "Test User"})
+        response = client.post("/api/v1/waitlist/admin", json={"email": "duplicate@example.com", "full_name": "Test User"})
     
         assert response.status_code == 400
         assert response.json()["message"]== "Email already added"

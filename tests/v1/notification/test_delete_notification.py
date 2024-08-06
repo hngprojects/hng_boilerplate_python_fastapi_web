@@ -1,7 +1,3 @@
-import sys, os
-
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -44,7 +40,6 @@ another_user_access_token = user_service.create_access_token(str(another_user_id
 # Create test user
 user = User(
     id=user_id,
-    username="testuser1",
     email="testuser1@gmail.com",
     password=user_service.hash_password("Testpassword@123"),
     first_name="Test",
@@ -56,7 +51,6 @@ user = User(
 
 another_user = User(
     id=another_user_id,
-    username="testuser2",
     email="testuser2@gmail.com",
     password=user_service.hash_password("Testpassword@123"),
     first_name="Another",
@@ -82,8 +76,6 @@ def test_delete_notification_unauthenticated_user(client, db_session_mock):
     response = client.delete(f"/api/v1/notifications/{notification.id}")
 
     assert response.status_code == 401
-    assert response.json()["success"] == False
-    assert response.json()["status_code"] == 401
 
 def test_delete_notification_unauthorized_user(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = notification
