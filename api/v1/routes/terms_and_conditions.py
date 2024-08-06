@@ -33,11 +33,7 @@ async def update_terms_and_conditions(
         status_code=status.HTTP_200_OK,
     )
 
-<<<<<<< HEAD
 
-=======
-  
->>>>>>> 25a989903d6ea9eb8b478a4901fbb01069e0d47f
 @terms_and_conditions.post("/", response_model=success_response, status_code=201)
 async def create_terms_and_conditions(
     schema: UpdateTermsAndConditions,
@@ -65,13 +61,8 @@ async def create_terms_and_conditions(
         message="Successfully created terms and conditions",
         status_code=status.HTTP_201_CREATED,
     )
-<<<<<<< HEAD
 
 
-=======
-  
-  
->>>>>>> 25a989903d6ea9eb8b478a4901fbb01069e0d47f
 @terms_and_conditions.delete("/{id}", response_model=DeleteResponseModel)
 async def delete_terms_and_conditions(id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
     try:
@@ -81,9 +72,4 @@ async def delete_terms_and_conditions(id: str, db: Session = Depends(get_db), cu
     except Exception as e:
         # Catch any other exceptions and raise an HTTP 500 error
         raise HTTPException(status_code=500, detail={"message": "An unexpected error occurred", "status_code": 500, "success": False})
-
-<<<<<<< HEAD
     return result
-=======
-    return result 
->>>>>>> 25a989903d6ea9eb8b478a4901fbb01069e0d47f
