@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.v1.models.job import Job
+from fastapi import HTTPException
 
 
 class JobService(Service):
@@ -31,11 +32,19 @@ class JobService(Service):
 
         return query.all()
 
+
+    @staticmethod
+    def fetch(db: Session, id: str) -> Optional[Job]:
+        """Fetches a job by ID"""
+        return db.query(Job).filter(Job.id == id).first()
+
     def fetch(self, db: Session, id: str):
         """Fetches a job by id"""
-
-        job = db.query(Job).where(Job.id == id)
+        job = db.query(Job).filter(Job.id == id).first()
+        if not job:
+            raise HTTPException(status_code=404, detail="Job not found")
         return job
+
 
     def update(self, db: Session, id: str, schema):
         """Updates a job"""
@@ -54,7 +63,7 @@ class JobService(Service):
     def delete(self, db: Session, id: str):
         """Deletes a job"""
 
-        job = self.fetch(id=id)
+        job = self.fetch(db=db, id=id)
         db.delete(job)
         db.commit()
 

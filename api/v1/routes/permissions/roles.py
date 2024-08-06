@@ -4,6 +4,7 @@ from api.v1.schemas.permissions.roles import (
     RoleCreate, RoleResponse, RoleAssignRequest, RemoveUserFromRoleResponse
 )
 from api.v1.services.permissions.role_service import role_service
+from api.v1.schemas.permissions.roles import RoleDeleteResponse, ResponseModel
 from api.db.database import get_db
 from uuid_extensions import uuid7
 from api.v1.models.user import User
@@ -64,3 +65,27 @@ def remove_user_from_role(
         message="User successfully removed from role"
     )
 
+
+@role_perm.delete("/roles/{role_id}", tags=["delete role"], response_model=ResponseModel)
+def delete_role(
+    role_id: str, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    result = role_service.delete_role(db, role_id)
+    
+    
+    if result:
+        return ResponseModel(
+            success=True,
+            status_code=200,
+            message="Role successfully deleted.",
+            data={"id": role_id}
+        )
+    else:
+        return ResponseModel(
+            success=False,
+            status_code=404,
+            message="Role not found.",
+            data=None
+        )
