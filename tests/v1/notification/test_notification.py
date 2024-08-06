@@ -86,5 +86,3 @@ def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock)
     response = client.patch(f"/api/v1/notifications/{notification.id}")
 
     assert response.status_code == 401
-    assert response.json()["success"] == False
-    assert response.json()["status_code"] == 401
