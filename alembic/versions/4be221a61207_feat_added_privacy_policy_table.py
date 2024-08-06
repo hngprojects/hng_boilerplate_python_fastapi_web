@@ -1,8 +1,8 @@
 """feat: added privacy policy table
 
-Revision ID: 5fb90b3dd3ed
-Revises: aeb162769644
-Create Date: 2024-08-06 09:53:28.697053
+Revision ID: 4be221a61207
+Revises: 836938cb4ce1
+Create Date: 2024-08-06 11:26:57.279931
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '5fb90b3dd3ed'
-down_revision: Union[str, None] = 'aeb162769644'
+revision: str = '4be221a61207'
+down_revision: Union[str, None] = '836938cb4ce1'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
