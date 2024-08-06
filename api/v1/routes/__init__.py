@@ -35,6 +35,7 @@ from api.v1.routes.contact import contact
 from api.v1.routes.permissions.permisions import perm_role
 from api.v1.routes.permissions.roles import role_perm
 from api.v1.routes.analytics import analytics
+from api.v1.routes.team import team
 
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -75,3 +76,4 @@ api_version_one.include_router(dashboard)
 api_version_one.include_router(perm_role)
 api_version_one.include_router(role_perm)
 api_version_one.include_router(analytics)
+api_version_one.include_router(team)
