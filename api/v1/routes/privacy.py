@@ -38,11 +38,11 @@ def get_privacies(db: Session = Depends(get_db)):
     )
 
 @privacies.get("/{privacy_id}", response_model=PrivacyPolicyResponse)
-def get_privacy_by_user(privacy_id: str, db: Session = Depends(get_db)):
-    region = privacy_service.fetch(db, privacy_id)
+def get_privacy(privacy_id: str, db: Session = Depends(get_db)):
+    privacy = privacy_service.fetch(db, privacy_id)
     
     return success_response (
         status_code=200,
         message='privacy retrieved successfully',
-        data=jsonable_encoder(region)
+        data=jsonable_encoder(privacy)
     )
