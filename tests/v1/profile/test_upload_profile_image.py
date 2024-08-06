@@ -24,7 +24,7 @@ def test_upload_profile_image(mock_open, mock_makedirs, mock_image_open, mock_us
     mock_image.resize.return_value = mock_image
     mock_image.save = MagicMock()
 
-    with patch("api.v1.routes.profile.user_service.get_current_user", return_value=mock_user):
+    with patch("api.v1.routes.profiles.user_service.get_current_user", return_value=mock_user):
         response = client.post(
             "/profile/upload-image",
             headers={'Authorization': f'Bearer {access_token}'},
