@@ -114,11 +114,10 @@ PROFILE_IMAGE_DIR = "static/profile_images"
 @profile.post("/upload-image")
 async def upload_profile_image(
     file: UploadFile = File(...),
-    # current_user: User = Depends(user_service.get_current_user),
+    current_user: User = Depends(user_service.get_current_user),
     db: Session = Depends(get_db)
 ):
-    # user_id = current_user.id
-    user_id = "54677738"
+    user_id = current_user.id
     if file.content_type not in ["image/jpeg", "image/png"]:
         raise HTTPException(status_code=400, detail="Invalid file format. Only JPG and PNG are supported.")
 
