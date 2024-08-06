@@ -61,3 +61,4 @@ def test_user_fields(db_session_mock, mock_send_email):
     assert response.json()['data']["user"]['first_name'] == "sunday"
     assert response.json()['data']["user"]['last_name'] == "mba"
     # mock_send_email.assert_called_once()
+    

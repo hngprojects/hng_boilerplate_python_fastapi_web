@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -35,6 +36,10 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_job_applications_id'), 'job_applications', ['id'], unique=False)
+
+    # Create the ENUM type
+    template_status_enum = postgresql.ENUM('online', 'offline', name='template_status')
+    template_status_enum.create(op.get_bind())
     op.add_column('email_templates', sa.Column('type', sa.String(), nullable=False))
     op.add_column('email_templates', sa.Column('template_status', sa.Enum('online', 'offline', name='template_status'), server_default='online', nullable=True))
     op.drop_column('email_templates', 'status')
@@ -48,4 +53,8 @@ def downgrade() -> None:
     op.drop_column('email_templates', 'type')
     op.drop_index(op.f('ix_job_applications_id'), table_name='job_applications')
     op.drop_table('job_applications')
+
+    # Drop the ENUM type
+    template_status_enum = postgresql.ENUM('online', 'offline', name='template_status')
+    template_status_enum.drop(op.get_bind())
     # ### end Alembic commands ###
