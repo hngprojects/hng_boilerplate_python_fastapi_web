@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Literal
 from fastapi import Depends, APIRouter, Request, status, Query, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
@@ -190,3 +190,15 @@ def admin_registers_user(user_request: AdminCreateUser,
         AdminCreateUserResponse: The full details of the newly created user
     '''
     return user_service.super_admin_create_user(db, user_request)
+    
+
+@user.get('/{role_id}/roles', status_code=status.HTTP_200_OK)
+async def get_users_by_role(role_id: Literal["admin", "user", "guest", "owner"], db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+    '''Endpoint to get all users by role'''
+    users = user_service.get_users_by_role(db, role_id, current_user)
+
+    return success_response(
+        status_code=200,
+        message='Users retrieved successfully',
+        data=jsonable_encoder(users)
+    )
