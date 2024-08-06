@@ -36,7 +36,6 @@ from api.v1.routes.permissions.permisions import perm_role
 from api.v1.routes.permissions.roles import role_perm
 from api.v1.routes.analytics import analytics
 from api.v1.routes.privacy import privacies
-from api.v1.routes.job_application import job_application
 from api.v1.routes.settings import settings
 
 api_version_one = APIRouter(prefix="/api/v1")
@@ -60,7 +59,6 @@ api_version_one.include_router(blog)
 api_version_one.include_router(comment)
 api_version_one.include_router(sms)
 api_version_one.include_router(jobs)
-api_version_one.include_router(job_application)
 api_version_one.include_router(test_router)
 api_version_one.include_router(faq)
 api_version_one.include_router(topic)
