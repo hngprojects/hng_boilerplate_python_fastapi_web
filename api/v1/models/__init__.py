@@ -23,3 +23,4 @@ from api.v1.models.email_template import EmailTemplate
 from api.v1.models.regions import Region
 from api.v1.models.squeeze import Squeeze
 from api.v1.models.sales import Sales
+from api.v1.models.privacy import PrivacyPolicy
