@@ -21,6 +21,7 @@ from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
 from api.v1.services.notification_settings import notification_setting_service
+from api.v1.services.organization import organization_service as org_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -432,6 +433,23 @@ class UserService(Service):
         """Get the current super admin"""
         user = self.get_current_user(db=db, access_token=token)
         if not user.is_super_admin:
+            raise HTTPException(
+                status_code=403,
+                detail="You do not have permission to access this resource",
+            )
+        return user
+
+    def get_current_admin(
+        self, org_id: str, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+    ):
+        """
+        ***THIS IS NOT YET FIT FOR USE***
+        
+        Get the current admin
+        """
+        user = self.get_current_user(db=db, access_token=token)
+        role = org_service.get_organization_user_role(user.id, org_id, db)
+        if (not role) or (role.name != "admin"):
             raise HTTPException(
                 status_code=403,
                 detail="You do not have permission to access this resource",

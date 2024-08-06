@@ -5,6 +5,8 @@ from api.v1.schemas.role import RoleCreate
 from uuid_extensions import uuid7
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
+from api.utils.db_validators import check_model_existence
+from api.v1.services.organization import organization_service as org_service
 
 
 class RoleService:
@@ -39,6 +41,38 @@ class RoleService:
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
+
+
+    def fetch(self, db: Session, role_id: str):
+        """Fetches an role by id"""
+
+        role = check_model_existence(db, Role, role_id)
+
+        return role
+
+    def get_user_role_relation(self, db: Session, user_id: str, org_id: str, role: Role):
+        '''Get the relation with user_id, role.id, and org_id exist'''
+
+        if role.name not in ['user', 'guest', 'admin', 'owner']:
+            raise HTTPException(status_code=400, detail="Invalid role")
+
+        stmt = user_organization_roles.select().where(
+            user_organization_roles.c.user_id == user_id,
+            user_organization_roles.c.organization_id == org_id,
+            user_organization_roles.c.role_id == role.id,
+        )
+
+        relation = db.execute(stmt).fetchone()
+
+        if relation is None:
+            raise HTTPException(status_code=403, detail="User not found in role")
+        
+        return relation
+
+    def remove_user_from_role(self, db: Session, org_id: str, user_id: str, role: Role):
+        relation = self.get_user_role_relation(db, user_id, org_id, role)
+        db.delete(relation)
+        db.commit()
 
 
 role_service = RoleService()
