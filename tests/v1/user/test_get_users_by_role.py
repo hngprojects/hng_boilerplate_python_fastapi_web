@@ -70,5 +70,5 @@ def test_get_user_by_role(mock_db_session):
     get_user_response = client.get(f'api/v1/users/{role_id}/roles', headers={
         'Authorization': f'Bearer {access_token}'
     })
-    assert get_user_response.status_code == 404
-    assert get_user_response.json()['message'] == 'No users found for this role'
+    assert get_user_response.status_code == 403
+    assert get_user_response.json()['message'] == 'Permission denied. Admin access required.'
