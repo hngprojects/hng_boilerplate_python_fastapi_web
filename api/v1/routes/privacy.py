@@ -46,17 +46,3 @@ def get_privacy_by_user(privacy_id: str, db: Session = Depends(get_db)):
         message='privacy retrieved successfully',
         data=jsonable_encoder(region)
     )
-
-@privacies.put("/{privacy_id}", response_model=PrivacyPolicyResponse)
-def update_privacy(privacy_id: str, privacy: PrivacyPolicyUpdate, db: Session = Depends(get_db)):
-    db_privacy = privacy_service.update(db, privacy_id, privacy)
-    return success_response(
-        status_code=200,
-        message='Privacy updated successfully',
-        data=jsonable_encoder(db_privacy)
-    )
-
-@privacies.delete("/{privacy_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_privacy(privacy_id: str, db: Session = Depends(get_db)):
-    privacy = privacy_service.delete(db, privacy_id)
-    return
