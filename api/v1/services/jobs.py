@@ -56,7 +56,7 @@ class JobService(Service):
     def delete(self, db: Session, id: str):
         """Deletes a job"""
 
-        job = self.fetch(id=id)
+        job = self.fetch(db=db, id=id)
         db.delete(job)
         db.commit()
 
