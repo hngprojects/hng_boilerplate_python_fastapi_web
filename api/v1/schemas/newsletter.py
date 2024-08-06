@@ -8,8 +8,3 @@ class EmailSchema(BaseModel):
 
     email: EmailStr
     
-
-class EmailRetrieveSchema(EmailSchema):
-
-    class Config:
-        from_attributes = True

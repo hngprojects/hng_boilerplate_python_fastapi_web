@@ -1,8 +1,7 @@
-from sqlalchemy import Column, String, Text, ForeignKey
+# app/models/contact_us.py
+from sqlalchemy import Column, String, Text
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
-
 
 class ContactUs(BaseTableModel):
     __tablename__ = "contact_us"
@@ -11,6 +10,3 @@ class ContactUs(BaseTableModel):
     email = Column(String, nullable=False)
     title = Column(String, nullable=False)
     message = Column(Text, nullable=False)
-    org_id = Column(String, ForeignKey('organizations.id', ondelete="CASCADE"), nullable=False)
-
-    organization = relationship("Organization", back_populates="contact_us")

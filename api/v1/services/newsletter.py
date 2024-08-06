@@ -2,17 +2,19 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from api.v1.schemas.newsletter import EmailSchema
 from api.core.base.services import Service
-from api.v1.models.newsletter import NewsletterSubscriber
-from typing import Optional, Any
+from api.v1.models.newsletter import Newsletter
+
 
 class NewsletterService(Service):
-    """Newsletter service functionality"""
+    '''Newsletter service functionality'''
 
     @staticmethod
-    def create(db: Session, request: EmailSchema) -> NewsletterSubscriber:
+    def create(db: Session, request: EmailSchema) -> Newsletter:
         '''add a new subscriber'''
 
-        new_subscriber = NewsletterSubscriber(
+        new_subscriber = Newsletter(
+            title="",
+            content="",
             email=request.email)
         db.add(new_subscriber)
         db.commit()
@@ -21,29 +23,13 @@ class NewsletterService(Service):
         return new_subscriber
 
     @staticmethod
-    def check_existing_subscriber(db: Session, request: EmailSchema) -> NewsletterSubscriber:
+    def check_existing_subscriber(db: Session, request: EmailSchema) -> Newsletter:
         """
         Check if user with email already exist
         """
 
-        newsletter = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email==request.email).first()
+        newsletter = db.query(Newsletter).filter(Newsletter.email==request.email).first()
         if newsletter:
-            raise HTTPException(
-                status_code=400, detail="User already subscribed to newsletter"
-            )
+            raise HTTPException(status_code=400, detail='User already subscribed to newsletter')
 
         return newsletter
-    
-    @staticmethod
-    def fetch_all(db: Session, **query_params: Optional[Any]):
-        '''Fetch all newsletter subscriptions with option to search using query parameters'''
-
-        query = db.query(NewsletterSubscriber)
-
-        # Enable filter by query parameter
-        if query_params:
-            for column, value in query_params.items():
-                if hasattr(NewsletterSubscriber, column) and value:
-                    query = query.filter(getattr(NewsletterSubscriber, column).ilike(f'%{value}%'))
-
-        return query.all()

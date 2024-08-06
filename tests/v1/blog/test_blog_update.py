@@ -3,6 +3,11 @@ from fastapi.testclient import TestClient
 from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
+# import sys
+# from pathlib import Path
+
+# Add the project root directory to the Python path
+# sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 
 from main import app
 from api.db.database import get_db
@@ -23,7 +28,7 @@ def mock_db_session():
 
 @pytest.fixture
 def current_user():
-    return User(id=f'{uuid7()}', email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
+    return User(id=f'{uuid7()}', username="testuser", email="test@example.com", password="hashedpassword1", first_name="test", last_name="user")
 
 @pytest.fixture
 def valid_blog_post():
@@ -79,6 +84,7 @@ async def test_update_blog_forbidden(client, mock_db_session, current_user, vali
     # Simulate a different user
     different_user = User(
         id=f'{uuid7()}', 
+        username="otheruser", 
         email="other@example.com",
         password="hashedpassword1", 
         first_name="other", 

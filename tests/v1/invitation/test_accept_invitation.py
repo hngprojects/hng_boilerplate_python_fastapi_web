@@ -6,8 +6,7 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timedelta, timezone
 from uuid_extensions import uuid7
 from fastapi import status
-from fastapi import HTTPException, Request
-from urllib.parse import urlencode
+from fastapi import HTTPException
 from api.v1.services.user import user_service
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -15,7 +14,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from main import app
 from api.v1.models.user import User
-from api.v1.models.associations import user_organization_association
 from api.v1.models.invitation import Invitation
 from api.v1.models.organization import Organization
 from api.v1.services.invite import InviteService
@@ -43,6 +41,7 @@ def mock_invite_service():
 def create_mock_user(mock_db_session, user_id):
     mock_user = User(
         id=user_id,
+        username="testuser",
         email="testuser@gmail.com",
         password="hashed_password",
         first_name='Test',
@@ -57,13 +56,12 @@ def create_mock_user(mock_db_session, user_id):
 def create_mock_organization(mock_db_session, org_id):
     mock_org = Organization(
         id=org_id,
-        company_name="Test Organization",
+        name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query(Organization).filter_by(id=org_id).first.return_value = mock_org
     return mock_org
-
 
 def create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid):
     mock_invitation = Invitation(
@@ -75,48 +73,6 @@ def create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expi
     )
     mock_db_session.query(Invitation).filter_by(id=invitation_id, is_valid=True).first.return_value = mock_invitation
     return mock_invitation
-
-@pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
-def test_create_invitation_valid_userid(mock_db_session, mock_invite_service):
-    user_email = "mike@example.com"
-    org_id = str(uuid7())
-
-    create_mock_user(mock_db_session, user_email)
-    create_mock_organization(mock_db_session, org_id)
-
-    access_token = user_service.create_access_token(str(user_email))
-    mock_db_session.execute.return_value.fetchall.return_value = []
-
-    paylod = {
-        "user_email" : user_email,
-        "organization_id" : org_id
-    }
-
-    response = client.post(INVITE_CREATE_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == 200
-    assert response.json()['message'] == 'Invitation link created successfully'
-
-
-@pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
-def test_create_invitation_invalid_id(mock_db_session, mock_invite_service):
-    user_id = 12345
-    org_id = str(uuid7())
-    
-    create_mock_user(mock_db_session, user_id)
-    create_mock_organization(mock_db_session, org_id)
-
-    access_token = user_service.create_access_token(str(user_id))
-    mock_db_session.execute.return_value.fetchall.return_value = []
-
-    paylod = {
-        "user_id" : user_id,
-        "organization_id" : org_id
-    }
-
-    response = client.post(INVITE_CREATE_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == 422
-    assert response.json()['message'] == "Invalid input"
-
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_accept_invitation_valid_link(mock_db_session, mock_invite_service):
@@ -137,6 +93,11 @@ def test_accept_invitation_valid_link(mock_db_session, mock_invite_service):
     }, headers={'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == 200
+    assert response.json() == {
+        "status": "success",
+        "message": "User added to organization successfully"
+    }
+    #mock_invite_service.add_user_to_organization.assert_called_once_with(invitation_id, mock_db_session)
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
@@ -159,6 +120,8 @@ def test_accept_invitation_expired_link(mock_db_session, mock_invite_service):
 
     
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'success': False, 'status_code': 400, 'message': 'Expired invitation link'}
+    #mock_invite_service.add_user_to_organization.assert_called_once_with(invitation_id, mock_db_session)
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_accept_invitation_malformed_link(mock_db_session):
@@ -176,6 +139,7 @@ def test_accept_invitation_malformed_link(mock_db_session):
     }, headers={'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json() == {'success': False, 'status_code': 400, 'message': 'Invalid invitation link'}
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
@@ -202,4 +166,3 @@ def test_load_testing(mock_db_session, mock_invite_service):
     success_count = sum(1 for r in responses if r.status_code == 200)
 
     assert success_count == 100
-    

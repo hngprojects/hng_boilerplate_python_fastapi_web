@@ -1,10 +1,9 @@
-from pydantic import BaseModel, EmailStr
-
+from pydantic import BaseModel
 
 class UserAddToOrganization(BaseModel):
     invitation_link: str
 
 
 class InvitationCreate(BaseModel):
-    user_email: EmailStr
+    user_id: str
     organization_id: str

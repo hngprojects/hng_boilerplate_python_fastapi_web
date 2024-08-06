@@ -2,7 +2,6 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.sql import func
 from api.v1.models.base_model import BaseTableModel
 
-
 class Waitlist(BaseTableModel):
     __tablename__ = "waitlist"
 

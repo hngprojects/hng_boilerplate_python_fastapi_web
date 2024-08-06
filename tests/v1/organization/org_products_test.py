@@ -23,6 +23,7 @@ def mock_db_session(mocker):
 def test_user():
     return User(
         id=str(uuid7()),
+        username="testuser",
         email="testuser@gmail.com",
         password="hashedpassword",
         first_name="test",
@@ -35,6 +36,7 @@ def test_user():
 def another_user():
     return User(
         id=str(uuid7()),
+        username="anotheruser",
         email="anotheruser@gmail.com",
         password="hashedpassword",
         first_name="another",
@@ -46,7 +48,8 @@ def another_user():
 def test_organization(test_user):
     organization = Organization(
         id=str(uuid7()),
-        company_name="testorg",
+        name="testorg",
+        description="An organization for testing purposes"
     )
     organization.users.append(test_user)
     return organization
@@ -93,7 +96,7 @@ def test_get_products_for_organization_user_belongs(
 
     # Test user belonging to the organization
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.get(f"/api/v1/products/organizations/{test_organization.id}", headers=headers)
+    response = client.get(f"/api/v1/products/{test_organization.id}", headers=headers)
     
     # Debugging statement
     if response.status_code != 200:
@@ -126,7 +129,7 @@ def test_get_products_for_organization_user_not_belong(
 
     # Test user not belonging to the organization
     headers = {'Authorization': f'Bearer {access_token_user2}'}
-    response = client.get(f"/api/v1/products/organizations/{test_organization.id}", headers=headers)
+    response = client.get(f"/api/v1/products/{test_organization.id}", headers=headers)
     
     assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
 
@@ -145,6 +148,6 @@ def test_get_products_for_non_existent_organization(
     # Test non-existent organization
     non_existent_id = "non-existent-id"  # Use a string since the IDs are UUIDs
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.get(f"/api/v1/products/organizations/{non_existent_id}", headers=headers)
+    response = client.get(f"/api/v1/products/{non_existent_id}", headers=headers)
     
     assert response.status_code == 404, f"Expected status code 404, got {response.status_code}"

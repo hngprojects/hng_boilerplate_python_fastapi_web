@@ -11,6 +11,7 @@ client = TestClient(app)
 data1 = {
     "first_name": "Marvelous",
     "last_name": "Uboh",
+    "username": "marveld0",
     "password": "Doyinsola174@$",
     "email": "utibesolomon12@gmail.com"
 }
@@ -18,6 +19,7 @@ data2 = {
 
     "first_name": "Marvelou",
     "last_name": "Ubh",
+    "username": "marveldoes",
     "password": "Doyinsola177@$",
     "email": "utibesolomon15@gmail.com"
 
@@ -26,6 +28,7 @@ data3 = {
 
     "first_name": "Marvelu",
     "last_name": "Ub",
+    "username": "marveldid",
     "password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
     
@@ -55,7 +58,7 @@ def test_super_user_creation(data, db_session_mock):
     db_session_mock.commit.return_value = None
     # Mock the user creation function
 
-    url = '/api/v1/auth/register-super-admin'
+    url = '/api/v1/superadmin/register'
    
   
     response = client.post(url, json=data)
@@ -66,6 +69,10 @@ def test_super_user_creation(data, db_session_mock):
     # Assert that create_user was called with the correct data
    
     db_session_mock.query().filter().first.return_value = data
+    # Attempt to create the same user again (expect a 400 error)
+  
+
+    # Create a user with missing data (expect a 422 error)
 
     data.pop('email')
     invalid_data_response = client.post(url, json=data)
