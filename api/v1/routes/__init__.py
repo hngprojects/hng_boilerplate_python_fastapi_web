@@ -41,7 +41,6 @@ from api.v1.routes.analytics import analytics
 from api.v1.routes.job_application import job_application
 from api.v1.routes.privacy import privacies
 
-
 api_version_one = APIRouter(prefix="/api/v1")
 
 api_version_one.include_router(auth)
