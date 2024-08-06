@@ -1,6 +1,8 @@
 from typing import Any, Optional
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends, status
+from typing import Annotated
 from sqlalchemy.orm import Session
+from api.db.database import get_db
 from api.core.base.services import Service
 from api.v1.models.job import JobApplication
 from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication
@@ -16,8 +18,9 @@ class JobApplicationService(Service):
 
         # Check if user has already applied by checking through the email
         if db.query(JobApplication).filter(JobApplication.applicant_email == schema.applicant_email).first():
-            raise HTTPException(status_code=400, detail='You have already applied for this role')
-        
+            raise HTTPException(
+                status_code=400, detail='You have already applied for this role')
+
         db.add(job_application)
         db.commit()
         db.refresh(job_application)
@@ -33,7 +36,8 @@ class JobApplicationService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(JobApplication, column) and value:
-                    query = query.filter(getattr(JobApplication, column).ilike(f"%{value}%"))
+                    query = query.filter(
+                        getattr(JobApplication, column).ilike(f"%{value}%"))
 
         return query.all()
 
@@ -46,14 +50,16 @@ class JobApplicationService(Service):
         ).first()
 
         if not job_application:
-            raise HTTPException(status_code=404, detail='Job application not found')
-        
+            raise HTTPException(
+                status_code=404, detail='Job application not found')
+
         return job_application
 
     def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
         """Updates an application"""
 
-        job_application = self.fetch(db=db, job_id=job_id, application_id=application_id)
+        job_application = self.fetch(
+            db=db, job_id=job_id, application_id=application_id)
 
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
@@ -64,11 +70,23 @@ class JobApplicationService(Service):
         db.refresh(job_application)
         return job_application
 
-    def delete(self, db: Session, job_id: str, application_id: str):
-        """Deletes an FAQ"""
-
-        faq = self.fetch(db=db, job_id=job_id, application_id=application_id)
-        db.delete(faq)
+    def delete(self, job_id: str, application_id: str,
+               db: Annotated[Session, Depends(get_db)]):
+        """
+        Delete a single job application.
+        Args:
+            job_id: The id of the job for the applicant
+            application_id: The id of the application for the job
+            db: database Session object
+        Returns:
+            None
+        """
+        application: object | None = db.query(JobApplication).filter_by(job_id=job_id,
+                                                                        id=application_id).first()
+        if not application:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail='Invalid id')
+        db.delete(application)
         db.commit()
 
 
