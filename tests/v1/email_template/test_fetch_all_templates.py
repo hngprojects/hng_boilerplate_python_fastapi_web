@@ -47,6 +47,7 @@ def mock_email_template():
         EmailTemplate(
             id=str(uuid7()),
             title="Test name",
+            type="Test name",
             template="<h1>Hello</h1>",
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
@@ -54,6 +55,7 @@ def mock_email_template():
         EmailTemplate(
             id=str(uuid7()),
             title="Test name",
+            type="Test name",
             template="<h1>Hello</h1>",
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
@@ -61,6 +63,7 @@ def mock_email_template():
         EmailTemplate(
             id=str(uuid7()),
             title="Test name",
+            type="Test name",
             template="<h1>Hello</h1>",
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)

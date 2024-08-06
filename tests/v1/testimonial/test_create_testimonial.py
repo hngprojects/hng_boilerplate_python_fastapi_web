@@ -31,7 +31,7 @@ payload = [
 
 # before all tests generate an access token
 @pytest.fixture(autouse=True)
-def before_all(client: client, session: session) -> pytest.fixture:
+def before_all(client: client, session: session, mock_send_email) -> pytest.fixture:
     # create a user
     user = client.post(
         "/api/v1/auth/register",

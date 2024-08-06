@@ -10,7 +10,6 @@ class Notification(BaseTableModel):
     title = Column(String, nullable=False)
     message = Column(Text, nullable=False)
     status = Column(String, default="unread")  # unread, read
-    
 
     user = relationship("User", back_populates="notifications", primaryjoin="Notification.user_id==User.id", foreign_keys=[user_id])
 
@@ -20,7 +19,7 @@ class NotificationSetting(BaseTableModel):
 
     mobile_push_notifications = Column(Boolean, server_default='false')
     email_notification_activity_in_workspace = Column(Boolean, server_default='false')
-    email_notification_always_send_email_notifications = Column(Boolean, server_default='false')
+    email_notification_always_send_email_notifications = Column(Boolean, server_default='true')
     email_notification_email_digest = Column(Boolean, server_default='false')
     email_notification_announcement_and_update_emails = Column(Boolean, server_default='false')
     slack_notifications_activity_on_your_workspace = Column(Boolean, server_default='false')
