@@ -5,7 +5,8 @@ from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSc
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from typing import Annotated
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Query
+
 from api.v1.services.user import user_service
 from sqlalchemy.orm import Session
 from api.utils.logger import logger
@@ -17,7 +18,7 @@ from api.v1.services.job_application import job_application_service, UpdateJobAp
 from api.utils.pagination import paginated_response
 from api.utils.db_validators import check_model_existence
 import uuid
-from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication
+from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication, JobApplicationResponse
 
 
 jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
@@ -197,6 +198,32 @@ async def create_application(
         data=jsonable_encoder(updated_application)
     )
 
+# Fetch all applications (superadmin)
+@jobs.get("/{job_id}/applications", response_model=JobApplicationResponse, status_code=status.HTTP_200_OK,)
+async def fetch_all_job_applications(
+    job_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    per_page: Annotated[int, Query(ge=1, description="Number of applications per page")] = 10,
+    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
+):
+    """Superadmin endpoint to fetch all applications for a job
+
+    Args:
+        - job_id (str): The Job ID
+        - db (Annotated[Session, Depends): the database session
+        - current_user: The current authenticated super admin 
+        - per_page: Number of customers per page (default: 10, minimum: 1)
+        - page: Page number (starts from 1)
+
+    Returns:
+        obj: paginated list of applications for the Job ID
+
+    Raises:
+        - HTTPException: 403 FORBIDDEN (Current user is not a super admin)
+        - HTTPException: 404 NOT FOUND (Provided Job ID does not exist)
+    """
+    return job_application_service.fetch_all(job_id=job_id, page=page, per_page=per_page,db=db)
 
 @jobs.delete('/{job_id}/applications/{application_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_application(job_id: str,

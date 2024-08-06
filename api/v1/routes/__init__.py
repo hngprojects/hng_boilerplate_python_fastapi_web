@@ -40,7 +40,6 @@ from api.v1.routes.permissions.roles import role_perm
 from api.v1.routes.analytics import analytics
 from api.v1.routes.job_application import job_application
 from api.v1.routes.privacy import privacies
-
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
 
