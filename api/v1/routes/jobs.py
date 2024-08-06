@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 
 from api.utils.success_response import success_response
-from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSchema
+from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSchema, UpdateJobSchema
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, status
 from api.v1.services.user import user_service
 from sqlalchemy.orm import Session
 from api.utils.logger import logger
@@ -13,7 +13,9 @@ from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.job import Job
 from api.v1.services.jobs import job_service
+from api.v1.services.job_application import job_application_service
 from api.utils.pagination import paginated_response
+from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication
 
 jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
 
@@ -54,7 +56,6 @@ async def add_jobs(
     )
 
 
-# GET /api/v1/jobs/:job_id 
 @jobs.get("") 
 async def fetch_all_jobs(
     db: Session = Depends(get_db),
@@ -76,4 +77,64 @@ async def fetch_all_jobs(
         model=Job,
         limit=page_size,
         skip=max(page,0),
+    )
+
+
+@jobs.delete(
+    "/{job_id}",
+    response_model=success_response,
+    status_code=200,
+    
+)
+async def delete_job_by_id(
+    job_id: str,
+    db: Session = Depends(get_db),
+    admin: User = Depends(user_service.get_current_super_admin),
+):
+    """
+    Delete a job record by id
+    """
+    job_service.delete(db, job_id)
+
+    return success_response(
+        message = "Job listing deleted successfully",
+        status_code = 200,
+    )
+
+
+@jobs.patch("/{id}")
+async def update_job(
+    id: str,
+    schema: UpdateJobSchema,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    '''This endpoint is to update a job listing by its id'''
+
+    job = job_service.update(db, id=id, schema=schema)
+
+    return success_response(
+        data=jsonable_encoder(job),
+        message="Successfully updated a job listing",
+        status_code=status.HTTP_200_OK,
+    )
+
+
+# -------------------- JOB APPLICATION ROUTES ------------------------
+# --------------------------------------------------------------------
+
+@jobs.post("/{job_id}/applications", response_model=success_response)
+async def apply_to_job(
+    job_id: str,
+    application: CreateJobApplication,
+    db: Session = Depends(get_db)
+):
+    '''Endpoint to apply for a job'''
+
+    job_application = job_application_service.create(db=db, schema=application, job_id=job_id)
+
+    return success_response(
+        status_code=201,
+        message="Job application submitted successfully",
+        data=jsonable_encoder(job_application)
     )
