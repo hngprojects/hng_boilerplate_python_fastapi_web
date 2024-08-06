@@ -17,10 +17,12 @@ class JobApplicationService(Service):
         job_application = JobApplication(**schema.model_dump(), job_id=job_id)
 
         # Check if user has already applied by checking through the email
-        if db.query(JobApplication).filter(JobApplication.applicant_email == schema.applicant_email).first():
-            raise HTTPException(
-                status_code=400, detail='You have already applied for this role')
-
+        if db.query(JobApplication).filter(
+            JobApplication.applicant_email == schema.applicant_email,
+            JobApplication.job_id == job_id,
+        ).first():
+            raise HTTPException(status_code=400, detail='You have already applied for this role')
+        
         db.add(job_application)
         db.commit()
         db.refresh(job_application)
@@ -62,7 +64,7 @@ class JobApplicationService(Service):
             db=db, job_id=job_id, application_id=application_id)
 
         # Update the fields with the provided schema data
-        update_data = schema.dict(exclude_unset=True)
+        update_data = schema.dict(exclude_unset=True, exclude={"id"})
         for key, value in update_data.items():
             setattr(job_application, key, value)
 
