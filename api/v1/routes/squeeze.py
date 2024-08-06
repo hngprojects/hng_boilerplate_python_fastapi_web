@@ -50,3 +50,9 @@ def get_squeeze(
     if not squeeze_page:
         return success_response(status.HTTP_404_NOT_FOUND, "Squeeze page not found!")
     return success_response(status.HTTP_200_OK, SUCCESS, squeeze_page)
+
+@squeeze.delete("/{squeeze_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_squeeze(squeeze_id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
+    """Delete a squeeze page"""
+    success = squeeze_service.delete(db, squeeze_id)
+    return success_response(status_code=204, message="Squeeze page deleted successfully!")
