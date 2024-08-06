@@ -13,8 +13,8 @@ user_id = str(uuid7())
 def mock_user():
     return User(id=1, email="test@example.com")
 
-@patch("api.v1.routes.profiles.Image.open")
-@patch("api.v1.routes.profiles.os.makedirs")
+@patch("api.v1.routes.profile.Image.open")
+@patch("api.v1.routes.profile.os.makedirs")
 @patch("builtins.open", new_callable=MagicMock)
 def test_upload_profile_image(mock_open, mock_makedirs, mock_image_open, mock_user):
     
@@ -24,9 +24,9 @@ def test_upload_profile_image(mock_open, mock_makedirs, mock_image_open, mock_us
     mock_image.resize.return_value = mock_image
     mock_image.save = MagicMock()
 
-    with patch("api.utils.dependencies.get_current_user", return_value=mock_user):
+    with patch("api.v1.routes.profile.user_service.get_current_user", return_value=mock_user):
         response = client.post(
-            "/api/v1/profile/upload-image",
+            "/profile/upload-image",
             headers={'Authorization': f'Bearer {access_token}'},
             files={"file": ("test_image.jpg", b"fake_image_data", "image/jpeg")}
         )
