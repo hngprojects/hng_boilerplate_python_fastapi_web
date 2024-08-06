@@ -51,7 +51,3 @@ def get_privacy(privacy_id: str, db: Session = Depends(get_db)):
 def delete_privacy(privacy_id: str, db: Session = Depends(get_db), superadmin_user: User = Depends(user_service.get_current_super_admin)):
     """Delete a Privacy Policy"""
     privacy_service.delete(db, privacy_id)
-    # return success_response(
-    #     status_code=status.HTTP_204_NO_CONTENT,
-    #     message='Privacy deleted successfully'
-    # )
