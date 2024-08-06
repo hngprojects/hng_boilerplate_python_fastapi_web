@@ -32,3 +32,32 @@ async def update_terms_and_conditions(
         message="Successfully updated terms and conditions",
         status_code=status.HTTP_200_OK,
     )
+
+
+@terms_and_conditions.post("/", response_model=success_response, status_code=201)
+async def create_terms_and_conditions(
+    schema: UpdateTermsAndConditions,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Endpoint to create terms and conditions. Only accessible to superadmins"""
+
+    # Check if terms and conditions already exist
+    existing_tc = db.query(TermsAndConditions).first()
+    if existing_tc:
+        return success_response(
+            message="Terms and conditions already exist. Use PATCH to update.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # Create new terms and conditions
+    new_tc = TermsAndConditions(title=schema.title, content=schema.content)
+    db.add(new_tc)
+    db.commit()
+    db.refresh(new_tc)
+
+    return success_response(
+        data=new_tc.to_dict(),
+        message="Successfully created terms and conditions",
+        status_code=status.HTTP_201_CREATED,
+    )
