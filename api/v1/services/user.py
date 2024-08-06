@@ -21,7 +21,6 @@ from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
 from api.v1.services.notification_settings import notification_setting_service
-from api.v1.services.organization import organization_service as org_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
