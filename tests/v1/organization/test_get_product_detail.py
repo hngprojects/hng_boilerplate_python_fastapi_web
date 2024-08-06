@@ -8,7 +8,8 @@ from datetime import datetime, timezone, timedelta
 from api.v1.models.organization import Organization
 from api.v1.models.product import Product, ProductCategory
 from api.v1.models.user import User
-from ....main import app
+
+from main import app
 from api.v1.routes.blog import get_db
 from api.v1.services.user import user_service
 

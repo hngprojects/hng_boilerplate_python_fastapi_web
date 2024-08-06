@@ -55,7 +55,7 @@ class BlogPostResponse(BaseModel):
         from_attributes = True
 
 
-class BlogDislikeCreate(BaseModel):
+class BlogLikeDislikeCreate(BaseModel):
     id: str
     blog_id: str
     user_id: str
@@ -63,7 +63,8 @@ class BlogDislikeCreate(BaseModel):
     created_at: datetime
 
 
-class BlogDislikeResponse(BaseModel):
+
+class BlogLikeDislikeResponse(BaseModel):
     status_code: str
     message: str
-    data: BlogDislikeCreate
+    data: BlogLikeDislikeCreate
