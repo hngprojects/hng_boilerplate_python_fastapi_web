@@ -16,7 +16,9 @@ from api.v1.services.jobs import job_service
 from api.v1.services.job_application import job_application_service, UpdateJobApplication
 from api.utils.pagination import paginated_response
 from api.utils.db_validators import check_model_existence
+import uuid
 from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication
+
 
 jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
 
@@ -55,6 +57,31 @@ async def add_jobs(
         status_code = 201,
         data = jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
     )
+    
+    
+    
+@jobs.get("/{job_id}", response_model=success_response)
+async def get_job(
+    job_id: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve job details by ID.
+    This endpoint fetches the details of a specific job by its ID.
+
+    Parameters:
+    - job_id: str
+        The ID of the job to retrieve.
+    - db: The database session
+    """
+    job = job_service.fetch(db, job_id)
+    
+    return success_response(
+        message="Retrieved Job successfully",
+        status_code=200,
+        data=jsonable_encoder(job)
+    )
+    
 
 
 @jobs.get("") 
