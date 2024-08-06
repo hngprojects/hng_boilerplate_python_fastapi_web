@@ -27,12 +27,12 @@ app = FastAPI(lifespan=lifespan)
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
 
-# MEDIA_DIR = '/media'
-# if not os.path.exists(MEDIA_DIR):
-#     os.makedirs(MEDIA_DIR)
+MEDIA_DIR = '/media'
+if not os.path.exists(MEDIA_DIR):
+    os.makedirs(MEDIA_DIR)
 
-# # Load up media static files
-# app.mount(MEDIA_DIR, StaticFiles(directory=MEDIA_DIR), name='media')
+# Load up media static files
+app.mount(MEDIA_DIR, StaticFiles(directory=MEDIA_DIR), name='media')
 
 origins = [
     "http://localhost:3000",
