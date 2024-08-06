@@ -72,5 +72,4 @@ api_version_one.include_router(squeeze)
 api_version_one.include_router(contact)
 api_version_one.include_router(dashboard)
 api_version_one.include_router(analytics)
-api_version_one.include_router(language)
 
