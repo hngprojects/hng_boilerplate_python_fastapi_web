@@ -32,9 +32,9 @@ async def get_user_data_privacy_setting(
 
 @settings.patch("/data-privacy")
 async def update_user_data_privacy_setting(
-    db: Session,
     schema: DataPrivacySettingUpdate,
     current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
 ):
     """
     Endpoint to update a user's data privacy setting'
