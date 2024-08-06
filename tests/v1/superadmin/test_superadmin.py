@@ -127,6 +127,7 @@ def test_non_admin_access(
         headers={"Authorization": "Bearer dummy_token"},
     )
 
+
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
