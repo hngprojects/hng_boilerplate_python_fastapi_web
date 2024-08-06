@@ -13,7 +13,9 @@ from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.job import Job
 from api.v1.services.jobs import job_service
+from api.v1.services.job_application import job_application_service
 from api.utils.pagination import paginated_response
+from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication
 
 jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
 
@@ -54,7 +56,6 @@ async def add_jobs(
     )
 
 
-# GET /api/v1/jobs/:job_id 
 @jobs.get("") 
 async def fetch_all_jobs(
     db: Session = Depends(get_db),
@@ -78,6 +79,7 @@ async def fetch_all_jobs(
         skip=max(page,0),
     )
 
+
 @jobs.delete(
     "/{job_id}",
     response_model=success_response,
@@ -99,6 +101,7 @@ async def delete_job_by_id(
         status_code = 200,
     )
 
+
 @jobs.patch("/{id}")
 async def update_job(
     id: str,
@@ -114,4 +117,24 @@ async def update_job(
         data=jsonable_encoder(job),
         message="Successfully updated a job listing",
         status_code=status.HTTP_200_OK,
-        )
+    )
+
+
+# -------------------- JOB APPLICATION ROUTES ------------------------
+# --------------------------------------------------------------------
+
+@jobs.post("/{job_id}/applications", response_model=success_response)
+async def apply_to_job(
+    job_id: str,
+    application: CreateJobApplication,
+    db: Session = Depends(get_db)
+):
+    '''Endpoint to apply for a job'''
+
+    job_application = job_application_service.create(db=db, schema=application, job_id=job_id)
+
+    return success_response(
+        status_code=201,
+        message="Job application submitted successfully",
+        data=jsonable_encoder(job_application)
+    )
