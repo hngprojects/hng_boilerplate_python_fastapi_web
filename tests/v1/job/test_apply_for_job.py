@@ -87,6 +87,46 @@ def test_create_job_application_success(client, db_session_mock):
         assert response.status_code == 201
 
 
+def test_create_job_application_already_applied(client, db_session_mock):
+    '''Test to check if a user has already applied for the role'''
+
+    # Mock the user service to return the current user
+    app.dependency_overrides[job_application_service.create] = lambda: mock_job_application
+
+    # Mock faq creation
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
+    mock_job_app = mock_job_application()
+
+    # Mock job application data
+    mock_job_app = MagicMock(
+        applicant_name="Test Applicant",
+        applicant_email="user@example.com",
+        cover_letter="Test cover letter",
+        resume_link="https://www.example.com/resume",
+        portfolio_link="https://www.example.com/portfolio",
+        job_id=str(uuid7())
+    )
+
+    # Mock the database query to simulate that the user has already applied
+    db_session_mock.query().filter().first.return_value = mock_job_app
+
+    response =client.post(
+        f'/api/v1/jobs/{mock_job_app.job_id}/applications',
+        json={
+            'applicant_name': 'Test Applicant',
+            'applicant_email': 'user@example.com',
+            'cover_letter': 'Test cover letter',
+            'resume_link': 'https://www.example.com/portfolio',
+            'portfolio_link': 'https://www.example.com/portfolio'
+        }
+    )
+
+    assert response.status_code == 400
+
+
 def test_create_job_application_missing_field(client, db_session_mock):
     '''Test for missing field when creating a new job application'''
 
