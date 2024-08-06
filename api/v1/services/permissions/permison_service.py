@@ -4,9 +4,9 @@ from api.v1.models.permissions.role import Role
 from api.v1.schemas.permissions.permissions import PermissionCreate
 from api.v1.models.permissions.role_permissions import role_permissions
 from uuid import UUID
-from fastapi import HTTPException
+from fastapi import HTTPException,status
 from sqlalchemy.exc import IntegrityError
-
+from sqlalchemy import delete
 
 class PermissionService:
     @staticmethod
@@ -49,6 +49,22 @@ class PermissionService:
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
-
+   
+    @staticmethod
+    def delete_permission(db:Session, permission_id : str):
+        permission = db.query(Permission).filter(Permission.id == permission_id).first()
+        if permission :
+            try:
+                db.execute(delete(role_permissions).where(role_permissions.c.permission_id == permission_id))
+                db.delete(permission)
+                db.commit()
+                return {}
+            except IntegrityError as e :
+               db.rollback()
+               raise HTTPException(status_code=400, detail="A Permission with this name already exists.")
+            except Exception as e:
+               db.rollback()
+               raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not Found')
 
 permission_service = PermissionService()
