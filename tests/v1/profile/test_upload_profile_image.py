@@ -3,8 +3,11 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
 from api.v1.models.user import User
+from api.v1.services.user import user_service
+from uuid_extensions import uuid7
 
 client = TestClient(app)
+user_id = str(uuid7())
 
 @pytest.fixture
 def mock_user():
@@ -14,7 +17,8 @@ def mock_user():
 @patch("api.v1.routes.profiles.os.makedirs")
 @patch("builtins.open", new_callable=MagicMock)
 def test_upload_profile_image(mock_open, mock_makedirs, mock_image_open, mock_user):
-    # Setup mocks
+    
+    access_token = user_service.create_access_token(str(user_id))
     mock_image = MagicMock()
     mock_image_open.return_value = mock_image
     mock_image.resize.return_value = mock_image
@@ -23,6 +27,7 @@ def test_upload_profile_image(mock_open, mock_makedirs, mock_image_open, mock_us
     with patch("api.utils.dependencies.get_current_user", return_value=mock_user):
         response = client.post(
             "/api/v1/profile/upload-image",
+            headers={'Authorization': f'Bearer {access_token}'},
             files={"file": ("test_image.jpg", b"fake_image_data", "image/jpeg")}
         )
 
