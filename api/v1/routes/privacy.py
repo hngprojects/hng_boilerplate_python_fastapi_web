@@ -36,3 +36,13 @@ def get_privacies(db: Session = Depends(get_db)):
         message='Privacies retrieved successfully',
         data=jsonable_encoder(privacy_items)
     )
+
+@privacies.get("/{privacy_id}", response_model=PrivacyPolicyResponse)
+def get_privacy_by_user(privacy_id: str, db: Session = Depends(get_db)):
+    region = privacy_service.fetch(db, privacy_id)
+    
+    return success_response (
+        status_code=200,
+        message='privacy retrieved successfully',
+        data=jsonable_encoder(region)
+    )
