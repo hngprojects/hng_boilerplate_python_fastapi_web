@@ -45,19 +45,19 @@ def remove_user_from_role(
     """
     Endpoint to remove a user from a particular role by `admin`
     """
-    admin_role = org_service.get_organization_user_role(current_user.id, org_id, db)
-    if (not admin_role) or (admin_role.name != "admin"):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Insufficient permission. Admin required."
-        )
-    
+    # GET org
     org = org_service.fetch(db=db, id=org_id)
+    
+    # CONFIRM current_user is admin
+    org_service.check_user_role_in_org(db, current_user, org, "admin")
 
+    # GET user
     user = user_service.fetch(db=db, id=user_id)
 
+    # GET role
     role = role_service.fetch(db=db, role_id=role_id)
 
+    # REMOVE user from role
     role_service.remove_user_from_role(db, org.id, user.id, role)
 
     return success_response(

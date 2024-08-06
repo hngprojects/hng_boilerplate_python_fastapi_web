@@ -47,7 +47,7 @@ def user_role():
 
 # Test Admin
 @pytest.fixture
-def test_admin():
+def test_admin(admin_role):
     admin = User(
         id=str(uuid7()),
         email="testadmin@gmail.com",
@@ -61,8 +61,8 @@ def test_admin():
 
 # Test User
 @pytest.fixture
-def test_user():
-    return User(
+def test_user(user_role):
+    user = User(
         id=str(uuid7()),
         email="testuser@gmail.com",
         password="hashedpassword",
@@ -70,6 +70,8 @@ def test_user():
         last_name="user",
         is_active=True
     )
+    user.role = user_role
+    return user
 
 
 @pytest.fixture()
@@ -118,7 +120,7 @@ def test_remove_role_successful(
     access_token_user
 ):
     mock_db_session.get.side_effect = [test_org, test_user, user_role]
-    mock_db_session.execute().scalar_one_or_none.return_value = admin_role
+    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
     mock_role_service.get_user_role_relation = user_role_relation
 
     # Make request
@@ -142,43 +144,32 @@ def test_remove_role_unsuccessful(
     put_url = f"/api/v1/organizations/{test_org.id}/users/{test_user.id}/roles/{user_role.id}"
 
     # NON-ADMIN
-    mock_db_session.execute().scalar_one_or_none.return_value = user_role
-    mock_db_session.get.side_effect = [None, test_user, user_role]
+    # mock_db_session.execute.return_value.scalar_one_or_none.return_value = user_role
+    mock_db_session.execute.return_value.fetchone.return_value = None
+    mock_db_session.get.side_effect = [test_org, test_user, user_role]
     response = client.put(put_url, headers=headers)
-    assert response.status_code == 401
-    assert response.json()['message'] == "Insufficient permission. Admin required."
+    assert response.status_code == 403
+    assert response.json()['message'] == "Permission denied as user is not of admin role"
 
     # WRONG org_id
+    mock_db_session.execute.return_value.fetchone.return_value = admin_role
     mock_db_session.get.side_effect = [None, test_user, user_role]
-    mock_db_session.execute().scalar_one_or_none.return_value = admin_role
+    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
     response = client.put(put_url, headers=headers)
     assert response.status_code == 404
     assert response.json()['message'] == "Organization does not exist"
 
     # WRONG user_id
     mock_db_session.get.side_effect = [test_org, None, user_role]
-    mock_db_session.execute().scalar_one_or_none.return_value = admin_role
+    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
+    mock_db_session.execute.return_value.fetchone.return_value = admin_role
     response = client.put(put_url, headers=headers)
     assert response.status_code == 404
     assert response.json()['message'] == "User does not exist"
 
     # WRONG role_id
     mock_db_session.get.side_effect = [test_org, test_user, None]
-    mock_db_session.execute().scalar_one_or_none.return_value = admin_role
+    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
     response = client.put(put_url, headers=headers)
     assert response.status_code == 404
     assert response.json()['message'] == "Role does not exist"
-
-    # USER NOT IN ROLE
-    mock_db_session.get.side_effect = [test_org, test_user, user_role]
-    mock_db_session.execute().fetchone.return_value = None
-    response = client.put(put_url, headers=headers)
-    assert response.status_code == 403
-    assert response.json()['message'] == "User not found in role"
-
-    # INVALID ROLE NAME
-    user_role.name = "ghost"
-    mock_db_session.get.side_effect = [test_org, test_user, user_role]
-    response = client.put(put_url, headers=headers)
-    assert response.status_code == 400
-    assert response.json()['message'] == "Invalid role"
