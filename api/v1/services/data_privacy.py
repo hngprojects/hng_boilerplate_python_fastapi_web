@@ -4,6 +4,7 @@ from api.core.base.services import Service
 from api.v1.models.user import User
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.utils.db_validators import check_model_existence
+from api.v1.schemas.data_privacy import DataPrivacyUpdate
 
 
 class DataPrivacyService(Service):
@@ -29,8 +30,19 @@ class DataPrivacyService(Service):
 
         return user.data_privacy_setting
 
-    def update(self):
-        pass
+    def update(self, db: Session, schema: DataPrivacyUpdate, user: User):
+        # update data privacy setting
+
+        data_privacy_setting = self.fetch(db, user)
+
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(data_privacy_setting, key, value)
+
+        db.commit()
+        db.refresh(data_privacy_setting)
+
+        return data_privacy_setting
 
     def delete(self):
         pass
