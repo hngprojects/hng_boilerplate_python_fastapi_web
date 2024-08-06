@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.utils.success_response import success_response
 from api.v1.services.terms_and_conditions import terms_and_conditions_service
-from api.v1.schemas.terms_and_conditions import UpdateTermsAndConditions
+from api.v1.schemas.terms_and_conditions import DeleteResponseModel, UpdateTermsAndConditions
 from api.v1.services.user import user_service
 from api.v1.models import *
 
@@ -61,3 +61,15 @@ async def create_terms_and_conditions(
         message="Successfully created terms and conditions",
         status_code=status.HTTP_201_CREATED,
     )
+
+
+@terms_and_conditions.delete("/{id}", response_model=DeleteResponseModel)
+async def delete_terms_and_conditions(id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
+    try:
+        result = terms_and_conditions_service.delete(terms_id=id, db=db, current_user=current_user)
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        # Catch any other exceptions and raise an HTTP 500 error
+        raise HTTPException(status_code=500, detail={"message": "An unexpected error occurred", "status_code": 500, "success": False})
+    return result
