@@ -10,6 +10,8 @@ from api.v1.schemas.organization import (
     PaginatedOrgUsers,
     OrganizationBase,
 )
+from api.v1.services.product import product_service
+from api.v1.schemas.product import ProductCreate
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
@@ -93,6 +95,22 @@ def get_all_organizations(
         data=jsonable_encoder(orgs),
     )
 
+@organization.post("/{org_id}/products", status_code=status.HTTP_201_CREATED)
+def product_create(
+    org_id: str,
+    product: ProductCreate,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    db: Session = Depends(get_db),
+):
+    created_product = product_service.create(
+        db=db, schema=product, org_id=org_id, current_user=current_user
+    )
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product created successfully",
+        data=jsonable_encoder(created_product),
+    )
 
 @organization.delete(
     "/{org_id}/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT

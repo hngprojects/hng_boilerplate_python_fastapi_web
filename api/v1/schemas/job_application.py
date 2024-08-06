@@ -1,11 +1,34 @@
 """
 Job application schemas
 """
-from typing_extensions import List
-from pydantic import BaseModel
-from typing import Optional, Union
-from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
+
+
+from typing import Union, Optional
 import re
+
+class JobApplicationData(BaseModel):
+    """
+    Schema for job application base
+    """
+    job_id: str
+    applicant_name: str
+    applicant_email: str
+    resume_link: str
+    portfolio_link: Union[str, None]
+    cover_letter: Union[str, None]
+    application_status: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+class SingleJobAppResponse(BaseModel):
+    """
+    Single job application response schema
+    """
+    status: str
+    message: str
+    status_code: int
+    data: JobApplicationData
 
 class JobApplicationBase(BaseModel):
     """
@@ -18,7 +41,6 @@ class JobApplicationBase(BaseModel):
     portfolio_link: Union[str, None]
     cover_letter: Union[str, None]
     application_status: str
-
 
     model_config = ConfigDict(from_attributes=True)
 

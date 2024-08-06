@@ -9,12 +9,40 @@ from sqlalchemy.orm import Session
 from api.utils.db_validators import check_model_existence
 from api.utils.pagination import paginated_response
 from api.v1.models.job import Job, JobApplication
-from api.v1.schemas.job_application import JobApplicationBase, JobApplicationData, CreateJobApplication, UpdateJobApplication
 from api.utils.success_response import success_response
-
+from api.v1.schemas.job_application import (SingleJobAppResponse,
+                                            JobApplicationBase,
+                                            JobApplicationData,
+                                           CreateJobApplication, UpdateJobApplication
+                                           )
 
 class JobApplicationService(Service):
-    '''Job application service functionality'''
+    """
+    Job application service class
+    """
+
+    def fetch(self, job_id:str, application_id: str,
+              db: Annotated[Session, Depends(get_db)]):
+        """
+        Fetch a single job application.
+        Args:
+            job_id: The id of the job for the applicant
+            application_id: The id of the application for the job
+            db: database Session object
+        Returne:
+            SingleJobAppResponse: Response on success
+        """
+        application: object | None = db.query(JobApplication).filter_by(job_id=job_id,
+                                                                        id=application_id).first()
+        if not application:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail='Invalid id')
+        else:
+            return SingleJobAppResponse(status='success',
+                                      status_code=status.HTTP_200_OK,
+                                      message='successfully retrieved job application.',
+                                      data=JobApplicationData.model_validate(application,
+                                                                             from_attributes=True))                                   
 
     def create(self, db: Session, job_id: str, schema: CreateJobApplication):
         """Create a new job application"""
@@ -76,19 +104,7 @@ class JobApplicationService(Service):
             data=application_data
         )
 
-    def fetch(self, db: Session, job_id: str, application_id: str):
-        """Fetches a, FAQ by id"""
-
-        job_application = db.query(JobApplication).filter(
-            JobApplication.id == application_id,
-            JobApplication.job_id == job_id,
-        ).first()
-
-        if not job_application:
-            raise HTTPException(status_code=404, detail='Job application not found')
         
-        return job_application
-
     def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
         """Updates an application"""
 
@@ -112,3 +128,4 @@ class JobApplicationService(Service):
 
 
 job_application_service = JobApplicationService()
+
