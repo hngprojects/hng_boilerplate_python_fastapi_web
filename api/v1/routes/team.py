@@ -1,23 +1,51 @@
-#!/usr/bin/env python3
+"""Defines Teams Endpoints"""
 
-from api.utils.success_response import success_response
-from api.v1.schemas.team import PostTeamMemberSchema, TeamMemberCreateResponseSchema
-from fastapi.exceptions import HTTPException
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, Path
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm.session import Session
+from starlette import status
 
-from fastapi import APIRouter, HTTPException, Depends
-from api.v1.services.user import user_service
-from sqlalchemy.orm import Session
-from api.utils.logger import logger
 from api.db.database import get_db
+from api.v1.services.user import user_service
+from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.services.team import TeamMemberService
+from api.v1.services.team import team_service, TeamServices
+from api.v1.schemas.team import PostTeamMemberSchema, TeamMemberCreateResponseSchema
+from api.utils.logger import logger
 
-teams = APIRouter(prefix="/team/members", tags=["Teams"])
+
+team = APIRouter(prefix="/team", tags=["Teams"])
 
 
-@teams.post(
-    "",
+@team.get(
+    '/members/{team_id}',
+    response_model=success_response,
+    status_code=status.HTTP_200_OK
+)
+def get_team_member_by_id(
+    team_id: Annotated[str, Path(description="Team Member ID")],
+    db: Session = Depends(get_db),
+    su: User = Depends(user_service.get_current_super_admin)
+):
+    '''Endpoint to fetch a team by id'''
+    team = team_service.fetch(db, team_id)
+    if not team:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Team not found"
+        )
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Team fetched successfully',
+        data=jsonable_encoder(team),
+    )
+
+
+
+@team.post(
+    "/members",
     response_model=success_response,
     status_code=201,
     
@@ -42,7 +70,7 @@ async def add_team_members(
         raise HTTPException(status_code=400, detail="Invalid request data")
     
 
-    new_member = TeamMemberService.create(db, member)
+    new_member = TeamServices.create(db, member)
     logger.info(f"Team Member added successfully {new_member.id}")
 
     return success_response(

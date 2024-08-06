@@ -45,7 +45,7 @@ class TestCodeUnderTest:
                     "picture_url": "example.com",
                     "team_type": "Executive"}
                 
-        with patch('api.v1.services.team.TeamMemberService.create') as mock_team:
+        with patch('api.v1.services.team.TeamServices.create') as mock_team:
             mock_team.return_value = MagicMock(spec=PostTeamMemberSchema,
             id='user_id',
             created_at=datetime.now())
