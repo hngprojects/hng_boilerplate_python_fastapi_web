@@ -1,20 +1,18 @@
 import uvicorn
-import os
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from api.utils.email_service import send_mail
-from api.utils.json_response import JsonResponseDict
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
+from api.utils.json_response import JsonResponseDict
 from api.utils.logger import logger
-from api.core.dependencies.email_sender import send_email
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 
@@ -26,9 +24,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
+
+# Load up media static files
+app.mount('/media', StaticFiles(directory='media'), name='media')
 
 origins = [
     "http://localhost:3000",
@@ -67,7 +67,7 @@ async def http_exception(request: Request, exc: HTTPException):
     return JSONResponse(
         status_code=exc.status_code,
         content={
-            "success": False,
+            "status": False,
             "status_code": exc.status_code,
             "message": exc.detail,
         },
@@ -86,7 +86,7 @@ async def validation_exception(request: Request, exc: RequestValidationError):
     return JSONResponse(
         status_code=422,
         content={
-            "success": False,
+            "status": False,
             "status_code": 422,
             "message": "Invalid input",
             "errors": errors,
@@ -103,7 +103,7 @@ async def exception(request: Request, exc: IntegrityError):
     return JSONResponse(
         status_code=400,
         content={
-            "success": False,
+            "status": False,
             "status_code": 400,
             "message": f"An unexpected error occurred: {exc}",
         },
@@ -119,7 +119,7 @@ async def exception(request: Request, exc: Exception):
     return JSONResponse(
         status_code=500,
         content={
-            "success": False,
+            "status": False,
             "status_code": 500,
             "message": f"An unexpected error occurred: {exc}",
         },
