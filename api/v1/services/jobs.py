@@ -31,11 +31,10 @@ class JobService(Service):
 
         return query.all()
 
-    def fetch(self, db: Session, id: str):
-        """Fetches a job by id"""
-
-        job = db.query(Job).where(Job.id == id)
-        return job
+    @staticmethod
+    def fetch(db: Session, id: str) -> Optional[Job]:
+        """Fetches a job by ID"""
+        return db.query(Job).filter(Job.id == id).first()
 
     def update(self, db: Session, id: str, schema):
         """Updates a job"""
