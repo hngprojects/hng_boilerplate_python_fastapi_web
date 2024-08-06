@@ -9,7 +9,7 @@ class RoleResponse(BaseModel):
     name: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class RoleAssignRequest(BaseModel):
     role_id: str
@@ -20,4 +20,4 @@ class RoleDeleteResponse(BaseModel):
     message: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True

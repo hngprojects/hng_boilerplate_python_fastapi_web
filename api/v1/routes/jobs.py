@@ -11,10 +11,11 @@ from sqlalchemy.orm import Session
 from api.utils.logger import logger
 from api.db.database import get_db
 from api.v1.models.user import User
-from api.v1.models.job import Job
+from api.v1.models.job import Job, JobApplication
 from api.v1.services.jobs import job_service
-from api.v1.services.job_application import job_application_service
+from api.v1.services.job_application import job_application_service, UpdateJobApplication
 from api.utils.pagination import paginated_response
+from api.utils.db_validators import check_model_existence
 from api.v1.schemas.job_application import CreateJobApplication, UpdateJobApplication
 
 jobs = APIRouter(prefix="/jobs", tags=["Jobs"])
@@ -138,3 +139,35 @@ async def apply_to_job(
         message="Job application submitted successfully",
         data=jsonable_encoder(job_application)
     )
+
+
+@jobs.patch("/{job_id}/applications/{application_id}") 
+async def create_application(
+    job_id: str,
+    application_id: str,
+    update_data: UpdateJobApplication,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """
+    Description
+		Get endpoint for admin users to update a job application.
+
+	Args:
+		db: the database session object
+        job_id: the ID of the Job
+
+	Returns:
+		Response: a response object containing details if successful or appropriate errors if not
+	"""	
+   
+    check_model_existence(db, Job, job_id)
+    check_model_existence(db, JobApplication, application_id)
+    updated_application = job_application_service.update(db, application_id=application_id, job_id=job_id, schema=update_data)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Application updated successfully!",
+        data=jsonable_encoder(updated_application)
+    )
+    
+    
