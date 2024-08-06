@@ -20,15 +20,6 @@ class JobApplicationData(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class SingleJobAppResponse(BaseModel):
-    """
-    Single job application response schema
-    """
-    status: str
-    message: str
-    status_code: int
-    data: JobApplicationData
-
 class JobApplicationBase(BaseModel):
     """
     Schema for job application base
@@ -43,7 +34,7 @@ class JobApplicationBase(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-class JobApplicationData(BaseModel):
+class JobApplicationResponseData(BaseModel):
     """
     Schema for job application data
     """
@@ -57,7 +48,7 @@ class JobApplicationResponse(BaseModel):
     status_code: int = 200
     message: str
     success: bool = True
-    data: JobApplicationData
+    data: JobApplicationResponseData
 
 
 class SingleJobAppResponse(BaseModel):

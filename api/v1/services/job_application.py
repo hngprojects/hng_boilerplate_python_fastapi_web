@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.comment import Comment, CommentLike
@@ -13,6 +13,7 @@ from api.utils.success_response import success_response
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
                                             JobApplicationData,
+                                            JobApplicationResponseData,
                                             CreateJobApplication, UpdateJobApplication
                                             )
 
@@ -95,7 +96,7 @@ class JobApplicationService(Service):
         application_schema: list = [
             JobApplicationBase.model_validate(application) for application in applications
         ]
-        application_data = JobApplicationData(
+        application_data = JobApplicationResponseData(
             page=page, per_page=per_page, total_pages=total_pages, applications=application_schema
         )
 
