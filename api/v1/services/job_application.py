@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.comment import Comment, CommentLike
@@ -63,7 +63,7 @@ class JobApplicationService(Service):
         return job_application
 
     def fetch_all(
-        self, job_id: str, page: int, per_page: int, db: Annotated[Session, get_db]
+        self, job_id: str, page: int, per_page: int, db: Annotated[Session, Depends(get_db)]
     ):
         """Fetches all applications for a job 
 
