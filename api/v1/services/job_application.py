@@ -12,7 +12,6 @@ from api.core.base.services import Service
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
                                            CreateJobApplication, UpdateJobApplication
-
                                            )
 
 
@@ -44,18 +43,7 @@ class JobApplicationService(Service):
                                       status_code=status.HTTP_200_OK,
                                       message='successfully retrieved job application.',
                                       data=JobApplicationBase.model_validate(application,
-                                                                        
-
-
-
-
-
-
-
-
-
-
-
+                                                                             from_attributes=True))                                   
 
     def create(self, db: Session, job_id: str, schema: CreateJobApplication):
         """Create a new job application"""
@@ -84,8 +72,6 @@ class JobApplicationService(Service):
                     query = query.filter(getattr(JobApplication, column).ilike(f"%{value}%"))
 
         return query.all()
-
-
 
         
     def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
