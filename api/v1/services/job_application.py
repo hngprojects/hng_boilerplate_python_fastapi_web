@@ -13,15 +13,15 @@ from api.utils.success_response import success_response
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
                                             JobApplicationData,
-                                           CreateJobApplication, UpdateJobApplication
-                                           )
+                                            CreateJobApplication, UpdateJobApplication
+                                            )
 
 class JobApplicationService(Service):
     """
     Job application service class
     """
 
-    def fetch(self, job_id:str, application_id: str,
+    def fetch(self, job_id: str, application_id: str,
               db: Annotated[Session, Depends(get_db)]):
         """
         Fetch a single job application.
@@ -39,10 +39,10 @@ class JobApplicationService(Service):
                                 detail='Invalid id')
         else:
             return SingleJobAppResponse(status='success',
-                                      status_code=status.HTTP_200_OK,
-                                      message='successfully retrieved job application.',
-                                      data=JobApplicationData.model_validate(application,
-                                                                             from_attributes=True))                                   
+                                        status_code=status.HTTP_200_OK,
+                                        message='successfully retrieved job application.',
+                                        data=JobApplicationData.model_validate(application,
+                                                                               from_attributes=True))
 
     def create(self, db: Session, job_id: str, schema: CreateJobApplication):
         """Create a new job application"""
@@ -54,8 +54,9 @@ class JobApplicationService(Service):
             JobApplication.applicant_email == schema.applicant_email,
             JobApplication.job_id == job_id,
         ).first():
-            raise HTTPException(status_code=400, detail='You have already applied for this role')
-        
+            raise HTTPException(
+                status_code=400, detail='You have already applied for this role')
+
         db.add(job_application)
         db.commit()
         db.refresh(job_application)
@@ -104,11 +105,11 @@ class JobApplicationService(Service):
             data=application_data
         )
 
-        
     def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
         """Updates an application"""
 
-        job_application = self.fetch(db=db, job_id=job_id, application_id=application_id)
+        job_application = self.fetch(
+            db=db, job_id=job_id, application_id=application_id)
 
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True, exclude={"id"})
@@ -119,13 +120,24 @@ class JobApplicationService(Service):
         db.refresh(job_application)
         return job_application
 
-    def delete(self, db: Session, job_id: str, application_id: str):
-        """Deletes an FAQ"""
-
-        faq = self.fetch(db=db, job_id=job_id, application_id=application_id)
-        db.delete(faq)
+    def delete(self, job_id: str, application_id: str,
+               db: Annotated[Session, Depends(get_db)]):
+        """
+        Delete a single job application.
+        Args:
+            job_id: The id of the job for the applicant
+            application_id: The id of the application for the job
+            db: database Session object
+        Returns:
+            None
+        """
+        application: object | None = db.query(JobApplication).filter_by(job_id=job_id,
+                                                                        id=application_id).first()
+        if not application:
+            raise HTTPException(
+                status_code=404, detail='Invalid id')
+        db.delete(application)
         db.commit()
 
 
 job_application_service = JobApplicationService()
-
