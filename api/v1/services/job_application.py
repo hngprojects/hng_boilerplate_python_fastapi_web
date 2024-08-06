@@ -11,6 +11,7 @@ from api.v1.models.job import JobApplication
 from api.core.base.services import Service
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
+                                            JobApplicationData,
                                            CreateJobApplication, UpdateJobApplication
                                            )
 
@@ -19,8 +20,6 @@ class JobApplicationService(Service):
     """
     Job application service class
     """
-
-
 
     def fetch(self, job_id:str, application_id: str,
               db: Annotated[Session, Depends(get_db)]):
@@ -42,7 +41,7 @@ class JobApplicationService(Service):
             return SingleJobAppResponse(status='success',
                                       status_code=status.HTTP_200_OK,
                                       message='successfully retrieved job application.',
-                                      data=JobApplicationBase.model_validate(application,
+                                      data=JobApplicationData.model_validate(application,
                                                                              from_attributes=True))                                   
 
     def create(self, db: Session, job_id: str, schema: CreateJobApplication):
