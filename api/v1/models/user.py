@@ -48,7 +48,8 @@ class User(BaseTableModel):
     notification_setting = relationship("NotificationSetting", back_populates="user",  cascade="all, delete-orphan", uselist=False)
     region = relationship("Region", back_populates="user", cascade="all, delete-orphan")
     squeeze = relationship("Squeeze", back_populates="user", cascade="all, delete-orphan")
-
+    data_privacy_setting = relationship("DataPrivacySetting", back_populates="user", cascade="all, delete-orphan")
+    
     
     def to_dict(self):
         obj_dict = super().to_dict()

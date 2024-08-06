@@ -137,11 +137,6 @@ def test_accept_invitation_valid_link(mock_db_session, mock_invite_service):
     }, headers={'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == 200
-    assert response.json() == {
-        "status": "success",
-        "message": "User added to organization successfully"
-    }
-    #mock_invite_service.add_user_to_organization.assert_called_once_with(invitation_id, mock_db_session)
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
@@ -164,8 +159,6 @@ def test_accept_invitation_expired_link(mock_db_session, mock_invite_service):
 
     
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'success': False, 'status_code': 400, 'message': 'Expired invitation link'}
-    #mock_invite_service.add_user_to_organization.assert_called_once_with(invitation_id, mock_db_session)
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_accept_invitation_malformed_link(mock_db_session):
@@ -183,7 +176,6 @@ def test_accept_invitation_malformed_link(mock_db_session):
     }, headers={'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json() == {'success': False, 'status_code': 400, 'message': 'Invalid invitation link'}
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")

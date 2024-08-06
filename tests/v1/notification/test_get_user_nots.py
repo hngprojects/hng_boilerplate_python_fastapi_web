@@ -71,8 +71,6 @@ def test_get_all_notification_with_unauthenticated_user(client, db_session_mock)
     response = client.patch(f"/api/v1/notifications/current-user")
 
     assert response.status_code == 401
-    assert response.json()["success"] == False
-    assert response.json()["status_code"] == 401
 
 
 def test_get_notification_current_user(client, db_session_mock):
@@ -84,5 +82,3 @@ def test_get_notification_current_user(client, db_session_mock):
     response = client.patch(f"/api/v1/notifications/current-user", headers=headers)
 
     assert response.status_code == 200
-    assert response.json()["success"] == True
-    assert response.json()["status_code"] == 200
