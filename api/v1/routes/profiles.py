@@ -124,7 +124,6 @@ async def upload_profile_image(
     try:
         image = Image.open(BytesIO(await file.read()))
 
-        # Resize and optimize image
         image = image.resize((300, 300))
         buffer = BytesIO()
         image.save(buffer, format="JPEG", quality=85)
@@ -137,7 +136,6 @@ async def upload_profile_image(
 
         image_url = f"/static/profile_images/{user_id}.jpg"
 
-        # Update user's avatar URL in the database
         user = db.query(User).filter(User.id == user_id).first()
         if user:
             user.avatar_url = image_url
