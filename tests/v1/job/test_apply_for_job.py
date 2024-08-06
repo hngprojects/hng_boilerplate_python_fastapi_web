@@ -15,33 +15,6 @@ from faker import Faker
 from main import app
 
 
-# def mock_get_current_user():
-#     return User(
-#         id=str(uuid7()),
-#         email="testuser@gmail.com",
-#         password=user_service.hash_password("Testpassword@123"),
-#         first_name='Test',
-#         last_name='User',
-#         is_active=True,
-#         is_super_admin=False,
-#         created_at=datetime.now(timezone.utc),
-#         updated_at=datetime.now(timezone.utc)
-#     )
-
-
-# def mock_get_current_admin():
-#     return User(
-#         id=str(uuid7()),
-#         email="admin@gmail.com",
-#         password=user_service.hash_password("Testadmin@123"),
-#         first_name='Admin',
-#         last_name='User',
-#         is_active=True,
-#         is_super_admin=True,
-#         created_at=datetime.now(timezone.utc),
-#         updated_at=datetime.now(timezone.utc)
-#     )
-
 fake = Faker()
 
 def mock_jpb():
@@ -86,8 +59,8 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 
-def test_create_faq_success(client, db_session_mock):
-    '''Test to successfully create a new faq'''
+def test_create_job_application_success(client, db_session_mock):
+    '''Test to successfully create a new job application'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[job_application_service.create] = lambda: mock_job_application
@@ -99,7 +72,7 @@ def test_create_faq_success(client, db_session_mock):
 
     mock_job_app = mock_job_application()
 
-    with patch("api.v1.services.faq.job_application_service.create", return_value=mock_job_app) as mock_create:
+    with patch("api.v1.services.job_application.job_application_service.create", return_value=mock_job_app) as mock_create:
         response = client.post(
             f'/api/v1/jobs/{mock_job_app.job_id}/applications',
             json={
@@ -115,7 +88,7 @@ def test_create_faq_success(client, db_session_mock):
 
 
 def test_create_job_application_missing_field(client, db_session_mock):
-    '''Test for missing field when creating a new faq'''
+    '''Test for missing field when creating a new job application'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[job_application_service.create] = lambda: mock_job_application
@@ -127,13 +100,41 @@ def test_create_job_application_missing_field(client, db_session_mock):
 
     mock_job_app = mock_job_application()
 
-    with patch("api.v1.services.faq.job_application_service.create", return_value=mock_job_app) as mock_create:
+    with patch("api.v1.services.job_application.job_application_service.create", return_value=mock_job_app) as mock_create:
         response = client.post(
             f'/api/v1/jobs/{mock_job_app.job_id}/applications',
             json={
                 'applicant_name': 'Test Applicant',
                 'applicant_email': 'user@example.com',
                 'resume_link': 'https://www.example.com/portfolio',
+                'portfolio_link': 'https://www.example.com/portfolio'
+            }
+        )
+
+        assert response.status_code == 422
+
+
+def test_create_job_application_invalid_url(client, db_session_mock):
+    '''Test to check for invalid url in job application creation'''
+
+    # Mock the user service to return the current user
+    app.dependency_overrides[job_application_service.create] = lambda: mock_job_application
+
+    # Mock faq creation
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
+    mock_job_app = mock_job_application()
+
+    with patch("api.v1.services.job_application.job_application_service.create", return_value=mock_job_app) as mock_create:
+        response = client.post(
+            f'/api/v1/jobs/{mock_job_app.job_id}/applications',
+            json={
+                'applicant_name': 'Test Applicant',
+                'applicant_email': 'user@example.com',
+                'cover_letter': 'Test cover letter',
+                'resume_link': 'http:/www.example.com/portfolio',
                 'portfolio_link': 'https://www.example.com/portfolio'
             }
         )

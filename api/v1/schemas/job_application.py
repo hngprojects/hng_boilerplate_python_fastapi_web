@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, EmailStr, model_validator
+from pydantic import BaseModel, EmailStr, field_validator
 import re
 
 
@@ -24,7 +24,7 @@ class CreateJobApplication(BaseModel):
     portfolio_link: Optional[str] = None
     application_status: str = 'pending'
 
-    @model_validator('resume_link', 'portfolio_link')
+    @field_validator('resume_link', 'portfolio_link')
     def validate_links(cls, v):
         # Regular expression pattern to match valid URLs
         url_regex = re.compile(
@@ -47,7 +47,7 @@ class UpdateJobApplication(BaseModel):
     portfolio_link: Optional[str] = None
     application_status: Optional[str] = None
 
-    @model_validator('resume_link', 'portfolio_link')
+    @field_validator('resume_link', 'portfolio_link')
     def validate_links(cls, v):
         # Regular expression pattern to match valid URLs
         url_regex = re.compile(
