@@ -59,7 +59,7 @@ class JobApplicationService(Service):
         job_application = self.fetch(db=db, job_id=job_id, application_id=application_id)
 
         # Update the fields with the provided schema data
-        update_data = schema.dict(exclude_unset=True)
+        update_data = schema.dict(exclude_unset=True, exclude={"id"})
         for key, value in update_data.items():
             setattr(job_application, key, value)
 
