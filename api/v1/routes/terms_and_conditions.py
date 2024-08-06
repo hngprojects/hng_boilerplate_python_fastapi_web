@@ -11,6 +11,23 @@ terms_and_conditions = APIRouter(
     prefix="/terms-and-conditions", tags=["Terms and Conditions"]
 )
 
+@terms_and_conditions.get("/{id}", response_model=success_response, status_code=200)
+async def get_terms_and_conditions(
+    id: str,
+    db: Session = Depends(get_db)
+):
+    """Endpoint to get term and condition based on id"""
+    tc = terms_and_conditions_service.fetch(db, id)
+    if not tc:
+        return success_response(
+            message="Term and condition not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
+    return success_response(
+        data=tc.to_dict(),
+        message="success",
+        status_code=status.HTTP_200_OK
+    )
 
 @terms_and_conditions.patch("/{id}", response_model=success_response, status_code=200)
 async def update_terms_and_conditions(

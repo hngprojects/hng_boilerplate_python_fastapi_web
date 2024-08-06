@@ -11,8 +11,11 @@ class TermsAndConditionsService(Service):
     def create(self):
         return super().create()
 
-    def fetch(self):
-        return super().fetch()
+    def fetch(self, db: Session, id: str):
+        tc = db.query(TermsAndConditions).filter(TermsAndConditions.id == id).first()
+        if not tc:
+            return None
+        return tc
 
     def fetch_all(self):
         return super().fetch_all()
