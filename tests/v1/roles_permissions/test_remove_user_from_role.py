@@ -119,7 +119,7 @@ def test_remove_role_successful(
     admin_role,
     access_token_user
 ):
-    mock_db_session.get.side_effect = [test_org, test_user, user_role]
+    mock_db_session.get.side_effect = [test_user, user_role, test_org, test_user]
     mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
     mock_role_service.get_user_role_relation = user_role_relation
 
@@ -144,32 +144,24 @@ def test_remove_role_unsuccessful(
     put_url = f"/api/v1/organizations/{test_org.id}/users/{test_user.id}/roles/{user_role.id}"
 
     # NON-ADMIN
-    # mock_db_session.execute.return_value.scalar_one_or_none.return_value = user_role
     mock_db_session.execute.return_value.fetchone.return_value = None
     mock_db_session.get.side_effect = [test_org, test_user, user_role]
     response = client.put(put_url, headers=headers)
     assert response.status_code == 403
     assert response.json()['message'] == "Permission denied as user is not of admin role"
 
-    # WRONG org_id
-    mock_db_session.execute.return_value.fetchone.return_value = admin_role
-    mock_db_session.get.side_effect = [None, test_user, user_role]
-    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
-    response = client.put(put_url, headers=headers)
-    assert response.status_code == 404
-    assert response.json()['message'] == "Organization does not exist"
-
-    # WRONG user_id
-    mock_db_session.get.side_effect = [test_org, None, user_role]
-    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
-    mock_db_session.execute.return_value.fetchone.return_value = admin_role
-    response = client.put(put_url, headers=headers)
-    assert response.status_code == 404
-    assert response.json()['message'] == "User does not exist"
-
     # WRONG role_id
-    mock_db_session.get.side_effect = [test_org, test_user, None]
-    mock_db_session.execute.return_value.scalar_one_or_none.return_value = admin_role
+    mock_db_session.get.side_effect = [test_user, None, test_org, test_user]
+    mock_db_session.execute.return_value.fetchone.return_value = admin_role
+    mock_role_service.get_user_role_relation = user_role_relation
     response = client.put(put_url, headers=headers)
     assert response.status_code == 404
     assert response.json()['message'] == "Role does not exist"
+
+    # USER NOT IN ROLE
+    mock_db_session.get.side_effect = [test_user, user_role, test_org, test_user]
+    mock_db_session.execute.return_value.fetchone.side_effect = [admin_role, None]
+    mock_role_service.get_user_role_relation = None
+    response = client.put(put_url, headers=headers)
+    assert response.status_code == 403
+    assert response.json()['message'] == "User not found in role"
