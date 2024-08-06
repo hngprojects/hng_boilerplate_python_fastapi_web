@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial migration
 
-Revision ID: 6df268aed907
+Revision ID: dca65eec4060
 Revises: 
-Create Date: 2024-08-06 12:04:19.660337
+Create Date: 2024-08-06 15:55:47.764040
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '6df268aed907'
+revision: str = 'dca65eec4060'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -67,15 +67,14 @@ def upgrade() -> None:
     sa.UniqueConstraint('company_name')
     )
     op.create_index(op.f('ix_organizations_id'), 'organizations', ['id'], unique=False)
-    op.create_table('permissions',
-    sa.Column('name', sa.String(), nullable=False),
+    op.create_table('privacy_policies',
+    sa.Column('content', sa.Text(), nullable=False),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
+    sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_permissions_id'), 'permissions', ['id'], unique=False)
+    op.create_index(op.f('ix_privacy_policies_id'), 'privacy_policies', ['id'], unique=False)
     op.create_table('product_categories',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('id', sa.String(), nullable=False),
@@ -85,15 +84,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('name')
     )
     op.create_index(op.f('ix_product_categories_id'), 'product_categories', ['id'], unique=False)
-    op.create_table('roles',
-    sa.Column('id', sa.String(), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
-    )
-    op.create_index(op.f('ix_roles_id'), 'roles', ['id'], unique=False)
     op.create_table('team_members',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('role', sa.String(), nullable=False),
@@ -375,13 +365,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_regions_id'), 'regions', ['id'], unique=False)
-    op.create_table('role_permissions',
-    sa.Column('role_id', sa.String(), nullable=False),
-    sa.Column('permission_id', sa.String(), nullable=False),
-    sa.ForeignKeyConstraint(['permission_id'], ['permissions.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('role_id', 'permission_id')
-    )
     op.create_table('squeezes',
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('email', sa.String(), nullable=False),
@@ -432,16 +415,6 @@ def upgrade() -> None:
     sa.Column('role', sa.Enum('admin', 'user', 'guest', 'owner', name='user_org_role'), nullable=False),
     sa.Column('status', sa.Enum('member', 'suspended', 'left', name='user_org_status'), nullable=False),
     sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('user_id', 'organization_id')
-    )
-    op.create_table('user_organization_roles',
-    sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('organization_id', sa.String(), nullable=False),
-    sa.Column('role_id', sa.String(), nullable=False),
-    sa.Column('status', sa.String(length=20), nullable=False),
-    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('user_id', 'organization_id')
     )
@@ -570,7 +543,6 @@ def downgrade() -> None:
     op.drop_table('blog_likes')
     op.drop_index(op.f('ix_blog_dislikes_id'), table_name='blog_dislikes')
     op.drop_table('blog_dislikes')
-    op.drop_table('user_organization_roles')
     op.drop_table('user_organization')
     op.drop_index(op.f('ix_token_logins_id'), table_name='token_logins')
     op.drop_table('token_logins')
@@ -578,7 +550,6 @@ def downgrade() -> None:
     op.drop_table('testimonials')
     op.drop_index(op.f('ix_squeezes_id'), table_name='squeezes')
     op.drop_table('squeezes')
-    op.drop_table('role_permissions')
     op.drop_index(op.f('ix_regions_id'), table_name='regions')
     op.drop_table('regions')
     op.drop_index(op.f('ix_profiles_id'), table_name='profiles')
@@ -619,12 +590,10 @@ def downgrade() -> None:
     op.drop_table('topics')
     op.drop_index(op.f('ix_team_members_id'), table_name='team_members')
     op.drop_table('team_members')
-    op.drop_index(op.f('ix_roles_id'), table_name='roles')
-    op.drop_table('roles')
     op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
     op.drop_table('product_categories')
-    op.drop_index(op.f('ix_permissions_id'), table_name='permissions')
-    op.drop_table('permissions')
+    op.drop_index(op.f('ix_privacy_policies_id'), table_name='privacy_policies')
+    op.drop_table('privacy_policies')
     op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
     op.drop_table('organizations')
     op.drop_index(op.f('ix_newsletters_id'), table_name='newsletters')
