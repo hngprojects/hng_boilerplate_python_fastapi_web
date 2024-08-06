@@ -141,7 +141,7 @@ async def apply_to_job(
     )
 
 
-@jobs.delete('/{job_id}/applications/{application_id}', status_code=status.HTTP_204_NO_CONTENT)
+@jobs.delete('/{job_id}/applications/{application_id}')
 async def delete_application(job_id: str,
                              application_id: str,
                              db: Annotated[Session, Depends(get_db)],
@@ -154,7 +154,10 @@ async def delete_application(job_id: str,
         db: database Session object
         current_user: the super admin user
     Returns:
-        HTTP 204 No Content on success
+        HTTP 200 on success
     """
     job_application_service.delete(job_id, application_id, db)
-    return {"message": "Application deleted successfully."}
+    return success_response(
+        message="Job application deleted successfully",
+        status_code=200,
+    )
