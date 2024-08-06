@@ -90,9 +90,6 @@ async def add_team_members(
         The current admin adding the team member. This is a dependency that provides the admin context.
     - db: The database session
     """
-    if member.name.strip() == "" or member.role.strip() == "" or member.description.strip() == "" or member.picture_url.strip() == "":
-        raise HTTPException(status_code=400, detail="Invalid request data")
-
     new_member = TeamServices.create(db, member)
     logger.info(f"Team Member added successfully {new_member.id}")
 
