@@ -79,20 +79,20 @@ async def fetch_all_jobs(
     )
 
 @jobs.delete(
-    "",
+    "/{job_id}",
     response_model=success_response,
     status_code=200,
     
 )
 async def delete_job_by_id(
-    id: str,
+    job_id: str,
     db: Session = Depends(get_db),
     admin: User = Depends(user_service.get_current_super_admin),
 ):
     """
     Delete a job record by id
     """
-    job_service.delete(db, id)
+    job_service.delete(db, job_id)
 
     return success_response(
         message = "Job listing deleted successfully",
