@@ -13,8 +13,8 @@ user_id = str(uuid7())
 def mock_user():
     return User(id=1, email="test@example.com")
 
-@patch("api.v1.routes.profile.Image.open")
-@patch("api.v1.routes.profile.os.makedirs")
+@patch("api.v1.routes.profiles.Image.open")
+@patch("api.v1.routes.profiles.os.makedirs")
 @patch("builtins.open", new_callable=MagicMock)
 def test_upload_profile_image(mock_open, mock_makedirs, mock_image_open, mock_user):
     
