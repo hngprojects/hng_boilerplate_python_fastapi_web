@@ -25,3 +25,4 @@ from api.v1.models.squeeze import Squeeze
 from api.v1.models.sales import Sales
 from api.v1.models.team import TeamMember
 from api.v1.models.data_privacy import DataPrivacySetting
+from api.v1.models.terms import TermsAndConditions
