@@ -34,7 +34,8 @@ class EmailTemplateSchema(BaseModel):
 
     title: str
     template: str
-    status: bool = True
+    type: str
+    status: str = 'online'
 
     @field_validator("template")
     @classmethod

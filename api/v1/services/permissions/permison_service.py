@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
-from api.v1.models.permissions import Permission
-from api.v1.models.role import Role
-from api.v1.schemas.permissions import PermissionCreate
-from api.v1.models.role_permissions import role_permissions
+from api.v1.models.permissions.permissions import Permission
+from api.v1.models.permissions.role import Role
+from api.v1.schemas.permissions.permissions import PermissionCreate
+from api.v1.models.permissions.role_permissions import role_permissions
 from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -49,6 +49,9 @@ class PermissionService:
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
+        
+        
+    
 
 
 permission_service = PermissionService()

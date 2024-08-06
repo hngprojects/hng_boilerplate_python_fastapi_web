@@ -2,7 +2,7 @@ from fastapi import APIRouter, Response
 import subprocess
 
 
-test_rout = APIRouter(prefix='/all', tags=['project test cases'])
+test_rout = APIRouter(prefix='/all', tags=['Tests'])
 
 @test_rout.get("/run-tests")
 async def run_tests():

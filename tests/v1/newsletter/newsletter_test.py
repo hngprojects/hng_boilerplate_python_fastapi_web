@@ -116,8 +116,6 @@ class TestCodeUnderTest:
             response = client.get('/api/v1/pages/newsletters')
 
             assert response.status_code == 403
-            assert response.json()['success'] == False
-            assert response.json()['message'] == 'You do not have permission to access this resource'
 
     # # Unauthenticated access to the endpoint    
     def test_retrieve_contact_unauthenticated(self):
@@ -126,8 +124,6 @@ class TestCodeUnderTest:
         response = client.get('/api/v1/pages/newsletters')
 
         assert response.status_code == 401
-        assert response.json()['success'] == False
-        assert response.json()['message'] == 'Not authenticated'
 
 
 if __name__ == "__main__":

@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
-from api.v1.models.role import Role
-from api.v1.models.user_org_role import user_organization_roles
-from api.v1.schemas.roles import RoleCreate
+from api.v1.models.permissions.role import Role
+from api.v1.models.permissions.user_org_role import user_organization_roles
+from api.v1.schemas.permissions.roles import RoleDeleteResponse
+from api.v1.schemas.permissions.roles import RoleCreate
 from uuid_extensions import uuid7
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
@@ -40,6 +41,16 @@ class RoleService:
             db.rollback()
             raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
         
+    @staticmethod
+    def delete_role(db: Session, role_id: str) -> RoleDeleteResponse:
+        role = db.query(Role).filter(Role.id == role_id).first()
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        
+        db.delete(role)
+        db.commit()
+        return RoleDeleteResponse(id=role_id, message="Role successfully deleted")
+    
     
     @staticmethod
     def get_roles_by_organization(db: Session, organization_id: str):

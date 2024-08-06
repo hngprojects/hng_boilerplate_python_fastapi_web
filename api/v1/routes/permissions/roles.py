@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Path, Query, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from api.v1.schemas.roles import RoleCreate, RoleResponse, RoleAssignRequest
-from api.v1.services.role import role_service
+from api.v1.schemas.permissions.roles import RoleCreate, RoleResponse, RoleAssignRequest
+from api.utils.success_response import success_response
+from api.v1.services.permissions.role_service import role_service
 from api.db.database import get_db
 from uuid_extensions import uuid7
 from api.v1.models.user import User
@@ -28,8 +28,7 @@ def assign_role(
 ):
     return role_service.assign_role_to_user(db, org_id, user_id, request.role_id)
 
-
-@role_perm.get("/api/v1/{org_id}/organizations/roles", response_model=List[RoleResponse], tags=["Fetch Roles"])
+@role_perm.get("/organizations/{org_id}/roles", response_model=List[RoleResponse], tags=["Fetch Roles"])
 def get_roles_for_organization(
     org_id: str = Path(..., description="The ID of the organization"),
     db: Session = Depends(get_db),
@@ -38,4 +37,8 @@ def get_roles_for_organization(
     roles = role_service.get_roles_by_organization(db, org_id)
     if not roles:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Roles not found for the given organization")
-    return roles
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Roles fetched successfully",
+        data=roles
+    )
