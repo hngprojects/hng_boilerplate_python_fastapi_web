@@ -159,14 +159,19 @@ class ProductService(Service):
         db.refresh(product)
         return product
 
-    def delete(self, db: Session, id: str, current_user: User):
+    def delete(self, db: Session, org_id: str, product_id: str, current_user: User):
         """Deletes a product"""
 
         product: Product = self.fetch(db=db, id=id)
 
         # check ownership
 
-        org_id = product.org_id
+        if org_id != product.org_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="product doesn't belong to the specified organisation",
+            )
+
         organization = check_model_existence(db, Organization, org_id)
 
         check_user_in_org(user=current_user, organization=organization)
