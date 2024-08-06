@@ -13,3 +13,11 @@ class RoleResponse(BaseModel):
 
 class RoleAssignRequest(BaseModel):
     role_id: str
+    
+    
+class RoleDeleteResponse(BaseModel):
+    id: str
+    message: str
+
+    class Config:
+        orm_mode = True
