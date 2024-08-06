@@ -32,6 +32,8 @@ from api.v1.routes.squeeze import squeeze
 from api.v1.routes.dashboard import dashboard
 from api.v1.routes.email_template import email_template
 from api.v1.routes.contact import contact
+from api.v1.routes.permissions.permisions import perm_role
+from api.v1.routes.permissions.roles import role_perm
 
 
 
@@ -71,3 +73,5 @@ api_version_one.include_router(test_router)
 api_version_one.include_router(squeeze)
 api_version_one.include_router(contact)
 api_version_one.include_router(dashboard)
+api_version_one.include_router(perm_role)
+api_version_one.include_router(role_perm)
