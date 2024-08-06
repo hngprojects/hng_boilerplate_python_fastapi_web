@@ -7,12 +7,12 @@ from sqlalchemy.orm.session import Session
 from starlette import status
 
 from api.db.database import get_db
-from api.utils.dependencies import get_super_admin
+from api.v1.services.user import user_service
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.services.team import team_service
 
-team = APIRouter(prefix="/teams", tags=["Teams"])
+team = APIRouter(prefix="/team", tags=["Teams"])
 
 
 @team.get(
@@ -23,7 +23,7 @@ team = APIRouter(prefix="/teams", tags=["Teams"])
 def get_team_member_by_id(
     team_id: Annotated[str, Path(description="Team Member ID")],
     db: Session = Depends(get_db),
-    su: User = Depends(get_super_admin)
+    su: User = Depends(user_service.get_current_super_admin)
 ):
     '''Endpoint to fetch a team by id'''
     team = team_service.fetch(db, team_id)

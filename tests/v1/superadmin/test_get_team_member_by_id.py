@@ -1,92 +1,203 @@
+"""
+Tests for superadmin
+"""
+
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
+from api.v1.models.team import TeamMember
+from api.v1.services.team import TeamServices
 from main import app
-from api.v1.services.user import user_service
 from api.v1.models.user import User
-from api.v1.models.contact_us import ContactUs
-from sqlalchemy.orm import Session
+from api.v1.services.user import user_service, UserService
+from uuid_extensions import uuid7
 from api.db.database import get_db
-from unittest import mock
-from api.v1.models.associations import user_organization_association
-from sqlalchemy import insert
+from fastapi import status
+from datetime import datetime, timezone
+from sqlalchemy.orm import Session
+
 
 client = TestClient(app)
+GET_TEAM_MEMBER_ENDPOINT = "/api/v1/team/members"
 
 
-# Mock the database session dependency
 @pytest.fixture
-def mock_db_session(mocker=mock):
-    db_session_mock = mocker.MagicMock(spec=Session)
-    app.dependency_overrides[get_db] = lambda: db_session_mock
-    return db_session_mock
+def mock_db_session():
+    """Fixture to create a mock database session."
+
+    Yields:
+        MagicMock: mock database
+    """
+
+    with patch("api.v1.services.user.get_db", autospec=True):
+        mock_db = MagicMock()
+        app.dependency_overrides[get_db] = lambda: mock_db
+        yield mock_db
+    app.dependency_overrides = {}
 
 
-# Test fixtures for users and access tokens
 @pytest.fixture
-def test_admin():
-    return User(
-        id="admin_id",  # Ensure the admin has an ID
-        email="admin@example.com",
+def mock_user_service():
+    """Fixture to create a mock user service."""
+
+    with patch("api.v1.services.user.user_service",
+               autospec=True) as mock_service:
+        yield mock_service
+
+
+@pytest.fixture
+def mock_get_current_user():
+    """Fixture to create a mock current user"""
+    with patch(
+        "api.v1.services.user.UserService.get_current_user", autospec=True
+    ) as mock_get_current_user:
+        yield mock_get_current_user
+
+
+@pytest.fixture
+def override_get_current_super_admin():
+    """Mock the get_current_super_admin dependency"""
+
+    app.dependency_overrides[user_service.get_current_super_admin] = lambda: User(
+        id=str(uuid7()),
+        email="admintestuser@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="AdminTest",
+        last_name="User",
+        is_active=False,
         is_super_admin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
 
-@pytest.fixture
-def test_message():
-    return ContactUs(
-        id="message_id",
-        org_id="org_id",
-        full_name="John Doe",
-        email="johndoe@example.com",
-        title="Query",
-        message="Short message content"
+mock_id = str(uuid7())
+
+
+def create_dummy_mock_user(mock_user_service: UserService, mock_db_session: Session):
+    """generate a dummy mock user
+
+    Args:
+        mock_user_service (UserService): mock user service
+        mock_db_session (Session): mock database session
+    """
+    dummy_mock_user = User(
+        id=mock_id,
+        email="dummyuser1@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="Mr",
+        last_name="Dummy",
+        is_active=True,
+        is_super_admin=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
     )
 
+    mock_db_session.get.return_value = dummy_mock_user
+    mock_db_session.delete.return_value = None
+    mock_db_session.commit.return_value = None
 
-@pytest.fixture
-def access_token_admin(test_admin):
-    return user_service.create_access_token(test_admin.id)
+
+def create_dummy_mock_team_member(mock_team_service: TeamServices, mock_db_session: Session):
+    """generate a dummy mock team member in session
+
+    Args:
+        mock_user_service (UserService): mock user service
+        mock_db_session (Session): mock database session
+    """
+    dummy_mock_user = TeamMember(
+        id=mock_id,
+        name="john doe",
+        role="soft engineer",
+        description="software engineer",
+        picture_url="https://www.google.com",
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+
+    mock_db_session.get.return_value = dummy_mock_user
+    mock_db_session.delete.return_value = None
+    mock_db_session.commit.return_value = None
 
 
-# Test successful customer update
-def test_get_message(mock_db_session, test_message, access_token_admin, test_admin):
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        test_admin]
-    mock_db_session.query.return_value.filter_by.return_value.first.side_effect = [
-        test_message]
-    mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Session):
+    """Test for unauthorized access to endpoint."""
 
-    headers = {'Authorization': f'Bearer {access_token_admin}'}
+    response = client.get(f"{GET_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}")
+
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_non_admin_access(
+    mock_get_current_user, mock_user_service: UserService, mock_db_session: Session
+):
+    """Test for non admin user access to endpoint"""
+
+    mock_get_current_user.return_value = User(
+        id=str(uuid7()),
+        email="admintestuser@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="AdminTest",
+        last_name="User",
+        is_active=False,
+        is_super_admin=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
 
     response = client.get(
-        f"/api/v1/contact/{test_message.id}", headers=headers)
-    assert response.status_code == 200
-    assert response.json()['data']['full_name'] == test_message.full_name
-    assert response.json()['data']['email'] == test_message.email
-    assert response.json()['data']['title'] == test_message.title
-    assert response.json()['data']['message'] == test_message.message
+        f"{GET_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}",
+        headers={"Authorization": "Bearer dummy_token"},
+    )
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-def test_invalid_id(mock_db_session, test_message, access_token_admin, test_admin):
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        test_admin]
-    mock_db_session.query.return_value.filter_by.return_value.first.side_effect = [
-        None]
-    mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
+@pytest.mark.usefixtures(
+    "mock_db_session", "mock_user_service", "override_get_current_super_admin"
+)
+def test_successful_team_member_get(
+    mock_user_service: UserService,
+    mock_db_session: Session,
+    override_get_current_super_admin: None,
+):
+    """Test for successful get of team member"""
 
-    headers = {'Authorization': f'Bearer {access_token_admin}'}
+    # Create a mock user
+    create_dummy_mock_user(mock_user_service, mock_db_session)
+    mock_db_session.get.return_value = mock_db_session.get.return_value
 
-    response = client.get(f"/api/v1/contact/invalid_id", headers=headers)
-    assert response.status_code == 404
+    response = client.get(
+        f"{GET_TEAM_MEMBER_ENDPOINT}/{mock_id}",
+    )
+    assert response.status_code == status.HTTP_200_OK
+
+    # Simulate the user being deleted from the database
+    mock_db_session.get.return_value = None
+
+    response = client.get(
+        f"{GET_TEAM_MEMBER_ENDPOINT}/{mock_id}",
+    )
+    assert response.status_code == status.HTTP_404_NOT_FOUND
 
 
-# Test unauthorized access
-def test_unauthorized(mock_db_session, test_message, test_admin):
-    mock_db_session.query.return_value.filter.return_value.first.side_effect = [
-        test_admin]
-    mock_db_session.query.return_value.filter_by.return_value.first.side_effect = [
-        test_message]
-    mock_db_session.execute.return_value.scalar_one_or_none.return_value = 'admin'
+@pytest.mark.usefixtures(
+    "mock_db_session", "mock_user_service", "override_get_current_super_admin"
+)
+def test_not_found_error(
+    mock_user_service: UserService,
+    mock_db_session: Session,
+    override_get_current_super_admin: None,
+):
+    """Test for invalid user ID"""
 
-    response = client.get(f"/api/v1/contact/{test_message.id}")
-    assert response.status_code == 401  # Expecting 401 Unauthorized
+    # Simulate the user not being found in the database
+    mock_db_session.get.return_value = None
+
+    response = client.get(
+        f"{GET_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}",
+    )
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
