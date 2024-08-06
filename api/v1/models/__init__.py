@@ -11,7 +11,7 @@ from api.v1.models.profile import Profile
 from api.v1.models.notifications import Notification
 from api.v1.models.product import ProductVariant, ProductCategory, Product
 from api.v1.models.blog import Blog, BlogLike, BlogDislike
-from api.v1.models.job import Job
+from api.v1.models.job import Job, JobApplication
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.token_login import TokenLogin
 from api.v1.models.oauth import OAuth
