@@ -1,27 +1,28 @@
-
-"""
-Job applications services
-"""
-from typing import Annotated, Any, Optional
-from fastapi import Depends, status, HTTPException
+from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
-
-from api.db.database import get_db
-from api.v1.models.job import JobApplication
 from api.core.base.services import Service
+from api.v1.models.comment import Comment, CommentLike
+from typing import Any, Optional, Union, Annotated
+from sqlalchemy import desc
+from api.db.database import get_db
+from sqlalchemy.orm import Session
+from api.utils.db_validators import check_model_existence
+from api.utils.pagination import paginated_response
+from api.v1.models.job import Job, JobApplication
+from api.utils.success_response import success_response
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
                                             JobApplicationData,
-                                           CreateJobApplication, UpdateJobApplication
-                                           )
-
+                                            JobApplicationResponseData,
+                                            CreateJobApplication, UpdateJobApplication
+                                            )
 
 class JobApplicationService(Service):
     """
     Job application service class
     """
 
-    def fetch(self, job_id:str, application_id: str,
+    def fetch(self, job_id: str, application_id: str,
               db: Annotated[Session, Depends(get_db)]):
         """
         Fetch a single job application.
@@ -39,10 +40,10 @@ class JobApplicationService(Service):
                                 detail='Invalid id')
         else:
             return SingleJobAppResponse(status='success',
-                                      status_code=status.HTTP_200_OK,
-                                      message='successfully retrieved job application.',
-                                      data=JobApplicationData.model_validate(application,
-                                                                             from_attributes=True))                                   
+                                        status_code=status.HTTP_200_OK,
+                                        message='successfully retrieved job application.',
+                                        data=JobApplicationData.model_validate(application,
+                                                                               from_attributes=True))
 
     def create(self, db: Session, job_id: str, schema: CreateJobApplication):
         """Create a new job application"""
@@ -54,32 +55,62 @@ class JobApplicationService(Service):
             JobApplication.applicant_email == schema.applicant_email,
             JobApplication.job_id == job_id,
         ).first():
-            raise HTTPException(status_code=400, detail='You have already applied for this role')
-        
+            raise HTTPException(
+                status_code=400, detail='You have already applied for this role')
+
         db.add(job_application)
         db.commit()
         db.refresh(job_application)
 
         return job_application
 
-    def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all applications with option to search using query parameters"""
+    def fetch_all(
+        self, job_id: str, page: int, per_page: int, db: Annotated[Session, Depends(get_db)]
+    ):
+        """Fetches all applications for a job 
 
-        query = db.query(JobApplication)
+        Args:
+            job_id: the Job ID of the applications
+            page: the number of the current page
+            per_page: the page size for a current page
+            db: Database Session object
+        Returns:
+            Response: An exception if error occurs
+            object: Response object containing the applications
+        """
 
-        # Enable filter by query parameter
-        if query_params:
-            for column, value in query_params.items():
-                if hasattr(JobApplication, column) and value:
-                    query = query.filter(getattr(JobApplication, column).ilike(f"%{value}%"))
+        # check if job id exists
+        check_model_existence(db, Job, job_id)
 
-        return query.all()
+        # Calculating offset value from page number and per-page given
+        offset_value = (page - 1) * per_page
 
-        
+        # Querying the db for applications of that job
+        applications = db.query(JobApplication).filter_by(job_id=job_id).offset(offset_value).limit(per_page).all()
+
+        total_applications = len(applications)
+
+        # Total pages: integer division with ceiling for remaining items
+        total_pages = int(total_applications / per_page) + (total_applications % per_page > 0)
+
+        application_schema: list = [
+            JobApplicationBase.model_validate(application) for application in applications
+        ]
+        application_data = JobApplicationResponseData(
+            page=page, per_page=per_page, total_pages=total_pages, applications=application_schema
+        )
+
+        return success_response(
+            status_code=200,
+            message="Successfully fetched job applications",
+            data=application_data
+        )
+
     def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
         """Updates an application"""
 
-        job_application = self.fetch(db=db, job_id=job_id, application_id=application_id)
+        job_application = self.fetch(
+            db=db, job_id=job_id, application_id=application_id)
 
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True, exclude={"id"})
@@ -90,13 +121,24 @@ class JobApplicationService(Service):
         db.refresh(job_application)
         return job_application
 
-    def delete(self, db: Session, job_id: str, application_id: str):
-        """Deletes an FAQ"""
-
-        faq = self.fetch(db=db, job_id=job_id, application_id=application_id)
-        db.delete(faq)
+    def delete(self, job_id: str, application_id: str,
+               db: Annotated[Session, Depends(get_db)]):
+        """
+        Delete a single job application.
+        Args:
+            job_id: The id of the job for the applicant
+            application_id: The id of the application for the job
+            db: database Session object
+        Returns:
+            None
+        """
+        application: object | None = db.query(JobApplication).filter_by(job_id=job_id,
+                                                                        id=application_id).first()
+        if not application:
+            raise HTTPException(
+                status_code=404, detail='Invalid id')
+        db.delete(application)
         db.commit()
 
 
 job_application_service = JobApplicationService()
-
