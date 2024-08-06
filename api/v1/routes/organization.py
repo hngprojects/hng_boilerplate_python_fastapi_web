@@ -15,7 +15,6 @@ from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
 from api.v1.services.product import product_service
 from api.v1.schemas.product import ProductDetail
-
 from typing import Annotated
 
 organization = APIRouter(prefix="/organizations", tags=["Organizations"])
@@ -94,6 +93,31 @@ def get_all_organizations(
         data=jsonable_encoder(orgs),
     )
 
+
+@organization.delete(
+    "/{org_id}/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_product(
+    org_id: str,
+    product_id: str,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Enpoint to delete a product
+
+    Args:
+        product_id (str): The unique identifier of the product to be deleted
+        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+    Raises:
+        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
+        HTTPException: 404 NOT FOUND (Product to be deleted cannot be found)
+    """
+
+    product_service.delete(
+        db=db, org_id=org_id, product_id=product_id, current_user=current_user
+    )
 
 @organization.delete("/{org_id}")
 async def delete_organization(
