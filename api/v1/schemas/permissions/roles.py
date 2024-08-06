@@ -30,3 +30,4 @@ class ResponseModel(BaseModel):
     status_code: int
     message: str
     data: Optional[Dict[str, Any]] = None
+    

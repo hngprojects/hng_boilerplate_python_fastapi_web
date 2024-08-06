@@ -51,4 +51,8 @@ def delete_role(
             status_code=404,
             message="Role not found.",
             data=None
+<<<<<<< HEAD
         )
+=======
+        )
+>>>>>>> bf0db3a11038818453904529093396831a74b408
