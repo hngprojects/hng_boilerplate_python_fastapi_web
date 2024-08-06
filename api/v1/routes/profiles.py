@@ -1,6 +1,10 @@
-from fastapi import Depends, APIRouter, Request, logger, status
+from fastapi import Depends, APIRouter, Request, logger, status, File, UploadFile, HTTPException
 from sqlalchemy.orm import Session
 import logging
+from PIL import Image
+from io import BytesIO
+from fastapi.responses import JSONResponse
+import os
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
@@ -104,3 +108,43 @@ async def reactivate_account(request: Request, db: Session = Depends(get_db)):
         status_code=200,
         message="User reactivation successful",
     )
+
+PROFILE_IMAGE_DIR = "static/profile_images"
+
+@profile.post("/upload-image")
+async def upload_profile_image(
+    file: UploadFile = File(...),
+    # current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    # user_id = current_user.id
+    user_id = "54677738"
+    if file.content_type not in ["image/jpeg", "image/png"]:
+        raise HTTPException(status_code=400, detail="Invalid file format. Only JPG and PNG are supported.")
+
+    try:
+        image = Image.open(BytesIO(await file.read()))
+
+        # Resize and optimize image
+        image = image.resize((300, 300))
+        buffer = BytesIO()
+        image.save(buffer, format="JPEG", quality=85)
+        buffer.seek(0)
+
+        file_name = f"{PROFILE_IMAGE_DIR}/{user_id}.jpg"
+        os.makedirs(PROFILE_IMAGE_DIR, exist_ok=True)
+        with open(file_name, "wb") as f:
+            f.write(buffer.getbuffer())
+
+        image_url = f"/static/profile_images/{user_id}.jpg"
+
+        # Update user's avatar URL in the database
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            user.avatar_url = image_url
+            db.commit()
+
+        return JSONResponse(status_code=200, content={"message": "Image uploaded successfully", "image_url": image_url})
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")

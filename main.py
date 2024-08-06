@@ -12,6 +12,8 @@ from starlette.requests import Request
 from api.utils.email_service import send_mail
 from api.utils.json_response import JsonResponseDict
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
+from fastapi.staticfiles import StaticFiles
+import os
 
 from api.utils.logger import logger
 from api.core.dependencies.email_sender import send_email
@@ -124,6 +126,10 @@ async def exception(request: Request, exc: Exception):
             "message": f"An unexpected error occurred: {exc}",
         },
     )
+
+STATIC_DIR = "static/profile_images"
+os.makedirs(STATIC_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
 if __name__ == "__main__":
