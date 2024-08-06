@@ -1,9 +1,19 @@
 """ The Profile model
 """
+from typing import Optional, Dict
+from sqlalchemy import (
+        Column,
+        String,
+        Text,
+        ForeignKey,
+        DateTime, 
+        func
+        )
 
 from sqlalchemy import Column, String, Text, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
+from pydantic import Field
 
 
 class Profile(BaseTableModel):
@@ -21,6 +31,8 @@ class Profile(BaseTableModel):
     phone_number = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     recovery_email = Column(String, nullable=True)
+    preferences: Optional[Dict[str, Optional[str]]] = Field(default_factory=dict)
+
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

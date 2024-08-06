@@ -24,6 +24,7 @@ from api.v1.routes.faq import faq
 import api.v1.routes.payment_flutterwave
 from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
+from api.v1.routes.profiles import settings
 from api.v1.routes.notification_settings import notification_setting
 from api.v1.routes.regions import regions
 from api.v1.routes.api_tests import test_router
@@ -60,6 +61,7 @@ api_version_one.include_router(jobs)
 api_version_one.include_router(test_router)
 api_version_one.include_router(faq)
 api_version_one.include_router(topic)
+api_version_one.include_router(settings)
 api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
