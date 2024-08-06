@@ -12,8 +12,8 @@ from api.core.base.services import Service
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
                                             JobApplicationData,
-                                           CreateJobApplication, UpdateJobApplication
-                                           )
+                                            CreateJobApplication, UpdateJobApplication
+                                            )
 
 
 class JobApplicationService(Service):
@@ -21,7 +21,7 @@ class JobApplicationService(Service):
     Job application service class
     """
 
-    def fetch(self, job_id:str, application_id: str,
+    def fetch(self, job_id: str, application_id: str,
               db: Annotated[Session, Depends(get_db)]):
         """
         Fetch a single job application.
@@ -39,10 +39,10 @@ class JobApplicationService(Service):
                                 detail='Invalid id')
         else:
             return SingleJobAppResponse(status='success',
-                                      status_code=status.HTTP_200_OK,
-                                      message='successfully retrieved job application.',
-                                      data=JobApplicationData.model_validate(application,
-                                                                             from_attributes=True))                                   
+                                        status_code=status.HTTP_200_OK,
+                                        message='successfully retrieved job application.',
+                                        data=JobApplicationData.model_validate(application,
+                                                                               from_attributes=True))
 
     def create(self, db: Session, job_id: str, schema: CreateJobApplication):
         """Create a new job application"""
@@ -76,19 +76,6 @@ class JobApplicationService(Service):
                         getattr(JobApplication, column).ilike(f"%{value}%"))
 
         return query.all()
-
-    def fetch(self, db: Session, job_id: str, application_id: str):
-        """Fetches a, FAQ by id"""
-
-        job_application = db.query(JobApplication).filter(
-            JobApplication.id == application_id,
-            JobApplication.job_id == job_id,
-        ).first()
-
-        if not job_application:
-            raise HTTPException(status_code=404, detail='Job application not found')
-        
-        return job_application
 
     def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
         """Updates an application"""
@@ -126,4 +113,3 @@ class JobApplicationService(Service):
 
 
 job_application_service = JobApplicationService()
-
