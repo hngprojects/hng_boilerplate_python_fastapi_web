@@ -1,9 +1,11 @@
-from fastapi import HTTPException
-from sqlalchemy.orm import Session
-from api.v1.schemas.newsletter import EmailSchema
+from typing import Any, Optional
+
 from api.core.base.services import Service
 from api.v1.models.newsletter import NewsletterSubscriber
-from typing import Optional, Any
+from api.v1.schemas.newsletter import EmailSchema
+from fastapi import HTTPException
+from sqlalchemy.orm import Session
+
 
 class NewsletterService(Service):
     """Newsletter service functionality"""
@@ -47,3 +49,26 @@ class NewsletterService(Service):
                     query = query.filter(getattr(NewsletterSubscriber, column).ilike(f'%{value}%'))
 
         return query.all()
+
+    
+    
+    @staticmethod
+    def check_nonexisting_subscriber(db: Session, request: EmailSchema):
+        """As above, checks if subscription with email already exists, but raises an exception if not found.
+        """        
+        subscription = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
+        if not subscription:
+            raise HTTPException(status_code=404, detail="Subscriber not found.")
+        return subscription
+
+
+    @staticmethod
+    def delete(db: Session, request: EmailSchema) -> None:
+        """
+        Unsubsribes a user for newsletter
+        """
+        subscriber = NewsletterService.check_nonexisting_subscriber(db=db, request=request)
+        db.delete(subscriber)
+        db.commit
+        return None
+    

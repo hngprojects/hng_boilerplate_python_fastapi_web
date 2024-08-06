@@ -1,15 +1,14 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-from uuid_extensions import uuid7
-
 from api.db.database import get_db
-from api.v1.services.user import user_service
 from api.v1.models import User
 from api.v1.models.blog import Blog
+from api.v1.services.user import user_service
+from fastapi.testclient import TestClient
 from main import app
+from sqlalchemy.orm import Session
+from uuid_extensions import uuid7
 
 
 def mock_get_db():
