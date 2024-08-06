@@ -23,6 +23,8 @@ CREATE_PERMISSIONS_ENDPOINT = '/api/v1/permissions'
 
 client = TestClient(app)
 
+mock_id = str(uuid7()) 
+
 @pytest.fixture
 def mock_db_session():
     with patch("api.db.database.get_db", autospec=True) as mock_get_db:
@@ -166,3 +168,42 @@ def test_assign_permission_to_role_integrity_error(mock_db_session, mock_permiss
     response = client.post(f"api/v1/roles/{role_id}/permissions", json=payload, headers=headers)
     assert response.status_code == 400
     assert response.json()["message"] == "An error occurred while assigning the permission."
+
+def test_deleteuser(mock_db_session):
+    dummy_admin = User (
+        id=mock_id,
+        email= "Testuser1@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="Mr",
+        last_name="Dummy",
+        is_active=True,
+        is_super_admin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    app.dependency_overrides[user_service.get_current_super_admin] = lambda : dummy_admin
+
+    dummy_permission = Permission(
+        id = mock_id,
+        name='DummyPermissionname',
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+
+    mock_db_session.query().filter().first.return_value = dummy_permission
+
+    delete_permission_url = f'api/v1/permissions/{dummy_permission.id}'
+
+    success_response = client.delete(delete_permission_url)
+
+    assert success_response.status_code == 204
+
+    """Unauthenticated Users"""
+    
+    app.dependency_overrides[user_service.get_current_super_admin] = user_service.get_current_super_admin
+    
+    delete_permission_url = f'api/v1/permissions/{dummy_permission.id}'
+
+    unsuccess_response = client.delete(delete_permission_url)
+
+    assert unsuccess_response.status_code == 401

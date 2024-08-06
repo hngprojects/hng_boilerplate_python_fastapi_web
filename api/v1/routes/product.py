@@ -27,24 +27,6 @@ from api.v1.models import User
 product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@product.post("/{org_id}", status_code=status.HTTP_201_CREATED)
-def product_create(
-    org_id: str,
-    product: ProductCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    created_product = product_service.create(
-        db=db, schema=product, org_id=org_id, current_user=current_user
-    )
-
-    return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="Product created successfully",
-        data=jsonable_encoder(created_product),
-    )
-
-
 @product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
