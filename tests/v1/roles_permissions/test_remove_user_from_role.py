@@ -78,7 +78,7 @@ def test_user(user_role):
 def test_org():
     org = Organization(
         id=str(uuid7()),
-        company_name="Organization 1"
+        name="Organization 1"
     )
     return org
 

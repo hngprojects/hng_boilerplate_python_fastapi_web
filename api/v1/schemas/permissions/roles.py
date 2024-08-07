@@ -27,11 +27,6 @@ class RoleDeleteResponse(BaseModel):
     message: str
 
     class Config:
+        orm_mode = True
+
         from_attributes = True
-        
-        
-class ResponseModel(BaseModel):
-    success: bool
-    status_code: int
-    message: str
-    data: Optional[Dict[str, Any]] = None

@@ -33,7 +33,7 @@ def mock_org():
     """Mock organization"""
     return Organization(
         id=str(uuid7()),
-        company_name='Test Company',
+        name='Test Company',
     )
 
 

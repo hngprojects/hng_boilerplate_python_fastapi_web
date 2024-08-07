@@ -1,6 +1,7 @@
 import time
 from fastapi import Depends, APIRouter, status, HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from api.utils.success_response import success_response
@@ -10,6 +11,8 @@ from api.v1.schemas.organization import (
     PaginatedOrgUsers,
     OrganizationBase,
 )
+from api.v1.services.product import product_service
+from api.v1.schemas.product import ProductCreate
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.organization import organization_service
@@ -63,6 +66,24 @@ async def get_organization_users(
     return organization_service.paginate_users_in_organization(db, org_id, skip, limit)
 
 
+@organization.get('/{org_id}/users/export', status_code=200)
+async def export_organization_member_data_to_csv(
+    org_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    '''Endpoint to export organization users data to csv'''
+
+    csv_file = organization_service.export_organization_members(db=db, org_id=org_id)
+
+    # Stream the response as a CSV file download
+    response = StreamingResponse(csv_file, media_type="text/csv")
+    response.headers["Content-Disposition"] = f"attachment; filename=organization_{org_id}_members.csv"
+    response.status_code = 200
+
+    return response
+
+
 @organization.patch("/{org_id}", response_model=success_response, status_code=200)
 async def update_organization(
     org_id: str,
@@ -93,6 +114,22 @@ def get_all_organizations(
         data=jsonable_encoder(orgs),
     )
 
+@organization.post("/{org_id}/products", status_code=status.HTTP_201_CREATED)
+def product_create(
+    org_id: str,
+    product: ProductCreate,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    db: Session = Depends(get_db),
+):
+    created_product = product_service.create(
+        db=db, schema=product, org_id=org_id, current_user=current_user
+    )
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product created successfully",
+        data=jsonable_encoder(created_product),
+    )
 
 @organization.delete(
     "/{org_id}/products/{product_id}", status_code=status.HTTP_204_NO_CONTENT

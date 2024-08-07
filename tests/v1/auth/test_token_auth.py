@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from unittest.mock import MagicMock
 from datetime import datetime, timedelta
 
-from ....main import app
+from main import app
 from api.v1.models.token_login import TokenLogin
 from api.v1.models.user import User
 from api.v1.routes.auth import get_db

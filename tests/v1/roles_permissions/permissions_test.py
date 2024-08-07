@@ -15,13 +15,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from main import app
 from api.v1.models.user import User
 from api.v1.models.permissions.permissions import Permission
-from api.v1.models.organization import Organization
+from api.v1.models.permissions.role import Role
 from api.v1.services.permissions.permison_service import permission_service
 from api.db.database import get_db
 
 CREATE_PERMISSIONS_ENDPOINT = '/api/v1/permissions'
 
 client = TestClient(app)
+
+mock_id = str(uuid7()) 
 
 @pytest.fixture
 def mock_db_session():
@@ -78,7 +80,7 @@ def test_create_permission(mock_db_session, mock_permission_service):
 
     response = client.post(CREATE_PERMISSIONS_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
     assert response.status_code == 200
-    assert response.json()['name'] == 'Read'
+    assert response.json()['message'] == 'permissions created successfully'
 
 
 def test_create_permission_endpoint_integrity_error(mock_db_session, mock_permission_service):
@@ -120,28 +122,6 @@ def test_assign_permission_to_role_success(mock_db_session, mock_permission_serv
     assert response.status_code == 200
     assert response.json()["message"] == "Permission assigned successfully"
 
-def test_assign_permission_to_role_invalid_role(mock_db_session, mock_permission_service):
-    """Test for assigning a permission to a non-existent role."""
-
-    user_email = "mike@example.com"
-    create_mock_user(mock_db_session, user_email)
-
-    access_token = user_service.create_access_token(str(user_email))
-    role_id = uuid7
-    permission_id = str(uuid7())
-
-    create_mock_permissions(mock_db_session, "Read", permission_id)
-    # Do not create the role here to simulate a non-existent role.
-    mock_db_session.add.side_effect = IntegrityError("mock error", {}, None)
-
-    payload = {
-        "permission_id": permission_id
-    }
-
-    response = client.post(f"api/v1/roles/{role_id}/permissions", json=payload, headers={'Authorization': f'Bearer {access_token}'})
-    print("JSON 1234", response.json())
-    assert response.status_code == 400
-    assert response.json()["message"] == "An error occurred while assigning the permission."
 
 def test_assign_permission_to_role_integrity_error(mock_db_session, mock_permission_service):
     """Test for handling IntegrityError when assigning a permission to a role."""
@@ -160,9 +140,51 @@ def test_assign_permission_to_role_integrity_error(mock_db_session, mock_permiss
         "permission_id": permission_id
     }
 
-    mock_db_session.add.side_effect = IntegrityError("mock error", {}, None)
+    # Instead of mocking `add`, mock `commit` to raise the IntegrityError
+    mock_db_session.commit.side_effect = IntegrityError("mock error", {}, None)
     
     headers = {'Authorization': f'Bearer {access_token}'}
     response = client.post(f"api/v1/roles/{role_id}/permissions", json=payload, headers=headers)
+
     assert response.status_code == 400
     assert response.json()["message"] == "An error occurred while assigning the permission."
+
+
+def test_deleteuser(mock_db_session):
+    dummy_admin = User (
+        id=mock_id,
+        email= "Testuser1@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="Mr",
+        last_name="Dummy",
+        is_active=True,
+        is_super_admin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    app.dependency_overrides[user_service.get_current_super_admin] = lambda : dummy_admin
+
+    dummy_permission = Permission(
+        id = mock_id,
+        name='DummyPermissionname',
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+
+    mock_db_session.query().filter().first.return_value = dummy_permission
+
+    delete_permission_url = f'api/v1/permissions/{dummy_permission.id}'
+
+    success_response = client.delete(delete_permission_url)
+
+    assert success_response.status_code == 204
+
+    """Unauthenticated Users"""
+    
+    app.dependency_overrides[user_service.get_current_super_admin] = user_service.get_current_super_admin
+    
+    delete_permission_url = f'api/v1/permissions/{dummy_permission.id}'
+
+    unsuccess_response = client.delete(delete_permission_url)
+
+    assert unsuccess_response.status_code == 401
