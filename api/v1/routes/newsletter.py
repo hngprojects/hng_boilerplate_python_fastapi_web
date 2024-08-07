@@ -57,7 +57,7 @@ def retrieve_subscribers(
         data=jsonable_encoder(subs_filtered),
     )
 
-@newsletter.get('/newsletters/{id}', response_model=SingleNewsletterResponse, status_code=status.HTTP_200_OK)
+@newsletter.get('/{id}', response_model=SingleNewsletterResponse, status_code=status.HTTP_200_OK)
 async def get_single_newsletter(
     id: str,
     db: Annotated[Session, Depends(get_db)],
