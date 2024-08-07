@@ -1,4 +1,5 @@
 from fastapi import Depends, APIRouter, status, HTTPException, Response, Request
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
 from starlette.responses import RedirectResponse
@@ -21,34 +22,37 @@ google_auth = APIRouter(prefix="/auth", tags=["Authentication"])
 FRONTEND_URL = config("FRONTEND_URL")
 
 
-@google_auth.post("/google")
+@google_auth.post("/google", status_code=200)
 async def google_login(token_request: OAuthToken, db: Session = Depends(get_db)):
-    access_token = token_request.id_token
-    profile_endpoint = 'https://www.googleapis.com/oauth2/v1/userinfo'
-    headers = {'Authorization': f'Bearer {access_token}'}
-    
-    profile_response = requests.get(profile_endpoint, headers=headers)
+
+    google_oauth_service = GoogleOauthServices()
+
+    id_token = token_request.id_token
+    profile_endpoint = f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={id_token}'
+    profile_response = requests.get(profile_endpoint)
     
     if profile_response.status_code != 200:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
 
-
     profile_data = profile_response.json()
-    user = GoogleOauthServices.create_oauth_user(db=db, google_response=profile_data)
+    print(profile_response.json())
+    user = google_oauth_service.create(db=db, google_response=profile_data)
 
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    response = success_response(
+    response = JSONResponse(
         status_code=200,
-        message='success',
-        data={
-            'access_token': access_token,
-            'token_type': 'bearer',
-            'user': jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
+        content={
+            "status_code": 200,
+            "message": "Successfully authenticated",
+            "access_token": access_token,
+            "data": {
+                "user": jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                )
+            }
         }
     )
 

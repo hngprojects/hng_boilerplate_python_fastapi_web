@@ -1,6 +1,7 @@
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from datetime import datetime, timezone
 from api.db.database import get_db
+from api.v1.models.organization import Organization
 from api.v1.models.user import User
 from api.v1.models.oauth import OAuth
 from api.v1.models.user import User
@@ -17,7 +18,7 @@ class GoogleOauthServices(Service):
     """
     Handles database operations for google oauth
     """
-    def create_oauth_user(self, google_response: dict, db: Session):
+    def create(self, google_response: dict, db: Session):
         """
         Creates a user using information from google.
 
@@ -30,8 +31,7 @@ class GoogleOauthServices(Service):
             False: for when Authentication fails
         """
         try:
-            user_info: dict = google_response.get("userinfo")
-            email = user_info.get("email")
+            email = google_response.get("email")
             existing_user = db.query(User).filter_by(email=email).first()
 
             if existing_user:
@@ -44,9 +44,9 @@ class GoogleOauthServices(Service):
             else:
                 new_user = self.create_new_user(google_response, db)
                 return new_user
-        except Exception:
+        except Exception as e:
             db.rollback()
-            return False
+            raise HTTPException(status_code=500, detail=f'Error {e}')
 
     def fetch(self):
         """
@@ -185,6 +185,7 @@ class GoogleOauthServices(Service):
             )
             db.add(new_user)
             db.commit()
+            db.refresh(new_user)
 
             profile = Profile(user_id=new_user.id, avatar_url=google_response.get("picture"))
             oauth_data = OAuth(
@@ -194,10 +195,12 @@ class GoogleOauthServices(Service):
                 access_token=user_service.create_access_token(new_user.id),
                 refresh_token=user_service.create_refresh_token(new_user.id)
             )
-            db.add_all([profile, oauth_data])
+            organization = Organization(
+                name = f'{new_user.first_name} {new_user.last_name} Organization'
+            )
+            db.add_all([profile, oauth_data, organization])
             db.commit()
 
-            db.refresh(new_user)
             return new_user
         except Exception:
             db.rollback()
