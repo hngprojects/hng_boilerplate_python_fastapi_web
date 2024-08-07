@@ -30,17 +30,22 @@ def get_team_member_by_id(
     db: Session = Depends(get_db),
     su: User = Depends(user_service.get_current_super_admin)
 ):
-    '''Endpoint to fetch a team by id'''
+    """Endpoint to fetch a team by id
+    Args:
+        team_id (str): The id of the team to be fetched
+        db (Session): The database session
+        su (User): The current super admin user
+    """
     team_response = team_service.fetch(db, team_id)
     if not team:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found"
+            detail="Team member not found"
         )
 
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='Team fetched successfully',
+        message='Team member fetched successfully',
         data=jsonable_encoder(team_response),
     )
 
@@ -56,14 +61,20 @@ def update_team_member_by_id(
     db: Session = Depends(get_db),
     su: User = Depends(user_service.get_current_super_admin),
 ):
-    '''Endpoint to update a team by id'''
+    """Endpoint to update a team by id
+    Args:
+        team_id (str): The id of the team to be updated
+        team_data (UpdateTeamMember): The data to be updated
+        db (Session): The database session
+        su (User): The current super admin user
+    """
 
     team_response = team_service.update(
         db, team_id, team_data.model_dump(exclude_unset=True,
                                           exclude_none=True))
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='Team updated successfully',
+        message='Team member updated successfully',
         data=jsonable_encoder(team_response),
     )
 
@@ -111,11 +122,17 @@ def delete_team_member_by_id(
     db: Session = Depends(get_db),
     su: User = Depends(user_service.get_current_super_admin)
 ):
-    '''Endpoint to delete a team by id'''
+    """Endpoint to delete a team by id
+
+    Args:
+        team_id (str): The id of the team to be deleted
+        db (Session): The database session
+        su (User): The current super admin user
+    """
 
     team_response = team_service.delete(db, team_id)
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='Team deleted successfully',
+        message='Team member deleted successfully',
         data=jsonable_encoder(team_response),
     )
