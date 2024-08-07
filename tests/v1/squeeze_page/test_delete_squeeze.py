@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-from fastapi import HTTPException
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -10,8 +9,8 @@ from uuid_extensions import uuid7
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.models import User
-from api.v1.models.faq import FAQ
-from api.v1.services.faq import faq_service
+from api.v1.models.squeeze import Squeeze
+from api.v1.services.squeeze import squeeze_service
 from main import app
 
 
@@ -29,11 +28,12 @@ def mock_get_current_admin():
     )
 
 
-def mock_faq():
-    return FAQ(
+def mock_squeeze():
+    return Squeeze(
         id=str(uuid7()),
-        question="TTest qustion?",
-        answer="TAnswer",
+        title="TTest qustion?",
+        email="user2@example.com",
+        body="Hello squeeze",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -52,58 +52,38 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 
-def test_delete_faq_success(client, db_session_mock):
-    '''Test to successfully delete a new faq'''
+def test_delete_squeeze_success(client, db_session_mock):
+    '''Test to successfully delete a new squeeze'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-    app.dependency_overrides[faq_service.delete] = lambda: None
+    app.dependency_overrides[squeeze_service.delete] = lambda: None
 
-    # Mock faq creation
+    # Mock squeeze creation
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    mock_freq_asked_questions = mock_faq()
+    squeeze = mock_squeeze()
 
-    with patch("api.v1.services.faq.faq_service.delete", return_value=mock_freq_asked_questions) as mock_delete:
+    with patch("api.v1.services.squeeze.squeeze_service.delete", return_value=squeeze) as mock_delete:
         response = client.delete(
-            f'/api/v1/faqs/{mock_freq_asked_questions.id}',
+            f'/api/v1/squeeze/{squeeze.id}',
             headers={'Authorization': 'Bearer token'}
         )
 
         assert response.status_code == 204
 
 
-def test_delete_faq_unauthorized(client, db_session_mock):
+def test_delete_squeeze_unauthorized(client, db_session_mock):
     '''Test for unauthorized user'''
 
-    mock_freq_asked_questions = mock_faq()
+    squeeze = mock_squeeze()
 
     response = client.delete(
-        f'/api/v1/faqs/{mock_freq_asked_questions.id}',
+        f'/api/v1/squeeze/{squeeze.id}',
         headers={'Authorization': 'Bearer token'},
     )
 
     assert response.status_code == 401
 
-
-def test_faq_not_found(client, db_session_mock):
-    """Test when the FAQ ID does not exist."""
-
-    # Mock the user service to return the current super admin user
-    app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_admin
-    app.dependency_overrides[faq_service.fetch] = lambda: mock_faq
-
-    # Simulate a non-existent organization
-    nonexistent_id = str(uuid7())
-
-    # Mock the organization service to raise an exception for a non-existent FAQ
-    with patch("api.v1.services.faq.faq_service.fetch", side_effect=HTTPException(status_code=404, detail="FAQ not found")):
-        response = client.delete(
-            f'/api/v1/faqs/{nonexistent_id}',
-            headers={'Authorization': 'Bearer valid_token'}
-        )
-
-        # Assert that the response status code is 404 Not Found
-        assert response.status_code == 404
