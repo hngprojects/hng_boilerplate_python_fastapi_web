@@ -51,6 +51,8 @@ class Product(BaseTableModel):
     )
     organization = relationship("Organization", back_populates="products")
     category = relationship("ProductCategory", back_populates="products")
+    sales = relationship('Sales', back_populates='product',
+                         cascade='all, delete-orphan')
 
     def __str__(self):
         return self.name
