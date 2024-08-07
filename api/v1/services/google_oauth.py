@@ -12,6 +12,7 @@ from typing import Annotated, Union
 from api.v1.services.user import user_service
 from api.v1.schemas.google_oauth import Tokens
 from api.v1.services.profile import profile_service
+from api.v1.models.associations import user_organization_association
 
 
 class GoogleOauthServices(Service): 
@@ -199,6 +200,13 @@ class GoogleOauthServices(Service):
                 name = f'{new_user.first_name} {new_user.last_name} Organization'
             )
             db.add_all([profile, oauth_data, organization])
+            db.commit()
+
+            # TODO: Ensure to update this later
+            stmt = user_organization_association.insert().values(
+                user_id=new_user.id, organization_id=organization.id, role="owner"
+            )
+            db.execute(stmt)
             db.commit()
 
             return new_user
