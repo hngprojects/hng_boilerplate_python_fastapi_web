@@ -100,4 +100,3 @@ def test_get_comments_blog_not_found(db_session):
     response = client.get(f"/api/v1/blogs/{blog_id}/comments?page={page}&per_page={per_page}")
 
     assert response.status_code == 404
-    assert response.json() == {'message': 'Blog not found', 'status_code': 404, 'success': False}

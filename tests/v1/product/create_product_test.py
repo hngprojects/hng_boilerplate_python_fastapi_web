@@ -23,7 +23,7 @@ from api.utils.db_validators import check_user_in_org
 
 
 client = TestClient(app)
-PRODUCT_ENDPOINT = "/api/v1/products"
+PRODUCT_ENDPOINT = "/api/v1/organizations"
 
 
 @pytest.fixture
@@ -125,7 +125,7 @@ def test_successful_creation(
     """Test for succesful creation of product"""
 
     response = client.post(
-        f"{PRODUCT_ENDPOINT}/{mock_id}",
+        f"{PRODUCT_ENDPOINT}/{mock_id}/products",
         json=SAMPLE_DATA,
     )
 
@@ -136,7 +136,9 @@ def test_successful_creation(
 def test_unauthorized_access(mock_user_service: UserService, mock_db_session: Session):
     """Test for unauthorized access to endpoint."""
 
-    response = client.post(f"{PRODUCT_ENDPOINT}/{str(uuid7())}", json=SAMPLE_DATA)
+    response = client.post(
+        f"{PRODUCT_ENDPOINT}/{str(uuid7())}/products", json=SAMPLE_DATA
+    )
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -151,7 +153,9 @@ def test_non_existent_organisation(
     # Simulate the organisation not being found in the database
     mock_db_session.get.return_value = None
 
-    response = client.post(f"{PRODUCT_ENDPOINT}/{str(uuid7())}", json=SAMPLE_DATA)
+    response = client.post(
+        f"{PRODUCT_ENDPOINT}/{str(uuid7())}/products", json=SAMPLE_DATA
+    )
 
     print(response.json())
 
@@ -166,7 +170,9 @@ def test_non_existent_category(
 ):
     """Test for invalid category"""
 
-    response = client.post(f"{PRODUCT_ENDPOINT}/{str(uuid7())}", json=SAMPLE_DATA)
+    response = client.post(
+        f"{PRODUCT_ENDPOINT}/{str(uuid7())}/products", json=SAMPLE_DATA
+    )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -179,7 +185,9 @@ def test_user_does_not_belong_to_org(
 ):
     """Test if user belongs to organisation with the org ID"""
 
-    response = client.post(f"{PRODUCT_ENDPOINT}/{str(uuid7())}", json=SAMPLE_DATA)
+    response = client.post(
+        f"{PRODUCT_ENDPOINT}/{str(uuid7())}/products", json=SAMPLE_DATA
+    )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
     assert response.json()["message"] == "You are not a member of this organization"

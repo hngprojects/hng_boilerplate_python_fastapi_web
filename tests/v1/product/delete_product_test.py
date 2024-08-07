@@ -18,7 +18,10 @@ from api.v1.services.user import user_service, UserService
 
 
 client = TestClient(app)
-PRODUCT_DELETE_ENDPOINT = "/api/v1/products"
+
+
+def endpoint(org_id, product_id):
+    return f"/api/v1/organizations/{org_id}/products/{product_id}"
 
 
 @pytest.fixture
@@ -74,6 +77,7 @@ def override_get_current_user():
 
 
 mock_id = str(uuid7())
+mock_org_id = str(uuid7())
 
 
 def create_dummy_mock_product(mock_user_service: UserService, mock_db_session: Session):
@@ -88,7 +92,7 @@ def create_dummy_mock_product(mock_user_service: UserService, mock_db_session: S
         name="Product 1",
         description="Description for product 1",
         price=19.99,
-        org_id=str(uuid7()),
+        org_id=mock_org_id,
         category_id=str(uuid7()),
         image_url="random.com",
     )
@@ -101,7 +105,9 @@ def create_dummy_mock_product(mock_user_service: UserService, mock_db_session: S
 def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Session):
     """Test for unauthorized access to endpoint."""
 
-    response = client.delete(f"{PRODUCT_DELETE_ENDPOINT}/{str(uuid7())}")
+    response = client.delete(endpoint(mock_org_id, mock_id))
+
+    print(response.json())
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -125,7 +131,7 @@ def test_successful_deletion(
     mock_db_session.get.return_value = mock_db_session.get.return_value
 
     response = client.delete(
-        f"{PRODUCT_DELETE_ENDPOINT}/{mock_id}",
+        endpoint(mock_org_id, mock_id),
     )
     assert response.status_code == status.HTTP_204_NO_CONTENT
 
@@ -146,7 +152,7 @@ def test_already_deleted(
     mock_db_session.get.return_value = None
 
     response = client.delete(
-        f"{PRODUCT_DELETE_ENDPOINT}/{mock_id}",
+        endpoint(mock_org_id, mock_id),
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -165,7 +171,7 @@ def test_not_found_error(
     mock_db_session.get.return_value = None
 
     response = client.delete(
-        f"{PRODUCT_DELETE_ENDPOINT}/{str(uuid7())}",
+        endpoint(mock_org_id, mock_id),
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND

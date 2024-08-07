@@ -147,3 +147,16 @@ class MagicLinkResponse(BaseModel):
     """Schema for magic link respone"""
 
     message: str
+
+class UserRoleSchema(BaseModel):
+    """Schema for user role"""
+
+    role: str
+    user_id: str
+    org_id: str
+
+    @field_validator("role")
+    def role_validator(cls, value):
+        if value not in ["admin", "user", "guest", "owner"]:
+            raise ValueError("Role has to be one of admin, guest, user, or owner")
+        return value
