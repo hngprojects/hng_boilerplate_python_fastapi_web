@@ -47,14 +47,14 @@ def mock_get_current_admin():
 def mock_organization():
     return Organization(
         id=str(uuid7()),
-        company_name="Health Co",
-        company_email="info@healthco.com",
+        name="Health Co",
+        email="info@healthco.com",
         industry="Healthcare",
-        organization_type="Public",
+        type="Public",
         country="USA",
         state="New York",
         address="456 Health Blvd",
-        lga="Manhattan",
+        description="Manhattan",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
