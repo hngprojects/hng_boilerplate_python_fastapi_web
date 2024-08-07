@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 
 """Teams services"""
@@ -8,9 +7,7 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.team import TeamMember
 
-from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.team import TeamMember
 
 
 class TeamServices(Service):
@@ -27,10 +24,6 @@ class TeamServices(Service):
 
         return new_member
 
-    def create(self, db, data):
-        """Create team"""
-        pass
-
     def fetch_all(self, db, page, page_size):
         """Fetch all teams"""
         pass
@@ -43,7 +36,12 @@ class TeamServices(Service):
 
     def update(self, db, id, data):
         """Update a team"""
-        pass
+        team = check_model_existence(db, TeamMember, id)
+
+        db.query(TeamMember).filter(TeamMember.id == id).update(data)
+        db.commit()
+        db.refresh(team)
+        return team
 
     def delete(self, db, id):
         """Delete a team"""
