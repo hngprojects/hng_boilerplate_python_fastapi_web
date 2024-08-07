@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, Path, Query, HTTPException
+from fastapi import APIRouter, Depends, Path, Query, HTTPException, status
+from typing import List
 from sqlalchemy.orm import Session
+from api.utils.success_response import success_response
 from api.v1.schemas.permissions.roles import RoleCreate, RoleResponse, RoleAssignRequest
 from api.v1.services.permissions.role_service import role_service
 from api.v1.schemas.permissions.roles import RoleDeleteResponse, ResponseModel
@@ -52,3 +54,23 @@ def delete_role(
             message="Role not found.",
             data=None
         )
+
+@role_perm.get(
+    "/organizations/{org_id}/roles",
+    response_model=List[RoleResponse],
+    tags=["Fetch Roles"],
+)
+def get_roles_for_organization(
+    org_id: str = Path(..., description="The ID of the organization"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    roles = (role_service.get_roles_by_organization(db, org_id),)
+    if not roles:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Roles not found for the given organization",
+        )
+    return success_response(
+        status_code=status.HTTP_200_OK, message="Roles fetched successfully", data=roles
+    )
