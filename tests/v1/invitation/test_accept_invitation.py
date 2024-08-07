@@ -57,7 +57,7 @@ def create_mock_user(mock_db_session, user_id):
 def create_mock_organization(mock_db_session, org_id):
     mock_org = Organization(
         id=org_id,
-        company_name="Test Organization",
+        name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
