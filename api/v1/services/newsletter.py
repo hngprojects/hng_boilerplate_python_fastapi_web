@@ -42,7 +42,7 @@ class NewsletterService(Service):
         return newsletter
 
     @staticmethod
-    def fetch(self, db: Session, id: str):
+    def fetch(db: Session, id: str):
         """Fetches a single newsletter by id"""
         return check_model_existence(db=db, model=Newsletter, id=id)
 
@@ -63,10 +63,10 @@ class NewsletterService(Service):
         return query.all()
 
     @staticmethod
-    def delete(self, db: Session, id: str):
+    def delete(db: Session, id: str):
         """Deletes a single newsletter by id"""
 
-        newsletter = self.fetch(db=db, id=id)
+        newsletter = check_model_existence(db=db, model=Newsletter, id=id)
 
         db.delete(newsletter)
         db.commit()
