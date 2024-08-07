@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, status
+from typing import Annotated
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
-from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema
+from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema, SingleNewsletterResponse
 from api.db.database import get_db
 from api.v1.services.newsletter import NewsletterService
 from fastapi.encoders import jsonable_encoder
@@ -49,3 +50,21 @@ def retrieve_subscribers(
         status_code = 200,
         data = jsonable_encoder(subs_filtered)
     )
+
+@newsletter.get('/newsletters/{id}', response_model=SingleNewsletterResponse, status_code=status.HTTP_200_OK)
+async def get_single_newsletter(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    ):
+    """Retrieves a single newsletter.
+
+    Args:
+        id: The id of the job for the newsletter
+        db: database Session object
+        current_user: the super admin user
+
+    Returns:
+        SingleNewslettersResponse: response on success
+    """
+    newsletterservice = NewsletterService()
+    return newsletterservice.fetch(news_id=id, db=db)
