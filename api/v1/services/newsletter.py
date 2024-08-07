@@ -1,9 +1,13 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
+from api.db.database import get_db
 from api.v1.schemas.newsletter import EmailSchema
 from api.core.base.services import Service
-from api.v1.models.newsletter import NewsletterSubscriber
-from typing import Optional, Any
+from api.v1.models.newsletter import NewsletterSubscriber, Newsletter
+from typing import Optional, Any, Annotated
+from api.utils.db_validators import check_model_existence
+from api.utils.success_response import success_response
+from api.v1.schemas.newsletter import SingleNewsletterResponse
 
 class NewsletterService(Service):
     """Newsletter service functionality"""
@@ -47,3 +51,31 @@ class NewsletterService(Service):
                     query = query.filter(getattr(NewsletterSubscriber, column).ilike(f'%{value}%'))
 
         return query.all()
+
+    @staticmethod
+    def fetch(news_id: str, db: Annotated[Session, Depends(get_db)]):
+        """Fetch a single newsletter.
+
+        Args:
+            news_id: The id of the newsletter
+            db: database Session object
+
+        Return:
+            SingleNewsletterResponse: Response on success
+        """
+
+        # checking if newsletter exist and send
+        newsletter = check_model_existence(db, Newsletter, news_id)
+        return success_response(
+            status_code=200,
+            message="Successfully fetched newsletter",
+            data=newsletter
+        )
+
+    @staticmethod
+    def update():
+        pass
+
+    @staticmethod
+    def delete():
+        pass
