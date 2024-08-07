@@ -64,5 +64,6 @@ def delete_invitation(
     db: Session = Depends(get_session),
     current_user: User = Depends(user_service.get_current_super_admin)
     ):
+    '''Delete invitation from the database'''
     invite.InviteService.delete_invitation(id, db)
 
