@@ -1,113 +1,311 @@
-from fastapi import FastAPI, Depends, HTTPException, status, APIRouter
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from datetime import timedelta
+from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Request
+from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
-from typing import Optional, Annotated
-from api.v1.models.user import User, WaitlistUser
-from api.v1.models.org import Organization
-from api.v1.models.profile import Profile
-from api.v1.models.product import Product
-from api.v1.models.base import Base
-from api.v1.models.subscription import Subscription
-from api.v1.models.blog import Blog
-from api.v1.models.job import Job
-from api.v1.models.invitation import Invitation
-from api.v1.models.role import Role
-from api.v1.models.permission import Permission
-from datetime import datetime, timedelta
-from api.v1.schemas.token import Token, LoginRequest
-from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
+
+from api.core.dependencies.email_sender import send_email
+from api.utils.success_response import success_response
+from api.utils.send_mail import send_magic_link
+from api.v1.models import User
+from api.v1.schemas.user import Token
+from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
+from api.v1.schemas.token import TokenRequest
+from api.v1.schemas.user import UserCreate, MagicLinkRequest
 from api.db.database import get_db
-from api.utils.auth import authenticate_user, create_access_token,hash_password,get_user
-from api.utils.dependencies import get_current_admin, get_current_user
+from api.v1.services.user import user_service
+from api.v1.services.auth import AuthService
 
+auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
-from api.v1.models.org import Organization
-
-from api.v1.models.product import Product
-
-
-db = next(get_db())
-
-
-auth = APIRouter(prefix="/auth", tags=["auth"])
-
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-
-
-@auth.post("/login", response_model=Token, status_code=status.HTTP_200_OK)
-def login_for_access_token(login_request: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = authenticate_user(db, login_request.username, login_request.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"username": user.username}, expires_delta=access_token_expires
-    )
-    return Token(access_token=access_token, token_type="bearer")
   
-@auth.post("/register", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.username == user.username).first()
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
-        )
-    db_user = db.query(User).filter(User.email == user.email).first()
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
-        )
+@auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=success_response)
+def register(background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
+    '''Endpoint for a user to register their account'''
+
+    # Create user account
+    user = user_service.create(db=db, schema=user_schema)
+
+    # Create access and refresh tokens
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    # Send email in the background
+    background_tasks.add_task(
+        send_email, 
+        recipient=user.email,
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+    )
+
+    response = success_response(
+        status_code=201,
+        message="User created successfully",
+        data={
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": jsonable_encoder(
+                user,
+                exclude=[
+                    "password",
+                    "is_super_admin",
+                    "is_deleted",
+                    "is_verified",
+                    "updated_at",
+                ],
+            ),
+        },
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+@auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED)
+def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
+    """Endpoint for super admin creation"""
+
+    user = user_service.create_admin(db=db, schema=user)
+
+    # Create access and refresh tokens
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=201,
+        message="User Created Successfully",
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user':  {
+            **jsonable_encoder(
+                user,
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+            'access_token': access_token,
+            'token_type': 'bearer',
+            }
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=60),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+@auth.post("/login", status_code=status.HTTP_200_OK)
+def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Session = Depends(get_db)):
+    """Endpoint to log in a user"""
+
+    # Authenticate the user
+    user = user_service.authenticate_user(
+        db=db, email=login_request.email, password=login_request.password
+    )
+
+    # Generate access and refresh tokens
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message='Login successful',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': {
+                **jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                ),
+                'access_token': access_token,
+                'token_type': 'bearer',
+            }
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+@auth.post("/logout", status_code=status.HTTP_200_OK)
+def logout(
+    response: Response,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to log a user out of their account"""
+
+    response = success_response(status_code=200, message="User logged put successfully")
+
+    # Delete refresh token from cookies
+    response.delete_cookie(key="refresh_token")
+
+    return response
+
+
+@auth.post("/refresh-access-token", status_code=status.HTTP_200_OK)
+def refresh_access_token(
+    request: Request, response: Response, db: Session = Depends(get_db)
+):
+    """Endpoint to log a user out of their account"""
+
+    # Get refresh token
+    current_refresh_token = request.cookies.get("refresh_token")
+
+    # Create new access and refresh tokens
+    access_token, refresh_token = user_service.refresh_access_token(
+        current_refresh_token=current_refresh_token
+    )
+
+    response = success_response(
+        status_code=200,
+        message="Tokens refreshed successfully",
+        data={
+            "access_token": access_token,
+            "token_type": "bearer",
+        },
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+@auth.post("/request-token", status_code=status.HTTP_200_OK)
+async def request_signin_token(
+    email_schema: EmailRequest, db: Session = Depends(get_db)
+):
+    """Generate and send a 6-digit sign-in token to the user's email"""
+
+    user = user_service.fetch_by_email(db, email_schema.email)
+
+    token, token_expiry = user_service.generate_token()
+
+    # Save the token and expiry
+    user_service.save_login_token(db, user, token, token_expiry)
+
+    # Send mail notification
+
+    return success_response(
+        status_code=200, message=f"Sign-in token sent to {user.email}"
+    )
+
+
+@auth.post("/verify-token", status_code=status.HTTP_200_OK)
+async def verify_signin_token(
+    token_schema: TokenRequest, db: Session = Depends(get_db)
+):
+    """Verify the 6-digit sign-in token and log in the user"""
+
+    user = user_service.verify_login_token(db, schema=token_schema)
+
+    # Generate JWT token
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message="Sign in successful",
+        data={
+            "access_token": access_token,
+            "token_type": "bearer",
+        },
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
+
+# Verify Magic Link
+@auth.post("/verify-magic-link")
+async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
+    user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
+
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    response = success_response(
+        status_code=200,
+        message='Login successful',
+        data={
+            'access_token': access_token,
+            'token_type': 'bearer',
+            'user': jsonable_encoder(
+                user, 
+                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+            ),
+        }
+    )
+
+    # Add refresh token to cookies
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        expires=timedelta(days=30),
+        httponly=True,
+        secure=True,
+        samesite="none",
+    )
+
+    return response
+
     
-    password_hashed = hash_password(user.password)
 
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"username": user.username}, expires_delta=access_token_expires
-    )
 
-    db_user = User(
-        username=user.username,
-        email=user.email,
-        password = password_hashed,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        is_active=True
-    )
-    try: 
-        db.add(db_user)
-        db.commit()
-        db.refresh(db_user)
-    except Exception as e:
-        print(e)
+@auth.post("/request-magic-link", status_code=status.HTTP_200_OK)
+def request_magic_link(
+    request: MagicLinkRequest, response: Response, db: Session = Depends(get_db)
+):
+    user = user_service.fetch_by_email(db=db, email=request.email)
+    access_token = user_service.create_access_token(user_id=user.id)
+    send_magic_link(user.email, access_token)
 
-    user = UserBase(
-        id=db_user.id,
-        first_name=db_user.first_name,
-        last_name=db_user.last_name,
-        email=db_user.email,
-        created_at=datetime.utcnow()
-    )
-    data = SuccessResponseData(
-        token=access_token,
-        user=user
-    )
-    response = SuccessResponse(
-        statusCode=201,
-        message="Operation successful",
-        data=data
+    response = success_response(
+        status_code=200, message=f"Magic link sent to {user.email}"
     )
     return response
-    
-
-# Protected route example: test route
-@auth.get("/admin")
-def read_admin_data(current_admin: Annotated[User, Depends(get_current_admin)]):
-    return {"message": "Hello, admin!"}
-
