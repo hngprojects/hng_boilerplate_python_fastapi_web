@@ -52,7 +52,7 @@ def mock_product_category():
 def mock_org():
     return Organization(
         id=str(uuid7()),
-        company_name="Test Organization",
+        name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

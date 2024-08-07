@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict, List
 from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional
 
 from api.utils.success_response import success_response
 
@@ -10,27 +11,27 @@ class OrganizationBase(BaseModel):
     id: str
     created_at: datetime
     updated_at: datetime
-    company_name: str
-    company_email: EmailStr
-    industry: str
-    organization_type: str
-    country: str
-    state: str
-    address: str
-    lga: str
+    name: str
+    email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    description: Optional[str] = None
 
 
 class CreateUpdateOrganization(BaseModel):
     """Organization schema to create or update organization"""
 
-    company_name: str
-    company_email: EmailStr
-    industry: str
-    organization_type: str
-    country: str
-    state: str
-    address: str
-    lga: str
+    name: str
+    email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    description: Optional[str] = None
 
 
 class AddUpdateOrganizationRole(BaseModel):

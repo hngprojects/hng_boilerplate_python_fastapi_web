@@ -31,7 +31,7 @@ def mock_get_current_user():
 def mock_org():
     return Organization(
         id=str(uuid7()),
-        company_name="Test Organization",
+        name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -69,14 +69,14 @@ def test_create_organization_success(client, db_session_mock):
             '/api/v1/organizations',
             headers={'Authorization': 'Bearer token'},
             json={
-                "company_name": "Joboy dev",
-                "company_email": "dev@gmail.com",
+                "name": "Joboy dev",
+                "email": "dev@gmail.com",
                 "industry": "Tech",
-                "organization_type": "Tech",
+                "type": "Tech",
                 "country": "Nigeria",
                 "state": "Lagos",
                 "address": "Ikorodu, Lagos",
-                "lga": "Ikorodu"
+                "description": "Ikorodu"
             }
         )
 
@@ -85,24 +85,26 @@ def test_create_organization_success(client, db_session_mock):
 
 def test_create_organization_missing_field(client, db_session_mock):
     '''Test for missing field when creating a new organization'''
-
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
-
-    response = client.post(
-        '/api/v1/organizations',
-        headers = {'Authorization': 'Bearer token'},
-        json={
-            'name': 'Test Organization',
-            "company_email": "dev@gmail.com",
-            "industry": "Tech",
-            "organization_type": "Tech",
-            "country": "Nigeria",
-            "state": "Lagos",
-        }
-    )
-
-    assert response.status_code == 422
+    app.dependency_overrides[organization_service.create] = lambda: mock_org
+    # Mock organization creation
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+    mock_organization = mock_org()
+    with patch("api.v1.services.organization.organization_service.create", return_value=mock_organization) as mock_create:
+        response = client.post(
+            '/api/v1/organizations',
+            headers = {'Authorization': 'Bearer token'},
+            json={
+                "email": "dev@gmail.com",
+                "industry": "Tech",
+                "type": "Tech",
+                "country": "Nigeria"
+            }
+        )
+        assert response.status_code == 422
 
 def test_create_organization_unauthorized(client, db_session_mock):
     '''Test for unauthorized user'''
@@ -110,14 +112,14 @@ def test_create_organization_unauthorized(client, db_session_mock):
     response = client.post(
         '/api/v1/organizations',
         json={
-            "company_name": "Joboy dev",
-            "company_email": "dev@gmail.com",
+            "name": "Joboy dev",
+            "email": "dev@gmail.com",
             "industry": "Tech",
-            "organization_type": "Tech",
+            "type": "Tech",
             "country": "Nigeria",
             "state": "Lagos",
             "address": "Ikorodu, Lagos",
-            "lga": "Ikorodu"
+            "description": "Ikorodu"
         }
     )
 
