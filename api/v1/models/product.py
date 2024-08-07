@@ -86,8 +86,10 @@ class ProductComment(BaseTableModel):
     __tablename__ = "product_comments"
 
     product_id = Column(String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     product = relationship("Product", back_populates="comments")
+    user = relationship("User", back_populates="product_comments")

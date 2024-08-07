@@ -84,6 +84,9 @@ class User(BaseTableModel):
         cascade="all, delete-orphan",
     )
 
+    product_comments = relationship("ProductComment", back_populates="user",
+                                    cascade="all, delete-orphan")
+
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
