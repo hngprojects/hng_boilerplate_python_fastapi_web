@@ -170,9 +170,3 @@ class ProductCategoryCreate(BaseModel):
 
 class ProductCategoryData(BaseModel):
     name: str
-
-class ProductCategoryCreateResponse(BaseModel, Generic[T]):
-    message: str
-    status_code: int
-    category: T
-

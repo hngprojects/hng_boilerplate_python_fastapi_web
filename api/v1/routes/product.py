@@ -12,7 +12,6 @@ from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatu
 from api.v1.services.product import product_service, ProductCategoryService
 from api.v1.schemas.product import (
     ProductCategoryCreate,
-    ProductCategoryCreateResponse,
     ProductCategoryData,
     ProductCreate,
     ProductList,
