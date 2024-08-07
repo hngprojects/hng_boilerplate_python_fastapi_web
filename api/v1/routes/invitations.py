@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Request,status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from urllib.parse import urlparse, parse_qs
 from api.v1.schemas import invitations
 from api.db.database import get_db as get_session
 from api.v1.services import invite
 from api.v1.models.user import User
+from api.utils.success_response import success_response
 from api.v1.services.user import user_service
 import logging
 
@@ -48,6 +49,7 @@ async def add_user_to_organization(
 def delete_invitation(
     id: str, 
     db: Session = Depends(get_session),
-    current_user: User = Depends(user_service.get_current_user)
+    current_user: User = Depends(user_service.get_current_super_admin)
     ):
     invite.InviteService.delete_invitation(id, db)
+
