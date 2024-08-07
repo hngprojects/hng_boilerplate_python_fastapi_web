@@ -139,5 +139,17 @@ class InviteService:
                 status_code=500,
                 detail="An error occurred while adding the user to the organization",
             )
+    @staticmethod
+    def delete_invitation(id: str, db: Session):
+        invitation = db.query(Invitation).filter(Invitation.id == id).first()
+        if invitation:
+            try:
+                db.delete(invitation)
+                db.commit()
+            except Exception as e:
+                db.rollback()
+                raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
+        else:
+            raise HTTPException(status_code=404, detail="Invitation not found")
 
 invite_service = InviteService()
