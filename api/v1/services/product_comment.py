@@ -26,7 +26,6 @@ class ProductCommentService(Service):
         comment_to_delete = db.query(ProductComment).filter_by(id=comment_id,
                                                                product_id=product_id,
                                                                user_id=user.id).first()
-        print('comment_to_delete: ', comment_to_delete)
         if not comment_to_delete:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail='comment not found')
