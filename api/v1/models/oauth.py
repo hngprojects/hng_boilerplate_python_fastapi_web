@@ -11,7 +11,7 @@ class OAuth(BaseTableModel):
     )
     provider = Column(String, nullable=False)
     sub = Column(String, nullable=False)
-    access_token = Column(String, nullable=False)
-    refresh_token = Column(String, nullable=False)
+    access_token = Column(String, nullable=True)
+    refresh_token = Column(String, nullable=True)
 
     user = relationship("User", back_populates="oauth")
