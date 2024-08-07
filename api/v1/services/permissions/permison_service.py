@@ -66,5 +66,32 @@ class PermissionService:
                db.rollback()
                raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Not Found')
+    
+    @staticmethod
+    def update_permission_on_role(db: Session, role_id: str, permission_id: str, new_permission_id: str):
+        role = db.query(Role).filter_by(id=role_id).first()
+        # Check if the role exists
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found.")
+        new_permission = db.query(Permission).filter_by(id=new_permission_id).first()
+        if not new_permission:
+            raise HTTPException(status_code=404, detail="New permission not found.")
+        try:
+            
+            # Check if the new permission exists
+            # Remove the old permission from the role
+            db.execute(delete(role_permissions).where(role_permissions.c.role_id == role_id).where(role_permissions.c.permission_id == permission_id))
 
+            # Assign the new permission to the role
+            db.execute(role_permissions.insert().values(role_id=role_id, permission_id=new_permission_id))
+            db.commit()
+            return {"success": True, "message": "Permission updated successfully"}
+
+        except IntegrityError as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail="An error occurred while updating the permission.")
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=500, detail=str(e))
+                
 permission_service = PermissionService()
