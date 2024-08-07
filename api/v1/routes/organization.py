@@ -1,6 +1,7 @@
 import time
 from fastapi import Depends, APIRouter, status, HTTPException
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from api.utils.success_response import success_response
@@ -63,6 +64,24 @@ async def get_organization_users(
     """Endpoint to fetch all users in an organization"""
 
     return organization_service.paginate_users_in_organization(db, org_id, skip, limit)
+
+
+@organization.get('/{org_id}/users/export', status_code=200)
+async def export_organization_member_data_to_csv(
+    org_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    '''Endpoint to export organization users data to csv'''
+
+    csv_file = organization_service.export_organization_members(db=db, org_id=org_id)
+
+    # Stream the response as a CSV file download
+    response = StreamingResponse(csv_file, media_type="text/csv")
+    response.headers["Content-Disposition"] = f"attachment; filename=organization_{org_id}_members.csv"
+    response.status_code = 200
+
+    return response
 
 
 @organization.patch("/{org_id}", response_model=success_response, status_code=200)
