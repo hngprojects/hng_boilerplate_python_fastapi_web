@@ -47,15 +47,6 @@ class TestCodeUnderTest:
         assert response.json()['success'] == True
 
 
-
-    # Invite id path parameter absent
-    def test_delete_invite_empty_id(self, client):
-        
-        response = client.delete("/api/v1/invite/ ")
-        
-        assert response.status_code == 404
-        assert response.json()['message'] == "Invite id is absent"
-
     # Invalid invite id
     def test_delete_invite_invalid_id(self, client):
         

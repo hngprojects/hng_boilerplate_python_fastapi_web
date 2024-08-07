@@ -52,10 +52,6 @@ def delete_invite(
     admin: User = Depends(user_service.get_current_super_admin)
 ):
     """ Delete invite from database """
-    if invite_id.strip() == "":
-        logging.warning(f"Invitation ID not found in path parameter.")
-        raise HTTPException(status_code=404, detail="Invite id is absent")
-    
     invite_is_deleted = invite.InviteService.delete(db, invite_id)
 
     if not invite_is_deleted:
