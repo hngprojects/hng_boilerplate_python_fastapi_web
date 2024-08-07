@@ -127,6 +127,8 @@ class UserService(Service):
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
 
+        del schema.admin_secret
+
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
@@ -196,6 +198,8 @@ class UserService(Service):
 
     def create_admin(self, db: Session, schema: user.UserCreate):
         """Creates a new admin"""
+
+        del schema.admin_secret
 
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
