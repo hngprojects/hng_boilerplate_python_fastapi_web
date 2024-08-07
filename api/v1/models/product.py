@@ -53,6 +53,8 @@ class Product(BaseTableModel):
     category = relationship("ProductCategory", back_populates="products")
     sales = relationship('Sales', back_populates='product',
                          cascade='all, delete-orphan')
+    comments = relationship("ProductComment", back_populates='product',
+                            cascade='all, delete-orphan')
 
     def __str__(self):
         return self.name
@@ -66,6 +68,9 @@ class ProductVariant(BaseTableModel):
     price = Column(Numeric)
     product_id = Column(String, ForeignKey("products.id", ondelete="CASCADE"))
     product = relationship("Product", back_populates="variants")
+    
+    comments = relationship("ProductComment", back_populates='product_variant',
+                            cascade='all, delete-orphan')
 
 
 class ProductCategory(BaseTableModel):
@@ -76,3 +81,19 @@ class ProductCategory(BaseTableModel):
 
     def __str__(self):
         return self.name
+
+class ProductComment(BaseTableModel):
+    """
+    Class representing comments linked to a product
+    """
+    __tablename__ = "product_comments"
+    comment = Column(String(500), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"))
+    product_id = Column(String, ForeignKey("products.id", ondelete="CASCADE"),
+                        nullable=True)
+    product_variant_id = Column(String, ForeignKey("product_variants.id", ondelete="CASCADE"),
+                                nullable=True)
+    
+    product = relationship("Product", back_populates='comments')
+    product_variant = relationship("ProductVariant", back_populates='comments')
+    user = relationship("User", back_populates="product_comments")
