@@ -50,22 +50,6 @@ def delete_role(
     
     
     
-<<<<<<< HEAD
-=======
-    if result:
-        return ResponseModel(
-            success=True,
-            status_code=200,
-            message="Role successfully deleted.",
-            data={"id": role_id}
-        )
-    else:
-        return ResponseModel(
-            success=False,
-            status_code=404,
-            message="Role not found.",
-            data=None
-        )
 
 @role_perm.get(
     "/organizations/{org_id}/roles",
@@ -86,4 +70,3 @@ def get_roles_for_organization(
     return success_response(
         status_code=status.HTTP_200_OK, message="Roles fetched successfully", data=roles
     )
->>>>>>> 73058eebcae5f25cb02e94435af20c40add084a8
