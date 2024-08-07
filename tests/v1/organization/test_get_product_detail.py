@@ -56,14 +56,14 @@ user = User(
 
 org = Organization(
     id=str(org_id),
-    company_name="hng",
-    company_email=None,
+    name="hng",
+    email=None,
     industry=None,
-    organization_type=None,
+    type=None,
     country=None,
     state=None,
     address=None,
-    lga=None,
+    description=None,
     created_at=created_at,
     updated_at=updated_at,
 )
