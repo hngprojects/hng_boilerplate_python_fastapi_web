@@ -65,25 +65,15 @@ class NewsletterService(Service):
         return query.all()
 
     @staticmethod
-    def fetch(news_id: str, db: Annotated[Session, Depends(get_db)]):
-        """Fetch a single newsletter.
-
-        Args:
-            news_id: The id of the newsletter
-            db: database Session object
-
-        Return:
-            SingleNewsletterResponse: Response on success
-        """
-
-        # checking if newsletter exist and send
-        newsletter = check_model_existence(db, Newsletter, news_id)
-        return success_response(
-            status_code=200,
-            message="Successfully fetched newsletter",
-            data=newsletter
-        )
-
+    def unsubscribe(db: Session, request: EmailSchema) -> None:
+        '''Unsubscribe a user from the newsletter'''
+        newsletter_subscriber = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
+        if not newsletter_subscriber:
+            raise HTTPException(
+                status_code=404, detail="Email not found."
+            )
+        db.delete(newsletter_subscriber)
+        
     @staticmethod
     def update():
         pass
