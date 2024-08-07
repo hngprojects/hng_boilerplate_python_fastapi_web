@@ -1,4 +1,5 @@
 from typing import Any, Optional, Union
+import sqlalchemy
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi import HTTPException, status
@@ -9,7 +10,7 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum, ProductCategory
 from api.v1.models.user import User
 from api.v1.models import Organization
-from api.v1.schemas.product import ProductCreate
+from api.v1.schemas.product import ProductCategoryCreate, ProductCreate
 from api.utils.db_validators import check_user_in_org
 from api.v1.schemas.product import ProductFilterResponse
 
@@ -243,8 +244,29 @@ class ProductCategoryService(Service):
     """Product categories service functionality"""
 
     @staticmethod
-    def create():
-        pass
+    def create(
+        db: Session, 
+        org_id: str, 
+        schema: ProductCategoryCreate, 
+        current_user: User
+    ):
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        try:
+            new_category = ProductCategory(**schema.model_dump())
+            db.add(new_category)
+            db.commit()
+            db.refresh(new_category)
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Category already exists.",
+                )
+
+        return new_category
+    
 
     @staticmethod
     def fetch_all(db: Session, **query_params: Optional[Any]):
