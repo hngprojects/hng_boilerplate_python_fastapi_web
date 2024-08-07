@@ -79,17 +79,9 @@ async def delete_activity_log(
     current_user: User = Depends(user_service.get_current_super_admin)
 ):
     """Endpoint to delete an activity log by its ID"""
-
-    try:
-        activity_log_service.delete_activity_log_by_id(db, log_id)
-        return success_response(
-            status_code=status.HTTP_200_OK,
-            message=f"Activity log with ID {log_id} deleted successfully"
-        )
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"An unexpected error occurred: {str(e)}"
-        )
+    
+    activity_log_service.delete_activity_log_by_id(db, log_id)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message=f"Activity log with ID {log_id} deleted successfully"
+    )
