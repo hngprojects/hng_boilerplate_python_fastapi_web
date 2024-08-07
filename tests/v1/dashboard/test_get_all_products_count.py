@@ -56,7 +56,7 @@ def test_category():
 def test_org():
     org = Organization(
         id=str(uuid7()),
-        company_name="Organization 1"
+        name="Organization 1"
     )
     return org
 

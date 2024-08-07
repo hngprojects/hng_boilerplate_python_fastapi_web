@@ -217,7 +217,7 @@ class ProductService(Service):
             "category_id": prod.category_id,
             "category_name": prod.category.name,
             "created_at": prod.created_at.isoformat(),
-            "organization_name": prod.organization.company_name
+            "organization_name": prod.organization.name
         }
 
         return prod_dict

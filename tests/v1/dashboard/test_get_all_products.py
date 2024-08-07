@@ -56,7 +56,7 @@ def test_category():
 def test_org():
     org = Organization(
         id=str(uuid7()),
-        company_name="Organization 1"
+        name="Organization 1"
     )
     return org
 
@@ -134,7 +134,7 @@ def test_get_products_successful(
     assert prod['image_url'] == test_product.image_url
     assert prod['archived'] == test_product.archived
     assert prod['category_name'] == test_category.name
-    assert prod['organization_name'] == test_org.company_name
+    assert prod['organization_name'] == test_org.name
     assert prod['category_id'] == test_category.id
     assert prod['organization_id'] == test_org.id
     assert datetime.fromisoformat(prod['created_at']) == test_product.created_at
