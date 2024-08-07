@@ -49,3 +49,14 @@ def retrieve_subscribers(
         status_code = 200,
         data = jsonable_encoder(subs_filtered)
     )
+
+@newsletter.post('/newsletters/unsubscribe')
+async def unsubscribe_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
+    """
+    Newsletter unsubscription endpoint
+    """
+    NewsletterService.unsubscribe(db, request)
+    return success_response(
+        message="Unsubscribed successfully.",
+        status_code=status.HTTP_200_OK,
+    )

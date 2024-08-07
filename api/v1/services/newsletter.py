@@ -47,3 +47,14 @@ class NewsletterService(Service):
                     query = query.filter(getattr(NewsletterSubscriber, column).ilike(f'%{value}%'))
 
         return query.all()
+
+    @staticmethod
+    def unsubscribe(db: Session, request: EmailSchema) -> None:
+        '''Unsubscribe a user from the newsletter'''
+        newsletter_subscriber = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
+        if not newsletter_subscriber:
+            raise HTTPException(
+                status_code=404, detail="Email not found."
+            )
+        db.delete(newsletter_subscriber)
+        db.commit()
