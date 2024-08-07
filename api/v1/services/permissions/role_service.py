@@ -4,6 +4,7 @@ from api.v1.models.permissions.user_org_role import user_organization_roles
 from api.v1.schemas.permissions.roles import RoleDeleteResponse
 from api.v1.schemas.role import RoleCreate
 from uuid_extensions import uuid7
+from api.utils.success_response import success_response
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
@@ -17,7 +18,8 @@ class RoleService:
             db.add(db_role)
             db.commit()
             db.refresh(db_role)
-            return db_role
+            response = success_response(201, f'role {role.name} created successfully', db_role)
+            return response
         except IntegrityError as e:
             db.rollback()
             raise HTTPException(status_code=400, detail="A role with this name already exists.")
@@ -34,6 +36,7 @@ class RoleService:
                 role_id=role_id
             ))
             db.commit()
+            return success_response(200, "role successfully added to user")
         except IntegrityError as e:
             db.rollback()
             raise HTTPException(status_code=400, detail="The role or user might not exist, or there might be a duplication issue.")
@@ -61,7 +64,6 @@ class RoleService:
         if not roles:
             raise HTTPException(status_code=404, detail="Roles not found for the given organization")
         return roles
-
 
 
 role_service = RoleService()
