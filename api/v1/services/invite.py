@@ -161,3 +161,14 @@ class InviteService(Service):
         session.delete(invite)
         session.commit()
         return True
+    
+    def fetch(self):
+        pass
+
+    def fetch_all(self):
+        pass
+
+    def update(self):
+        pass
+    
+invite_service = InviteService()
