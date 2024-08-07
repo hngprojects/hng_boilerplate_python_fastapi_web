@@ -170,3 +170,12 @@ class ProductCategoryCreate(BaseModel):
 
 class ProductCategoryData(BaseModel):
     name: str
+
+
+class ProductDeletionResponse(BaseModel):
+    """
+    Product deletion response
+    """
+    status: str
+    status_code: int
+    message: str
