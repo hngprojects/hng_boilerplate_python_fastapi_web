@@ -14,24 +14,24 @@ db = next(get_db())
 
 # Create some organizations
 org1 = Organization(
-    company_name="Tech Corp",
-    company_email="contact@techcorp.com",
+    name="Tech Corp",
+    email="contact@techcorp.com",
     industry="Technology",
-    organization_type="Private",
+    type="Private",
     country="USA",
     state="California",
     address="123 Tech Lane",
-    lga="San Francisco"
+    ="San Francisco"
 )
 org2 = Organization(
-    company_name="Health Co",
-    company_email="info@healthco.com",
+    name="Health Co",
+    email="info@healthco.com",
     industry="Healthcare",
-    organization_type="Public",
+    type="Public",
     country="USA",
     state="New York",
     address="456 Health Blvd",
-    lga="Manhattan"
+    ="Manhattan"
 )
 
 # Add organizations to the session
