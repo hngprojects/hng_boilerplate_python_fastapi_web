@@ -85,8 +85,8 @@ async def update_faq(
     )
 
 
-@faq.delete("/{id}", status_code=204)
-async def update_faq(
+@faq.delete("/{id}", status_code=200)
+async def delete_faq(
     id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
@@ -94,3 +94,8 @@ async def update_faq(
     """Endpoint to delete an FAQ. Only accessible to superadmins"""
 
     faq_service.delete(db, faq_id=id)
+
+    return success_response(
+        message="Successfully deleted FAQ",
+        status_code=200,
+    )
