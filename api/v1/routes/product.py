@@ -241,7 +241,7 @@ async def update_product(
         data=jsonable_encoder(updated_product),
     )
 
-@product.post('/categories/{org_id}', status_code=status.HTTP_201_CREATED, response_model=ProductCategoryCreateResponse[ProductCategoryData])
+@product.post('/categories/{org_id}', status_code=status.HTTP_201_CREATED)
 def create_product_category(
     org_id: str,
     category_schema: ProductCategoryCreate,
@@ -264,9 +264,9 @@ def create_product_category(
 
     new_category = ProductCategoryService.create(db, org_id, category_schema, current_user)
 
-    return ProductCategoryCreateResponse (
-        message = "Category successfully created",
-        status_code = status.HTTP_201_CREATED,
-        category = new_category
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Category successfully created",
+        data=jsonable_encoder(new_category),
     )
 
