@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
@@ -71,3 +71,25 @@ async def fetch_all_users_activity_log(
         message="Activity logs fetched successfully!",
         data=jsonable_encoder(activity_logs)
     )
+
+@activity_logs.delete("/{log_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_activity_log(
+    log_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    """Endpoint to delete an activity log by its ID"""
+
+    try:
+        activity_log_service.delete_activity_log_by_id(db, log_id)
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            message=f"Activity log with ID {log_id} deleted successfully"
+        )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
