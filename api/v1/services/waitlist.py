@@ -2,16 +2,15 @@ from typing import Any, Optional
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
-from api.utils.db_validators import check_model_existence
 from api.v1.models.waitlist import Waitlist
-from pydantic import EmailStr, BaseModel
+from pydantic import BaseModel
 
 
 class WaitListService(Service):
-    '''waitlist user service functionality'''
+    """waitlist user service functionality"""
 
-    def create(self, db: Session,  schema: BaseModel):
-        '''Create a new waitlist user'''
+    def create(self, db: Session, schema: BaseModel):
+        """Create a new waitlist user"""
 
         new_waitlist_user = Waitlist(**schema.model_dump())
         db.add(new_waitlist_user)
@@ -19,10 +18,9 @@ class WaitListService(Service):
         db.refresh(new_waitlist_user)
 
         return new_waitlist_user
-    
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all waitlist users with option to search using query parameters'''
+        """Fetch all waitlist users with option to search using query parameters"""
 
         query = db.query(Waitlist)
 
@@ -30,35 +28,33 @@ class WaitListService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Waitlist, column) and value:
-                    query = query.filter(getattr(Waitlist, column).ilike(f'%{value}%'))
+                    query = query.filter(getattr(Waitlist, column).ilike(f"%{value}%"))
 
         return query.all()
 
-    
     def fetch(self, db: Session, id: str):
-        '''Fetches a waitlist user by their id'''
+        """Fetches a waitlist user by their id"""
 
         waitlist_user = db.query(Waitlist).filter(Waitlist.id == id).first()
         return waitlist_user
-    
+
     def fetch_by_email(self, db: Session, email: str):
-        '''Fetches a waitlist user by their email'''
+        """Fetches a waitlist user by their email"""
 
         waitlist_user = db.query(Waitlist).filter(Waitlist.email == email).first()
 
         return waitlist_user
-    
 
     def update(self, db: Session, id: str, schema):
-        '''Updates a waitlist user'''
+        """Updates a waitlist user"""
         pass
-    
 
     def delete(self, db: Session, id: str):
-        '''Deletes a waitlist user'''
-        
+        """Deletes a waitlist user"""
+
         waitlist_user = self.fetch(db=db, id=id)
         db.delete(waitlist_user)
         db.commit()
+
 
 waitlist_service = WaitListService()
