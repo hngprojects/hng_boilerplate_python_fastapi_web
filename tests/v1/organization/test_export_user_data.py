@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from io import StringIO
 from unittest.mock import MagicMock, patch
 
+from fastapi import HTTPException
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -87,7 +88,7 @@ def test_export_success(client, db_session_mock):
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-    # app.dependency_overrides[organization_service.fetch] = lambda: mock_organization
+    app.dependency_overrides[organization_service.export_organization_members] = lambda: mock_csv_content
 
     mock_org = mock_organization()
     db_session_mock.add(mock_org)
@@ -97,7 +98,7 @@ def test_export_success(client, db_session_mock):
 
     with patch("api.v1.services.organization.organization_service.export_organization_members", return_value=mock_csv) as mock_export:
         response = client.get(
-            f'/api/v1/organizations{mock_org.id}/users/export',
+            f'/api/v1/organizations/{mock_org.id}/users/export',
             headers={'Authorization': 'Bearer token'}
         )
 
@@ -106,16 +107,32 @@ def test_export_success(client, db_session_mock):
 
 
 def test_export_unauthorized(client, db_session_mock):
-    '''Test for unauthorized user'''
+    """Test export by an unauthorized user."""
 
     mock_org = mock_organization()
-    db_session_mock.add(mock_org)
-    db_session_mock.commit()
-    
     response = client.get(
-        f'/api/v1/organizations{mock_org.id}/users/export',
-        headers={'Authorization': 'Bearer token'}
+        f'/api/v1/organizations/{mock_org.id}/users/export',
     )
 
+    # Assert that the response status code is 401 Unauthorized
     assert response.status_code == 401
 
+
+def test_export_organization_not_found(client, db_session_mock):
+    """Test export when the organization ID does not exist."""
+
+    # Mock the user service to return the current super admin user
+    app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_admin
+
+    # Simulate a non-existent organization
+    non_existent_org_id = str(uuid7())
+
+    # Mock the organization service to raise an exception for a non-existent organization
+    with patch("api.v1.services.organization.organization_service.fetch", side_effect=HTTPException(status_code=404, detail="Organization not found")):
+        response = client.get(
+            f'/api/v1/organizations/{non_existent_org_id}/users/export',
+            headers={'Authorization': 'Bearer valid_token'}
+        )
+
+        # Assert that the response status code is 404 Not Found
+        assert response.status_code == 404
