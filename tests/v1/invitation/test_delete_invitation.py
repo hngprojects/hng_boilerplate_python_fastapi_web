@@ -41,11 +41,7 @@ class TestCodeUnderTest:
         
         response = client.delete(DELETE_ENDPOINT)
         
-        assert response.status_code     == 200
-        assert response.json()['message'] == "Invite deleted successfully"
-        assert response.json().get('data') == None
-        assert response.json()['success'] == True
-
+        assert response.status_code == 204
 
     # Invalid invite id
     def test_delete_invite_invalid_id(self, client):

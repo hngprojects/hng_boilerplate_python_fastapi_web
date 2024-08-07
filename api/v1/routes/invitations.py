@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from urllib.parse import urlparse, parse_qs
 from api.v1.schemas import invitations
@@ -45,7 +45,7 @@ async def add_user_to_organization(
 
     return invite.InviteService.add_user_to_organization(invite_id, session)
 
-@invites.delete("/{invite_id}", status_code=200, response_model=success_response)
+@invites.delete("/{invite_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_invite(
     invite_id: str,
     db: Session = Depends(get_session), 
@@ -58,8 +58,3 @@ def delete_invite(
         raise HTTPException(status_code=404, detail="Invalid invitation id")
 
     logging.info(f"Deleted invite. ID: {invite_id}")
-
-    return success_response(
-        status_code=200,
-        message='Invite deleted successfully',
-    )
