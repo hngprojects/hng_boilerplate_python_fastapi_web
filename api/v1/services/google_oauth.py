@@ -55,7 +55,7 @@ class GoogleOauthServices(Service):
         """
         pass
 
-    def fetch_all(self, db: Annotated[Session, Depends(get_db)]) -> Union[list, bool]:
+    def fetch_all(self, db: Annotated[Session, Depends(get_db)]):
         """
         Retrieves all users information from the oauth table
 
@@ -68,8 +68,9 @@ class GoogleOauthServices(Service):
         try:
             all_oauth = db.query(OAuth).all()
             return all_oauth
-        except Exception:
-            return False
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Error {e}')
+            
 
     def delete(self):
         """
@@ -82,7 +83,7 @@ class GoogleOauthServices(Service):
         oauth_data: object,
         google_response: dict,
         db: Annotated[Session, Depends(get_db)],
-    ) -> Union[None, bool]:
+    ):
         """
         Updates a user information in the oauth table
 
@@ -102,11 +103,10 @@ class GoogleOauthServices(Service):
             oauth_data.updated_at = datetime.now(timezone.utc)
             # commit and return the user object
             db.commit()
-        except Exception:
-            db.rollback()
-            return False
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Error {e}')
 
-    def generate_tokens(self, user: object) -> Union[object, bool]:
+    def generate_tokens(self, user: object):
         """
         Creates a resnpose for the end user
 
@@ -127,15 +127,16 @@ class GoogleOauthServices(Service):
                 token_type="bearer",
             )
             return tokens
-        except Exception:
-            return False
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Error {e}')
+            
 
     def create_oauth_data(
         self,
         user_id: int,
         google_response: dict,
         db: Annotated[Session, Depends(get_db)],
-    ) -> Union[None, bool]:
+    ):
         """
         Creates OAuth data for a new user.
 
@@ -152,19 +153,18 @@ class GoogleOauthServices(Service):
             oauth_data = OAuth(
                 provider="google",
                 user_id=user_id,
-                sub=google_response["userinfo"].get("sub"),
+                sub=google_response.get("sub"),
                 access_token=google_response.get("access_token"),
                 refresh_token=google_response.get("refresh_token", ""),
             )
             db.add(oauth_data)
             db.commit()
-        except Exception:
-            db.rollback()
-            return False
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Error {e}')
 
     def create_new_user(
         self, google_response: dict, db: Annotated[Session, Depends(get_db)]
-    ) -> Union[User, bool]:
+    ):
         """
         Creates a new user and their associated profile and OAuth data.
 
@@ -210,6 +210,5 @@ class GoogleOauthServices(Service):
             db.commit()
 
             return new_user
-        except Exception:
-            db.rollback()
-            return False
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f'Error {e}')
