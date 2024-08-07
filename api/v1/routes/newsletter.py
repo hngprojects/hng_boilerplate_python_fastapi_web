@@ -61,7 +61,6 @@ async def get_single_newsletter(
     Args:
         id: The id of the job for the newsletter
         db: database Session object
-        current_user: the super admin user
 
     Returns:
         SingleNewslettersResponse: response on success
