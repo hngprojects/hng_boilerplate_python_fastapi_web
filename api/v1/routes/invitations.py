@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Request,status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 from urllib.parse import urlparse, parse_qs
 from api.v1.schemas import invitations
 from api.db.database import get_db as get_session
 from api.v1.services import invite
 from api.v1.models.user import User
+from api.utils.success_response import success_response
 from api.v1.services.user import user_service
 import logging
 
@@ -43,11 +44,26 @@ async def add_user_to_organization(
     logging.info(f"Processing invitation ID: {invite_id}")
 
     return invite.InviteService.add_user_to_organization(invite_id, session)
+@invites.delete("/{invite_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_invite(
+    invite_id: str,
+    db: Session = Depends(get_session), 
+    admin: User = Depends(user_service.get_current_super_admin)
+):
+    """ Delete invite from database """
+    invite_is_deleted = invite.InviteService.delete(db, invite_id)
 
+    if not invite_is_deleted:
+        raise HTTPException(status_code=404, detail="Invalid invitation id")
+
+    logging.info(f"Deleted invite. ID: {invite_id}")
+    
 @invites.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT,response_model=None,tags=["Invitation Management"])
 def delete_invitation(
     id: str, 
     db: Session = Depends(get_session),
-    current_user: User = Depends(user_service.get_current_user)
+    current_user: User = Depends(user_service.get_current_super_admin)
     ):
+    '''Delete invitation from the database'''
     invite.InviteService.delete_invitation(id, db)
+

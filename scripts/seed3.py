@@ -60,7 +60,7 @@ for _ in range(10):
         location=fake.city(),
         salary=fake.random_element(["$50,000 - $70,000", "$70,000 - $90,000", "$90,000+"]),
         job_type=fake.random_element(["Full-time", "Part-time", "Contract"]),
-        company_name=fake.company(),
+        name=fake.company(),
     )
     db.add(job)
     db.commit()

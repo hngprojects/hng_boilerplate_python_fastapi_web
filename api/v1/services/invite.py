@@ -11,10 +11,11 @@ from api.v1.models.organization import Organization
 from api.v1.models.user import User
 from api.v1.models.associations import user_organization_association
 from api.v1.schemas import invitations
+from api.core.base.services import Service
 from urllib.parse import urlencode
 
 
-class InviteService:
+class InviteService(Service):
     @staticmethod
     def create(
         invite: invitations.InvitationCreate, request: Request, session: Session
@@ -141,6 +142,12 @@ class InviteService:
             )
     @staticmethod
     def delete_invitation(id: str, db: Session):
+        """Function to delete an invitation by its id
+        
+        Args:
+            session(Session): The current ORM session object.
+            id(str): Invite id string
+        """
         invitation = db.query(Invitation).filter(Invitation.id == id).first()
         if invitation:
             try:
@@ -151,5 +158,35 @@ class InviteService:
                 raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
         else:
             raise HTTPException(status_code=404, detail="Invitation not found")
+            
+    def delete(session: Session, id: str):
+        """Function to delete invite link
+        
+        Args:
+            session(Session): The current ORM session object.
+            id(str): Invite id string
 
+        Returns:
+            True if delete is successful else False
+        
+        """
+        invite = (
+            session.query(Invitation).filter_by(id=id).first()
+        )
+        
+        if invite is None:
+            return False
+        session.delete(invite)
+        session.commit()
+        return True
+    
+    def fetch(self):
+        pass
+
+    def fetch_all(self):
+        pass
+
+    def update(self):
+        pass
+    
 invite_service = InviteService()
