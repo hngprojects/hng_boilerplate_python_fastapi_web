@@ -12,12 +12,27 @@ from api.v1.services.user import user_service
 
 role_perm = APIRouter(tags=["permissions management"])
 
-@role_perm.post("/roles", tags=["create role"])
-def create_role_endpoint(
+@role_perm.post("/custom/roles", tags=["Create Custom Role"])
+def create_custom_role_endpoint(
     role: RoleCreate, 
     db: Session = Depends(get_db), 
     current_user: User = Depends(user_service.get_current_user)):
-    return  role_service.create_role(db, role)
+    # Ensure it's a custom role
+    role.is_builtin = False
+    return role_service.create_role(db, role)
+
+@role_perm.post("/built-in/roles", tags=["Create Built-in Role"])
+def create_built_in_role_endpoint(
+    role: RoleCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(user_service.get_current_super_admin)):  # Only super admin can create
+    if not current_user.is_super_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super admins can create built-in roles.")
+    # ):
+    
+    # Ensure it's a built-in role
+    role.is_builtin = True
+    return role_service.create_role(db, role)
 
 
 @role_perm.post("/organizations/{org_id}/users/{user_id}/roles", tags=["assign role to a user"])
