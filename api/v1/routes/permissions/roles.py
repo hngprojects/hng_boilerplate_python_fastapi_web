@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, Path, Query, HTTPException, status
+from api.v1.schemas.permissions.roles import (
+    RoleCreate, RoleResponse, RoleAssignRequest, RemoveUserFromRoleResponse
+)
 from typing import List
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
-from api.v1.schemas.permissions.roles import RoleCreate, RoleResponse, \
-    RoleAssignRequest, RemoveUserFromRoleResponse
 from api.v1.services.permissions.role_service import role_service
 from api.v1.schemas.permissions.roles import RoleDeleteResponse
 from fastapi.responses import JSONResponse
@@ -70,7 +71,6 @@ def remove_user_from_role(
     )
 
 
-
 @role_perm.delete("/roles/{role_id}", tags=["delete role"], response_model=success_response)
 def delete_role(
     role_id: str, 
@@ -81,6 +81,8 @@ def delete_role(
     return success_response(status_code=200, message="Role successfully deleted.", data={"id": role_id})
        
 
+       
+    
 @role_perm.get(
     "/organizations/{org_id}/roles",
     response_model=List[RoleResponse],
