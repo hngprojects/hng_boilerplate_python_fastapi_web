@@ -1,4 +1,6 @@
 from sqlalchemy.orm import Session
+from fastapi import HTTPException, status
+from sqlalchemy.exc import SQLAlchemyError
 from api.v1.models.activity_logs import ActivityLog
 from typing import Optional, Any
 
@@ -30,6 +32,19 @@ class ActivityLogService:
                     )
         
         return query.all()
-
+    
+    def delete_activity_log_by_id(self, db: Session, log_id: str):
+        log = db.query(ActivityLog).filter(ActivityLog.id == log_id).first()
+        
+        if not log:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Activity log with ID {log_id} not found"
+            )
+        
+        db.delete(log)
+        db.commit()
+        
+        return {"status": "success", "detail": f"Activity log with ID {log_id} deleted successfully"}
 
 activity_log_service = ActivityLogService()
