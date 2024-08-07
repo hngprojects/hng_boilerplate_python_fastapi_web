@@ -1,8 +1,8 @@
 """added product_comments table, relate product_comments with users, products, and product_variants
 
-Revision ID: 605dc039f084
-Revises: d97cd1f6afa7
-Create Date: 2024-08-07 16:15:12.190198
+Revision ID: c3b40dad6233
+Revises: 5e8d48445236
+Create Date: 2024-08-07 17:34:43.489045
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '605dc039f084'
-down_revision: Union[str, None] = 'd97cd1f6afa7'
+revision: str = 'c3b40dad6233'
+down_revision: Union[str, None] = '5e8d48445236'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
