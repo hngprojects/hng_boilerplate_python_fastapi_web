@@ -41,3 +41,4 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_product_comments_id'), table_name='product_comments')
     op.drop_table('product_comments')
     # ### end Alembic commands ###
+
