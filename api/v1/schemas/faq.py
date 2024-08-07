@@ -18,6 +18,7 @@ class CreateFAQ(BaseModel):
 
     question: str
     answer: str
+    category: str
 
 
 class UpdateFAQ(BaseModel):
@@ -25,3 +26,4 @@ class UpdateFAQ(BaseModel):
 
     question: Optional[str]
     answer: Optional[str]
+    category: Optional[str]

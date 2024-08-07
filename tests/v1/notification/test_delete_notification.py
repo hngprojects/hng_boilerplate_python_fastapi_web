@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
-from ....main import app
+from main import app
 from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
 from api.v1.models.user import User

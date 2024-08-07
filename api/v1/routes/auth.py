@@ -11,6 +11,8 @@ from api.v1.schemas.user import Token
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
 from api.v1.schemas.user import UserCreate, MagicLinkRequest
+from api.v1.services.organization import organization_service
+from api.v1.schemas.organization import CreateUpdateOrganization
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
@@ -24,6 +26,11 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
 
     # Create user account
     user = user_service.create(db=db, schema=user_schema)
+
+    # create an organization for the user
+    org = CreateUpdateOrganization(name=f"{user.first_name}'s Organization",
+                                   email=user.email)
+    user_org = organization_service.create(db=db, schema=org, user=user)
 
     # Create access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
@@ -90,12 +97,12 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
             'access_token': access_token,
             'token_type': 'bearer',
             'user':  {
-            **jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
-            'access_token': access_token,
-            'token_type': 'bearer',
+                **jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                ),
+                'access_token': access_token,
+                'token_type': 'bearer',
             }
         }
     )
@@ -113,7 +120,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
     return response
 
 
-@auth.post("/login", status_code=status.HTTP_200_OK)
+@auth.post("/login", status_code=status.HTTP_200_OK, response_model=success_response)
 def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Session = Depends(get_db)):
     """Endpoint to log in a user"""
 
