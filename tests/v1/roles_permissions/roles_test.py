@@ -9,7 +9,9 @@ from api.v1.services.user import user_service
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from api.v1.schemas.permissions.permissions import PermissionCreate
-from api.v1.schemas.permissions.roles import RoleDeleteResponse, ResponseModel
+from api.v1.schemas.permissions.roles import RoleDeleteResponse
+from api.utils.success_response import success_response
+
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -89,8 +91,8 @@ def test_create_role_success(mock_db_session):
 
     # Mock role creation
     response = client.post("/api/v1/roles", json=role_data, headers={'Authorization': f'Bearer {access_token}'})
-    assert response.status_code == 200
-    assert response.json()["name"] == role_name
+    assert response.status_code == 201
+    assert response.json()["message"] == "role TestRole created successfully"
     
     
     

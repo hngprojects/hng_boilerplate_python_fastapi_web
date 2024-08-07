@@ -5,6 +5,7 @@ from api.v1.models.permissions.role_permissions import role_permissions
 from api.v1.schemas.permissions.roles import RoleDeleteResponse
 from api.v1.schemas.role import RoleCreate
 from uuid_extensions import uuid7
+from api.utils.success_response import success_response
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 
@@ -18,7 +19,8 @@ class RoleService:
             db.add(db_role)
             db.commit()
             db.refresh(db_role)
-            return db_role
+            response = success_response(201, f'role {role.name} created successfully', db_role)
+            return response
         except IntegrityError as e:
             db.rollback()
             raise HTTPException(
@@ -39,6 +41,7 @@ class RoleService:
                 )
             )
             db.commit()
+            return success_response(200, "role successfully added to user")
         except IntegrityError as e:
             db.rollback()
             raise HTTPException(
@@ -97,6 +100,5 @@ class RoleService:
         db.commit()
         db.refresh(role)
         return role
-
 
 role_service = RoleService()
