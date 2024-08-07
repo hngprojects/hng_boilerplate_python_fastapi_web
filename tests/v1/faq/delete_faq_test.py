@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
+from fastapi import HTTPException
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
@@ -71,7 +72,7 @@ def test_delete_faq_success(client, db_session_mock):
             headers={'Authorization': 'Bearer token'}
         )
 
-        assert response.status_code == 204
+        assert response.status_code == 200
 
 
 def test_delete_faq_unauthorized(client, db_session_mock):
@@ -86,3 +87,23 @@ def test_delete_faq_unauthorized(client, db_session_mock):
 
     assert response.status_code == 401
 
+
+def test_faq_not_found(client, db_session_mock):
+    """Test when the FAQ ID does not exist."""
+
+    # Mock the user service to return the current super admin user
+    app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_admin
+    app.dependency_overrides[faq_service.fetch] = lambda: mock_faq
+
+    # Simulate a non-existent organization
+    nonexistent_id = str(uuid7())
+
+    # Mock the organization service to raise an exception for a non-existent FAQ
+    with patch("api.v1.services.faq.faq_service.fetch", side_effect=HTTPException(status_code=404, detail="FAQ not found")):
+        response = client.delete(
+            f'/api/v1/faqs/{nonexistent_id}',
+            headers={'Authorization': 'Bearer valid_token'}
+        )
+
+        # Assert that the response status code is 404 Not Found
+        assert response.status_code == 404

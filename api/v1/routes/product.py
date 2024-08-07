@@ -11,6 +11,8 @@ from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service, ProductCategoryService
 from api.v1.schemas.product import (
+    ProductCategoryCreate,
+    ProductCategoryData,
     ProductCreate,
     ProductList,
     ProductUpdate,
@@ -25,24 +27,6 @@ from api.v1.services.user import user_service
 from api.v1.models import User
 
 product = APIRouter(prefix="/products", tags=["Products"])
-
-
-@product.post("/{org_id}", status_code=status.HTTP_201_CREATED)
-def product_create(
-    org_id: str,
-    product: ProductCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    created_product = product_service.create(
-        db=db, schema=product, org_id=org_id, current_user=current_user
-    )
-
-    return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="Product created successfully",
-        data=jsonable_encoder(created_product),
-    )
 
 
 @product.get("", response_model=success_response, status_code=200)
@@ -255,3 +239,33 @@ async def update_product(
         message="Product updated successfully",
         data=jsonable_encoder(updated_product),
     )
+
+@product.post('/categories/{org_id}', status_code=status.HTTP_201_CREATED)
+def create_product_category(
+    org_id: str,
+    category_schema: ProductCategoryCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to create a product category
+
+    Args:
+        org_id (str): The unique identifier of the organization
+        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+    Returns:
+        ResponseModel: The created product category
+
+    Raises:
+        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
+    """
+
+    new_category = ProductCategoryService.create(db, org_id, category_schema, current_user)
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Category successfully created",
+        data=jsonable_encoder(new_category),
+    )
+

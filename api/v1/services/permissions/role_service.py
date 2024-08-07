@@ -52,6 +52,19 @@ class RoleService:
         db.delete(role)
         db.commit()
         return RoleDeleteResponse(id=role_id, message="Role successfully deleted")
+    
+    
+
+    @staticmethod
+    def get_roles_by_organization(db: Session, organization_id: str):
+        roles = db.query(Role).join(
+            user_organization_roles, Role.id == user_organization_roles.c.role_id
+        ).filter(user_organization_roles.c.organization_id == organization_id).all()
+        if not roles:
+            raise HTTPException(status_code=404, detail="Roles not found for the given organization")
+        return roles
+
+
 
     def fetch(self, db: Session, role_id: str):
         """Fetches an role by id"""
