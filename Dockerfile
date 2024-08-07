@@ -14,6 +14,9 @@ RUN apk add --no-cache curl
 # Copy the rest of the backend files
 COPY . /app/
 
+# Copy the .env.sample to .env
+COPY .env.sample /app/.env
+
 # Install dependencies
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
