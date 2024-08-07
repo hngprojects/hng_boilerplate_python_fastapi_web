@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,Query
 from sqlalchemy.orm import Session
+from typing import Annotated
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema
 from api.db.database import get_db
 from api.v1.services.newsletter import NewsletterService
 from fastapi.encoders import jsonable_encoder
+from api.v1.models.newsletter import Newsletter
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from api.v1.services.newsletter import NewsletterService
-
+from api.utils.pagination import paginated_response
 newsletter = APIRouter(prefix='/pages', tags=['Newsletter'])
 
-@newsletter.post('/newsletters')
+@newsletter.post('/newsletters/subscribers')
 async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
     """
     Newsletter subscription endpoint
@@ -28,7 +30,7 @@ async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
         status_code=status.HTTP_201_CREATED,
     )
 
-@newsletter.get('/newsletters', response_model=success_response, status_code=200,)
+@newsletter.get('/newsletters/subscribers', response_model=success_response, status_code=200,)
 def retrieve_subscribers(
     db: Session = Depends(get_db),
     admin: User = Depends(user_service.get_current_super_admin)
@@ -49,3 +51,22 @@ def retrieve_subscribers(
         status_code = 200,
         data = jsonable_encoder(subs_filtered)
     )
+
+@newsletter.get('/newsletters', status_code=200)
+def get_all_newsletters(
+    db:Session = Depends(get_db),
+    page_size: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
+):
+    """
+    Retrieving all newsletters
+    """
+
+    return paginated_response(
+        db=db,
+        skip=page,
+        limit = page_size,
+        model = Newsletter
+    )
+
+
