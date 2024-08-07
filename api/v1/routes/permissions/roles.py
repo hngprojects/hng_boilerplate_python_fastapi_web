@@ -41,6 +41,7 @@ def delete_role(
     current_user: User = Depends(user_service.get_current_user)
 ):
     try:
+        role_service.delete_role(db, role_id)
         return success_response(status_code=200, message="Role successfully deleted.", data={"id": role_id})
     except HTTPException as e:
         return JSONResponse(status_code=e.status_code, content={"status": False, "status_code": e.status_code, "message": e.detail})
