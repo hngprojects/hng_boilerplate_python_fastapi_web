@@ -88,7 +88,7 @@ def delete_newsletter(
     """Endpoint to delete a newsletter"""
     NewsletterService.delete(db=db, id=id)
 
-@newsletter.post('/newsletters/unsubscribe')
+@newsletter.post('/unsubscribe')
 async def unsubscribe_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
     """
     Newsletter unsubscription endpoint
