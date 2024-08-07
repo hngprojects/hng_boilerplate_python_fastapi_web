@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Path, Query, HTTPException
 from sqlalchemy.orm import Session
 from fastapi import status
-from api.v1.schemas.permissions.permissions import PermissionCreate, PermissionResponse, PermissionAssignRequest
+from api.v1.schemas.permissions.permissions import PermissionCreate, PermissionResponse, PermissionAssignRequest, PermissionUpdate
 from api.v1.services.permissions.permison_service import permission_service
 from api.db.database import get_db
 from uuid_extensions import uuid7
@@ -30,3 +30,13 @@ def delete_permissions(
     current_user: User = Depends(user_service.get_current_super_admin)
     ):
     return permission_service.delete_permission(db , permission_id)
+
+
+@perm_role.put("/roles/{role_id}/permissions/{permission_id}", tags=["update permissions"])
+def update_permission_endpoint(
+    new_permission_id: PermissionUpdate,  # New Permission ID from path
+    permission_id: str = Path(..., description="The ID of the old permission"),  # Old Permission ID from path
+    role_id: str = Path(..., description="The ID of the role"),  # Role ID from path
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)):  # Assuming only super admins can update permissions
+    return permission_service.update_permission_on_role(db, role_id, permission_id, new_permission_id.new_permission_id)
