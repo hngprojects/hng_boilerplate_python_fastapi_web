@@ -56,8 +56,8 @@ def delete_privacy(privacy_id: str, db: Session = Depends(get_db), superadmin_us
     privacy_service.delete(db, privacy_id)
 
 
-@privacies.put("/{privacy_id}", response_model=PrivacyPolicyResponse)
-def update_privacy(privacy_id: str, privacy: PrivacyPolicyUpdate, db: Session = Depends(get_db)):
+@privacies.patch("/{privacy_id}", response_model=PrivacyPolicyResponse)
+def update_privacy(privacy_id: str, privacy: PrivacyPolicyUpdate, db: Session = Depends(get_db), superadmin_user: User = Depends(user_service.get_current_super_admin)):
     db_privacy = privacy_service.update(db, privacy_id, privacy)
     return success_response(
         status_code=200,
