@@ -5,6 +5,9 @@ on:
 
 jobs:
   deploy-pr:
+    environment: 
+      name: preview
+      url: ${{ steps.deploy.outputs.preview-url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout to branch
