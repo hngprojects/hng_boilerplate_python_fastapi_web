@@ -10,14 +10,14 @@ from api.v1.models.base_model import BaseTableModel
 class Organization(BaseTableModel):
     __tablename__ = "organizations"
 
-    company_name = Column(String, nullable=False, unique=True)
-    company_email = Column(String, nullable=True, unique=True)
+    name = Column(String, nullable=False, unique=True)
+    email = Column(String, nullable=True, unique=True)
     industry = Column(String, nullable=True)
-    organization_type = Column(String, nullable=True)
+    type = Column(String, nullable=True)
+    description = Column(String, nullable=True)
     country = Column(String, nullable=True)
     state = Column(String, nullable=True)
     address = Column(String, nullable=True)
-    lga = Column(String, nullable=True)
 
     users = relationship(
         "User", secondary=user_organization_association, back_populates="organizations"
@@ -40,4 +40,4 @@ class Organization(BaseTableModel):
                          cascade='all, delete-orphan')
 
     def __str__(self):
-        return self.company_name
+        return self.name
