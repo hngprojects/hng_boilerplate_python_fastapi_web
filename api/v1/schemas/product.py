@@ -164,3 +164,15 @@ class ProductCategoryRetrieve(BaseModel):
     id: str
     class Config:
         from_attributes = True
+
+class ProductCategoryCreate(BaseModel):
+    name: str
+
+class ProductCategoryData(BaseModel):
+    name: str
+
+class ProductCategoryCreateResponse(BaseModel, Generic[T]):
+    message: str
+    status_code: int
+    category: T
+

@@ -11,6 +11,9 @@ from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service, ProductCategoryService
 from api.v1.schemas.product import (
+    ProductCategoryCreate,
+    ProductCategoryCreateResponse,
+    ProductCategoryData,
     ProductCreate,
     ProductList,
     ProductUpdate,
@@ -237,3 +240,34 @@ async def update_product(
         message="Product updated successfully",
         data=jsonable_encoder(updated_product),
     )
+
+@product.post('/categories/{org_id}', status_code=status.HTTP_201_CREATED, response_model=ProductCategoryCreateResponse[ProductCategoryData])
+def create_product_category(
+    org_id: str,
+    category_schema: ProductCategoryCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to create a product category
+
+    Args:
+        org_id (str): The unique identifier of the organization
+        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+    Returns:
+        ResponseModel: The created product category
+
+    Raises:
+        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
+    """
+
+    print("First user: ", current_user)
+    new_category = ProductCategoryService.create(db, org_id, category_schema, current_user)
+
+    return ProductCategoryCreateResponse (
+        message = "Category successfully created",
+        status_code = status.HTTP_201_CREATED,
+        category = new_category
+    )
+
