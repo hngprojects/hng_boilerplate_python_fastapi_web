@@ -90,12 +90,12 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
             'access_token': access_token,
             'token_type': 'bearer',
             'user':  {
-            **jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
-            'access_token': access_token,
-            'token_type': 'bearer',
+                **jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                ),
+                'access_token': access_token,
+                'token_type': 'bearer',
             }
         }
     )
@@ -113,7 +113,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
     return response
 
 
-@auth.post("/login", status_code=status.HTTP_200_OK)
+@auth.post("/login", status_code=status.HTTP_200_OK, response_model=success_response)
 def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Session = Depends(get_db)):
     """Endpoint to log in a user"""
 

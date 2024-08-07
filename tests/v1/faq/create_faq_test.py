@@ -47,6 +47,7 @@ def mock_faq():
         id=str(uuid7()),
         question="TTest qustion?",
         answer="TAnswer",
+        category="Policies",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -86,6 +87,7 @@ def test_create_faq_success(client, db_session_mock):
             json={
                 "question": "Question?",
                 "answer": "Answer",
+                "category": "Category",
             }
         )
 
@@ -127,6 +129,7 @@ def test_create_faq_unauthorized(client, db_session_mock):
         json={
             "question": "Question?",
             "answer": "Answer",
+            "category": "Category",
         }
     )
 

@@ -62,6 +62,12 @@ class ProductData(BaseModel):
     products: List[ProductBase]
 
 
+class ProductStockResponse(BaseModel):
+    product_id: str
+    current_stock: int
+    last_updated: datetime
+
+
 class ProductList(BaseModel):
     status_code: int = 200
     success: bool
@@ -158,3 +164,9 @@ class ProductCategoryRetrieve(BaseModel):
     id: str
     class Config:
         from_attributes = True
+
+class ProductCategoryCreate(BaseModel):
+    name: str
+
+class ProductCategoryData(BaseModel):
+    name: str

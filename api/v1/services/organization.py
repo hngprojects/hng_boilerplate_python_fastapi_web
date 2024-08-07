@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 import logging
 from typing import Any, Optional
 from fastapi import HTTPException
@@ -149,7 +151,7 @@ class OrganizationService(Service):
 
     # def add_user_to_organization(self, db: Session, org_id: str, user_id: str):
     def add_user_to_organization(self, schema: AddUpdateOrganizationRole, db: Session):
-        '''Deletes a user from an organization'''
+        '''Adds a user to an organization'''
 
         # Fetch the user and organization
         user = check_model_existence(db, User, schema.user_id)
@@ -263,5 +265,26 @@ class OrganizationService(Service):
             raise HTTPException(status_code=404, detail="Organization not found")
         else:
             return True
+        
+    def export_organization_members(self, db: Session, org_id: str):
+        '''Exports the organization members'''
+
+        org = self.fetch(db=db, id=org_id)
+
+        csv_file = StringIO()
+        csv_writer = csv.writer(csv_file)
+
+        # Write headers
+        csv_writer.writerow(["ID", "First name", 'Last name', "Email", 'Date registered'])
+
+        # Write member data
+        for user in org.users:
+            csv_writer.writerow([user.id, user.first_name, user.last_name, user.email, user.created_at])
+
+        # Move to the beginning of the file
+        csv_file.seek(0)
+
+        return csv_file
+
 
 organization_service = OrganizationService()

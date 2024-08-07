@@ -1,4 +1,5 @@
 from typing import Any, Optional
+import sqlalchemy
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from fastapi import HTTPException, status
@@ -6,15 +7,10 @@ from fastapi import HTTPException, status
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.product import (
-    Product,
-    ProductFilterStatusEnum,
-    ProductStatusEnum,
-    ProductCategory,
-)
+from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum, ProductCategory
 from api.v1.models.user import User
 from api.v1.models import Organization
-from api.v1.schemas.product import ProductCreate
+from api.v1.schemas.product import ProductCategoryCreate, ProductCreate
 from api.utils.db_validators import check_user_in_org
 from api.v1.schemas.product import ProductFilterResponse
 
@@ -74,7 +70,8 @@ class ProductService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Product, column) and value:
-                    query = query.filter(getattr(Product, column).ilike(f"%{value}%"))
+                    query = query.filter(
+                        getattr(Product, column).ilike(f"%{value}%"))
 
         return query.all()
 
@@ -124,13 +121,30 @@ class ProductService(Service):
     def fetch_by_status(self, db: Session, status: ProductStatusEnum):
         """Fetch products by filter status"""
         try:
-            products = db.query(Product).filter(Product.status == status.value).all()
+            products = db.query(Product).filter(
+                Product.status == status.value).all()
             response_data = [
                 ProductFilterResponse.from_orm(product) for product in products
             ]
             return response_data
         except Exception as e:
             raise
+
+    def fetch_stock(self, db: Session, product_id: str, current_user: User) -> dict:
+        """Fetches the current stock level for a specific product"""
+        product = check_model_existence(db, Product, product_id)
+
+        organization = check_model_existence(db, Organization, product.org_id)
+        
+        check_user_in_org(user=current_user, organization=organization)
+
+        total_stock = product.quantity
+
+        return {
+            "product_id": product_id,
+            "current_stock": total_stock,
+            "last_updated": product.updated_at
+        }
 
     def update(self, db: Session, id: str, schema):
         """Updates a product"""
@@ -179,27 +193,50 @@ class ProductService(Service):
 
         product = check_model_existence(db, Product, product_id)
         return product
-    
+
+
 class ProductCategoryService(Service):
-        """Product categories service functionality"""
-        
-        @staticmethod
-        def create():
-            pass
+    """Product categories service functionality"""
+
+    @staticmethod
+    def create(
+        db: Session, 
+        org_id: str, 
+        schema: ProductCategoryCreate, 
+        current_user: User
+    ):
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        try:
+            new_category = ProductCategory(**schema.model_dump())
+            db.add(new_category)
+            db.commit()
+            db.refresh(new_category)
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Category already exists.",
+                )
+
+        return new_category
     
-        @staticmethod
-        def fetch_all(db: Session, **query_params: Optional[Any]):
-            '''Fetch all newsletter subscriptions with option to search using query parameters'''
 
-            query = db.query(ProductCategory)
+    @staticmethod
+    def fetch_all(db: Session, **query_params: Optional[Any]):
+        '''Fetch all newsletter subscriptions with option to search using query parameters'''
 
-            # Enable filter by query parameter
-            if query_params:
-                for column, value in query_params.items():
-                    if hasattr(ProductCategory, column) and value:
-                        query = query.filter(getattr(ProductCategory, column).ilike(f'%{value}%'))
+        query = db.query(ProductCategory)
 
-            return query.all()
+        # Enable filter by query parameter
+        if query_params:
+            for column, value in query_params.items():
+                if hasattr(ProductCategory, column) and value:
+                    query = query.filter(
+                        getattr(ProductCategory, column).ilike(f'%{value}%'))
+
+        return query.all()
 
 
 product_service = ProductService()
