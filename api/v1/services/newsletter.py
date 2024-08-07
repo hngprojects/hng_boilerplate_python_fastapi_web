@@ -74,25 +74,6 @@ class NewsletterService(Service):
             )
         db.delete(newsletter_subscriber)
         
-    def fetch(news_id: str, db: Annotated[Session, Depends(get_db)]):
-        """Fetch a single newsletter.
-
-        Args:
-            news_id: The id of the newsletter
-            db: database Session object
-
-        Return:
-            SingleNewsletterResponse: Response on success
-        """
-
-        # checking if newsletter exist and send
-        newsletter = check_model_existence(db, Newsletter, news_id)
-        return success_response(
-            status_code=200,
-            message="Successfully fetched newsletter",
-            data=newsletter
-        )
-
     @staticmethod
     def update():
         pass

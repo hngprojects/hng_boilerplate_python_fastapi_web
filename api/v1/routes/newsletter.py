@@ -58,21 +58,10 @@ def retrieve_subscribers(
     )
 
 @newsletter.get('/{id}', response_model=SingleNewsletterResponse, status_code=status.HTTP_200_OK)
-async def get_single_newsletter(
-    id: str,
-    db: Annotated[Session, Depends(get_db)],
-    ):
-    """Retrieves a single newsletter.
-
-    Args:
-        id: The id of the job for the newsletter
-        db: database Session object
-
-    Returns:
-        SingleNewslettersResponse: response on success
-    """
-    newsletterservice = NewsletterService()
-    return newsletterservice.fetch(news_id=id, db=db)
+async def get_single_newsletter(id: str, db: Annotated[Session, Depends(get_db)]):
+    """Retrieves a single newsletter."""
+    newsletter = NewsletterService.fetch(db=db, id=id)
+    return success_response(message="Successfully fetched newsletter", status_code=200, data=newsletter)
 
 @newsletter.delete(
     "/{id}",
