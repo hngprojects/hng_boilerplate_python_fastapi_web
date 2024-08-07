@@ -18,7 +18,7 @@ db = next(get_db())
 
 user_1 = User(
     id=str(uuid7()),
-    email="test@mail",
+    email="test@email.com",
     password=user_service.hash_password("testpass"),
     first_name="John",
     last_name="Doe",
@@ -41,11 +41,11 @@ user_3 = User(
 db.add_all([user_1, user_2, user_3])
 
 org_1 = Organization(
-    company_name="Python Org", organization_type="An organization for python develoers"
+    name="Python Org", type="An organization for python develoers"
 )
-org_2 = Organization(company_name="Django Org", organization_type="An organization of django devs")
+org_2 = Organization(name="Django Org", type="An organization of django devs")
 org_3 = Organization(
-    company_name="FastAPI Devs", organization_type="An organization of Fast API devs"
+    name="FastAPI Devs", type="An organization of Fast API devs"
 )
 
 
@@ -83,6 +83,18 @@ admin_user = User(
     is_verified=True,
 )
 db.add(admin_user)
+
+newsletter_1 = Newsletter(
+    title="test newsletter 1",
+    description="a test newsletter"
+)
+
+newsletter_2 = Newsletter(
+    title="test newsletter 2",
+    description="a test newsletter"
+)
+
+db.add_all([newsletter_1, newsletter_2])
 db.commit()
 
 job_1 = Job(id=str(uuid7()), author_id=user_1.id, description="Test job one", title="Engineer")
@@ -96,5 +108,5 @@ application_2 = JobApplication(id=str(uuid7()), job_id=job_2.id, applicant_name=
 db.add_all([job_1, job_2, application_1, application_2])
 db.commit()
 
-# users = db.query(Organization).first().users
+users = db.query(Organization).first().users
 print("Seed data succesfully")

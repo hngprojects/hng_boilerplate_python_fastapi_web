@@ -9,7 +9,9 @@ from api.v1.services.user import user_service
 from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from api.v1.schemas.permissions.permissions import PermissionCreate
-from api.v1.schemas.permissions.roles import RoleDeleteResponse, ResponseModel
+from api.v1.schemas.permissions.roles import RoleDeleteResponse
+from api.utils.success_response import success_response
+
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
