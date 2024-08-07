@@ -35,7 +35,6 @@ async def google_login(token_request: OAuthToken, db: Session = Depends(get_db))
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
 
     profile_data = profile_response.json()
-    print(profile_response.json())
     user = google_oauth_service.create(db=db, google_response=profile_data)
 
     access_token = user_service.create_access_token(user_id=user.id)
