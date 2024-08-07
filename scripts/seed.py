@@ -41,11 +41,11 @@ user_3 = User(
 db.add_all([user_1, user_2, user_3])
 
 org_1 = Organization(
-    company_name="Python Org", organization_type="An organization for python develoers"
+    name="Python Org", type="An organization for python develoers"
 )
-org_2 = Organization(company_name="Django Org", organization_type="An organization of django devs")
+org_2 = Organization(name="Django Org", type="An organization of django devs")
 org_3 = Organization(
-    company_name="FastAPI Devs", organization_type="An organization of Fast API devs"
+    name="FastAPI Devs", type="An organization of Fast API devs"
 )
 
 
