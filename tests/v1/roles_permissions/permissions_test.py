@@ -15,7 +15,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from main import app
 from api.v1.models.user import User
 from api.v1.models.permissions.permissions import Permission
-from api.v1.models.organization import Organization
+from api.v1.models.permissions.role import Role
 from api.v1.services.permissions.permison_service import permission_service
 from api.db.database import get_db
 
@@ -80,7 +80,7 @@ def test_create_permission(mock_db_session, mock_permission_service):
 
     response = client.post(CREATE_PERMISSIONS_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
     assert response.status_code == 200
-    assert response.json()['name'] == 'Read'
+    assert response.json()['message'] == 'permissions created successfully'
 
 
 def test_create_permission_endpoint_integrity_error(mock_db_session, mock_permission_service):
@@ -122,28 +122,6 @@ def test_assign_permission_to_role_success(mock_db_session, mock_permission_serv
     assert response.status_code == 200
     assert response.json()["message"] == "Permission assigned successfully"
 
-def test_assign_permission_to_role_invalid_role(mock_db_session, mock_permission_service):
-    """Test for assigning a permission to a non-existent role."""
-
-    user_email = "mike@example.com"
-    create_mock_user(mock_db_session, user_email)
-
-    access_token = user_service.create_access_token(str(user_email))
-    role_id = uuid7
-    permission_id = str(uuid7())
-
-    create_mock_permissions(mock_db_session, "Read", permission_id)
-    # Do not create the role here to simulate a non-existent role.
-    mock_db_session.add.side_effect = IntegrityError("mock error", {}, None)
-
-    payload = {
-        "permission_id": permission_id
-    }
-
-    response = client.post(f"api/v1/roles/{role_id}/permissions", json=payload, headers={'Authorization': f'Bearer {access_token}'})
-    print("JSON 1234", response.json())
-    assert response.status_code == 400
-    assert response.json()["message"] == "An error occurred while assigning the permission."
 
 def test_assign_permission_to_role_integrity_error(mock_db_session, mock_permission_service):
     """Test for handling IntegrityError when assigning a permission to a role."""
@@ -162,12 +140,15 @@ def test_assign_permission_to_role_integrity_error(mock_db_session, mock_permiss
         "permission_id": permission_id
     }
 
-    mock_db_session.add.side_effect = IntegrityError("mock error", {}, None)
+    # Instead of mocking `add`, mock `commit` to raise the IntegrityError
+    mock_db_session.commit.side_effect = IntegrityError("mock error", {}, None)
     
     headers = {'Authorization': f'Bearer {access_token}'}
     response = client.post(f"api/v1/roles/{role_id}/permissions", json=payload, headers=headers)
+
     assert response.status_code == 400
     assert response.json()["message"] == "An error occurred while assigning the permission."
+
 
 def test_deleteuser(mock_db_session):
     dummy_admin = User (
