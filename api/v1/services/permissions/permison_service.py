@@ -39,7 +39,7 @@ class PermissionService:
             
             # Assign the permission to the role
             # Ensure role_permissions table exists and create the association
-            db.add(role_permissions.insert().values(role_id=role_id, permission_id=permission_id))
+            db.execute(role_permissions.insert().values(role_id=role_id, permission_id=permission_id))
             db.commit()
             return {"success": True, "message": "Permission assigned successfully"}
 
