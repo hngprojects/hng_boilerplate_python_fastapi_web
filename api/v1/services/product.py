@@ -207,8 +207,6 @@ class ProductCategoryService(Service):
     ):
         organization = check_model_existence(db, Organization, org_id)
 
-        print("Current USer: ", current_user)
-
         check_user_in_org(user=current_user, organization=organization)
 
         try:

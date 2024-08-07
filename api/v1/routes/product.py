@@ -262,7 +262,6 @@ def create_product_category(
         HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
     """
 
-    print("First user: ", current_user)
     new_category = ProductCategoryService.create(db, org_id, category_schema, current_user)
 
     return ProductCategoryCreateResponse (
