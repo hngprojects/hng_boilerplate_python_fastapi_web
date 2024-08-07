@@ -22,6 +22,7 @@ class UserCreate(BaseModel):
     password: str
     first_name: str
     last_name: str
+    admin_secret: Optional[str] = None
 
     @field_validator("password")
     @classmethod
