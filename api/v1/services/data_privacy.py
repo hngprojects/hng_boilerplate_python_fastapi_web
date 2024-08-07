@@ -29,8 +29,19 @@ class DataPrivacyService(Service):
 
         return user.data_privacy_setting
 
-    def update(self):
-        pass
+    def update(self, db: Session, user: User, schema):
+        """Updates the user privacy settings"""
+
+        data_privacy_setting = self.fetch(db=db, user=user)
+
+        # Update the fields with the provided schema data
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(data_privacy_setting, key, value)
+
+        db.commit()
+        db.refresh(data_privacy_setting)
+        return data_privacy_setting
 
     def delete(self):
         pass
