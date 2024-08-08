@@ -7,7 +7,7 @@ from api.db.database import get_db
 from api.v1.services.user import oauth2_scheme
 from api.v1.services.analytics import analytics_service, AnalyticsServices
 
-statistics = APIRouter(prefix='/statistics')
+statistics = APIRouter(prefix='/statistics', tags=['Statistics'])
 
 
 def get_current_month_date_range():
@@ -18,18 +18,14 @@ def get_current_month_date_range():
     return start_date, end_date
 
 
-
-
-
 @statistics.get('', status_code=status.HTTP_200_OK)
 async def get_analytics_summary(
-   token: Annotated[str, Depends(oauth2_scheme)],
+    token: Annotated[str, Depends(oauth2_scheme)],
     db: Annotated[Session, Depends(get_db)],
     analytics_service: Annotated[AnalyticsServices, Depends()],
     start_date: datetime = None,
     end_date: datetime = None
 ):
-    
     """
     Retrieves analytics summary data for an organization or super admin.
     Args:
