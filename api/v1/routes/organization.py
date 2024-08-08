@@ -156,11 +156,9 @@ def delete_product(
         db=db, org_id=org_id, product_id=product_id, current_user=current_user
     )
 
-@organization.delete("/{org_id}")
-async def delete_organization(
-    org_id: str,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_super_admin),
+@organization.delete("superadmin/{org_id}")
+async def delete_organization(org_id: str, db: Session = Depends(get_db), 
+                        current_user: User = Depends(user_service.get_current_super_admin),
 ):
     check = organization_service.check_organization_exist(db, org_id)
     if check:
