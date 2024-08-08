@@ -90,7 +90,7 @@ def test_fetch_single_product_comment(client, db_session_mock):
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_admin()
     app.dependency_overrides[product_service.create] = lambda: mock_product()
     app.dependency_overrides[product_comment_service.create] = lambda: mock_product_comment()
-    app.dependency_overrides[product_comment_service.fetch_single] = lambda: mock_product_comment()
+    app.dependency_overrides[product_comment_service.fetch] = lambda: mock_product_comment()
 
     
     # Mock job update

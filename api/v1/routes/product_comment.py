@@ -27,9 +27,7 @@ def get_product_comment(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    comment = product_comment_service.fetch_single(db=db, comment_id=comment_id)
-    if not comment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+    comment = product_comment_service.fetch(db=db, id=comment_id)
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Comment fetched successfully",
