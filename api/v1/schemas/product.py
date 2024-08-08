@@ -1,6 +1,7 @@
-from pydantic import BaseModel, EmailStr, Field, PositiveFloat
-from typing import List, Optional, Any, Dict, TypeVar, Generic
+from pydantic import BaseModel, EmailStr, Field, PositiveFloat, ConfigDict, StringConstraints
+from typing import List, Optional, Any, Dict, TypeVar, Generic, Annotated, List
 from datetime import datetime
+
 
 T = TypeVar("T")
 
@@ -164,3 +165,27 @@ class ProductCategoryRetrieve(BaseModel):
     id: str
     class Config:
         from_attributes = True
+
+class ProductCategoryCreate(BaseModel):
+    name: str
+
+class ProductCategoryData(BaseModel):
+    name: str
+
+
+class ProductCommentCreate(BaseModel):
+    content: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
+
+
+class ProductCommentsSchema(BaseModel):
+    """
+    Schema for Product Comments
+    """
+
+    user_id: str = ""
+    product_id: str = ""
+    content: str = ""
+    created_at: datetime = datetime.now()
+
+    model_config = ConfigDict(from_attributes=True)

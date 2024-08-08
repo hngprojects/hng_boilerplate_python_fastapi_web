@@ -24,9 +24,10 @@ class TeamServices(Service):
 
         return new_member
 
-    def fetch_all(self, db, page, page_size):
-        """Fetch all teams"""
-        pass
+    def fetch_all(self, db: Session):
+        """Fetch all team members"""
+        team_members = db.query(TeamMember).all()
+        return team_members
 
     def fetch(self, db, id):
         """Fetch a single team"""

@@ -14,3 +14,6 @@ class PermissionResponse(BaseModel):
 
 class PermissionAssignRequest(BaseModel):
     permission_id: str
+    
+class PermissionUpdate(BaseModel):
+    new_permission_id: str

@@ -21,6 +21,31 @@ team = APIRouter(prefix="/team", tags=["Teams"])
 
 
 @team.get(
+    '/members',
+    response_model=success_response,
+    status_code=status.HTTP_200_OK
+)
+def get_all_team_members(
+    db: Session = Depends(get_db),
+    su: User = Depends(user_service.get_current_super_admin)
+):
+    '''Endpoint to fetch all team members'''
+    team_members = team_service.fetch_all(db)
+
+    if not team_members:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No team members found"
+        )
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Team members retrieved successfully',
+        data=jsonable_encoder(team_members),
+    )
+
+
+@team.get(
     '/members/{team_id}',
     response_model=success_response,
     status_code=status.HTTP_200_OK

@@ -10,7 +10,10 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service, ProductCategoryService
+from api.v1.services.product_comment import product_comment_service
 from api.v1.schemas.product import (
+    ProductCategoryCreate,
+    ProductCategoryData,
     ProductCreate,
     ProductList,
     ProductUpdate,
@@ -18,7 +21,9 @@ from api.v1.schemas.product import (
     ProductStockResponse,
     ProductFilterResponse,
     SuccessResponse,
-    ProductCategoryRetrieve
+    ProductCategoryRetrieve,
+    ProductCommentCreate,
+    ProductCommentsSchema,
 )
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
@@ -236,4 +241,71 @@ async def update_product(
         status_code=200,
         message="Product updated successfully",
         data=jsonable_encoder(updated_product),
+    )
+
+@product.post('/categories/{org_id}', status_code=status.HTTP_201_CREATED)
+def create_product_category(
+    org_id: str,
+    category_schema: ProductCategoryCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to create a product category
+
+    Args:
+        org_id (str): The unique identifier of the organization
+        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+    Returns:
+        ResponseModel: The created product category
+
+    Raises:
+        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
+    """
+
+    new_category = ProductCategoryService.create(db, org_id, category_schema, current_user)
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Category successfully created",
+        data=jsonable_encoder(new_category),
+    )
+
+@product.post("/{product_id}/comments", status_code=status.HTTP_201_CREATED, response_model=ProductCommentsSchema)
+def create_product_comment(
+    product_id: str,
+    comment: ProductCommentCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    product_comment = product_comment_service.create(
+        db,
+        comment,
+        current_user.id,
+        product_id
+    )
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product Comment successfully created",
+        data=jsonable_encoder(product_comment),
+    )
+
+@product.patch("/{product_id}/comments/{comment_id}", status_code=status.HTTP_200_OK, response_model=ProductCommentsSchema)
+def update_product_comment(
+    product_id: str,
+    comment_id: str,
+    comment: ProductCommentCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    product_comment = product_comment_service.update(
+        db,
+        comment_id,
+        comment
+    )
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Product Comment successfully updated!",
+        data=jsonable_encoder(product_comment),
     )
