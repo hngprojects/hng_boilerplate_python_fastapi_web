@@ -43,6 +43,7 @@ from api.v1.routes.job_application import job_application
 from api.v1.routes.privacy import privacies
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
+from api.v1.routes.statistics import statistics
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -88,4 +89,4 @@ api_version_one.include_router(settings)
 api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
 api_version_one.include_router(product_comment)
-
+api_version_one.include_router(statistics)
