@@ -57,7 +57,7 @@ class TestCodeUnderTest:
             with patch('api.v1.schemas.team.TeamMemberCreateResponseSchema.model_validate') as sc:
                 sc.return_value = test_member
                 response = client.post(
-                    "/api/v1/team/members", json=test_member)
+                    "/api/v1/teams", json=test_member)
 
                 assert response.status_code == 201
                 assert response.json()[
@@ -74,7 +74,7 @@ class TestCodeUnderTest:
                        "picture_url": "example.com",
                        "team_type": "Executive"}
 
-        response = client.post("/api/v1/team/members", json=test_member)
+        response = client.post("/api/v1/teams", json=test_member)
         assert response.status_code == 422
         assert response.json()['message'] == 'Invalid input'
 
@@ -85,7 +85,7 @@ class TestCodeUnderTest:
                        "picture_url": "example.com",
                        "team_type": "Executive"}
 
-        response = client.post("/api/v1/team/members", json=test_member)
+        response = client.post("/api/v1/teams", json=test_member)
         assert response.status_code == 422
 
     # Handling unauthorized request
@@ -99,7 +99,7 @@ class TestCodeUnderTest:
 
         app.dependency_overrides = {}
 
-        response = client.post("/api/v1/team/members", json=test_member)
+        response = client.post("/api/v1/teams", json=test_member)
         assert response.status_code == 401
         assert response.json()['message'] == 'Not authenticated'
 
@@ -117,7 +117,7 @@ class TestCodeUnderTest:
         app.dependency_overrides[oauth2_scheme] = mock_oauth
 
         with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
-            response = client.post("/api/v1/team/members", json=test_member)
+            response = client.post("/api/v1/teams", json=test_member)
         assert response.status_code == 403
         assert response.json()[
             'message'] == 'You do not have permission to access this resource'
