@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Tests for superadmin
 """
@@ -18,7 +19,7 @@ from sqlalchemy.orm import Session
 
 
 client = TestClient(app)
-GET_TEAM_MEMBER_ENDPOINT = "/api/v1/teams"
+DELETE_TEAM_MEMBER_ENDPOINT = "/api/v1/teams"
 
 
 @pytest.fixture
@@ -124,7 +125,7 @@ def create_dummy_mock_team_member(mock_team_service: TeamServices, mock_db_sessi
 def test_unauthorised_access(mock_user_service: UserService, mock_db_session: Session):
     """Test for unauthorized access to endpoint."""
 
-    response = client.get(f"{GET_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}")
+    response = client.delete(f"{DELETE_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}")
 
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -147,8 +148,8 @@ def test_non_admin_access(
         updated_at=datetime.now(timezone.utc),
     )
 
-    response = client.get(
-        f"{GET_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}",
+    response = client.delete(
+        f"{DELETE_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}",
         headers={"Authorization": "Bearer dummy_token"},
     )
 
@@ -158,7 +159,7 @@ def test_non_admin_access(
 @pytest.mark.usefixtures(
     "mock_db_session", "mock_user_service", "override_get_current_super_admin"
 )
-def test_successful_team_member_get(
+def test_successful_team_member_delete(
     mock_user_service: UserService,
     mock_db_session: Session,
     override_get_current_super_admin: None,
@@ -168,17 +169,18 @@ def test_successful_team_member_get(
     # Create a mock user
     create_dummy_mock_user(mock_user_service, mock_db_session)
     mock_db_session.get.return_value = mock_db_session.get.return_value
+    mock_db_session.delete.return_value = None
 
-    response = client.get(
-        f"{GET_TEAM_MEMBER_ENDPOINT}/{mock_id}",
+    response = client.delete(
+        f"{DELETE_TEAM_MEMBER_ENDPOINT}/{mock_id}",
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    # Simulate the user being deleted from the database
+    # Simulate the team member being deleted from the database
     mock_db_session.get.return_value = None
 
     response = client.get(
-        f"{GET_TEAM_MEMBER_ENDPOINT}/{mock_id}",
+        f"{DELETE_TEAM_MEMBER_ENDPOINT}/{mock_id}",
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -196,8 +198,8 @@ def test_not_found_error(
     # Simulate the user not being found in the database
     mock_db_session.get.return_value = None
 
-    response = client.get(
-        f"{GET_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}",
+    response = client.delete(
+        f"{DELETE_TEAM_MEMBER_ENDPOINT}/{str(uuid7())}",
     )
 
     assert response.status_code == status.HTTP_404_NOT_FOUND
