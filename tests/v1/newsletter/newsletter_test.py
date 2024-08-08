@@ -48,7 +48,7 @@ def test_sub_newsletter_success(db_session_mock):
     email_data = {"email": "test1@example.com"}
 
     # Act
-    response = client.post("/api/v1/pages/newsletters", json=email_data)
+    response = client.post("/api/v1/newsletters", json=email_data)
 
     # Assert
     assert response.status_code == 201
@@ -62,7 +62,7 @@ def test_sub_newsletter_existing_email(db_session_mock):
     email_data = {"email": "test@example.com"}
 
     # Act
-    response = client.post("/api/v1/pages/newsletters", json=email_data)
+    response = client.post("/api/v1/newsletters", json=email_data)
 
     # Assert
     assert response.status_code == 400
@@ -84,7 +84,7 @@ class TestCodeUnderTest:
                     {"email": "test1@example.com"}]
         mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_subs)
 
-        response = client.get('/api/v1/pages/newsletters')
+        response = client.get('/api/v1/newsletters')
 
         assert response.status_code == 200
         assert response.json()['success'] == True
@@ -98,7 +98,7 @@ class TestCodeUnderTest:
 
         mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_submissions)
 
-        response = client.get('/api/v1/pages/newsletters')
+        response = client.get('/api/v1/newsletters')
 
         assert response.status_code == 200
         assert response.json()['success'] == True
@@ -113,7 +113,7 @@ class TestCodeUnderTest:
 
         with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
 
-            response = client.get('/api/v1/pages/newsletters')
+            response = client.get('/api/v1/newsletters')
 
             assert response.status_code == 403
 
@@ -121,7 +121,7 @@ class TestCodeUnderTest:
     def test_retrieve_contact_unauthenticated(self):
         app.dependency_overrides = {}
 
-        response = client.get('/api/v1/pages/newsletters')
+        response = client.get('/api/v1/newsletters')
 
         assert response.status_code == 401
 
