@@ -10,7 +10,6 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service, ProductCategoryService
-from api.v1.services.product_comment import product_comment_service
 from api.v1.schemas.product import (
     ProductCategoryCreate,
     ProductCategoryData,
@@ -22,8 +21,6 @@ from api.v1.schemas.product import (
     ProductFilterResponse,
     SuccessResponse,
     ProductCategoryRetrieve,
-    ProductCommentCreate,
-    ProductCommentsSchema,
     ProductDetail,
 )
 from api.utils.dependencies import get_current_user
@@ -43,47 +40,6 @@ async def get_all_products(
     """Endpoint to get all products. Only accessible to superadmin"""
 
     return paginated_response(db=db, model=Product, limit=limit, skip=skip)
-
-
-@non_organization_product.post(
-    "/{product_id}/comments",
-    status_code=status.HTTP_201_CREATED,
-    response_model=ProductCommentsSchema,
-)
-def create_product_comment(
-    product_id: str,
-    comment: ProductCommentCreate,
-    current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db),
-):
-    product_comment = product_comment_service.create(
-        db, comment, current_user.id, product_id
-    )
-    return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="Product Comment successfully created",
-        data=jsonable_encoder(product_comment),
-    )
-
-
-@non_organization_product.patch(
-    "/{product_id}/comments/{comment_id}",
-    status_code=status.HTTP_200_OK,
-    response_model=ProductCommentsSchema,
-)
-def update_product_comment(
-    product_id: str,
-    comment_id: str,
-    comment: ProductCommentCreate,
-    current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db),
-):
-    product_comment = product_comment_service.update(db, comment_id, comment)
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message="Product Comment successfully updated!",
-        data=jsonable_encoder(product_comment),
-    )
 
 
 # categories
