@@ -66,6 +66,26 @@ def create_product_comment(
     )
 
 
+@non_organization_product.patch(
+    "/{product_id}/comments/{comment_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ProductCommentsSchema,
+)
+def update_product_comment(
+    product_id: str,
+    comment_id: str,
+    comment: ProductCommentCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    product_comment = product_comment_service.update(db, comment_id, comment)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Product Comment successfully updated!",
+        data=jsonable_encoder(product_comment),
+    )
+
+
 # categories
 @non_organization_product.post("/categories", status_code=status.HTTP_201_CREATED)
 def create_product_category(
