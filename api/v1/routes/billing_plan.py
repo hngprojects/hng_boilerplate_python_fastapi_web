@@ -33,7 +33,6 @@ async def retrieve_all_billing_plans(
         },
     )
 
-
 @bill_plan.post("/billing-plans", response_model=success_response)
 async def create_new_billing_plan(
     request: CreateSubscriptionPlan,
@@ -51,3 +50,23 @@ async def create_new_billing_plan(
         message="Plans created successfully",
         data=jsonable_encoder(plan),
     )
+
+@bill_plan.patch('/billing-plans/{billing_plan_id}', response_model=success_response)
+async def update_a_billing_plan(
+    billing_plan_id: str,
+    request: CreateSubscriptionPlan,
+    current_user: User = Depends(user_service.get_current_super_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Endpoint to update a billing plan by ID
+    """
+
+    plan = billing_plan_service.update(db=db, id=billing_plan_id, schema=request)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Plan updated successfully",
+        data=jsonable_encoder(plan),
+    )
+
