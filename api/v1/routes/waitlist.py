@@ -7,7 +7,7 @@ from api.utils.json_response import JsonResponseDict
 from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
 
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request, status
 from sqlalchemy.orm import Session
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.v1.services.waitlist_email import (
@@ -115,17 +115,25 @@ def admin_add_user_to_waitlist(
 
     return JsonResponseDict(**resp)
 
+
 @waitlist.get("/users", response_model=success_response, status_code=200)
 async def get_all_waitlist_emails(
-    request: Request,
-    db: Session = Depends(get_db),
-    admin=Depends(get_super_admin)
+    request: Request, db: Session = Depends(get_db), admin=Depends(get_super_admin)
 ):
     waitlist_users = waitlist_service.fetch_all(db)
-    emails = [{"email": user.email, "full_name": user.full_name} for user in waitlist_users]
+    emails = [
+        {"email": user.email, "full_name": user.full_name} for user in waitlist_users
+    ]
 
     return success_response(
-        message="Waitlist retrieved successfully",
-        status_code=200,
-        data=emails
+        message="Waitlist retrieved successfully", status_code=200, data=emails
     )
+
+
+@waitlist.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+async def remove_waitlist_by_email(
+    id: str, admin=Depends(get_super_admin), db: Session = Depends(get_db)
+):
+    """Remove a waitlisted user with the id"""
+
+    waitlist_service.delete(db, id)
