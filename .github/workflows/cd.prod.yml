@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build image
-        run: docker build -t anchor-python-bp-prod:latest -f docker/prod/Dockerfile .
+        run: docker build -t anchor-python-bp-prod:latest -f Dockerfile .
 
       - name: Save image 
         run: docker save anchor-python-bp-prod:latest | gzip > prod.tar.gz
@@ -23,7 +23,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           source: "prod.tar.gz"
-          target: "/home/${{ secrets.USERNAME }}/boilerplate-python/prod_source_code/docker/prod"
+          target: "/home/${{ secrets.USERNAME }}/boilerplate-python/prod_source_code"
  
       - name: Deploy image on server
         uses: appleboy/ssh-action@v0.1.8
@@ -32,8 +32,8 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd /home/${{ secrets.USERNAME }}/boilerplate-python/prod_source_code/docker/prod
+            cd /home/${{ secrets.USERNAME }}/boilerplate-python/prod_source_code
             git pull origin main
             docker load --input prod.tar.gz
-            docker-compose -f docker-compose.yml up -d
+            docker-compose -f docker-compose.prod.yml up -d
             rm -f prod.tar.gz
