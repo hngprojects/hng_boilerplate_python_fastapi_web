@@ -11,22 +11,25 @@ from api.v1.models.user import User
 from api.v1.services.user import user_service
 from main import app
 
+
 # Helper functions to create mock data
 def mock_role():
     return Role(
         id=str(uuid7()),
         name="Test Role",
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
+
 
 def mock_permission():
     return Permission(
         id=str(uuid7()),
         name="Test Permission",
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
+
 
 def mock_superuser():
     return User(
@@ -38,13 +41,15 @@ def mock_superuser():
         is_active=True,
         is_super_admin=True,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
+
 
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock(spec=Session)
     return db_session
+
 
 @pytest.fixture
 def client(db_session_mock):
@@ -52,6 +57,7 @@ def client(db_session_mock):
     client = TestClient(app)
     yield client
     app.dependency_overrides = {}
+
 
 def test_update_role_permission_success(client, db_session_mock):
     """Test updating a role's permission successfully"""
@@ -63,21 +69,26 @@ def test_update_role_permission_success(client, db_session_mock):
 
     # Mock the role, permissions, and superuser
     db_session_mock.query(Role).filter_by(id=role.id).first.return_value = role
-    db_session_mock.query(Permission).filter_by(id=old_permission.id).first.return_value = old_permission
-    db_session_mock.query(Permission).filter_by(id=new_permission.id).first.return_value = new_permission
+    db_session_mock.query(Permission).filter_by(
+        id=old_permission.id
+    ).first.return_value = old_permission
+    db_session_mock.query(Permission).filter_by(
+        id=new_permission.id
+    ).first.return_value = new_permission
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: superuser
 
     # Mock the update function
     db_session_mock.commit.return_value = None
 
     response = client.put(
-        f"/api/v1/roles/{role.id}/permissions/{old_permission.id}",
+        f"/api/v1/{role.id}/roles/{old_permission.id}",
         json={"new_permission_id": new_permission.id},
-        headers={'Authorization': 'Bearer token'}
+        headers={"Authorization": "Bearer token"},
     )
 
     assert response.status_code == 200
     assert response.json()["message"] == "Permission updated successfully"
+
 
 def test_update_role_permission_not_found(client, db_session_mock):
     """Test updating a role's permission when the role or permissions are not found"""
@@ -92,13 +103,14 @@ def test_update_role_permission_not_found(client, db_session_mock):
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: superuser
 
     response = client.put(
-        f"/api/v1/roles/{role_id}/permissions/{old_permission_id}",
+        f"/api/v1/{role_id}/roles/{old_permission_id}",
         json={"new_permission_id": new_permission_id},
-        headers={'Authorization': 'Bearer token'}
+        headers={"Authorization": "Bearer token"},
     )
 
     assert response.status_code == 404
     assert response.json()["message"] == "Role not found."
+
 
 def test_update_role_permission_invalid_permission(client, db_session_mock):
     """Test updating a role's permission with an invalid new permission ID"""
@@ -110,16 +122,20 @@ def test_update_role_permission_invalid_permission(client, db_session_mock):
 
     # Mock the role and old permission
     db_session_mock.query(Role).filter_by(id=role.id).first.return_value = role
-    db_session_mock.query(Permission).filter_by(id=old_permission.id).first.return_value = old_permission
+    db_session_mock.query(Permission).filter_by(
+        id=old_permission.id
+    ).first.return_value = old_permission
 
     # Simulate new permission not found
-    db_session_mock.query(Permission).filter_by(id=new_perission.id).first.return_value = None
+    db_session_mock.query(Permission).filter_by(
+        id=new_perission.id
+    ).first.return_value = None
     app.dependency_overrides[user_service.get_current_super_admin] = lambda: superuser
 
     response = client.put(
-        f"/api/v1/roles/{role.id}/permissions/{old_permission.id}",
+        f"/api/v1/{role.id}/roles/{old_permission.id}",
         json={"new_permission_id": new_perission.id},
-        headers={'Authorization': 'Bearer token'}
+        headers={"Authorization": "Bearer token"},
     )
 
     assert response.status_code == 404
