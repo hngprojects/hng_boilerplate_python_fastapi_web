@@ -17,11 +17,11 @@ from api.v1.schemas.team import (PostTeamMemberSchema,
 from api.v1.services.team import TeamServices, team_service
 from api.v1.services.user import user_service
 
-team = APIRouter(prefix="/team", tags=["Teams"])
+team = APIRouter(prefix="/teams", tags=["Teams"])
 
 
 @team.get(
-    '/members',
+    "",
     response_model=success_response,
     status_code=status.HTTP_200_OK
 )
@@ -46,7 +46,7 @@ def get_all_team_members(
 
 
 @team.get(
-    '/members/{team_id}',
+    '/{team_id}',
     response_model=success_response,
     status_code=status.HTTP_200_OK
 )
@@ -55,23 +55,28 @@ def get_team_member_by_id(
     db: Session = Depends(get_db),
     su: User = Depends(user_service.get_current_super_admin)
 ):
-    '''Endpoint to fetch a team by id'''
+    """Endpoint to fetch a team by id
+    Args:
+        team_id(str): The id of the team to be fetched
+        db(Session): The database session
+        su(User): The current super admin user
+    """
     team_response = team_service.fetch(db, team_id)
     if not team:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Team not found"
+            detail="Team member not found"
         )
 
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='Team fetched successfully',
+        message='Team member fetched successfully',
         data=jsonable_encoder(team_response),
     )
 
 
 @team.patch(
-    '/members/{team_id}',
+    '/{team_id}',
     response_model=success_response,
     status_code=status.HTTP_200_OK
 )
@@ -81,20 +86,26 @@ def update_team_member_by_id(
     db: Session = Depends(get_db),
     su: User = Depends(user_service.get_current_super_admin),
 ):
-    '''Endpoint to update a team by id'''
+    """Endpoint to update a team by id
+    Args:
+        team_id(str): The id of the team to be updated
+        team_data(UpdateTeamMember): The data to be updated
+        db(Session): The database session
+        su(User): The current super admin user
+    """
 
     team_response = team_service.update(
         db, team_id, team_data.model_dump(exclude_unset=True,
                                           exclude_none=True))
     return success_response(
         status_code=status.HTTP_200_OK,
-        message='Team updated successfully',
+        message='Team member updated successfully',
         data=jsonable_encoder(team_response),
     )
 
 
 @team.post(
-    "/members",
+    "",
     response_model=success_response,
     status_code=201,
 
@@ -111,7 +122,7 @@ async def add_team_members(
     Parameters:
     - team: PostTeamMemberSchema
         The details of the team member.
-    - admin: User (Depends on get_current_super_admin)
+    - admin: User(Depends on get_current_super_admin)
         The current admin adding the team member. This is a dependency that provides the admin context.
     - db: The database session
     """
@@ -124,3 +135,24 @@ async def add_team_members(
         data=jsonable_encoder(
             TeamMemberCreateResponseSchema.model_validate(new_member))
     )
+
+
+@team.delete(
+    "/{team_id}",
+    status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_team_member_by_id(
+    team_id: Annotated[str, Path(description="Team Member ID")],
+    db: Session = Depends(get_db),
+    su: User = Depends(user_service.get_current_super_admin)
+):
+    """Endpoint to delete a team by id
+
+    Args:
+        team_id(str): The id of the team to be deleted
+        db(Session): The database session
+        su(User): The current super admin user
+    """
+
+    team_service.delete(db, team_id)
+    return {}

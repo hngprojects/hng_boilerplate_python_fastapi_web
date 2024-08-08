@@ -1,24 +1,10 @@
-import pytest
-from unittest.mock import MagicMock
-from fastapi.testclient import TestClient
-from fastapi import HTTPException
-from uuid_extensions import uuid7
-
-
-from main import app
-from sqlalchemy.orm import Session
-from api.v1.services.product_comment import product_comment_service
-from api.v1.models import User
-from api.utils.dependencies import get_current_user
-from api.v1.services.product_comment import ProductCommentService
-from api.utils.success_response import success_response
-
-
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
+import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-
+from uuid_extensions import uuid7
 
 from api.db.database import get_db
 from api.v1.services.user import user_service
@@ -83,15 +69,13 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 
-def test_fetch_single_product_comment(client, db_session_mock):
-    '''Test to successfully fetch a single product comment'''
+def test_update_job_success(client, db_session_mock):
+    '''Test to successfully update a job'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_admin()
     app.dependency_overrides[product_service.create] = lambda: mock_product()
-    app.dependency_overrides[product_comment_service.create] = lambda: mock_product_comment()
-    app.dependency_overrides[product_comment_service.fetch] = lambda: mock_product_comment()
-
+    app.dependency_overrides[product_comment_service.update] = lambda: mock_product_comment()
     
     # Mock job update
     db_session_mock.add.return_value = None
@@ -101,41 +85,29 @@ def test_fetch_single_product_comment(client, db_session_mock):
     mock_product_comment_instance = mock_product_comment()
     mock_product_instance = mock_product()
 
-
     with patch("api.v1.services.product_comment.product_comment_service.create", return_value=mock_product_comment_instance) as mock_update:
-        response = client.get(
-            f"/api/v1/products/{mock_product_instance.id}/comments/{mock_product_comment_instance.id}",
-            headers={'Authorization': 'Bearer token'}
+        response = client.patch(
+            f'api/v1/products/{mock_product_comment_instance.id}/comments/{mock_product_instance.id}',
+            headers={'Authorization': 'Bearer token'},
+            json={
+                "content": "Jack Reaper thinks this product is Cool.",
+            }
         )
 
         assert response.status_code == 200
 
-        
 
+def test_update_job_unauthorized(client, db_session_mock):
+    '''Test for unauthorized user'''
 
-
-def test_fetch_all_product_comment(client, db_session_mock):
-    '''Test to successfully fetch all product comment'''
-
-    # Mock the user service to return the current user
-    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_admin()
-    app.dependency_overrides[product_service.create] = lambda: mock_product()
-    app.dependency_overrides[product_comment_service.create] = lambda: mock_product_comment()
-    app.dependency_overrides[product_comment_service.fetch_all] = lambda: mock_product_comment()
-
-    
-    # Mock job update
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
-
+    mock_product_comment_instance = mock_product_comment()
     mock_product_instance = mock_product()
-    
-    
-    response = client.get(
-            f"/api/v1/products/{mock_product_instance.id}/comments",
-            headers={'Authorization': 'Bearer token'}
-        )
+    response = client.patch(
+        f'api/v1/products/{mock_product_comment_instance.id}/comments/{mock_product_instance.id}',
+        headers={'Authorization': 'Bearer token'},
+        json={
+            "content": "Jack Reaper thinks this product is Cool.",
+        }
+    )
 
-    assert response.status_code == 200
-        
+    assert response.status_code == 401

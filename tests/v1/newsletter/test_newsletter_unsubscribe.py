@@ -55,7 +55,7 @@ class TestUnsubscribeNewsletter:
         email_data = {"email": "test@example.com"}
 
         # Act
-        response = client.post("/api/v1/pages/newsletters/unsubscribe", json=email_data)
+        response = client.post("/api/v1/newsletters/unsubscribe", json=email_data)
 
         # Assert
         assert response.status_code == 200
@@ -68,7 +68,7 @@ class TestUnsubscribeNewsletter:
         email_data = {"email": "notfound@example.com"}
 
         # Act
-        response = client.post("/api/v1/pages/newsletters/unsubscribe", json=email_data)
+        response = client.post("/api/v1/newsletters/unsubscribe", json=email_data)
 
         # Assert
         assert response.status_code == 404
