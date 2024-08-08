@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout to branch
         uses: actions/checkout@v4
+      - name: Copy .env.sample to .env
+        run: cp .env.sample .env
       - id: deploy
         name: Pull Request Deploy
         uses: hngprojects/pr-deploy@dev
@@ -22,7 +24,7 @@ jobs:
           comment: true
           context: '.'
           dockerfile: 'Dockerfile'
-          exposed_port: '8000'
+          exposed_port: '7001'
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Print Preview Url
         run: |

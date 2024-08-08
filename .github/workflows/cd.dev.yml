@@ -1,35 +1,40 @@
-name: Dev Branch Deployment
-
+name: Dev cd pipeline
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
-    branches: [dev]
+  push:
+    branches: [devops]
 
 jobs:
-  on-success:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use SSH Action
+      - name: Build image
+        run: docker build -t anchor-python-bp-dev:latest -f Dockerfile .
+
+      - name: Save image 
+        run: docker save anchor-python-bp-dev:latest | gzip > dev.tar.gz
+
+      - name: Copy image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          source: "dev.tar.gz"
+          target: "/home/${{ secrets.USERNAME }}/boilerplate-python/dev_source_code"
+ 
+      - name: Deploy image on server
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd python/dev_source_code/
-            git pull origin dev
-            source .venv/bin/activate
-            pip install -r requirements.txt
-            alembic upgrade head
+            cd /home/${{ secrets.USERNAME }}/boilerplate-python/dev_source_code
+            git pull origin devops
+            docker load --input dev.tar.gz
+            docker compose -f docker-compose.yml up -d
+            rm -f dev.tar.gz
 
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The triggering workflow failed'
