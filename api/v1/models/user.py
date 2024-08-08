@@ -83,6 +83,7 @@ class User(BaseTableModel):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    product_comments = relationship("ProductComment", back_populates="user", cascade="all, delete-orphan")
 
     product_comments = relationship("ProductComment", back_populates="user",
                                     cascade="all, delete-orphan")
