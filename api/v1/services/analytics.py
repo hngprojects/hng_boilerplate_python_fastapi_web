@@ -15,7 +15,7 @@ from api.v1.models.product import Product
 from api.v1.models.user import User
 from api.v1.models.billing_plan import BillingPlan
 from api.v1.schemas.analytics import (
-    AnalyticsChartsResponse, AnalyticsSummaryResponse, SuperAdminMetrics, UserMetrics, MetricData)
+    AnalyticsChartsResponse, AnalyticsSummaryResponse, SuperAdminMetrics, UserMetrics)
 
 DATA: dict = {idx: month_name for idx,
               month_name in enumerate(calendar.month_name) if month_name}
@@ -143,7 +143,7 @@ class AnalyticsServices(Service):
 
         if user.is_super_admin:
             data = self.get_summary_data_super_admin(db, start_date, end_date)
-            message = "Successfully retrieved summary for super admin dashboard"
+            message = "Dashboard statistics retrieved successfully"
         else:
             user_organization = (db.query(user_organization_association)
                                  .filter_by(user_id=user.id).first())
@@ -152,7 +152,7 @@ class AnalyticsServices(Service):
                     status_code=403, detail="User is not part of any organization")
             data = self.get_summary_data_organization(
                 db, user_organization.organization_id, start_date, end_date)
-            message = "Successfully retrieved summary for user dashboard"
+            message = "Dashboard statistics retrieved successfully"
 
         return AnalyticsSummaryResponse(
             message=message,
@@ -161,7 +161,7 @@ class AnalyticsServices(Service):
             data=data
         )
 
-    def get_summary_data_super_admin(self, db: Session, start_date: datetime, end_date: datetime) -> SuperAdminMetrics:
+    def get_summary_data_super_admin(self, db: Session, start_date: datetime, end_date: datetime) -> dict:
         total_revenue = db.query(func.sum(Sales.amount)).filter(
             Sales.created_at.between(start_date, end_date)).scalar() or 0
         total_products = db.query(func.count(Product.id)).scalar() or 0
@@ -179,32 +179,30 @@ class AnalyticsServices(Service):
         last_month_lifetime_sales = db.query(func.sum(Sales.amount)).filter(
             Sales.created_at < start_date).scalar() or 0
 
-        return [
+        return {
+            "total_revenue": {
+                "current_month": total_revenue,
+                "previous_month": last_month_revenue,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue)}%"
+            },
+            "total_users": {
+                "current_month": total_users,
+                "previous_month": last_month_users,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_users, total_users)}%"
+            },
+            "total_products": {
+                "current_month": total_products,
+                "previous_month": last_month_products,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_products, total_products)}%"
+            },
+            "lifetime_sales": {
+                "current_month": lifetime_sales,
+                "previous_month": last_month_lifetime_sales,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_lifetime_sales, lifetime_sales)}%"
+            }
+        }
 
-            {'total_revenue': MetricData(
-                value=total_revenue,
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_revenue, total_revenue)
-            )},
-            {'total_products': MetricData(
-                value=int(total_products),
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_products, total_products)
-            )},
-            {'total_users': MetricData(
-                value=int(total_users),
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_users, total_users)
-            )},
-            {'lifetime_sales': MetricData(
-                value=lifetime_sales,
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_lifetime_sales, lifetime_sales)
-            )}
-
-        ]
-
-    def get_summary_data_organization(self, db: Session, org_id: str, start_date: datetime, end_date: datetime) -> UserMetrics:
+    def get_summary_data_organization(self, db: Session, org_id: str, start_date: datetime, end_date: datetime) -> dict:
         total_revenue = db.query(func.sum(Sales.amount)).filter(and_(
             Sales.organization_id == org_id, Sales.created_at.between(start_date, end_date))).scalar() or 0
         subscriptions = db.query(func.count(BillingPlan.id)).filter(and_(
@@ -225,37 +223,51 @@ class AnalyticsServices(Service):
             User.is_active == True,
             User.organizations.any(id=org_id)
         )).scalar() or 0
+        previous_hour = last_hour - timedelta(hours=1)
+        active_previous_hour = db.query(func.count(User.id)).filter(and_(
+            User.is_active == True,
+            User.organizations.any(id=org_id),
+            User.created_at >= last_hour - timedelta(hours=1),
+            User.created_at < last_hour
+        )).scalar() or 0
 
-        return [
+        return {
+            "total_revenue": {
+                "current_month": total_revenue,
+                "previous_month": last_month_revenue,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue)}%"
+            },
+            "subscriptions": {
+                "current_month": subscriptions,
+                "previous_month": last_month_subscriptions,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_subscriptions, subscriptions)}%"
+            },
+            "sales": {
+                "current_month": sales,
+                "previous_month": last_month_sales,
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_sales, sales)}%"
+            },
+            "active_now": {
+                "current_hour": active_now,
+                "previous_hour": active_previous_hour,
+                "percentage_difference": f"{self.calculate_percentage_increase(active_previous_hour, active_now)}%"
+            }
+        }
 
-            {'total_revenue': MetricData(
-                value=total_revenue,
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_revenue, total_revenue)
-            )},
-            {'subscriptions': MetricData(
-                value=int(subscriptions),
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_subscriptions, subscriptions)
-            )},
-            {'sales': MetricData(
-                value=int(sales),
-                percentage_increase=self.calculate_percentage_increase(
-                    last_month_sales, sales)
-            )},
-            {'active_now': MetricData(
-                value=active_now,
-                percentage_increase=self.calculate_percentage_increase(
-                    0, active_now)  # No comparison for active now
-            )}
+    def calculate_percentage_increase(self, previous_value: Union[float, int], current_value: Union[float, int]) -> float:
+        """
+        Calculate the percentage increase from previous_value to current_value.
 
-        ]
+        Args:
+            previous_value: The previous value.
+            current_value: The current value.
 
-    @staticmethod
-    def calculate_percentage_increase(previous_value: Union[int, float], current_value: Union[int, float]) -> float:
+        Returns:
+            float: The percentage increase.
+        """
         if previous_value == 0:
-            return 0.0 if current_value == 0 else 100.0
-        return ((current_value - previous_value) / abs(previous_value)) * 100
+            return 100.0 if current_value > 0 else 0.0
+        return ((current_value - previous_value) / previous_value) * 100
 
     def create(self):
         """
