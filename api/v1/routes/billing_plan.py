@@ -12,12 +12,12 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.schemas.plans import CreateSubscriptionPlan
 
-bill_plan = APIRouter(prefix='/organizations', tags=['Billing-Plan'])
+bill_plan = APIRouter(prefix="/organisations", tags=["Billing-Plan"])
 
-@bill_plan.get('/{organization_id}/billing-plans', response_model=success_response)
+
+@bill_plan.get("/{organization_id}/billing-plans", response_model=success_response)
 async def retrieve_all_billing_plans(
-    organization_id: str,
-    db: Session = Depends(get_db)
+    organization_id: str, db: Session = Depends(get_db)
 ):
     """
     Endpoint to get all billing plans
@@ -32,6 +32,7 @@ async def retrieve_all_billing_plans(
             "plans": jsonable_encoder(plans),
         },
     )
+
 
 @bill_plan.post("/billing-plans", response_model=success_response)
 async def create_new_billing_plan(
@@ -51,12 +52,13 @@ async def create_new_billing_plan(
         data=jsonable_encoder(plan),
     )
 
-@bill_plan.patch('/billing-plans/{billing_plan_id}', response_model=success_response)
+
+@bill_plan.patch("/billing-plans/{billing_plan_id}", response_model=success_response)
 async def update_a_billing_plan(
     billing_plan_id: str,
     request: CreateSubscriptionPlan,
     current_user: User = Depends(user_service.get_current_super_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Endpoint to update a billing plan by ID
@@ -70,11 +72,12 @@ async def update_a_billing_plan(
         data=jsonable_encoder(plan),
     )
 
-@bill_plan.delete('/billing-plans/{billing_plan_id}', response_model=success_response)
+
+@bill_plan.delete("/billing-plans/{billing_plan_id}", response_model=success_response)
 async def delete_a_billing_plan(
     billing_plan_id: str,
     current_user: User = Depends(user_service.get_current_super_admin),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Endpoint to delete a billing plan by ID
