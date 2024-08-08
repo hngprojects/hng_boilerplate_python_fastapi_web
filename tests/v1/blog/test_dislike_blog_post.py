@@ -86,18 +86,22 @@ def test_successful_dislike(
     # mock existing-blog-dislike AND new-blog-dislike
     mock_db_session.query().filter_by().first.side_effect = [None, test_blog_dislike]
 
+    # mock dislike-count
+    mock_db_session.query().filter_by().count.return_value = 1
+
     resp = make_request(test_blog.id, access_token_user)
     resp_d = resp.json()
     assert resp.status_code == 200
     assert resp_d['success'] == True
     assert resp_d['message'] == "Dislike recorded successfully."
 
-    dislike_data = resp_d['data']
+    dislike_data = resp_d['data']['object']
     assert dislike_data['id'] == test_blog_dislike.id
     assert dislike_data['blog_id'] == test_blog.id
     assert dislike_data['user_id'] == test_user.id
     assert dislike_data['ip_address'] == test_blog_dislike.ip_address
     assert datetime.fromisoformat(dislike_data['created_at']) == test_blog_dislike.created_at
+    assert resp_d['data']['objects_count'] == 1
 
 
 # Test for double dislike
