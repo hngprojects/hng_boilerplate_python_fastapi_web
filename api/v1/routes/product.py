@@ -10,6 +10,7 @@ from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service, ProductCategoryService
+from api.v1.services.product_comment import product_comment_service
 from api.v1.schemas.product import (
     ProductCategoryCreate,
     ProductCategoryData,
@@ -20,7 +21,9 @@ from api.v1.schemas.product import (
     ProductStockResponse,
     ProductFilterResponse,
     SuccessResponse,
-    ProductCategoryRetrieve
+    ProductCategoryRetrieve,
+    ProductCommentCreate,
+    ProductCommentsSchema,
 )
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
@@ -269,3 +272,21 @@ def create_product_category(
         data=jsonable_encoder(new_category),
     )
 
+@product.post("/{product_id}/comments", status_code=status.HTTP_201_CREATED, response_model=ProductCommentsSchema)
+def create_product_comment(
+    product_id: str,
+    comment: ProductCommentCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    product_comment = product_comment_service.create(
+        db,
+        comment,
+        current_user.id,
+        product_id
+    )
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product Comment successfully created",
+        data=jsonable_encoder(product_comment),
+    )

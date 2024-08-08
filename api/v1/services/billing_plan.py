@@ -21,8 +21,14 @@ class BillingPlanService(Service):
 
         return plan
 
-    def delete():
-        pass
+    def delete(self, db: Session, id: str):
+        """
+        delete a plan by plan id
+        """
+        plan = check_model_existence(db, BillingPlan, id)
+
+        db.delete(plan)
+        db.commit()
 
     def fetch():
         pass
