@@ -183,22 +183,22 @@ class AnalyticsServices(Service):
             "total_revenue": {
                 "current_month": total_revenue,
                 "previous_month": last_month_revenue,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue)}%"
             },
             "total_users": {
                 "current_month": total_users,
                 "previous_month": last_month_users,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_users, total_users):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_users, total_users)}%"
             },
             "total_products": {
                 "current_month": total_products,
                 "previous_month": last_month_products,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_products, total_products):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_products, total_products)}%"
             },
             "lifetime_sales": {
                 "current_month": lifetime_sales,
                 "previous_month": last_month_lifetime_sales,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_lifetime_sales, lifetime_sales):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_lifetime_sales, lifetime_sales)}%"
             }
         }
 
@@ -235,22 +235,22 @@ class AnalyticsServices(Service):
             "total_revenue": {
                 "current_month": total_revenue,
                 "previous_month": last_month_revenue,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue)}%"
             },
             "subscriptions": {
                 "current_month": subscriptions,
                 "previous_month": last_month_subscriptions,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_subscriptions, subscriptions):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_subscriptions, subscriptions)}%"
             },
             "sales": {
                 "current_month": sales,
                 "previous_month": last_month_sales,
-                "percentage_difference": f"{self.calculate_percentage_increase(last_month_sales, sales):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(last_month_sales, sales)}%"
             },
             "active_now": {
                 "current_hour": active_now,
                 "previous_hour": active_previous_hour,
-                "percentage_difference": f"{self.calculate_percentage_increase(active_previous_hour, active_now):.2f}%"
+                "percentage_difference": f"{self.calculate_percentage_increase(active_previous_hour, active_now)}%"
             }
         }
 
