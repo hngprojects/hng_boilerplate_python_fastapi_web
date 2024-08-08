@@ -143,16 +143,37 @@ class AnalyticsServices(Service):
 
         if user.is_super_admin:
             data = self.get_summary_data_super_admin(db, start_date, end_date)
-            message = "Dashboard statistics retrieved successfully"
+            message = "Admin Statistics Fetched"
         else:
-            user_organization = (db.query(user_organization_association)
-                                 .filter_by(user_id=user.id).first())
+            user_organization = db.query(
+                user_organization_association).filter_by(user_id=user.id).first()
             if not user_organization:
-                raise HTTPException(
-                    status_code=403, detail="User is not part of any organization")
-            data = self.get_summary_data_organization(
-                db, user_organization.organization_id, start_date, end_date)
-            message = "Dashboard statistics retrieved successfully"
+                data = {
+                    "revenue": {
+                        "current_month": 0,
+                        "previous_month": 0,
+                        "percentage_difference": "0.00%"
+                    },
+                    "subscriptions": {
+                        "current_month": 0,
+                        "previous_month": 0,
+                        "percentage_difference": "0.00%"
+                    },
+                    "orders": {
+                        "current_month": 0,
+                        "previous_month": 0,
+                        "percentage_difference": "0.00%"
+                    },
+                    "active_users": {
+                        "current": 0,
+                        "difference_an_hour_ago": 0
+                    }
+                }
+                message = "User is not part of any organization"
+            else:
+                data = self.get_summary_data_organization(
+                    db, user_organization.organization_id, start_date, end_date)
+                message = "User Statistics Fetched"
 
         return AnalyticsSummaryResponse(
             message=message,
@@ -232,7 +253,7 @@ class AnalyticsServices(Service):
         )).scalar() or 0
 
         return {
-            "total_revenue": {
+            "revenue": {
                 "current_month": total_revenue,
                 "previous_month": last_month_revenue,
                 "percentage_difference": f"{self.calculate_percentage_increase(last_month_revenue, total_revenue)}%"
@@ -242,15 +263,14 @@ class AnalyticsServices(Service):
                 "previous_month": last_month_subscriptions,
                 "percentage_difference": f"{self.calculate_percentage_increase(last_month_subscriptions, subscriptions)}%"
             },
-            "sales": {
+            "orders": {
                 "current_month": sales,
                 "previous_month": last_month_sales,
                 "percentage_difference": f"{self.calculate_percentage_increase(last_month_sales, sales)}%"
             },
-            "active_now": {
-                "current_hour": active_now,
-                "previous_hour": active_previous_hour,
-                "percentage_difference": f"{self.calculate_percentage_increase(active_previous_hour, active_now)}%"
+            "active_users": {
+                "current": active_now,
+                "difference_an_hour_ago": active_now - active_previous_hour
             }
         }
 
