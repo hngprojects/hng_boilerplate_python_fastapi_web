@@ -2,14 +2,16 @@ from fastapi import APIRouter, Depends, status , Query
 from typing import Annotated
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
-from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema, SingleNewsletterResponse
+from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema, SingleNewsletterResponse, UpdateNewsletter
 from api.db.database import get_db
 from api.v1.services.newsletter import NewsletterService, Newsletter
 from fastapi.encoders import jsonable_encoder
 from api.v1.models.user import User
 from api.v1.services.user import user_service
+
+newsletter = APIRouter(prefix="/newsletters", tags=["Newsletter"])
 from api.utils.pagination import paginated_response
-newsletter = APIRouter(prefix="/pages/newsletters", tags=["Newsletter"])
+
 
 
 @newsletter.post("/subscribers")
@@ -77,6 +79,22 @@ def delete_newsletter(
     """Endpoint to delete a newsletter"""
     NewsletterService.delete(db=db, id=id)
 
+@newsletter.patch(
+    "/{id}",
+    status_code=status.HTTP_200_OK,   
+)
+async def update_newsletter(
+    id: str,
+    schema: UpdateNewsletter,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    newsletter = NewsletterService.update(db, id, schema)
+    return success_response(
+        data=jsonable_encoder(newsletter),
+        message="Successfully updated a newsletter",
+        status_code=status.HTTP_200_OK
+    )
 @newsletter.get('', status_code=200)
 def get_all_newsletters(
     db:Session = Depends(get_db),
