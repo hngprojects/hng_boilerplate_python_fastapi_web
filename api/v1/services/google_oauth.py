@@ -1,5 +1,6 @@
-from fastapi import Depends, HTTPException
+from fastapi import BackgroundTasks, Depends, HTTPException
 from datetime import datetime, timezone
+from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.v1.models.organization import Organization
 from api.v1.models.user import User
@@ -19,7 +20,7 @@ class GoogleOauthServices(Service):
     """
     Handles database operations for google oauth
     """
-    def create(self, google_response: dict, db: Session):
+    def create(self, background_tasks: BackgroundTasks, google_response: dict, db: Session):
         """
         Creates a user using information from google.
 
@@ -44,6 +45,16 @@ class GoogleOauthServices(Service):
                 return existing_user
             else:
                 new_user = self.create_new_user(google_response, db)
+                background_tasks.add_task(
+                    send_email, 
+                    recipient=new_user.email,
+                    template_name='welcome.html',
+                    subject='Welcome to HNG Boilerplate',
+                    context={
+                        'first_name': new_user.first_name,
+                        'last_name': new_user.last_name
+                    }
+                )
                 return new_user
         except Exception as e:
             db.rollback()
