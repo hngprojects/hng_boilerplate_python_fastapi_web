@@ -1,54 +1,55 @@
 from datetime import datetime
 from typing import Dict, List
 from pydantic import BaseModel, EmailStr, field_validator
+from typing import Optional
 
 from api.utils.success_response import success_response
 
 class OrganizationBase(BaseModel):
-    '''Base organization schema'''
+    """Base organization schema"""
 
     id: str
     created_at: datetime
     updated_at: datetime
-    company_name: str
-    company_email: EmailStr
-    industry: str
-    organization_type: str
-    country: str
-    state: str
-    address: str
-    lga: str
+    name: str
+    email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    description: Optional[str] = None
 
 
 class CreateUpdateOrganization(BaseModel):
-    '''Organization schema to create or update organization'''
+    """Organization schema to create or update organization"""
 
-    company_name: str
-    company_email: EmailStr
-    industry: str
-    organization_type: str
-    country: str
-    state: str
-    address: str
-    lga: str
+    name: str
+    email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    description: Optional[str] = None
 
 
 class AddUpdateOrganizationRole(BaseModel):
-    '''Schema to update a user role in an organization'''
+    """Schema to update a user role in an organization"""
 
     role: str
     user_id: str
     org_id: str
 
-    @field_validator('role')
+    @field_validator("role")
     def role_validator(cls, value):
-        if value not in ['admin', 'user', 'guest', 'owner']:
-            raise ValueError('Role has to be one of admin, guest, user, or owner')
+        if value not in ["admin", "user", "guest", "owner"]:
+            raise ValueError("Role has to be one of admin, guest, user, or owner")
         return value
 
 
 class RemoveUserFromOrganization(BaseModel):
-    '''Schema to delete a user role in an organization'''
+    """Schema to delete a user role in an organization"""
 
     user_id: str
     org_id: str

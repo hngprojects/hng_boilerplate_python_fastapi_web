@@ -12,10 +12,13 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
 from api.core.base.services import Service
+from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
+from api.v1.models.associations import user_organization_association
 from api.v1.models.user import User
+from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
@@ -28,8 +31,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 class UserService(Service):
     """User service"""
 
-    def fetch_all(self, db: Session, page: int, per_page: int,
-                  **query_params: Optional[Any]):
+    def fetch_all(
+        self, db: Session, page: int, per_page: int, **query_params: Optional[Any]
+    ):
         """
         Fetch all users
         Args:
@@ -48,7 +52,7 @@ class UserService(Service):
                 if value is not None and not isinstance(value, bool):
                     raise HTTPException(
                         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                        detail=f"Invalid value for '{param}'. Must be a boolean."
+                        detail=f"Invalid value for '{param}'. Must be a boolean.",
                     )
                 if value == None:
                     continue
@@ -60,16 +64,18 @@ class UserService(Service):
             query = query.filter(*filters)
             total_users = query.count()
 
-        all_users: list = (query
-                           .order_by(desc(User.created_at))
-                           .limit(per_page)
-                           .offset((page - 1) * per_page)
-                           .all())
+        all_users: list = (
+            query.order_by(desc(User.created_at))
+            .limit(per_page)
+            .offset((page - 1) * per_page)
+            .all()
+        )
 
         return self.all_users_response(all_users, total_users, page, per_page)
-   
-    def all_users_response(self, users: list, total_users: int,
-                           page: int, per_page: int):
+
+    def all_users_response(
+        self, users: list, total_users: int, page: int, per_page: int
+    ):
         """
         Generates a response for all users
         Args:
@@ -77,22 +83,27 @@ class UserService(Service):
             total_users: total number of users
         """
         if not users or len(users) == 0:
-            return user.AllUsersResponse(message='No User(s) for this query',
-                                         status='success',
-                                         status_code=200,
-                                         page=page,
-                                         per_page=per_page,
-                                         total=0,
-                                         data=[])
-        all_users = [user.UserData.model_validate(usr,
-                                                  from_attributes=True) for usr in users]
-        return user.AllUsersResponse(message='Users successfully retrieved',
-                                     status='success',
-                                     status_code=200,
-                                     page=page,
-                                     per_page=per_page,
-                                     total=total_users,
-                                     data=all_users)
+            return user.AllUsersResponse(
+                message="No User(s) for this query",
+                status="success",
+                status_code=200,
+                page=page,
+                per_page=per_page,
+                total=0,
+                data=[],
+            )
+        all_users = [
+            user.UserData.model_validate(usr, from_attributes=True) for usr in users
+        ]
+        return user.AllUsersResponse(
+            message="Users successfully retrieved",
+            status="success",
+            status_code=200,
+            page=page,
+            per_page=per_page,
+            total=total_users,
+            data=all_users,
+        )
 
     def fetch(self, db: Session, id):
         """Fetches a user by their id"""
@@ -103,7 +114,6 @@ class UserService(Service):
         if not user.is_deleted:
             return user
 
-
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
@@ -113,10 +123,11 @@ class UserService(Service):
             raise HTTPException(status_code=404, detail="User not found")
 
         return user
-    
 
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
+
+        del schema.admin_secret
 
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
@@ -133,13 +144,24 @@ class UserService(Service):
         db.commit()
         db.refresh(user)
 
-        # Create notification settings directly for the user
+        # # Create notification settings directly for the user
         notification_setting_service.create(db=db, user=user)
 
+        # create data privacy setting
+
+        data_privacy = DataPrivacySetting(user_id=user.id)
+
+        db.add(data_privacy)
+        db.commit()
+        db.refresh(data_privacy)
+
         return user
-    
-    def super_admin_create_user(self, db: Annotated[Session, Depends(get_db)],
-                                user_request: user.AdminCreateUser):
+
+    def super_admin_create_user(
+        self,
+        db: Annotated[Session, Depends(get_db)],
+        user_request: user.AdminCreateUser,
+    ):
         """
         Creates a user for super admin
         Args:
@@ -149,10 +171,14 @@ class UserService(Service):
             object: the complete details of the newly created user
         """
         try:
-            user_exists = db.query(User).filter_by(email=user_request.email).one_or_none()
+            user_exists = (
+                db.query(User).filter_by(email=user_request.email).one_or_none()
+            )
             if user_exists:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
-                                    detail=f'User with {user_request.email} already exists')
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"User with {user_request.email} already exists",
+                )
             if user_request.password:
                 user_request.password = self.hash_password(user_request.password)
             new_user = User(**user_request.model_dump())
@@ -160,10 +186,12 @@ class UserService(Service):
             db.commit()
             db.refresh(new_user)
             user_schema = user.UserData.model_validate(new_user, from_attributes=True)
-            return user.AdminCreateUserResponse(message='User created successfully',
-                                                 status_code=201,
-                                                 status='success',
-                                                 data=user_schema)
+            return user.AdminCreateUserResponse(
+                message="User created successfully",
+                status_code=201,
+                status="success",
+                data=user_schema,
+            )
         except Exception as exc:
             db.rollback()
             raise Exception(exc) from exc
@@ -171,12 +199,14 @@ class UserService(Service):
     def create_admin(self, db: Session, schema: user.UserCreate):
         """Creates a new admin"""
 
+        del schema.admin_secret
+
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
                 detail="User with this email already exists",
             )
-        
+
         # Hash password
         schema.password = self.hash_password(password=schema.password)
 
@@ -190,10 +220,9 @@ class UserService(Service):
         user.is_super_admin = True
         db.commit()
 
-        
         return user
 
-    def update(self, db: Session, current_user : User ,schema : user.UserUpdate, id=None):
+    def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
         """Function to update a User"""
         # Get user from access token if provided, otherwise fetch user by id
         if db.query(User).filter(User.email == schema.email).first():
@@ -201,13 +230,13 @@ class UserService(Service):
                 status_code=400,
                 detail="User with this email or username already exists",
             )
-        if current_user.is_super_admin and id is not None :
+        if current_user.is_super_admin and id is not None:
             user = self.fetch(db=db, id=id)
-        else :
+        else:
             user = self.fetch(db=db, id=current_user.id)
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
-            setattr(user, key , value)
+            setattr(user, key, value)
         db.commit()
         db.refresh(user)
         return user
@@ -216,7 +245,11 @@ class UserService(Service):
         """Function to soft delete a user"""
 
         # Get user from access token if provided, otherwise fetch user by id
-        user = self.get_current_user(access_token, db) if id is None else check_model_existence(db, User, id)
+        user = (
+            self.get_current_user(access_token, db)
+            if id is None
+            else check_model_existence(db, User, id)
+        )
 
         user.is_deleted = True
         db.commit()
@@ -235,7 +268,6 @@ class UserService(Service):
             raise HTTPException(status_code=400, detail="Invalid user credentials")
 
         return user
-    
 
     def perform_user_check(self, user: User):
         """This checks if a user is active and verified and not a deleted user"""
@@ -261,7 +293,7 @@ class UserService(Service):
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
         data = {"user_id": user_id, "exp": expires, "type": "access"}
-        encoded_jwt =  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
     def create_refresh_token(self, user_id: str) -> str:
@@ -271,9 +303,8 @@ class UserService(Service):
             days=settings.JWT_REFRESH_EXPIRY
         )
         data = {"user_id": user_id, "exp": expires, "type": "refresh"}
-        encoded_jwt =  jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
+        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
-    
 
     def verify_access_token(self, access_token: str, credentials_exception):
         """Funtcion to decode and verify access token"""
@@ -337,7 +368,6 @@ class UserService(Service):
 
             return access, refresh
 
-
     def get_current_user(
         self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
     ) -> User:
@@ -351,7 +381,7 @@ class UserService(Service):
 
         token = self.verify_access_token(access_token, credentials_exception)
         user = db.query(User).filter(User.id == token.id).first()
-        
+
         return user
 
     def deactivate_user(
@@ -438,7 +468,9 @@ class UserService(Service):
             )
         return user
 
-    def save_login_token(self, db: Session, user: User, token: str, expiration: datetime):
+    def save_login_token(
+        self, db: Session, user: User, token: str, expiration: datetime
+    ):
         """Save the token and expiration in the user's record"""
 
         db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
@@ -448,10 +480,9 @@ class UserService(Service):
         db.commit()
         db.refresh(token)
 
-
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
-        
+
         user = db.query(User).filter(User.email == schema.email).first()
 
         if not user:
@@ -470,5 +501,31 @@ class UserService(Service):
             random.choices(string.digits, k=6)
         ), datetime.utcnow() + timedelta(minutes=10)
 
+
+    def get_users_by_role(self, db: Session, role_id: str, current_user: User):
+        """Function to get all users by role"""
+        if role_id == "" or role_id is None:
+            raise HTTPException(
+                status_code=400, 
+                detail="Role ID is required"
+            )
+
+        user_roles = db.query(user_organization_association).filter(user_organization_association.c.user_id == current_user.id, user_organization_association.c.role.in_(['admin', 'owner'])).all()
+
+        if len(user_roles) == 0:
+            raise HTTPException(
+                status_code=403, 
+                detail="Permission denied. Admin access required."
+            )
+
+        users = db.query(User).join(user_organization_association).filter(user_organization_association.c.role == role_id).all()
+
+        if len(users) == 0:
+            raise HTTPException(
+                status_code=404, 
+                detail="No users found for this role"
+            )
+
+        return users
 
 user_service = UserService()

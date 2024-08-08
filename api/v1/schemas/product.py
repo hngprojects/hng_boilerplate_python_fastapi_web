@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field, PositiveFloat
-from typing import List, Optional, Any, Dict, TypeVar, Generic, Union
+from pydantic import BaseModel, EmailStr, Field, PositiveFloat, ConfigDict, StringConstraints
+from typing import List, Optional, Any, Dict, TypeVar, Generic, Annotated, List
 from datetime import datetime
 
-T = TypeVar('T')
+
+T = TypeVar("T")
+
 
 class ProductUpdate(BaseModel):
     """
@@ -61,13 +63,70 @@ class ProductData(BaseModel):
     products: List[ProductBase]
 
 
+class ProductStockResponse(BaseModel):
+    product_id: str
+    current_stock: int
+    last_updated: datetime
+
+
 class ProductList(BaseModel):
     status_code: int = 200
     success: bool
     message: str
     data: ProductData
 
-#status filter
+
+class ProductCategoryBase(BaseModel):
+    id: str
+    name: str
+
+
+class ProductVariantBase(BaseModel):
+    id: str
+    size: str
+    price: float
+    stock: int
+
+
+class ProductDetailOrganization(BaseModel):
+    id: str
+    company_name: str
+    company_email: EmailStr | None = None
+    industry: str | None = None
+    organization_type: str | None = None
+    country: str | None = None
+    state: str | None = None
+    address: str | None = None
+    lga: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ProductDetail(BaseModel):
+    id: str
+    name: str
+    description: str | None = None
+    price: float
+    organization: ProductDetailOrganization
+    quantity: int
+    image_url: str
+    status: str
+    archived: bool
+    variants: list[ProductVariantBase]
+    category: ProductCategoryBase
+
+    class Config:
+        from_attributes = True
+
+
+class ProductDetailResponse(BaseModel):
+    success: bool
+    status_code: int
+    message: str
+    data: ProductDetail
+
+
+# status filter
 class ProductFilterResponse(BaseModel):
     id: str
     name: str
@@ -86,7 +145,47 @@ class ProductFilterResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
 class SuccessResponse(BaseModel, Generic[T]):
     message: str
     status_code: int
     data: T
+
+
+class ProductCreate(BaseModel):
+    name: str
+    category: str
+    price: PositiveFloat
+    description: str = None
+    quantity: int = 0
+    image_url: str = "placeholder-image"
+
+class ProductCategoryRetrieve(BaseModel):
+    name: str
+    id: str
+    class Config:
+        from_attributes = True
+
+class ProductCategoryCreate(BaseModel):
+    name: str
+
+class ProductCategoryData(BaseModel):
+    name: str
+
+
+class ProductCommentCreate(BaseModel):
+    content: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+
+
+
+class ProductCommentsSchema(BaseModel):
+    """
+    Schema for Product Comments
+    """
+
+    user_id: str = ""
+    product_id: str = ""
+    content: str = ""
+    created_at: datetime = datetime.now()
+
+    model_config = ConfigDict(from_attributes=True)

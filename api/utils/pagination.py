@@ -65,11 +65,13 @@ def paginated_response(
 
     if join is not None:
         query = query.join(join)
+        
     if filters and join is None:
         # Apply filters
         for attr, value in filters.items():
             if value is not None:
                 query = query.filter(getattr(model, attr).like(f"%{value}%"))
+
     elif filters and join is not None:
         # Apply filters
         for attr, value in filters.items():
@@ -86,7 +88,7 @@ def paginated_response(
         status_code=200,
         message="Successfully fetched items",
         data={
-            'pages': total_pages,
+            "pages": total_pages,
             "total": total,
             "skip": skip,
             "limit": limit,

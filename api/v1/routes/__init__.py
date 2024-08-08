@@ -1,8 +1,12 @@
+from api.v1.routes.settings import settings
+from api.v1.routes.privacy import privacies
+from api.v1.routes.team import team
 from fastapi import APIRouter
 from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user
 from api.v1.routes.product import product
+from api.v1.routes.product_comment import product_comment
 from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
@@ -21,11 +25,24 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
-from tests.run_all_test import test_router
+import api.v1.routes.payment_flutterwave
+from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
 from api.v1.routes.notification_settings import notification_setting
+from api.v1.routes.regions import regions
 from api.v1.routes.api_tests import test_router
-
+from api.v1.routes.email_routes import email_sender
+from api.v1.routes.squeeze import squeeze
+from api.v1.routes.dashboard import dashboard
+from api.v1.routes.email_template import email_template
+from api.v1.routes.contact import contact
+from api.v1.routes.permissions.permisions import perm_role
+from api.v1.routes.permissions.roles import role_perm
+from api.v1.routes.analytics import analytics
+from api.v1.routes.job_application import job_application
+from api.v1.routes.privacy import privacies
+from api.v1.routes.settings import settings
+from api.v1.routes.terms_and_conditions import terms_and_conditions
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -41,6 +58,7 @@ api_version_one.include_router(payment)
 api_version_one.include_router(bill_plan)
 api_version_one.include_router(notification)
 api_version_one.include_router(notification_setting)
+api_version_one.include_router(email_template)
 api_version_one.include_router(invites)
 api_version_one.include_router(activity_logs)
 api_version_one.include_router(blog)
@@ -54,4 +72,20 @@ api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
 api_version_one.include_router(testimonial)
+api_version_one.include_router(test_rout)
+api_version_one.include_router(email_sender)
+api_version_one.include_router(regions)
 api_version_one.include_router(test_router)
+api_version_one.include_router(squeeze)
+api_version_one.include_router(contact)
+api_version_one.include_router(dashboard)
+api_version_one.include_router(perm_role)
+api_version_one.include_router(role_perm)
+api_version_one.include_router(analytics)
+api_version_one.include_router(job_application)
+api_version_one.include_router(privacies)
+api_version_one.include_router(settings)
+api_version_one.include_router(team)
+api_version_one.include_router(terms_and_conditions)
+api_version_one.include_router(product_comment)
+

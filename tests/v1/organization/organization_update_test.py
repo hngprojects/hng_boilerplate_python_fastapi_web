@@ -27,7 +27,7 @@ def mock_get_current_user():
 def mock_org():
     return Organization(
         id=str(uuid7()),
-        company_name="Test Organization",
+        name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -62,20 +62,20 @@ def test_update_organization_success(client, db_session_mock):
         f'/api/v1/organizations/{org_id}',
         headers={'Authorization': 'Bearer token'},
         json={
-            "company_name": "Updated Organization",
-            "company_email": "updated@gmail.com",
+            "name": "Updated Organization",
+            "email": "updated@gmail.com",
             "industry": "Tech",
-            "organization_type": "Tech",
+            "type": "Tech",
             "country": "Nigeria",
             "state": "Lagos",
             "address": "Ikorodu, Lagos",
-            "lga": "Ikorodu"
+            "description": "Ikorodu"
         }
     )
 
     assert response.status_code == 200
     assert response.json()["message"] == 'Organization updated successfully'
-    assert response.json()["data"]["company_name"] == "Updated Organization"
+    assert response.json()["data"]["name"] == "Updated Organization"
 
 def test_update_organization_missing_field(client, db_session_mock):
     '''Test to fail updating an organization due to missing fields'''
@@ -87,11 +87,12 @@ def test_update_organization_missing_field(client, db_session_mock):
         f'/api/v1/organizations/{org_id}',
         headers={'Authorization': 'Bearer token'},
         json={
-            "company_email": "updated@gmail.com",
+            "email": "updated@gmail.com",
             "industry": "Tech",
-            "organization_type": "Tech",
+            "type": "Tech",
             "country": "Nigeria",
             "state": "Lagos",
+            "description": "Ikorodu"
         }
     )
 
@@ -104,14 +105,14 @@ def test_update_organization_unauthorized(client, db_session_mock):
     response = client.patch(
         f'/api/v1/organizations/{org_id}',
         json={
-            "company_name": "Updated Organization",
-            "company_email": "updated@gmail.com",
+            "name": "Updated Organization",
+            "email": "updated@gmail.com",
             "industry": "Tech",
-            "organization_type": "Tech",
+            "type": "Tech",
             "country": "Nigeria",
             "state": "Lagos",
             "address": "Ikorodu, Lagos",
-            "lga": "Ikorodu"
+            "description": "Ikorodu"
         }
     )
 

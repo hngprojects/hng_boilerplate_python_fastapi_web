@@ -1,3 +1,5 @@
+import csv
+from io import StringIO
 import logging
 from typing import Any, Optional
 from fastapi import HTTPException
@@ -19,15 +21,15 @@ from api.v1.schemas.organization import (
 
 
 class OrganizationService(Service):
-    '''Organization service functionality'''
+    """Organization service functionality"""
 
     def create(self, db: Session, schema: CreateUpdateOrganization, user: User):
-        '''Create a new product'''
+        """Create a new product"""
 
         # Create a new organization
         new_organization = Organization(**schema.model_dump())
-        email = schema.model_dump()["company_email"]
-        name = schema.model_dump()["company_name"]
+        email = schema.model_dump()["email"]
+        name = schema.model_dump()["name"]
         self.check_by_email(db, email)
         self.check_by_name(db, name)
 
@@ -37,9 +39,7 @@ class OrganizationService(Service):
 
         # Add user as owner to the new organization
         stmt = user_organization_association.insert().values(
-            user_id=user.id,
-            organization_id=new_organization.id,
-            role='owner'
+            user_id=user.id, organization_id=new_organization.id, role="owner"
         )
         db.execute(stmt)
         db.commit()
@@ -48,7 +48,7 @@ class OrganizationService(Service):
 
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        '''Fetch all products with option tto search using query parameters'''
+        """Fetch all products with option tto search using query parameters"""
 
         query = db.query(Organization)
 
@@ -56,24 +56,25 @@ class OrganizationService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Organization, column) and value:
-                    query = query.filter(getattr(Organization, column).ilike(f'%{value}%'))
+                    query = query.filter(
+                        getattr(Organization, column).ilike(f"%{value}%")
+                    )
 
         return query.all()
 
 
     def fetch(self, db: Session, id: str):
-        '''Fetches an organization by id'''
+        """Fetches an organization by id"""
 
         organization = check_model_existence(db, Organization, id)
 
         return organization
 
-
     def get_organization_user_role(self, user_id: str, org_id: str, db: Session):
         try:
             stmt = select(user_organization_association.c.role).where(
                 user_organization_association.c.user_id == user_id,
-                user_organization_association.c.organization_id == org_id
+                user_organization_association.c.organization_id == org_id,
             )
             result = db.execute(stmt).scalar_one_or_none()
             return result
@@ -82,14 +83,16 @@ class OrganizationService(Service):
             return None
 
     def update(self, db: Session, id: str, schema, current_user: User):
-        '''Updates a product'''
+        """Updates a product"""
 
         organization = self.fetch(db=db, id=id)
 
         # check if the current user has the permission to update the organization
         role = self.get_organization_user_role(current_user.id, id, db)
-        if role not in ['admin', 'owner']:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions")
+        if role not in ["admin", "owner"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Not enough permissions"
+            )
 
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True)
@@ -116,7 +119,7 @@ class OrganizationService(Service):
         stmt = user_organization_association.select().where(
             user_organization_association.c.user_id == user.id,
             user_organization_association.c.organization_id == org.id,
-            user_organization_association.c.role == role
+            user_organization_association.c.role == role,
         )
 
         result = db.execute(stmt).fetchone()
@@ -148,7 +151,7 @@ class OrganizationService(Service):
 
     # def add_user_to_organization(self, db: Session, org_id: str, user_id: str):
     def add_user_to_organization(self, schema: AddUpdateOrganizationRole, db: Session):
-        '''Deletes a user from an organization'''
+        '''Adds a user to an organization'''
 
         # Fetch the user and organization
         user = check_model_existence(db, User, schema.user_id)
@@ -239,7 +242,7 @@ class OrganizationService(Service):
     def check_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
-        org = db.query(Organization).filter(Organization.company_email == email).first()
+        org = db.query(Organization).filter(Organization.email == email).first()
 
         if org:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="an organization with this email already exist")
@@ -249,7 +252,7 @@ class OrganizationService(Service):
     def check_by_name(self, db: Session, name):
         """Fetches a user by their email"""
 
-        org = db.query(Organization).filter(Organization.company_name == name).first()
+        org = db.query(Organization).filter(Organization.name == name).first()
 
         if org:
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="an organization with this name already exist")
@@ -262,5 +265,26 @@ class OrganizationService(Service):
             raise HTTPException(status_code=404, detail="Organization not found")
         else:
             return True
+        
+    def export_organization_members(self, db: Session, org_id: str):
+        '''Exports the organization members'''
+
+        org = self.fetch(db=db, id=org_id)
+
+        csv_file = StringIO()
+        csv_writer = csv.writer(csv_file)
+
+        # Write headers
+        csv_writer.writerow(["ID", "First name", 'Last name', "Email", 'Date registered'])
+
+        # Write member data
+        for user in org.users:
+            csv_writer.writerow([user.id, user.first_name, user.last_name, user.email, user.created_at])
+
+        # Move to the beginning of the file
+        csv_file.seek(0)
+
+        return csv_file
+
 
 organization_service = OrganizationService()

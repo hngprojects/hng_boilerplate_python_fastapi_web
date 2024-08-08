@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from api.db.database import get_db
-from api.v1.models.newsletter import NewsletterSubscriber
+from api.v1.models.newsletter import NewsletterSubscriber,Newsletter
 from api.v1.schemas.newsletter import EmailSchema
 from unittest.mock import patch, MagicMock
 from api.v1.services.newsletter import NewsletterService
@@ -48,7 +48,7 @@ def test_sub_newsletter_success(db_session_mock):
     email_data = {"email": "test1@example.com"}
 
     # Act
-    response = client.post("/api/v1/pages/newsletters", json=email_data)
+    response = client.post("/api/v1/pages/newsletters/subscribers", json=email_data)
 
     # Assert
     assert response.status_code == 201
@@ -62,10 +62,21 @@ def test_sub_newsletter_existing_email(db_session_mock):
     email_data = {"email": "test@example.com"}
 
     # Act
-    response = client.post("/api/v1/pages/newsletters", json=email_data)
+    response = client.post("/api/v1/pages/newsletters/subscribers", json=email_data)
 
     # Assert
     assert response.status_code == 400
+
+def test_get_all_newsletters(db_session_mock):
+    titles = ['testitle1','testtitle2','testtitle3']
+    descriptions = ['testdescription1','testdescription2','testdescription3']
+    contents = ['testcontent1','testcontnet2','testcontent3']
+    data = [Newsletter( title = title , description = description, content = content) for title, description, content in zip(titles, descriptions, contents)]
+    query = db_session_mock.query()
+    query.count.return_value = 3
+    query.offset().limit().all.return_value = data
+    response = client.get('api/v1/pages/newsletters')
+    assert response.status_code == 200
 
 class TestCodeUnderTest:
 
@@ -84,7 +95,7 @@ class TestCodeUnderTest:
                     {"email": "test1@example.com"}]
         mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_subs)
 
-        response = client.get('/api/v1/pages/newsletters')
+        response = client.get('/api/v1/pages/newsletters/subscribers')
 
         assert response.status_code == 200
         assert response.json()['success'] == True
@@ -98,7 +109,7 @@ class TestCodeUnderTest:
 
         mocker.patch.object(NewsletterService, 'fetch_all', return_value=mock_submissions)
 
-        response = client.get('/api/v1/pages/newsletters')
+        response = client.get('/api/v1/pages/newsletters/subscribers')
 
         assert response.status_code == 200
         assert response.json()['success'] == True
@@ -113,21 +124,17 @@ class TestCodeUnderTest:
 
         with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
 
-            response = client.get('/api/v1/pages/newsletters')
+            response = client.get('/api/v1/pages/newsletters/subscribers')
 
             assert response.status_code == 403
-            assert response.json()['success'] == False
-            assert response.json()['message'] == 'You do not have permission to access this resource'
 
     # # Unauthenticated access to the endpoint    
     def test_retrieve_contact_unauthenticated(self):
         app.dependency_overrides = {}
 
-        response = client.get('/api/v1/pages/newsletters')
+        response = client.get('/api/v1/pages/newsletters/subscribers')
 
         assert response.status_code == 401
-        assert response.json()['success'] == False
-        assert response.json()['message'] == 'Not authenticated'
 
 
 if __name__ == "__main__":

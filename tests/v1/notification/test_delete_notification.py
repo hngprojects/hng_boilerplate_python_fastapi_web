@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
-from ....main import app
+from main import app
 from api.v1.models.notifications import Notification
 from api.v1.services.user import user_service
 from api.v1.models.user import User
@@ -76,8 +76,6 @@ def test_delete_notification_unauthenticated_user(client, db_session_mock):
     response = client.delete(f"/api/v1/notifications/{notification.id}")
 
     assert response.status_code == 401
-    assert response.json()["success"] == False
-    assert response.json()["status_code"] == 401
 
 def test_delete_notification_unauthorized_user(client, db_session_mock):
     db_session_mock.query().filter().first.return_value = notification

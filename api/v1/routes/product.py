@@ -1,6 +1,7 @@
-from fastapi import Depends, APIRouter, status, Query,  HTTPException
+from fastapi import Depends, APIRouter, status, Query, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import Annotated
 from typing import List
 
@@ -8,72 +9,122 @@ from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
 from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
-from api.v1.services.product import product_service
-from api.v1.schemas.product import ProductList
-from api.v1.schemas.product import ProductUpdate, ResponseModel, ProductFilterResponse, SuccessResponse
+from api.v1.services.product import product_service, ProductCategoryService
+from api.v1.services.product_comment import product_comment_service
+from api.v1.schemas.product import (
+    ProductCategoryCreate,
+    ProductCategoryData,
+    ProductCreate,
+    ProductList,
+    ProductUpdate,
+    ResponseModel,
+    ProductStockResponse,
+    ProductFilterResponse,
+    SuccessResponse,
+    ProductCategoryRetrieve,
+    ProductCommentCreate,
+    ProductCommentsSchema,
+)
 from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.models import User
 
-product = APIRouter(prefix='/products', tags=['Products'])
+product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@product.get('', response_model=success_response, status_code=200)
+@product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    skip: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    skip: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
 ):
-    '''Endpoint to get all products. Only accessible to superadmin'''
+    """Endpoint to get all products. Only accessible to superadmin"""
 
-    return paginated_response(
-        db=db,
-        model=Product,
-        limit=limit,
-        skip=skip
-    )
+    return paginated_response(db=db, model=Product, limit=limit, skip=skip)
 
-@product.get('/filter-status', response_model=SuccessResponse[List[ProductFilterResponse]], status_code=200)
+
+@product.get(
+    "/filter-status",
+    response_model=SuccessResponse[List[ProductFilterResponse]],
+    status_code=200,
+)
 async def get_products_by_filter_status(
     filter_status: ProductFilterStatusEnum = Query(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    '''Endpoint to get products by filter status'''
+    """Endpoint to get products by filter status"""
     try:
         products = product_service.fetch_by_filter_status(db, filter_status)
         return SuccessResponse(
-            message="Products retrieved successfully",
-            status_code=200,
-            data=products
+            message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
-    
-@product.get('/status', response_model=SuccessResponse[List[ProductFilterResponse]], status_code=200)
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve products")
+
+
+@product.get(
+    "/status",
+    response_model=SuccessResponse[List[ProductFilterResponse]],
+    status_code=200,
+)
 async def get_products_by_status(
     status: ProductStatusEnum = Query(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    '''Endpoint to get products by status'''
+    """Endpoint to get products by status"""
     try:
         products = product_service.fetch_by_status(db, status)
         return SuccessResponse(
-            message="Products retrieved successfully",
-            status_code=200,
-            data=products
+            message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve products")
 
-@product.get('/{org_id}', status_code=status.HTTP_200_OK, response_model=ProductList)
+
+@product.get("/categories", response_model=success_response, status_code=200)
+def retrieve_categories(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    """
+    Retrieve all product categories from database
+    """
+
+    categories = ProductCategoryService.fetch_all(db)
+
+    categories_filtered = list(
+        map(lambda x: ProductCategoryRetrieve.model_validate(x), categories))
+
+    if (len(categories_filtered) == 0):
+        categories_filtered = [{}]
+
+    return success_response(
+        message="Categories retrieved successfully",
+        status_code=200,
+        data=jsonable_encoder(categories_filtered)
+    )
+
+
+@product.get("/{org_id}", status_code=status.HTTP_200_OK, response_model=ProductList)
+@product.get(
+    "/organizations/{org_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ProductList,
+)
 def get_organization_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 1,
     db: Session = Depends(get_db),
 ):
     """
@@ -116,6 +167,37 @@ def get_organization_products(
     )
 
 
+@product.get("/{id}/stock", response_model=ResponseModel)
+async def get_product_stock(
+    id: str,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    db: Session = Depends(get_db)
+):
+    """
+    Retrieve the current stock level for a specific product.
+
+    This endpoint fetches the current stock information for a given product,
+    including the total stock across all variants and the last update time.
+
+    Args:
+        id (str): The unique identifier of the product.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+
+    Returns:
+        ResponseModel: A success response containing the product stock information.
+
+    Raises:
+        HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
+    """
+    stock_info = product_service.fetch_stock(db, id, current_user)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Product stock fetched successfully",
+        data=jsonable_encoder(stock_info),
+    )
+
+
 @product.put("/{id}", response_model=ResponseModel)
 async def update_product(
     id: str,
@@ -151,7 +233,8 @@ async def update_product(
         }
     """
 
-    updated_product = product_service.update(db, id=str(id), schema=product_update)
+    updated_product = product_service.update(
+        db, id=str(id), schema=product_update)
 
     # Prepare the response
     return success_response(
@@ -160,23 +243,50 @@ async def update_product(
         data=jsonable_encoder(updated_product),
     )
 
-
-@product.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(
-    id: str,
+@product.post('/categories/{org_id}', status_code=status.HTTP_201_CREATED)
+def create_product_category(
+    org_id: str,
+    category_schema: ProductCategoryCreate,
     current_user: User = Depends(user_service.get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Enpoint to delete a product
+    """Endpoint to create a product category
 
     Args:
-        id (str): The unique identifier of the product to be deleted
+        org_id (str): The unique identifier of the organization
         current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
         db (Session): The database session, provided by the `get_db` dependency.
 
+    Returns:
+        ResponseModel: The created product category
+
     Raises:
         HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
-        HTTPException: 404 NOT FOUND (Product to be deleted cannot be found)
     """
 
-    product_service.delete(db=db, id=id, current_user=current_user)
+    new_category = ProductCategoryService.create(db, org_id, category_schema, current_user)
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Category successfully created",
+        data=jsonable_encoder(new_category),
+    )
+
+@product.post("/{product_id}/comments", status_code=status.HTTP_201_CREATED, response_model=ProductCommentsSchema)
+def create_product_comment(
+    product_id: str,
+    comment: ProductCommentCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
+):
+    product_comment = product_comment_service.create(
+        db,
+        comment,
+        current_user.id,
+        product_id
+    )
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product Comment successfully created",
+        data=jsonable_encoder(product_comment),
+    )

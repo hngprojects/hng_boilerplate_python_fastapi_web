@@ -17,10 +17,12 @@ class UserBase(BaseModel):
 
 class UserCreate(BaseModel):
     """Schema to create a user"""
+
     email: EmailStr
     password: str
     first_name: str
     last_name: str
+    admin_secret: Optional[str] = None
 
     @field_validator("password")
     @classmethod
@@ -99,8 +101,10 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
+
 class EmailRequest(BaseModel):
     email: EmailStr
+
 
 class Token(BaseModel):
     access_token: str
@@ -133,12 +137,27 @@ class ChangePwdRet(BaseModel):
     status_code: int
     message: str
 
+
 class MagicLinkRequest(BaseModel):
-    '''Schema for magic link creation'''
+    """Schema for magic link creation"""
 
     email: EmailStr
 
+
 class MagicLinkResponse(BaseModel):
-    '''Schema for magic link respone'''
+    """Schema for magic link respone"""
 
     message: str
+
+class UserRoleSchema(BaseModel):
+    """Schema for user role"""
+
+    role: str
+    user_id: str
+    org_id: str
+
+    @field_validator("role")
+    def role_validator(cls, value):
+        if value not in ["admin", "user", "guest", "owner"]:
+            raise ValueError("Role has to be one of admin, guest, user, or owner")
+        return value

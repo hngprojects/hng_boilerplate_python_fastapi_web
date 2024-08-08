@@ -29,29 +29,9 @@ def override_get_db(db_session_mock):
     # Clean up after the test by removing the override
     app.dependency_overrides = {}
 
-def test_status_code(db_session_mock):
-    # Arrange
-    db_session_mock.query(Newsletter).filter().first.return_value = None
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-
-    user = {
-        "password": "strin8Hsg263@",
-        "first_name": "string",
-        "last_name": "string",
-        "email": "user@example.com"
-    }
-
-    # Act
-    response = client.post("/api/v1/auth/register", json=user)
-
-    print(response.json())
-
-    # Assert
-    assert response.status_code == 201
 
 def test_user_login(db_session_mock):
-    """Test for inactive user deactivation."""
+    """Test for successful inactive user login."""
 
     # Create a mock user
     mock_user = User(

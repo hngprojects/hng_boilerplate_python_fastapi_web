@@ -11,27 +11,28 @@ from api.v1.models import *
 from api.v1.models.associations import Base
 from api.v1.services.user import user_service
 from api.db.database import create_database, get_db
+from uuid_extensions import uuid7
 
 # create_database()
 db = next(get_db())
 
 user_1 = User(
-    email="test@mail",
-    username="testuser",
+    id=str(uuid7()),
+    email="test@email.com",
     password=user_service.hash_password("testpass"),
     first_name="John",
     last_name="Doe",
 )
 user_2 = User(
+    id=str(uuid7()),
     email="test1@mail",
-    username="testuser1",
     password=user_service.hash_password("testpass1"),
     first_name="Jane",
     last_name="Boyle",
 )
 user_3 = User(
+    id=str(uuid7()),
     email="test2@mail",
-    username="testuser2",
     password=user_service.hash_password("testpass2"),
     first_name="Bob",
     last_name="Dwayne",
@@ -40,11 +41,11 @@ user_3 = User(
 db.add_all([user_1, user_2, user_3])
 
 org_1 = Organization(
-    name="Python Org", description="An organization for python develoers"
+    name="Python Org", type="An organization for python develoers"
 )
-org_2 = Organization(name="Django Org", description="An organization of django devs")
+org_2 = Organization(name="Django Org", type="An organization of django devs")
 org_3 = Organization(
-    name="FastAPI Devs", description="An organization of Fast API devs"
+    name="FastAPI Devs", type="An organization of Fast API devs"
 )
 
 
@@ -82,6 +83,29 @@ admin_user = User(
     is_verified=True,
 )
 db.add(admin_user)
+
+newsletter_1 = Newsletter(
+    title="test newsletter 1",
+    description="a test newsletter"
+)
+
+newsletter_2 = Newsletter(
+    title="test newsletter 2",
+    description="a test newsletter"
+)
+
+db.add_all([newsletter_1, newsletter_2])
+db.commit()
+
+job_1 = Job(id=str(uuid7()), author_id=user_1.id, description="Test job one", title="Engineer")
+job_2 = Job(id=str(uuid7()), author_id=user_2.id, description="Test job two", title="title")
+
+application_1 = JobApplication(id=str(uuid7()), job_id=job_1.id, applicant_name=user_1.first_name, applicant_email=user_1.email,
+                                resume_link="lakjfoaldflaf")
+application_2 = JobApplication(id=str(uuid7()), job_id=job_2.id, applicant_name=user_2.first_name, applicant_email=user_2.email,
+                                resume_link="lakjfoaldflaf")
+
+db.add_all([job_1, job_2, application_1, application_2])
 db.commit()
 
 users = db.query(Organization).first().users

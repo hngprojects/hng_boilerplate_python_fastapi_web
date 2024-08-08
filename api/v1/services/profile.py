@@ -6,6 +6,7 @@ from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.profile import Profile
 from api.v1.schemas.profile import ProfileCreateUpdate
+from api.v1.models.user import User
 
 
 class ProfileService(Service):
@@ -58,7 +59,7 @@ class ProfileService(Service):
         profile = db.query(Profile).filter(Profile.user_id == user_id).first()
         if not profile:
             raise HTTPException(status_code=404, detail="User profile not found")
-        
+
         # Update only the fields that are provided in the schema
         for field, value in schema.model_dump().items():
             if value is not None:
@@ -78,6 +79,23 @@ class ProfileService(Service):
         profile = self.fetch(id=id)
         db.delete(profile)
         db.commit()
+
+    def fetch_user_by_id(self, db: Session, user_id: str):
+        """Fetches a user by their id"""
+
+        user = db.query(User).filter(User.id == user_id).first()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User  not found")
+
+        return user
+    def update_user_avatar(self, db: Session, user_id: int, avatar_url: str):
+        user = self.fetch_user_by_id(db, user_id)
+        if user:
+            user.avatar_url = avatar_url
+            db.commit()
+        else:
+            raise Exception("User not found")
 
 
 profile_service = ProfileService()
