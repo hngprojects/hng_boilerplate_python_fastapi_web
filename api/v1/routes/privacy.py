@@ -15,6 +15,7 @@ from api.v1.services.user import user_service
 
 privacies = APIRouter(prefix="/privacy-policy", tags=["Privacy Policy"])
 
+
 @privacies.post("", response_model=PrivacyPolicyResponse, status_code=status.HTTP_201_CREATED)
 def create_privacy(privacy: PrivacyPolicyCreate, db: Session = Depends(get_db),
                   superadmin_user: User = Depends(user_service.get_current_super_admin)):
@@ -26,6 +27,7 @@ def create_privacy(privacy: PrivacyPolicyCreate, db: Session = Depends(get_db),
         data=jsonable_encoder(privacy_item)
     )
 
+
 @privacies.get("", response_model=List[PrivacyPolicyResponse])
 def get_privacies(db: Session = Depends(get_db)):
     """Get All Privacies"""
@@ -36,6 +38,7 @@ def get_privacies(db: Session = Depends(get_db)):
         message='Privacies retrieved successfully',
         data=jsonable_encoder(privacy_items)
     )
+
 
 @privacies.get("/{privacy_id}", response_model=PrivacyPolicyResponse)
 def get_privacy(privacy_id: str, db: Session = Depends(get_db)):
@@ -51,3 +54,13 @@ def get_privacy(privacy_id: str, db: Session = Depends(get_db)):
 def delete_privacy(privacy_id: str, db: Session = Depends(get_db), superadmin_user: User = Depends(user_service.get_current_super_admin)):
     """Delete a Privacy Policy"""
     privacy_service.delete(db, privacy_id)
+
+
+@privacies.patch("/{privacy_id}", response_model=PrivacyPolicyResponse)
+def update_privacy(privacy_id: str, privacy: PrivacyPolicyUpdate, db: Session = Depends(get_db), superadmin_user: User = Depends(user_service.get_current_super_admin)):
+    db_privacy = privacy_service.update(db, privacy_id, privacy)
+    return success_response(
+        status_code=200,
+        message='Privacy updated successfully',
+        data=jsonable_encoder(db_privacy)
+    )

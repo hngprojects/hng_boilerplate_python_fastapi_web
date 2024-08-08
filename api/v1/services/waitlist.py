@@ -1,4 +1,5 @@
 from typing import Any, Optional
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
@@ -53,6 +54,12 @@ class WaitListService(Service):
         """Deletes a waitlist user"""
 
         waitlist_user = self.fetch(db=db, id=id)
+        if not waitlist_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No waitlisted user found with given id",
+            )
+
         db.delete(waitlist_user)
         db.commit()
 
