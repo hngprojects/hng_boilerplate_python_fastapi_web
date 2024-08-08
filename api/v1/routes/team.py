@@ -139,7 +139,6 @@ async def add_team_members(
 
 @team.delete(
     "/members/{team_id}",
-    response_model=success_response,
     status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_team_member_by_id(

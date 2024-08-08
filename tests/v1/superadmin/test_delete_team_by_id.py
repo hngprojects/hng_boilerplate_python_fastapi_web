@@ -174,7 +174,7 @@ def test_successful_team_member_delete(
     response = client.delete(
         f"{DELETE_TEAM_MEMBER_ENDPOINT}/{mock_id}",
     )
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_204_NO_CONTENT
 
     # Simulate the team member being deleted from the database
     mock_db_session.get.return_value = None
