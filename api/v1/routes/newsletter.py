@@ -92,6 +92,7 @@ async def update_newsletter(
         data=jsonable_encoder(newsletter),
         message="Successfully updated a newsletter",
         status_code=status.HTTP_200_OK
+    )
 
 @newsletter.post('/unsubscribe')
 async def unsubscribe_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
