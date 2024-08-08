@@ -73,10 +73,6 @@ class NewsletterService(Service):
                 status_code=404, detail="Email not found."
             )
         db.delete(newsletter_subscriber)
-        
-    @staticmethod
-    def update():
-        pass
 
     def delete(db: Session, id: str):
         """Deletes a single newsletter by id"""
@@ -84,4 +80,16 @@ class NewsletterService(Service):
         newsletter = check_model_existence(db=db, model=Newsletter, id=id)
 
         db.delete(newsletter)
+        db.commit()
+    
+    @staticmethod
+    def update(db: Session, id: str, schema):
+        """Updates the newsletter with id"""
+        newsletter = check_model_existence(db=db, model=Newsletter, id=id)
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(newsletter, key, value)
+        db.commit()
+        db.refresh(newsletter)
+        return newsletter
         db.commit()
