@@ -31,7 +31,7 @@ class BillingPlanService(Service):
         db.delete(plan)
         db.commit()
 
-    def fetch(db: Session, billing_plan_id: str):
+    def fetch(self, db: Session, billing_plan_id: str):
         billing_plan = db.query(BillingPlan).get(billing_plan_id)
 
         if billing_plan is None:

@@ -95,13 +95,13 @@ async def retrieve_single_billing_plans(
     current_user: User = Depends(user_service.get_current_user)
 ):
     """
-    Endpoint to get single billing plans by id
+    Endpoint to get single billing plan by id
     """
 
-    billing_plan = billing_plan_service.fetch(db=db, billing_plan_id=billing_plan_id)
+    billing_plan = billing_plan_service.fetch(db, billing_plan_id)
 
     return success_response(
         status_code=status.HTTP_200_OK,
-        message="Plans fetched successfully",
+        message="Plan fetched successfully",
         data=jsonable_encoder(billing_plan)
     )
