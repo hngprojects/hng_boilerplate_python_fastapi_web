@@ -17,15 +17,15 @@ from api.v1.services.product_comment import product_comment_service
 from api.v1.services.user import user_service
 from api.v1.models import User
 
-product_comment = APIRouter(prefix="/products/{product_id}/comments", tags=["Product Comments"])
+product_comment = APIRouter(prefix="/products", tags=["Product Comments"])
 
 
-@product_comment.get("/{comment_id}", response_model=ProductCommentResponse, status_code=status.HTTP_200_OK)
+@product_comment.get("/{product_id}/comments/{comment_id}", response_model=ProductCommentResponse, status_code=status.HTTP_200_OK)
 def get_product_comment(
     product_id: str,
     comment_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(user_service.get_current_user),
 ):
     comment = product_comment_service.fetch_single(db=db, comment_id=comment_id)
     if not comment:
