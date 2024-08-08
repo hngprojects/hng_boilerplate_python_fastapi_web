@@ -92,6 +92,7 @@ def delete_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)
 ):
+    """ An endpoint that fetches all product comment"""
     role_service.delete_role(db, role_id)
     return success_response(status_code=200, message="Role successfully deleted.", data={"id": role_id})
        
