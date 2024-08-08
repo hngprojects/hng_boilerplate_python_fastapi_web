@@ -41,7 +41,7 @@ def test_fetching_single_newsletter(
     mock_db_session.get.side_effect = mock_get
 
     # Test get single newsletter
-    response = client.get(f"/api/v1/pages/newsletters/{test_newsletter.id}")
+    response = client.get(f"/api/v1/newsletters/{test_newsletter.id}")
 
     assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
     assert response.json()['message'] == "Successfully fetched newsletter"
