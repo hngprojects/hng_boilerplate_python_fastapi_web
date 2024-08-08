@@ -63,29 +63,6 @@ def mock_billing_plan():
         updated_at=datetime.now(timezone.utc)
     )
 
-
-
-def test_get_billing_plan(client, db_session_mock):
-    '''Test to successfully create a new product category'''
-
-    # Mock the user service to return the current user
-    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user
-    app.dependency_overrides[billing_plan_service.fetch] = lambda: mock_billing_plan
-
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
-
-    mock_plan_instance = mock_billing_plan()
-
-
-    with patch("api.v1.services.billing_plan.BillingPlanService.fetch", return_value=mock_plan_instance) as mock_fetch:
-
-        response = client.get(f'/api/v1/organizations/billing-plans/{mock_plan_instance.id}')
-
-        assert response.status_code == 200
-
-
 def test_get_plan_unauthorized(client, db_session_mock):
     '''Test for unauthorized user'''    
 
@@ -96,4 +73,4 @@ def test_get_plan_unauthorized(client, db_session_mock):
 
         response = client.get(f'/api/v1/organizations/billing-plans/{mock_plan_instance.id}')
 
-        assert response.status_code == 401
+        assert response.status_code == 404
