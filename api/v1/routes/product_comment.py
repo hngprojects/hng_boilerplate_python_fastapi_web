@@ -92,6 +92,9 @@ def update_product_comment(
     response_model=List[ProductCommentResponse],
     status_code=status.HTTP_200_OK,
 )
+@product_comment.get(
+    "", response_model=List[ProductCommentResponse], status_code=status.HTTP_200_OK
+)
 def get_all_product_comments(
     product_id: str,
     db: Session = Depends(get_db),
