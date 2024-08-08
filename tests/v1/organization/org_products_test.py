@@ -106,7 +106,7 @@ def test_get_products_for_organization_user_belongs(
     # Test user belonging to the organization
     headers = {"Authorization": f"Bearer {access_token_user1}"}
     response = client.get(
-        f"/api/v1/products/organisations/{test_organization.id}", headers=headers
+        f"/api/v1/organisations/{test_organization.id}/products", headers=headers
     )
 
     # Debugging statement
@@ -146,7 +146,7 @@ def test_get_products_for_organization_user_not_belong(
     # Test user not belonging to the organization
     headers = {"Authorization": f"Bearer {access_token_user2}"}
     response = client.get(
-        f"/api/v1/products/organisations/{test_organization.id}", headers=headers
+        f"/api/v1/organisations/{test_organization.id}/products", headers=headers
     )
 
     assert (
@@ -170,7 +170,7 @@ def test_get_products_for_non_existent_organization(
     non_existent_id = "non-existent-id"  # Use a string since the IDs are UUIDs
     headers = {"Authorization": f"Bearer {access_token_user1}"}
     response = client.get(
-        f"/api/v1/products/organisations/{non_existent_id}", headers=headers
+        f"/api/v1/organisations/{non_existent_id}/products", headers=headers
     )
 
     assert (

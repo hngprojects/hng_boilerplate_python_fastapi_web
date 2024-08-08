@@ -12,9 +12,8 @@ from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatu
 from api.v1.services.product import product_service, ProductCategoryService
 
 from api.utils.dependencies import get_current_user
-from api.v1.schemas.product import ProductCommentsSchema
+from api.v1.schemas.product import ProductCommentsSchema, ProductCommentCreate
 from api.v1.schemas.product_comment import (
-    ProductCommentCreate,
     ProductCommentResponse,
     ProductCommentUpdate,
 )
@@ -22,11 +21,13 @@ from api.v1.services.product_comment import product_comment_service
 from api.v1.services.user import user_service
 from api.v1.models import User
 
-product_comment = APIRouter(prefix="/products", tags=["Product Comments"])
+product_comment = APIRouter(
+    prefix="/products/{product_id}/comments", tags=["Product Comments"]
+)
 
 
 @product_comment.get(
-    "/{product_id}/comments/{comment_id}",
+    "/{comment_id}",
     response_model=ProductCommentResponse,
     status_code=status.HTTP_200_OK,
 )
@@ -36,7 +37,7 @@ def get_product_comment(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    """ An endpoint that fetches a single product comment"""
+    """An endpoint that fetches a single product comment"""
     comment = product_comment_service.fetch(db=db, id=comment_id)
     return success_response(
         status_code=status.HTTP_200_OK,
@@ -44,8 +45,9 @@ def get_product_comment(
         data=jsonable_encoder(comment),
     )
 
+
 @product_comment.post(
-    "/{product_id}/comments",
+    "",
     status_code=status.HTTP_201_CREATED,
     response_model=ProductCommentsSchema,
 )
@@ -66,7 +68,7 @@ def create_product_comment(
 
 
 @product_comment.patch(
-    "/{product_id}/comments/{comment_id}",
+    "/{comment_id}",
     status_code=status.HTTP_200_OK,
     response_model=ProductCommentsSchema,
 )
@@ -83,19 +85,22 @@ def update_product_comment(
         message="Product Comment successfully updated!",
         data=jsonable_encoder(product_comment),
     )
-    
-    
-@product_comment.get("/{product_id}/comments", response_model=List[ProductCommentResponse], status_code=status.HTTP_200_OK)
+
+
+@product_comment.get(
+    "",
+    response_model=List[ProductCommentResponse],
+    status_code=status.HTTP_200_OK,
+)
 def get_all_product_comments(
     product_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    """ An endpoint that fetches all product comment"""
+    """An endpoint that fetches all product comment"""
     comments = product_comment_service.fetch_all(db=db, product_id=product_id)
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Comments fetched successfully",
         data=jsonable_encoder(comments),
     )
-
