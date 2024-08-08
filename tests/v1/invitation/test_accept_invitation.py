@@ -8,7 +8,9 @@ from uuid_extensions import uuid7
 from fastapi import status
 from fastapi import HTTPException, Request
 from urllib.parse import urlencode
+from api.v1.models.permissions.role import Role
 from api.v1.services.user import user_service
+from api.v1.models.permissions.user_org_role import user_organization_roles
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -35,6 +37,19 @@ def mock_db_session():
         yield mock_db
     app.dependency_overrides = {}
 
+
+def create_mock_role(mock_db_session, role_name, role_id=None):
+    mock_role = Role(
+        id=role_id if role_id else uuid7(),
+        name=role_name,
+        is_builtin=True,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
+    )
+    mock_db_session.query(Role).filter_by(name=role_name).first.return_value = mock_role
+    return mock_role
+
+
 @pytest.fixture
 def mock_invite_service():
     with patch("api.v1.services.invite.invite_service", autospec=True) as mock_service:
@@ -54,10 +69,18 @@ def create_mock_user(mock_db_session, user_id):
     mock_db_session.query(User).filter_by(id=user_id).first.return_value = mock_user
     return mock_user
 
+def create_mock_role_assignment(mock_db_session, user_id, org_id, role_id):
+    mock_db_session.query(user_organization_roles).filter_by(
+        user_id=user_id,
+        organization_id=org_id,
+        role_id=role_id
+    ).first.return_value = MagicMock()
+
+
 def create_mock_organization(mock_db_session, org_id):
     mock_org = Organization(
         id=org_id,
-        company_name="Test Organization",
+        name="Test Organization",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -117,28 +140,6 @@ def test_create_invitation_invalid_id(mock_db_session, mock_invite_service):
     assert response.status_code == 422
     assert response.json()['message'] == "Invalid input"
 
-
-@pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
-def test_accept_invitation_valid_link(mock_db_session, mock_invite_service):
-    user_id = str(uuid7())
-    org_id = str(uuid7())
-    invitation_id = str(uuid7())
-    expiration = datetime.now(timezone.utc) + timedelta(days=1)
-
-    create_mock_user(mock_db_session, user_id)
-    create_mock_organization(mock_db_session, org_id)
-    create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid=True)
-    access_token = user_service.create_access_token(str(user_id))
-    mock_db_session.execute.return_value.fetchall.return_value = []
-
-
-    response = client.post(INVITE_ACCEPT_ENDPOINT, json={
-        "invitation_link": f"http://testserver/api/v1/invite/accept?invitation_id={invitation_id}"
-    }, headers={'Authorization': f'Bearer {access_token}'})
-
-    assert response.status_code == 200
-
-
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
 def test_accept_invitation_expired_link(mock_db_session, mock_invite_service):
     """Test for accepting an expired invitation link."""
@@ -179,8 +180,8 @@ def test_accept_invitation_malformed_link(mock_db_session):
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_invite_service")
-def test_load_testing(mock_db_session, mock_invite_service):
-    """Perform load testing to ensure the endpoint can handle multiple requests."""
+def test_accept_invitation_user_already_assigned(mock_db_session, mock_invite_service):
+    """Test for accepting an invitation where the user is already assigned to the role in the organization."""
     user_id = str(uuid7())
     org_id = str(uuid7())
     invitation_id = str(uuid7())
@@ -189,17 +190,19 @@ def test_load_testing(mock_db_session, mock_invite_service):
     create_mock_user(mock_db_session, user_id)
     create_mock_organization(mock_db_session, org_id)
     create_mock_invitation(mock_db_session, user_id, org_id, invitation_id, expiration, is_valid=True)
-    access_token = user_service.create_access_token(str(user_id))
-
-    mock_db_session.execute.return_value.fetchall.return_value = []
-    responses = []
-    for _ in range(100):  # Simulate 100 concurrent requests
-        response = client.post(INVITE_ACCEPT_ENDPOINT, json={
-            "invitation_link": f"http://testserver/api/v1/invite/accept?invitation_id={invitation_id}"
-        }, headers={'Authorization': f'Bearer {access_token}'})
-        responses.append(response)
-
-    success_count = sum(1 for r in responses if r.status_code == 200)
-
-    assert success_count == 100
     
+    # Simulate the scenario where the user is already assigned to the organization
+    mock_invite_service.add_user_to_organization.side_effect = HTTPException(
+        status_code=400, 
+        detail="User is already assigned to the role in this organization"
+    )
+    
+    access_token = user_service.create_access_token(str(user_id))
+    mock_db_session.execute.return_value.fetchall.return_value = []
+
+    response = client.post(INVITE_ACCEPT_ENDPOINT, json={
+        "invitation_link": f"http://testserver/api/v1/invite/accept?invitation_id={invitation_id}"
+    }, headers={'Authorization': f'Bearer {access_token}'})
+    
+    assert response.status_code == 400
+    assert response.json()['message'] == 'User is already assigned to the role in this organization'

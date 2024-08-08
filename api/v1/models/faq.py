@@ -5,5 +5,6 @@ from api.v1.models.base_model import BaseTableModel
 class FAQ(BaseTableModel):
     __tablename__ = "faqs"
 
-    question = Column(String, nullable=True)
-    answer = Column(Text, nullable=True)
+    question = Column(String, nullable=False)
+    answer = Column(Text, nullable=False)
+    category = Column(String, nullable=True)

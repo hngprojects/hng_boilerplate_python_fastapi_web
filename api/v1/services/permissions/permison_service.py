@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from api.v1.models.permissions.permissions import Permission
 from api.v1.models.permissions.role import Role
 from api.v1.schemas.permissions.permissions import PermissionCreate
+from api.utils.success_response import success_response
 from api.v1.models.permissions.role_permissions import role_permissions
 from uuid import UUID
 from fastapi import HTTPException,status
@@ -16,13 +17,15 @@ class PermissionService:
             db.add(db_permission)
             db.commit()
             db.refresh(db_permission)
-            return db_permission
+            response = success_response(200, "permissions created successfully", db_permission)
+            return response
         except IntegrityError as e:
             db.rollback()
             raise HTTPException(status_code=400, detail="A permission with this name already exists.")
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
+        
         
     @staticmethod
     def assign_permission_to_role(db: Session, role_id: str, permission_id: str):
@@ -38,14 +41,16 @@ class PermissionService:
                 raise HTTPException(status_code=404, detail="Permission not found.")
             
             # Assign the permission to the role
-            # Ensure role_permissions table exists and create the association
-            db.add(role_permissions.insert().values(role_id=role_id, permission_id=permission_id))
+            stmt = role_permissions.insert().values(role_id=role_id, permission_id=permission_id)
+            db.execute(stmt)
             db.commit()
-            return {"success": True, "message": "Permission assigned successfully"}
+            
+            response = success_response(200, "Permission assigned successfully")
+            return response
 
-        except IntegrityError as e:
+        except IntegrityError:
             db.rollback()
-            raise HTTPException(status_code=400, detail="An error occurred while assigning the permission.")
+            raise HTTPException(status_code=400, detail="This permission already exists for the role")
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
