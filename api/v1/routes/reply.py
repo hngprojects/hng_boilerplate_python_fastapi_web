@@ -20,7 +20,7 @@ async def reply_to_a_comment(comment_id: str, schema: ReplyCreate, db: Session =
     Request Params:
         comment_id: id of comment user want to reply to
     """
-    user_id = current_user.id
+    user_id = current_user().id
     
     new_reply = reply_service.create(schema=schema, comment_id=comment_id, user_id=user_id, db=db)
     
