@@ -84,7 +84,7 @@ def client(db_session_mock):
 
 
 def test_fetch_single_product_comment(client, db_session_mock):
-    '''Test to successfully update a job'''
+    '''Test to successfully fetch a single product comment'''
 
     # Mock the user service to return the current user
     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_admin()
@@ -113,3 +113,29 @@ def test_fetch_single_product_comment(client, db_session_mock):
         
 
 
+
+def test_fetch_all_product_comment(client, db_session_mock):
+    '''Test to successfully fetch all product comment'''
+
+    # Mock the user service to return the current user
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_admin()
+    app.dependency_overrides[product_service.create] = lambda: mock_product()
+    app.dependency_overrides[product_comment_service.create] = lambda: mock_product_comment()
+    app.dependency_overrides[product_comment_service.fetch_all] = lambda: mock_product_comment()
+
+    
+    # Mock job update
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
+    mock_product_instance = mock_product()
+    
+    
+    response = client.get(
+            f"/api/v1/products/{mock_product_instance.id}/comments",
+            headers={'Authorization': 'Bearer token'}
+        )
+
+    assert response.status_code == 200
+        

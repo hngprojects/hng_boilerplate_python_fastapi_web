@@ -27,9 +27,25 @@ def get_product_comment(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
+    """ An endpoint that fetches a single product comment"""
     comment = product_comment_service.fetch(db=db, id=comment_id)
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Comment fetched successfully",
         data=jsonable_encoder(comment),
+    )
+    
+    
+@product_comment.get("/{product_id}/comments", response_model=List[ProductCommentResponse], status_code=status.HTTP_200_OK)
+def get_all_product_comments(
+    product_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """ An endpoint that fetches all product comment"""
+    comments = product_comment_service.fetch_all(db=db, product_id=product_id)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Comments fetched successfully",
+        data=jsonable_encoder(comments),
     )
