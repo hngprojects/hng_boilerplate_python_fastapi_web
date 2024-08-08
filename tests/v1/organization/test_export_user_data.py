@@ -98,7 +98,6 @@ def test_export_success(client, db_session_mock):
     mock_org = mock_organization()
     db_session_mock.add(mock_org)
     db_session_mock.commit()
-/organisation
     mock_csv = mock_csv_content()
 
     with patch(
