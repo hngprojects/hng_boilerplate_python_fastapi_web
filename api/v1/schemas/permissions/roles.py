@@ -6,6 +6,7 @@ from typing import Dict, Any, Optional
 class RoleCreate(BaseModel):
     name: str
     is_builtin: bool = False  # Default to False for custom roles
+    description: Optional[str] = None
 
 class RoleResponse(BaseModel):
     id: str
@@ -29,3 +30,8 @@ class RoleDeleteResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+
+class RoleUpdate(BaseModel):
+    name: str
+    is_builtin: bool

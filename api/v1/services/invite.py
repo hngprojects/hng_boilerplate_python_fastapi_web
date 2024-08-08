@@ -172,24 +172,6 @@ class InviteService(Service):
                 detail="An error occurred while adding the user to the organization"
             )
     @staticmethod
-    def delete_invitation(id: str, db: Session):
-        """Function to delete an invitation by its id
-        
-        Args:
-            session(Session): The current ORM session object.
-            id(str): Invite id string
-        """
-        invitation = db.query(Invitation).filter(Invitation.id == id).first()
-        if invitation:
-            try:
-                db.delete(invitation)
-                db.commit()
-            except Exception as e:
-                db.rollback()
-                raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
-        else:
-            raise HTTPException(status_code=404, detail="Invitation not found")
-            
     def delete(session: Session, id: str):
         """Function to delete invite link
         
@@ -210,6 +192,22 @@ class InviteService(Service):
         session.delete(invite)
         session.commit()
         return True
+    
+    @staticmethod
+    def delete_all(session: Session):
+        """Function to delete all invite links
+        
+        Args:
+            session(Session): The current ORM session object.
+            id(str): Invite id string
+        
+        """
+        all_invites = session.query(Invitation).all()
+        
+        for invite in all_invites:
+            session.delete(invite)
+        
+        session.commit()
     
     def fetch(self):
         pass
