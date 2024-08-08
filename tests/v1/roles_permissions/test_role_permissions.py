@@ -60,8 +60,8 @@ def access_token(mock_db_session):
 @pytest.fixture
 def create_permissions(mock_db_session):
     permissions = [
-        Permission(id=str(uuid7()), name="perm_1"),
-        Permission(id=str(uuid7()), name="perm_2")
+        Permission(id=str(uuid7()), title="perm_1"),
+        Permission(id=str(uuid7()), title="perm_2")
     ]
     mock_db_session.query(Permission).all.return_value = permissions
     return permissions

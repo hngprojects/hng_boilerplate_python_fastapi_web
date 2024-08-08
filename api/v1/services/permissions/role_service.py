@@ -4,7 +4,7 @@ from api.v1.models.permissions.user_org_role import user_organization_roles
 from api.v1.models.permissions.role_permissions import role_permissions
 from api.v1.schemas.permissions.roles import RoleDeleteResponse
 from api.v1.models.permissions.permissions import Permission
-from api.v1.schemas.permissions.roles import RoleCreate
+from api.v1.schemas.permissions.roles import RoleCreate, RoleUpdate
 from uuid_extensions import uuid7
 from api.utils.success_response import success_response
 from fastapi import HTTPException
@@ -19,7 +19,11 @@ class RoleService:
     @staticmethod
     def create_role(db: Session, role: RoleCreate) -> Role:
         try:
-            db_role = Role(name=role.name, is_builtin=role.is_builtin)
+            db_role = Role(
+                name=role.name, 
+                is_builtin=role.is_builtin, 
+                description=role.description or ""
+                )
             db.add(db_role)
             db.commit()
             db.refresh(db_role)
@@ -127,6 +131,40 @@ class RoleService:
                 user_organization_roles.c.role_id == role.id,
             ))
             db.commit()
+            
+    
+    @staticmethod
+    def update_role(db: Session, role_id: str, role_update: RoleUpdate) -> Role:
+        role = db.query(Role).filter_by(id=role_id).first()
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        
+        if role.is_builtin != role_update.is_builtin:
+            raise HTTPException(status_code=400, detail="Cannot change role type (builtin/custom)")
+
+        role.name = role_update.name
+        db.commit()
+        db.refresh(role)
+        
+        response = success_response(200, f'Role {role.name} updated successfully', role)
+        return response
+    
+    
+    @staticmethod
+    def update_builtin_role(db: Session, role_id: str, role_update: RoleUpdate) -> Role:
+        role = db.query(Role).filter_by(id=role_id).first()
+        if not role:
+            raise HTTPException(status_code=404, detail="Role not found")
+        
+        if not role.is_builtin:
+            raise HTTPException(status_code=400, detail="Role is not a built-in role")
+
+        role.name = role_update.name
+        db.commit()
+        db.refresh(role)
+        
+        response = success_response(200, f'Built-in role {role.name} updated successfully', role)
+        return response
 
 
 role_service = RoleService()
