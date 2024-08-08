@@ -6,6 +6,7 @@ from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user
 from api.v1.routes.product import product
+from api.v1.routes.product_comment import product_comment
 from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
@@ -86,3 +87,5 @@ api_version_one.include_router(privacies)
 api_version_one.include_router(settings)
 api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
+api_version_one.include_router(product_comment)
+
