@@ -34,6 +34,7 @@ def mock_non_member_user_product():
 def mock_get_current_user_product(mock_current_user_product):
     async def mock_get_current_user():
         return mock_current_user_product
+
     return mock_get_current_user
 
 
@@ -41,6 +42,7 @@ def mock_get_current_user_product(mock_current_user_product):
 def mock_get_non_member_user_product(mock_non_member_user_product):
     async def mock_get_non_member_user():
         return mock_non_member_user_product
+
     return mock_get_non_member_user
 
 
@@ -51,7 +53,7 @@ def mock_product():
         name="Test Product",
         updated_at=datetime.utcnow(),
         org_id=str(uuid7()),
-        quantity=15
+        quantity=15,
     )
 
 
@@ -60,14 +62,24 @@ def access_token_product(mock_current_user_product):
     return user_service.create_access_token(user_id=mock_current_user_product["id"])
 
 
+org_id = str(uuid7())
+product_id = str(uuid7())
+
+
 @pytest.mark.asyncio
-async def test_get_product_stock(mock_db_product, mock_get_current_user_product, mock_product, access_token_product, monkeypatch):
-    def mock_fetch_stock(db, product_id, mock_get_current_user):
+async def test_get_product_stock(
+    mock_db_product,
+    mock_get_current_user_product,
+    mock_product,
+    access_token_product,
+    monkeypatch,
+):
+    def mock_fetch_stock(db, product_id, current_user, org_id):
         if product_id == mock_product.id:
             return {
                 "product_id": mock_product.id,
                 "current_stock": mock_product.quantity,
-                "last_updated": mock_product.updated_at
+                "last_updated": mock_product.updated_at,
             }
         else:
             return None
@@ -77,24 +89,33 @@ async def test_get_product_stock(mock_db_product, mock_get_current_user_product,
 
     with patch.object(product_service, "fetch_stock", mock_fetch_stock):
         with patch("api.utils.db_validators.check_user_in_org", mock_check_user_in_org):
-            with patch("api.v1.services.user.user_service.get_current_user", mock_get_current_user_product):
+            with patch(
+                "api.v1.services.user.user_service.get_current_user",
+                mock_get_current_user_product,
+            ):
                 response = client.get(
-                    f"/api/v1/products/{mock_product.id}/stock",
-                    headers={"Authorization": f"Bearer {access_token_product}"}
+                    f"/api/v1/organisations/{org_id}/products/{mock_product.id}/stock",
+                    headers={"Authorization": f"Bearer {access_token_product}"},
                 )
 
     assert response.status_code == 200
 
 
 @pytest.mark.asyncio
-async def test_get_product_stock_not_found(mock_db_product, mock_get_current_user_product, access_token_product, monkeypatch):
-    with patch("api.v1.services.user.user_service.get_current_user", mock_get_current_user_product):
+async def test_get_product_stock_not_found(
+    mock_db_product, mock_get_current_user_product, access_token_product, monkeypatch
+):
+    with patch(
+        "api.v1.services.user.user_service.get_current_user",
+        mock_get_current_user_product,
+    ):
         response = client.get(
-            f"/api/v1/products/1/stock",
-            headers={"Authorization": f"Bearer {access_token_product}"}
+            f"/api/v1/organisations/{org_id}/products/1/stock",
+            headers={"Authorization": f"Bearer {access_token_product}"},
         )
 
     assert response.status_code == 404
+
 
 # @pytest.mark.asyncio
 # async def test_get_product_stock_forbidden(mock_db_product, mock_get_non_member_user_product, mock_product, monkeypatch):
@@ -125,7 +146,11 @@ async def test_get_product_stock_unauthorized(mock_db_product, monkeypatch):
     async def mock_get_current_user():
         raise ValueError("Unauthorized")
 
-    with patch("api.v1.services.user.user_service.get_current_user", mock_get_current_user):
-        response = client.get(f"/api/v1/products/{str(uuid7())}/stock")
+    with patch(
+        "api.v1.services.user.user_service.get_current_user", mock_get_current_user
+    ):
+        response = client.get(
+            f"/api/v1/organisations/{org_id}/products/{product_id}/stock"
+        )
 
     assert response.status_code == 401

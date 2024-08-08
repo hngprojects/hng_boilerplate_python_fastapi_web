@@ -38,25 +38,28 @@ def create_mock_user(mock_user_service, mock_db_session):
         id=str(uuid7()),
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
-        first_name='Test',
-        last_name='User',
+        first_name="Test",
+        last_name="User",
         is_active=True,
         is_super_admin=True,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
-    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
+    mock_db_session.query.return_value.filter.return_value.first.return_value = (
+        mock_user
+    )
     return mock_user
+
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_delete_billing_plan(mock_user_service, mock_db_session):
     """Billing plan delete test."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
-    
+
     response = client.delete(
-        "/api/v1/organizations/billing-plans/123-1221-090",
-        headers={'Authorization': f'Bearer {access_token}'},
-        )
-    
+        "/api/v1/organisations/billing-plans/123-1221-090",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+
     assert response.status_code == status.HTTP_200_OK

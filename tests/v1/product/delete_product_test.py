@@ -21,7 +21,7 @@ client = TestClient(app)
 
 
 def endpoint(org_id, product_id):
-    return f"/api/v1/organizations/{org_id}/products/{product_id}"
+    return f"/api/v1/organisations/{org_id}/products/{product_id}"
 
 
 @pytest.fixture

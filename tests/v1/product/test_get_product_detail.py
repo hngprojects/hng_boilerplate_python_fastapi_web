@@ -96,7 +96,7 @@ def test_get_product_detail_success(client, db_session_mock):
     headers = {"authorization": f"Bearer {access_token}"}
 
     response = client.get(
-        f"/api/v1/organizations/{org_id}/products/{product_id}", headers=headers
+        f"/api/v1/organisations/{org_id}/products/{product_id}", headers=headers
     )
 
     assert response.status_code == 200
@@ -104,6 +104,6 @@ def test_get_product_detail_success(client, db_session_mock):
 
 def test_get_product_detail_unauthenticated_user(client, db_session_mock):
     db_session_mock.query().filter().all.first.return_value = product
-    response = client.get(f"/api/v1/organizations/{org_id}/products/{product_id}")
+    response = client.get(f"/api/v1/organisations/{org_id}/products/{product_id}")
 
     assert response.status_code == 401
