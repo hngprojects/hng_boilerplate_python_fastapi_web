@@ -15,7 +15,6 @@ from api.core.responses import SUCCESS
 from typing import Annotated
 from api.utils.pagination import paginated_response
 from api.v1.models.testimonial import Testimonial
-from uuid import UUID
 
 testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
 
@@ -95,7 +94,7 @@ def create_testimonial(
 
 @testimonial.patch("/{testimonial_id}", response_model=success_response)
 def update_testimonial(
-    testimonial_id: UUID,
+    testimonial_id: str,
     testimonial_data: CreateTestimonial,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)
