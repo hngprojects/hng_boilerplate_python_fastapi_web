@@ -18,6 +18,9 @@ class Comment(BaseTableModel):
     dislikes = relationship(
         "CommentDislike", back_populates="comment", cascade="all, delete-orphan"
     )
+    replies = relationship(
+        "Reply", back_populates="comment"
+    )
 
 
 class CommentLike(BaseTableModel):

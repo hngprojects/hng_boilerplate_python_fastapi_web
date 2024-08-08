@@ -25,6 +25,8 @@ from api.v1.routes.contact_us import contact_us
 from api.v1.routes.comment import comment
 from api.v1.routes.sms_twilio import sms
 from api.v1.routes.faq import faq
+
+from api.v1.routes.reply import reply_router
 import api.v1.routes.payment_flutterwave
 from tests.run_all_test import test_rout
 from api.v1.routes.topic import topic
@@ -52,6 +54,7 @@ api_version_one.include_router(fb_auth)
 api_version_one.include_router(pwd_reset)
 api_version_one.include_router(user_router)
 api_version_one.include_router(profile)
+api_version_one.include_router(reply_router)
 api_version_one.include_router(organization)
 api_version_one.include_router(non_organization_product)
 api_version_one.include_router(product)
