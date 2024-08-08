@@ -117,3 +117,18 @@ def get_roles_for_organization(
     return success_response(
         status_code=status.HTTP_200_OK, message="Roles fetched successfully", data=roles
     )
+    
+
+@role_perm.put("/roles/{role_id}/permissions", tags=["update role permissions"])
+def update_role_permissions(
+    role_id: str,
+    permissions: List[str],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    updated_role = role_service.update_role_permissions(db, role_id, permissions)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Role permissions updated successfully",
+        data=updated_role
+    )
