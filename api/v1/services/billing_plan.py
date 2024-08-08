@@ -4,6 +4,7 @@ from typing import Any, Optional
 from api.core.base.services import Service
 from api.v1.schemas.plans import CreateSubscriptionPlan
 from api.utils.db_validators import check_model_existence
+from fastapi import HTTPException
 
 
 class BillingPlanService(Service):
@@ -30,8 +31,15 @@ class BillingPlanService(Service):
         db.delete(plan)
         db.commit()
 
-    def fetch():
-        pass
+    def fetch(db: Session, billing_plan_id: str):
+        billing_plan = db.query(BillingPlan).get(billing_plan_id)
+
+        if billing_plan is None:
+            raise HTTPException(
+                status_code=404, detail="Billing plan not found."
+            )
+
+        return billing_plan
 
     def update(self, db: Session, id: str, schema):
         """
