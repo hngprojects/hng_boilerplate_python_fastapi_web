@@ -12,25 +12,22 @@ class AnalyticsChartsResponse(BaseModel):
     data: Dict
 
 
-class MetricData(BaseModel):
-    value: int | float
-    percentage_increase: float
-
-
 class SuperAdminMetrics(BaseModel):
-    total_revenue: MetricData
-    total_products: MetricData
-    total_users: MetricData
-    lifetime_sales: MetricData
+    total_revenue: Dict[str, Union[float, str]]
+    total_products: Dict[str, Union[int, str]]
+    total_users: Dict[str, Union[int, str]]
+    lifetime_sales: Dict[str, Union[float, str]]
+
 
 class UserMetrics(BaseModel):
-    total_revenue: MetricData
-    subscriptions: MetricData
-    sales: MetricData
-    active_now: MetricData
+    total_revenue: Dict[str, Union[float, str]]
+    subscriptions: Dict[str, Union[int, str]]
+    sales: Dict[str, Union[int, str]]
+    active_now: Dict[str, Union[int, str]]
+
 
 class AnalyticsSummaryResponse(BaseModel):
     message: str
     status: str
     status_code: int
-    data: List[Dict[str, Union[float, int, MetricData]]]
+    data: Union[SuperAdminMetrics, UserMetrics]
