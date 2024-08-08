@@ -18,7 +18,7 @@ from api.v1.services.user import user_service, UserService
 from api.v1.services.newsletter import NewsletterService
 
 client = TestClient(app)
-ENDPOINT = "/api/v1/pages/newsletters"
+ENDPOINT = "/api/v1/newsletters"
 
 
 @pytest.fixture
