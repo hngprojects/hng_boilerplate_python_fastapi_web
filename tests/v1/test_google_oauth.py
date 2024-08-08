@@ -42,7 +42,7 @@ def mock_google_profile_response():
 
 @pytest.fixture
 def mock_google_services():
-    with patch("api.v1.services.google_oauth.GoogleOauthServices.create_oauth_user") as mock_create_oauth_user:
+    with patch("api.v1.services.google_oauth.GoogleOauthServices.create") as mock_create_oauth_user:
         mock_user = User(
             id=1,
             email="test@example.com",
@@ -68,8 +68,8 @@ def test_google_login(mock_requests_get, mock_db_session, mock_google_profile_re
     
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data["message"] == "success"
-    assert response_data["data"]["access_token"] == "access_token_example"
+    assert response_data["message"] == "Successfully authenticated"
+    assert response_data["access_token"] == "access_token_example"
     assert response_data["data"]["user"]["email"] == "test@example.com"
     assert "refresh_token" in response.cookies
     assert response.cookies["refresh_token"] == "refresh_token_example"

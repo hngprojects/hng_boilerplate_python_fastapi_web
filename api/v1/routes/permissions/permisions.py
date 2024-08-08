@@ -25,7 +25,7 @@ def create_permission_endpoint(
     return permission_service.create_permission(db, permission)
 
 
-@perm_role.post("/roles/{role_id}/permissions", tags=["assign role to a user"])
+@perm_role.post("/roles/{role_id}/permissions", tags=["assign permission to role"])
 def assign_permission_endpoint(
     request: PermissionAssignRequest,  # Updated to receive request body
     role_id: str = Path(..., description="The ID of the role"),  # Role ID from path

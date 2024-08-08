@@ -11,9 +11,6 @@ import logging
 
 invites = APIRouter(prefix="/invite", tags=["Invitation Management"])
 
-# Add other necessary imports
-
-
 # generate invitation link to join organization
 @invites.post("/create", tags=["Invitation Management"])
 async def generate_invite_link(

@@ -65,28 +65,14 @@ class NewsletterService(Service):
         return query.all()
 
     @staticmethod
-    def fetch(news_id: str, db: Annotated[Session, Depends(get_db)]):
-        """Fetch a single newsletter.
-
-        Args:
-            news_id: The id of the newsletter
-            db: database Session object
-
-        Return:
-            SingleNewsletterResponse: Response on success
-        """
-
-        # checking if newsletter exist and send
-        newsletter = check_model_existence(db, Newsletter, news_id)
-        return success_response(
-            status_code=200,
-            message="Successfully fetched newsletter",
-            data=newsletter
-        )
-
-    @staticmethod
-    def update():
-        pass
+    def unsubscribe(db: Session, request: EmailSchema) -> None:
+        '''Unsubscribe a user from the newsletter'''
+        newsletter_subscriber = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
+        if not newsletter_subscriber:
+            raise HTTPException(
+                status_code=404, detail="Email not found."
+            )
+        db.delete(newsletter_subscriber)
 
     def delete(db: Session, id: str):
         """Deletes a single newsletter by id"""
@@ -94,4 +80,16 @@ class NewsletterService(Service):
         newsletter = check_model_existence(db=db, model=Newsletter, id=id)
 
         db.delete(newsletter)
+        db.commit()
+    
+    @staticmethod
+    def update(db: Session, id: str, schema):
+        """Updates the newsletter with id"""
+        newsletter = check_model_existence(db=db, model=Newsletter, id=id)
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(newsletter, key, value)
+        db.commit()
+        db.refresh(newsletter)
+        return newsletter
         db.commit()
