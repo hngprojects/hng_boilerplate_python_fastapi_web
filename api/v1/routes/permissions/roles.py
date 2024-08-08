@@ -19,12 +19,27 @@ from api.v1.services.organization import organization_service as org_service
 
 role_perm = APIRouter(tags=["permissions management"])
 
-@role_perm.post("/roles", tags=["create role"])
-def create_role_endpoint(
+@role_perm.post("/custom/roles", tags=["Create Custom Role"])
+def create_custom_role_endpoint(
     role: RoleCreate, 
     db: Session = Depends(get_db), 
     current_user: User = Depends(user_service.get_current_user)):
-    return  role_service.create_role(db, role)
+    # Ensure it's a custom role
+    role.is_builtin = False
+    return role_service.create_role(db, role)
+
+@role_perm.post("/built-in/roles", tags=["Create Built-in Role"])
+def create_built_in_role_endpoint(
+    role: RoleCreate, 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(user_service.get_current_super_admin)):  # Only super admin can create
+    if not current_user.is_super_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super admins can create built-in roles.")
+    # ):
+    
+    # Ensure it's a built-in role
+    role.is_builtin = True
+    return role_service.create_role(db, role)
 
 
 @role_perm.post("/organizations/{org_id}/users/{user_id}/roles", tags=["assign role to a user"])
@@ -77,6 +92,7 @@ def delete_role(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)
 ):
+    """ An endpoint that fetches all product comment"""
     role_service.delete_role(db, role_id)
     return success_response(status_code=200, message="Role successfully deleted.", data={"id": role_id})
        
@@ -101,4 +117,19 @@ def get_roles_for_organization(
         )
     return success_response(
         status_code=status.HTTP_200_OK, message="Roles fetched successfully", data=roles
+    )
+    
+
+@role_perm.put("/roles/{role_id}/permissions", tags=["update role permissions"])
+def update_role_permissions(
+    role_id: str,
+    permissions: List[str],
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    updated_role = role_service.update_role_permissions(db, role_id, permissions)
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Role permissions updated successfully",
+        data=updated_role
     )
