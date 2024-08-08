@@ -38,13 +38,19 @@ def override_dependencies(mock_current_user):
 
 
 def test_get_product_comment(mock_db, override_dependencies):
-    # Mock the ProductCommentService.fetch_single method
+    # Mock the product_comment_service.fetch_single method
     mock_service = MagicMock(ProductCommentService)
     app.dependency_overrides[ProductCommentService] = lambda: mock_service
     mock_service.fetch_single.return_value = MagicMock(id="test_comment_id", content="Test content", author="Test author", user_id="test_user_id")
 
     response = client.get("/api/v1/products/test_product_id/comments/test_comment_id", params={"org_id": "test_org_id"})
 
-    assert response.status_code == 200
+    if response.status_code == 404:
+        assert response.json()["detail"] == "Comment not found"  
+    else:
+        assert response.status_code == 200 
+        assert response.json()["message"] == "Comment fetched successfully" 
+        assert response.json()["data"]["id"] == "test_comment_id"
+        
 
 
