@@ -87,10 +87,11 @@ def test_create_role_success(mock_db_session):
     mock_db_session.execute.return_value.fetchall.return_value = []
 
     role_name = "TestRole"
-    role_data = {"name": role_name}
+    role_data = {"name": role_name, "description": "testing role permissions"}
 
     # Mock role creation
     response = client.post("/api/v1/custom/roles", json=role_data, headers={'Authorization': f'Bearer {access_token}'})
+    print("ROLE JSON", response.json())
     assert response.status_code == 201
     assert response.json()["message"] == "Role TestRole created successfully"
 
