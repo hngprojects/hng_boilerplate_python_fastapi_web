@@ -89,3 +89,22 @@ async def delete_a_billing_plan(
         status_code=status.HTTP_200_OK,
         message="Plan deleted successfully",
     )
+
+
+@bill_plan.get('/billing-plans/{billing_plan_id}', response_model=success_response)
+async def retrieve_single_billing_plans(
+    billing_plan_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    """
+    Endpoint to get single billing plan by id
+    """
+
+    billing_plan = billing_plan_service.fetch(db, billing_plan_id)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Plan fetched successfully",
+        data=jsonable_encoder(billing_plan)
+    )
