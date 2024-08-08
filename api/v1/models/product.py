@@ -10,8 +10,11 @@ from sqlalchemy import (
     Integer,
     Enum as SQLAlchemyEnum,
     Boolean,
+    DateTime,
+    func,
 )
 from api.v1.models.base_model import BaseTableModel
+from api.v1.models import User
 from sqlalchemy.orm import relationship
 from enum import Enum
 
@@ -53,6 +56,8 @@ class Product(BaseTableModel):
     category = relationship("ProductCategory", back_populates="products")
     sales = relationship('Sales', back_populates='product',
                          cascade='all, delete-orphan')
+    comments = relationship("ProductComment", back_populates="product", cascade="all, delete-orphan")
+
 
     def __str__(self):
         return self.name
@@ -76,3 +81,19 @@ class ProductCategory(BaseTableModel):
 
     def __str__(self):
         return self.name
+
+
+class ProductComment(BaseTableModel):
+    __tablename__ = "product_comments"
+
+    product_id = Column(String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True) 
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    product = relationship("Product", back_populates="comments")
+    user = relationship("User", back_populates="product_comments")  
+
+    def __str__(self):
+        return f"Comment by User ID: {self.user_id} on Product ID: {self.product_id}"

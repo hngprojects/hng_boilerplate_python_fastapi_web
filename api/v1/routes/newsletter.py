@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, status
+from typing import Annotated
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
-from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema, UpdateNewsletter
+from api.v1.schemas.newsletter import EmailSchema, EmailRetrieveSchema, SingleNewsletterResponse, UpdateNewsletter
 from api.db.database import get_db
 from api.v1.services.newsletter import NewsletterService
 from fastapi.encoders import jsonable_encoder
@@ -56,6 +57,11 @@ def retrieve_subscribers(
         data=jsonable_encoder(subs_filtered),
     )
 
+@newsletter.get('/{id}', response_model=SingleNewsletterResponse, status_code=status.HTTP_200_OK)
+async def get_single_newsletter(id: str, db: Annotated[Session, Depends(get_db)]):
+    """Retrieves a single newsletter."""
+    newsletter = NewsletterService.fetch(db=db, id=id)
+    return success_response(message="Successfully fetched newsletter", status_code=200, data=newsletter)
 
 @newsletter.delete(
     "/{id}",
@@ -86,4 +92,14 @@ async def update_newsletter(
         data=jsonable_encoder(newsletter),
         message="Successfully updated a newsletter",
         status_code=status.HTTP_200_OK
+
+@newsletter.post('/unsubscribe')
+async def unsubscribe_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
+    """
+    Newsletter unsubscription endpoint
+    """
+    NewsletterService.unsubscribe(db, request)
+    return success_response(
+        message="Unsubscribed successfully.",
+        status_code=status.HTTP_200_OK,
     )

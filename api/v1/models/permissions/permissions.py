@@ -7,3 +7,4 @@ class Permission(BaseTableModel):
 
     #id = Column(String, primary_key=True, index=True, default=lambda: str(uuid7()))
     name = Column(String, unique=True, nullable=False)
+    

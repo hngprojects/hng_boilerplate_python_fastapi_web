@@ -1,11 +1,13 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, Depends
 from sqlalchemy.orm import Session
+from api.db.database import get_db
 from api.v1.schemas.newsletter import EmailSchema
 from api.core.base.services import Service
 from api.v1.models.newsletter import NewsletterSubscriber, Newsletter
-from typing import Optional, Any
+from typing import Optional, Any, Annotated
 from api.utils.db_validators import check_model_existence
-
+from api.utils.success_response import success_response
+from api.v1.schemas.newsletter import SingleNewsletterResponse
 
 class NewsletterService(Service):
     """Newsletter service functionality"""
@@ -63,6 +65,15 @@ class NewsletterService(Service):
         return query.all()
 
     @staticmethod
+    def unsubscribe(db: Session, request: EmailSchema) -> None:
+        '''Unsubscribe a user from the newsletter'''
+        newsletter_subscriber = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
+        if not newsletter_subscriber:
+            raise HTTPException(
+                status_code=404, detail="Email not found."
+            )
+        db.delete(newsletter_subscriber)
+
     def delete(db: Session, id: str):
         """Deletes a single newsletter by id"""
 
@@ -81,3 +92,4 @@ class NewsletterService(Service):
         db.commit()
         db.refresh(newsletter)
         return newsletter
+        db.commit()
