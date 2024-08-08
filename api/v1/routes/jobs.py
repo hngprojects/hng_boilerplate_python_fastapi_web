@@ -86,8 +86,6 @@ async def get_job(
 @jobs.get("")
 async def fetch_all_jobs(
     db: Session = Depends(get_db),
-    page_size: int = 10,
-    page: int = 0,
 ):
     """
         Description
@@ -98,12 +96,12 @@ async def fetch_all_jobs(
 
         Returns:
                 Response: a response object containing details if successful or appropriate errors if not
-        """
-    return paginated_response(
-        db=db,
-        model=Job,
-        limit=page_size,
-        skip=max(page, 0),
+    """
+    jobs = job_service.fetch_all(db)
+    return success_response(
+       status_code=status.HTTP_200_OK,
+       data=jsonable_encoder(jobs),
+       message="Jobs Successfully Fetched!"
     )
 
 

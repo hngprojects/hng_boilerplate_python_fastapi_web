@@ -45,7 +45,6 @@ def get_product_comment(
         data=jsonable_encoder(comment),
     )
 
-
 @product_comment.post(
     "",
     status_code=status.HTTP_201_CREATED,
@@ -92,6 +91,8 @@ def update_product_comment(
     response_model=List[ProductCommentResponse],
     status_code=status.HTTP_200_OK,
 )
+
+@product_comment.get("/{product_id}/comments", response_model=List[ProductCommentResponse], status_code=status.HTTP_200_OK)
 def get_all_product_comments(
     product_id: str,
     db: Session = Depends(get_db),
@@ -103,4 +104,14 @@ def get_all_product_comments(
         status_code=status.HTTP_200_OK,
         message="Comments fetched successfully",
         data=jsonable_encoder(comments),
+    )
+
+@product_comment.delete("/products/{product_id}/comments")
+def delete_all_product_comments(product_id: str, db: Session = Depends(get_db),current_user: User = Depends(user_service.get_current_super_admin),):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="You are not Authorized")
+    deleted_comment = product_comment_service.delete_product_comments(db=db, product_id=product_id)
+    return success_response(
+        message=deleted_comment["message"],
+        status_code=200,
     )
