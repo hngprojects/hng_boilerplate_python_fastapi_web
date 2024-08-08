@@ -26,6 +26,7 @@ class PermissionService:
             db.rollback()
             raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
         
+        
     @staticmethod
     def assign_permission_to_role(db: Session, role_id: str, permission_id: str):
         try:
@@ -49,7 +50,7 @@ class PermissionService:
 
         except IntegrityError:
             db.rollback()
-            raise HTTPException(status_code=400, detail="An error occurred while assigning the permission.")
+            raise HTTPException(status_code=400, detail="This permission already exists for the role")
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))

@@ -3,6 +3,7 @@ from api.v1.models.billing_plan import BillingPlan
 from typing import Any, Optional
 from api.core.base.services import Service
 from api.v1.schemas.plans import CreateSubscriptionPlan
+from api.utils.db_validators import check_model_existence
 
 
 class BillingPlanService(Service):
@@ -20,14 +21,32 @@ class BillingPlanService(Service):
 
         return plan
 
-    def delete():
-        pass
+    def delete(self, db: Session, id: str):
+        """
+        delete a plan by plan id
+        """
+        plan = check_model_existence(db, BillingPlan, id)
+
+        db.delete(plan)
+        db.commit()
 
     def fetch():
         pass
 
-    def update():
-        pass
+    def update(self, db: Session, id: str, schema):
+        """
+        fetch and update a billing plan
+        """
+        plan = check_model_existence(db, BillingPlan, id)
+
+        update_data = schema.dict(exclude_unset=True)
+        for column, value in update_data.items():
+            setattr(plan, column, value)
+
+        db.commit()
+        db.refresh(plan)
+
+        return plan
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all products with option tto search using query parameters"""
