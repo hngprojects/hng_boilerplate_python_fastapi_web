@@ -147,7 +147,7 @@ def test_assign_permission_to_role_integrity_error(mock_db_session, mock_permiss
     response = client.post(f"api/v1/roles/{role_id}/permissions", json=payload, headers=headers)
 
     assert response.status_code == 400
-    assert response.json()["message"] == "An error occurred while assigning the permission."
+    assert response.json()["message"] == "This permission already exists for the role"
 
 
 def test_deleteuser(mock_db_session):
