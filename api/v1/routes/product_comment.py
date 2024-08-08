@@ -106,7 +106,7 @@ def get_all_product_comments(
     )
 
 
-@product_comment.delete("/products/{product_id}/comments")
+@product_comment.delete("")
 def delete_all_product_comments(
     product_id: str,
     db: Session = Depends(get_db),
