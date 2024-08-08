@@ -9,7 +9,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.services.permissions.role_service import role_service
-from api.v1.schemas.permissions.roles import RoleDeleteResponse
+from api.v1.schemas.permissions.roles import RoleDeleteResponse, RoleUpdate
 from fastapi.responses import JSONResponse
 from api.utils.success_response import success_response
 
@@ -148,3 +148,29 @@ def update_role_permissions(
         message="Role permissions updated successfully",
         data=updated_role,
     )
+
+
+@role_perm.put("/custom/roles/{role_id}", tags=["Update Custom Role"])
+def update_custom_role_endpoint(
+    role_id: str,
+    role_update: RoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    # Ensure it's a custom role
+    role_update.is_builtin = False
+    return role_service.update_role(db, role_id, role_update)
+
+
+@role_perm.put("/built-in/roles/{role_id}", tags=["Update Built-in Role"])
+def update_builtin_role_endpoint(
+    role_id: str,
+    role_update: RoleUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin)
+):
+    if not current_user.is_super_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super admins can update built-in roles.")
+    # Ensure it's a built-in role
+    role_update.is_builtin = True
+    return role_service.update_builtin_role(db, role_id, role_update)
