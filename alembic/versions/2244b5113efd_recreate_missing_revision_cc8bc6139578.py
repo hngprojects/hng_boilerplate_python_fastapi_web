@@ -1,8 +1,8 @@
-"""empty message
+"""Recreate missing revision cc8bc6139578
 
-Revision ID: ac6ee5ebdd31
-Revises: 5977055d4cf1, 6d9c88b1af24
-Create Date: 2024-08-08 01:53:34.743928
+Revision ID: 2244b5113efd
+Revises: ff96e067c204
+Create Date: 2024-08-08 03:46:56.475314
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'ac6ee5ebdd31'
-down_revision: Union[str, None] = ('5977055d4cf1', '6d9c88b1af24')
+revision: str = '2244b5113efd'
+down_revision: Union[str, None] = 'ff96e067c204'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

@@ -70,3 +70,19 @@ async def update_a_billing_plan(
         data=jsonable_encoder(plan),
     )
 
+@bill_plan.delete('/billing-plans/{billing_plan_id}', response_model=success_response)
+async def delete_a_billing_plan(
+    billing_plan_id: str,
+    current_user: User = Depends(user_service.get_current_super_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Endpoint to delete a billing plan by ID
+    """
+
+    billing_plan_service.delete(db=db, id=billing_plan_id)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Plan deleted successfully",
+    )
