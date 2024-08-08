@@ -29,3 +29,8 @@ class RoleDeleteResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+
+class RoleUpdate(BaseModel):
+    name: str
+    is_builtin: bool
