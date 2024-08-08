@@ -17,7 +17,7 @@ from api.v1.services.organization import organization_service
 
 from typing import Annotated
 
-organization = APIRouter(prefix="/organizations", tags=["Organizations"])
+organization = APIRouter(prefix="/organisations", tags=["Organizations"])
 
 
 @organization.post(

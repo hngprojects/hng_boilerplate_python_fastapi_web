@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user
-from api.v1.routes.product import product, superadmin_product
+from api.v1.routes.product import product, non_organization_product
 from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
 from api.v1.routes.facebook_login import fb_auth
@@ -52,7 +52,7 @@ api_version_one.include_router(pwd_reset)
 api_version_one.include_router(user)
 api_version_one.include_router(profile)
 api_version_one.include_router(organization)
-api_version_one.include_router(superadmin_product)
+api_version_one.include_router(non_organization_product)
 api_version_one.include_router(product)
 api_version_one.include_router(payment)
 api_version_one.include_router(bill_plan)

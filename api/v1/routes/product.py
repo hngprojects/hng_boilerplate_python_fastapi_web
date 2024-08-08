@@ -30,10 +30,10 @@ from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.models import User
 
-superadmin_product = APIRouter(prefix="/products", tags=["Products"])
+non_organization_product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@superadmin_product.get("", response_model=success_response, status_code=200)
+@non_organization_product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
@@ -45,9 +45,87 @@ async def get_all_products(
     return paginated_response(db=db, model=Product, limit=limit, skip=skip)
 
 
-product = APIRouter(prefix="/organizations/{org_id}/products", tags=["Products"])
+@non_organization_product.post(
+    "/{product_id}/comments",
+    status_code=status.HTTP_201_CREATED,
+    response_model=ProductCommentsSchema,
+)
+def create_product_comment(
+    product_id: str,
+    comment: ProductCommentCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    product_comment = product_comment_service.create(
+        db, comment, current_user.id, product_id
+    )
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Product Comment successfully created",
+        data=jsonable_encoder(product_comment),
+    )
 
 
+# categories
+@non_organization_product.post("/categories", status_code=status.HTTP_201_CREATED)
+def create_product_category(
+    category_schema: ProductCategoryCreate,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to create a product category
+
+    Args:
+        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
+        db (Session): The database session, provided by the `get_db` dependency.
+
+    Returns:
+        ResponseModel: The created product category
+
+    Raises:
+        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
+    """
+
+    new_category = ProductCategoryService.create(db, category_schema, current_user)
+
+    return success_response(
+        status_code=status.HTTP_201_CREATED,
+        message="Category successfully created",
+        data=jsonable_encoder(new_category),
+    )
+
+
+@non_organization_product.get(
+    "/categories", response_model=success_response, status_code=200
+)
+def retrieve_categories(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """
+    Retrieve all product categories from database
+    """
+
+    categories = ProductCategoryService.fetch_all(db)
+
+    categories_filtered = list(
+        map(lambda x: ProductCategoryRetrieve.model_validate(x), categories)
+    )
+
+    if len(categories_filtered) == 0:
+        categories_filtered = [{}]
+
+    return success_response(
+        message="Categories retrieved successfully",
+        status_code=200,
+        data=jsonable_encoder(categories_filtered),
+    )
+
+
+product = APIRouter(prefix="/organisations/{org_id}/products", tags=["Products"])
+
+
+# create
 @product.post("", status_code=status.HTTP_201_CREATED)
 def product_create(
     org_id: str,
@@ -66,6 +144,7 @@ def product_create(
     )
 
 
+# Retrive detail
 @product.get(
     "/{product_id}",
     response_model=dict[str, int | str | bool | ProductDetail],
@@ -108,9 +187,11 @@ async def get_product_detail(
     }
 
 
-@product.put("/{id}", response_model=ResponseModel)
+# Update
+@product.put("/{product_id}", response_model=ResponseModel)
 async def update_product(
-    id: str,
+    org_id: str,
+    product_id: str,
     product_update: ProductUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -143,7 +224,13 @@ async def update_product(
         }
     """
 
-    updated_product = product_service.update(db, id=str(id), schema=product_update)
+    updated_product = product_service.update(
+        db,
+        product_id=product_id,
+        schema=product_update,
+        org_id=org_id,
+        current_user=current_user,
+    )
 
     # Prepare the response
     return success_response(
@@ -153,6 +240,7 @@ async def update_product(
     )
 
 
+# delete
 @product.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(
     org_id: str,
@@ -174,71 +262,6 @@ def delete_product(
 
     product_service.delete(
         db=db, org_id=org_id, product_id=product_id, current_user=current_user
-    )
-
-
-@product.get(
-    "/filter-status",
-    response_model=SuccessResponse[List[ProductFilterResponse]],
-    status_code=200,
-)
-async def get_products_by_filter_status(
-    filter_status: ProductFilterStatusEnum = Query(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to get products by filter status"""
-    try:
-        products = product_service.fetch_by_filter_status(db, filter_status)
-        return SuccessResponse(
-            message="Products retrieved successfully", status_code=200, data=products
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
-
-
-@product.get(
-    "/status",
-    response_model=SuccessResponse[List[ProductFilterResponse]],
-    status_code=200,
-)
-async def get_products_by_status(
-    status: ProductStatusEnum = Query(...),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to get products by status"""
-    try:
-        products = product_service.fetch_by_status(db, status)
-        return SuccessResponse(
-            message="Products retrieved successfully", status_code=200, data=products
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
-
-
-@product.get("/categories", response_model=success_response, status_code=200)
-def retrieve_categories(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    """
-    Retrieve all product categories from database
-    """
-
-    categories = ProductCategoryService.fetch_all(db)
-
-    categories_filtered = list(
-        map(lambda x: ProductCategoryRetrieve.model_validate(x), categories)
-    )
-
-    if len(categories_filtered) == 0:
-        categories_filtered = [{}]
-
-    return success_response(
-        message="Categories retrieved successfully",
-        status_code=200,
-        data=jsonable_encoder(categories_filtered),
     )
 
 
@@ -294,9 +317,10 @@ def get_organization_products(
     )
 
 
-@product.get("/{id}/stock", response_model=ResponseModel)
+@product.get("/{product_id}/stock", response_model=ResponseModel)
 async def get_product_stock(
-    id: str,
+    product_id: str,
+    org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
     db: Session = Depends(get_db),
 ):
@@ -317,7 +341,9 @@ async def get_product_stock(
     Raises:
         HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
     """
-    stock_info = product_service.fetch_stock(db, id, current_user)
+    stock_info = product_service.fetch_stock(
+        db=db, product_id=product_id, current_user=current_user, org_id=org_id
+    )
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Product stock fetched successfully",
@@ -325,54 +351,45 @@ async def get_product_stock(
     )
 
 
-@product.post("/categories", status_code=status.HTTP_201_CREATED)
-def create_product_category(
-    org_id: str,
-    category_schema: ProductCategoryCreate,
-    current_user: User = Depends(user_service.get_current_user),
-    db: Session = Depends(get_db),
-):
-    """Endpoint to create a product category
-
-    Args:
-        org_id (str): The unique identifier of the organization
-        current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
-        db (Session): The database session, provided by the `get_db` dependency.
-
-    Returns:
-        ResponseModel: The created product category
-
-    Raises:
-        HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
-    """
-
-    new_category = ProductCategoryService.create(
-        db, org_id, category_schema, current_user
-    )
-
-    return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="Category successfully created",
-        data=jsonable_encoder(new_category),
-    )
-
-
-@product.post(
-    "/{product_id}/comments",
-    status_code=status.HTTP_201_CREATED,
-    response_model=ProductCommentsSchema,
+@product.get(
+    "/filter-status",
+    response_model=SuccessResponse[List[ProductFilterResponse]],
+    status_code=200,
 )
-def create_product_comment(
-    product_id: str,
-    comment: ProductCommentCreate,
-    current_user: User = Depends(user_service.get_current_user),
+async def get_products_by_filter_status(
+    org_id: str,
+    filter_status: ProductFilterStatusEnum = Query(...),
     db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
 ):
-    product_comment = product_comment_service.create(
-        db, comment, current_user.id, product_id
-    )
-    return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="Product Comment successfully created",
-        data=jsonable_encoder(product_comment),
-    )
+    """Endpoint to get products by filter status"""
+    try:
+        products = product_service.fetch_by_filter_status(
+            db=db, org_id=org_id, filter_status=filter_status
+        )
+        return SuccessResponse(
+            message="Products retrieved successfully", status_code=200, data=products
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+
+
+@product.get(
+    "/status",
+    response_model=SuccessResponse[List[ProductFilterResponse]],
+    status_code=200,
+)
+async def get_products_by_status(
+    org_id: str,
+    status: ProductStatusEnum = Query(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get products by status"""
+    try:
+        products = product_service.fetch_by_status(db=db, org_id=org_id, status=status)
+        return SuccessResponse(
+            message="Products retrieved successfully", status_code=200, data=products
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to retrieve products")
