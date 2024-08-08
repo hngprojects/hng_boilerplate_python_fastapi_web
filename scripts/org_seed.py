@@ -21,7 +21,7 @@ org1 = Organization(
     country="USA",
     state="California",
     address="123 Tech Lane",
-    ="San Francisco"
+    lga="San Francisco"
 )
 org2 = Organization(
     name="Health Co",
@@ -31,7 +31,7 @@ org2 = Organization(
     country="USA",
     state="New York",
     address="456 Health Blvd",
-    ="Manhattan"
+    lga="Manhattan"
 )
 
 # Add organizations to the session
