@@ -140,7 +140,7 @@ async def add_team_members(
 @team.delete(
     "/members/{team_id}",
     response_model=success_response,
-    status_code=status.HTTP_200_OK
+    status_code=status.HTTP_204_NO_CONTENT
 )
 def delete_team_member_by_id(
     team_id: Annotated[str, Path(description="Team Member ID")],
@@ -155,9 +155,5 @@ def delete_team_member_by_id(
         su (User): The current super admin user
     """
 
-    team_response = team_service.delete(db, team_id)
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message='Team member deleted successfully',
-        data=jsonable_encoder(team_response),
-    )
+    team_service.delete(db, team_id)
+    return {}
