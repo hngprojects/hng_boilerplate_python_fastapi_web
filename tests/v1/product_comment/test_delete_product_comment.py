@@ -54,8 +54,8 @@ async def test_delete_product_comment(mock_token_verification):
     
     # Mock database query
     db = override_get_db()
-    mock_comment = ProductComment(id=comment_id, product_id=product_id, user_id=user_id)
-    db.query(ProductComment).filter_by.return_value.first.return_value = mock_comment
+    mock_comment = ProductComment(id=comment_id, product_id=product_id, user_id=user_id, content='some comment')
+    db.query.return_value.filter_by.return_value.first.return_value = mock_comment
     
     # Create access token for the test user
     headers = {
