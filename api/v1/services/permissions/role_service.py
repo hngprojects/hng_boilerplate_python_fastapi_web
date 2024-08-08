@@ -16,7 +16,11 @@ class RoleService:
     @staticmethod
     def create_role(db: Session, role: RoleCreate) -> Role:
         try:
-            db_role = Role(name=role.name, is_builtin=role.is_builtin)
+            db_role = Role(
+                name=role.name, 
+                is_builtin=role.is_builtin, 
+                description=role.description or ""
+                )
             db.add(db_role)
             db.commit()
             db.refresh(db_role)
