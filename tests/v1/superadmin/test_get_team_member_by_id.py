@@ -18,7 +18,7 @@ from sqlalchemy.orm import Session
 
 
 client = TestClient(app)
-GET_TEAM_MEMBER_ENDPOINT = "/api/v1/team/members"
+GET_TEAM_MEMBER_ENDPOINT = "/api/v1/teams"
 
 
 @pytest.fixture

@@ -21,12 +21,12 @@ def mock_get_current_user():
         id=str(uuid7()),
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
-        first_name='Test',
-        last_name='User',
+        first_name="Test",
+        last_name="User",
         is_active=True,
         is_super_admin=False,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -35,12 +35,12 @@ def mock_get_current_admin():
         id=str(uuid7()),
         email="admin@gmail.com",
         password=user_service.hash_password("Testadmin@123"),
-        first_name='Admin',
-        last_name='User',
+        first_name="Admin",
+        last_name="User",
         is_active=True,
         is_super_admin=True,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
 
 
@@ -56,8 +56,9 @@ def mock_organization():
         address="456 Health Blvd",
         description="Manhattan",
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
+
 
 def mock_csv_content():
     # Create a sample CSV content
@@ -69,11 +70,11 @@ def mock_csv_content():
     return sample_csv_content
 
 
-
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock(spec=Session)
     return db_session
+
 
 @pytest.fixture
 def client(db_session_mock):
@@ -84,22 +85,28 @@ def client(db_session_mock):
 
 
 def test_export_success(client, db_session_mock):
-    '''Test to successfully export user data in an organization'''
+    """Test to successfully export user data in an organization"""
 
     # Mock the user service to return the current user
-    app.dependency_overrides[user_service.get_current_super_admin] = lambda: mock_get_current_admin
-    app.dependency_overrides[organization_service.export_organization_members] = lambda: mock_csv_content
+    app.dependency_overrides[user_service.get_current_super_admin] = (
+        lambda: mock_get_current_admin
+    )
+    app.dependency_overrides[organization_service.export_organization_members] = (
+        lambda: mock_csv_content
+    )
 
     mock_org = mock_organization()
     db_session_mock.add(mock_org)
     db_session_mock.commit()
-
     mock_csv = mock_csv_content()
 
-    with patch("api.v1.services.organization.organization_service.export_organization_members", return_value=mock_csv) as mock_export:
+    with patch(
+        "api.v1.services.organization.organization_service.export_organization_members",
+        return_value=mock_csv,
+    ) as mock_export:
         response = client.get(
-            f'/api/v1/organizations/{mock_org.id}/users/export',
-            headers={'Authorization': 'Bearer token'}
+            f"/api/v1/organisations/{mock_org.id}/users/export",
+            headers={"Authorization": "Bearer token"},
         )
 
         # Assert the response status code
@@ -111,7 +118,7 @@ def test_export_unauthorized(client, db_session_mock):
 
     mock_org = mock_organization()
     response = client.get(
-        f'/api/v1/organizations/{mock_org.id}/users/export',
+        f"/api/v1/organisations/{mock_org.id}/users/export",
     )
 
     # Assert that the response status code is 401 Unauthorized
@@ -122,16 +129,21 @@ def test_export_organization_not_found(client, db_session_mock):
     """Test export when the organization ID does not exist."""
 
     # Mock the user service to return the current super admin user
-    app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_admin
+    app.dependency_overrides[user_service.get_current_super_admin] = (
+        mock_get_current_admin
+    )
 
     # Simulate a non-existent organization
     non_existent_org_id = str(uuid7())
 
     # Mock the organization service to raise an exception for a non-existent organization
-    with patch("api.v1.services.organization.organization_service.fetch", side_effect=HTTPException(status_code=404, detail="Organization not found")):
+    with patch(
+        "api.v1.services.organization.organization_service.fetch",
+        side_effect=HTTPException(status_code=404, detail="Organization not found"),
+    ):
         response = client.get(
-            f'/api/v1/organizations/{non_existent_org_id}/users/export',
-            headers={'Authorization': 'Bearer valid_token'}
+            f"/api/v1/organisations/{non_existent_org_id}/users/export",
+            headers={"Authorization": "Bearer valid_token"},
         )
 
         # Assert that the response status code is 404 Not Found

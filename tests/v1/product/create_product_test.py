@@ -23,7 +23,7 @@ from api.utils.db_validators import check_user_in_org
 
 
 client = TestClient(app)
-PRODUCT_ENDPOINT = "/api/v1/organizations"
+PRODUCT_ENDPOINT = "/api/v1/organisations"
 
 
 @pytest.fixture

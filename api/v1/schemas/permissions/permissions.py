@@ -3,11 +3,11 @@ from uuid_extensions import uuid7
 
 
 class PermissionCreate(BaseModel):
-    name: str
+    title: str
 
 class PermissionResponse(BaseModel):
     id: str
-    name: str
+    title: str
 
     class Config:
         from_attributes = True

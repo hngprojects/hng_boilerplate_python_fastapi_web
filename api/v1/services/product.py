@@ -7,7 +7,12 @@ from fastapi import HTTPException, status
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
-from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum, ProductCategory
+from api.v1.models.product import (
+    Product,
+    ProductFilterStatusEnum,
+    ProductStatusEnum,
+    ProductCategory,
+)
 from api.v1.models.user import User
 from api.v1.models import Organization
 from api.v1.schemas.product import ProductCategoryCreate, ProductCreate
@@ -17,6 +22,21 @@ from api.v1.schemas.product import ProductFilterResponse
 
 class ProductService(Service):
     """Product service functionality"""
+
+    # def check_ownership(
+    #     self, db: Session, current_user: User, product: Product, org_id: str
+    # ):
+    #     # check ownership
+
+    #     if org_id != product.org_id:
+    #         raise HTTPException(
+    #             status_code=status.HTTP_400_BAD_REQUEST,
+    #             detail="product doesn't belong to the specified organisation",
+    #         )
+
+    #     organization = check_model_existence(db, Organization, org_id)
+
+    #     check_user_in_org(user=current_user, organization=organization)
 
     def create(
         self, db: Session, schema: ProductCreate, org_id: str, current_user: User
@@ -61,6 +81,50 @@ class ProductService(Service):
 
         return new_product
 
+    def fetch_single_by_organization(
+        self, db: Session, org_id: str, product_id: str, current_user: User
+    ) -> Product:
+        """Fetches a product by id"""
+
+        # check if user belongs to org
+
+        organization = check_model_existence(db, Organization, org_id)
+
+        check_user_in_org(user=current_user, organization=organization)
+
+        product = check_model_existence(db, Product, product_id)
+        return product
+
+    def update(
+        self, db: Session, product_id: str, current_user: User, org_id: str, schema
+    ):
+        """Updates a product"""
+
+        product = self.fetch_single_by_organization(
+            db, org_id, product_id, current_user
+        )
+
+        # Update the fields with the provided schema data
+        update_data = schema.dict(exclude_unset=True)
+        for key, value in update_data.items():
+            setattr(product, key, value)
+
+        db.commit()
+        db.refresh(product)
+        return product
+
+    def delete(self, db: Session, org_id: str, product_id: str, current_user: User):
+        """Deletes a product"""
+
+        product: Product = self.fetch_single_by_organization(
+            db, org_id, product_id, current_user
+        )
+
+        # delete the product
+
+        db.delete(product)
+        db.commit()
+
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all products with option tto search using query parameters"""
 
@@ -70,8 +134,7 @@ class ProductService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Product, column) and value:
-                    query = query.filter(
-                        getattr(Product, column).ilike(f"%{value}%"))
+                    query = query.filter(getattr(Product, column).ilike(f"%{value}%"))
 
         return query.all()
 
@@ -105,12 +168,13 @@ class ProductService(Service):
         return products
 
     def fetch_by_filter_status(
-        self, db: Session, filter_status: ProductFilterStatusEnum
+        self, db: Session, org_id: str, filter_status: ProductFilterStatusEnum
     ):
         """Fetch products by filter status"""
         try:
             products = (
                 db.query(Product)
+                .filter(Product.org_id == org_id)
                 .filter(Product.filter_status == filter_status.value)
                 .all()
             )
@@ -118,11 +182,15 @@ class ProductService(Service):
         except Exception as e:
             raise
 
-    def fetch_by_status(self, db: Session, status: ProductStatusEnum):
+    def fetch_by_status(self, db: Session, org_id: str, status: ProductStatusEnum):
         """Fetch products by filter status"""
         try:
-            products = db.query(Product).filter(
-                Product.status == status.value).all()
+            products = (
+                db.query(Product)
+                .filter(Product.org_id == org_id)
+                .filter(Product.status == status.value)
+                .all()
+            )
             response_data = [
                 ProductFilterResponse.from_orm(product) for product in products
             ]
@@ -130,84 +198,31 @@ class ProductService(Service):
         except Exception as e:
             raise
 
-    def fetch_stock(self, db: Session, product_id: str, current_user: User) -> dict:
+    def fetch_stock(
+        self, db: Session, product_id: str, current_user: User, org_id: str
+    ) -> dict:
         """Fetches the current stock level for a specific product"""
-        product = check_model_existence(db, Product, product_id)
-
-        organization = check_model_existence(db, Organization, product.org_id)
-        
-        check_user_in_org(user=current_user, organization=organization)
+        product = self.fetch_single_by_organization(
+            db=db, org_id=org_id, product_id=product_id, current_user=current_user
+        )
 
         total_stock = product.quantity
 
         return {
             "product_id": product_id,
             "current_stock": total_stock,
-            "last_updated": product.updated_at
+            "last_updated": product.updated_at,
         }
-
-    def update(self, db: Session, id: str, schema):
-        """Updates a product"""
-
-        product = self.fetch(db=db, id=id)
-
-        # Update the fields with the provided schema data
-        update_data = schema.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(product, key, value)
-
-        db.commit()
-        db.refresh(product)
-        return product
-
-    def delete(self, db: Session, org_id: str, product_id: str, current_user: User):
-        """Deletes a product"""
-
-        product: Product = self.fetch(db=db, id=id)
-
-        # check ownership
-
-        if org_id != product.org_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="product doesn't belong to the specified organisation",
-            )
-
-        organization = check_model_existence(db, Organization, org_id)
-
-        check_user_in_org(user=current_user, organization=organization)
-
-        # delete the product
-
-        db.delete(product)
-        db.commit()
-
-    def fetch_single_by_organization(self, db: Session, org_id: str, product_id: str, current_user: User) -> Product:
-        """Fetches a product by id"""
-
-        # check if user belongs to org
-
-        organization = check_model_existence(db, Organization, org_id)
-
-        check_user_in_org(user=current_user, organization=organization)
-
-        product = check_model_existence(db, Product, product_id)
-        return product
 
 
 class ProductCategoryService(Service):
     """Product categories service functionality"""
 
     @staticmethod
-    def create(
-        db: Session, 
-        org_id: str, 
-        schema: ProductCategoryCreate, 
-        current_user: User
-    ):
-        organization = check_model_existence(db, Organization, org_id)
+    def create(db: Session, schema: ProductCategoryCreate, current_user: User):
+        # organization = check_model_existence(db, Organization, org_id)
 
-        check_user_in_org(user=current_user, organization=organization)
+        # check_user_in_org(user=current_user, organization=organization)
 
         try:
             new_category = ProductCategory(**schema.model_dump())
@@ -216,16 +231,15 @@ class ProductCategoryService(Service):
             db.refresh(new_category)
         except sqlalchemy.exc.IntegrityError:
             raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Category already exists.",
-                )
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Category already exists.",
+            )
 
         return new_category
-    
 
     @staticmethod
     def fetch_all(db: Session, **query_params: Optional[Any]):
-        '''Fetch all newsletter subscriptions with option to search using query parameters'''
+        """Fetch all newsletter subscriptions with option to search using query parameters"""
 
         query = db.query(ProductCategory)
 
@@ -234,7 +248,8 @@ class ProductCategoryService(Service):
             for column, value in query_params.items():
                 if hasattr(ProductCategory, column) and value:
                     query = query.filter(
-                        getattr(ProductCategory, column).ilike(f'%{value}%'))
+                        getattr(ProductCategory, column).ilike(f"%{value}%")
+                    )
 
         return query.all()
 

@@ -35,5 +35,5 @@ jobs:
             cd /home/${{ secrets.USERNAME }}/boilerplate-python/prod_source_code
             git pull origin main
             docker load --input prod.tar.gz
-            docker-compose -f docker-compose.prod.yml up -d
+            docker compose -f docker-compose.prod.yml up -d
             rm -f prod.tar.gz

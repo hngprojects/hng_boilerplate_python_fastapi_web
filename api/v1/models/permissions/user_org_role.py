@@ -5,6 +5,6 @@ user_organization_roles = Table(
     'user_organization_roles', BaseTableModel.metadata,
     Column("user_id", String, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
     Column("organization_id", String, ForeignKey("organizations.id", ondelete="CASCADE"), primary_key=True),
-    Column('role_id', String, ForeignKey('roles.id', ondelete='CASCADE'), nullable=False),
+    Column('role_id', String, ForeignKey('roles.id', ondelete='CASCADE'), nullable=True),
     Column('status', String(20), nullable=False, default="active")
 )
