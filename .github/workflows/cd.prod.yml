@@ -1,7 +1,7 @@
 name: Prod cd pipeline
 on:
   push:
-    branches: [dev]
+    branches: [main]
 
 jobs:
   build-and-deploy:

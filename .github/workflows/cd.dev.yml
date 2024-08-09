@@ -1,7 +1,7 @@
 name: Dev cd pipeline
 on:
   push:
-    branches: [devops]
+    branches: [dev]
 
 jobs:
   build-and-deploy:
@@ -33,7 +33,7 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd /home/${{ secrets.USERNAME }}/boilerplate-python/dev_source_code
-            git pull origin devops
+            git pull origin dev
             docker load --input dev.tar.gz
             docker-compose -f docker-compose.yml up -d
             rm -f dev.tar.gz
