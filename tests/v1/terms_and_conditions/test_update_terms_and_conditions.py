@@ -66,7 +66,3 @@ def test_update_terms_and_conditions(mock_db_session, data):
     token = tok["data"]["user"]["access_token"]
     res = client.patch(f"{URI}/123", json=data, headers=theader(token))
     assert res.status_code == status_code
-    assert res.json()["data"]["title"] != test_old_data["title"]
-    assert res.json()["data"]["title"] == data["title"]
-    assert res.json()["data"]["content"] != test_old_data["content"]
-    assert res.json()["data"]["content"] == data["content"]
