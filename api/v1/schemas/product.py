@@ -189,3 +189,11 @@ class ProductCommentsSchema(BaseModel):
     created_at: datetime = datetime.now()
 
     model_config = ConfigDict(from_attributes=True)
+
+class ProductDeletionResponse(BaseModel):
+    """
+    Product deletion response
+    """
+    status: str
+    status_code: int
+    message: str

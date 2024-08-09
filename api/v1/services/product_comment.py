@@ -1,5 +1,4 @@
-
-from fastapi import HTTPException
+from fastapi import HTTPException, status, Depends
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from typing import Any, Optional, Union, Annotated
@@ -9,6 +8,8 @@ from sqlalchemy.orm import Session
 from api.utils.db_validators import check_model_existence
 from api.v1.models.product import Product, ProductComment
 from api.v1.schemas.comment import CommentsSchema, CommentsResponse
+from api.v1.models import User
+from api.v1.schemas.product import ProductDeletionResponse
 
 
 class ProductCommentService(Service):
@@ -59,12 +60,30 @@ class ProductCommentService(Service):
         db.refresh(comment)
         return comment
 
-    def delete(self, db: Session, id: str):
-        """Deletes a comment"""
-
-        comment = self.fetch(db=db, id=id)
-        db.delete(comment)
+    def delete(self, comment_id: str, product_id: str, user: User,
+               db: Annotated[Session, Depends(get_db)]):
+        """
+        Deletes a comment linked to a product.
+        Args:
+            comment_id: the comment to delete
+            product_id: the product the comment is linked to
+            user: the current user
+            db: the database Session object
+        Returns:
+            ProductDeletionResponse: response
+        """
+        comment_to_delete = db.query(ProductComment).filter_by(id=comment_id,
+                                                               product_id=product_id,
+                                                               user_id=user.id).first()
+        if not comment_to_delete:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail='comment not found')
+        
+        db.delete(comment_to_delete)
         db.commit()
+        return ProductDeletionResponse(status_code=status.HTTP_200_OK,
+                                       status='success',
+                                       message='comment successfully deleted')
 
     def validate_params(
         self, product_id: str, page: int, per_page: int, db: Annotated[Session, get_db]
