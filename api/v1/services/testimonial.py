@@ -4,6 +4,7 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
 from api.v1.schemas.testimonial import CreateTestimonial
+from fastapi import HTTPException, status
 
 
 class TestimonialService(Service):
@@ -34,10 +35,22 @@ class TestimonialService(Service):
 
         return check_model_existence(db, Testimonial, id)
 
-    def update(self, db: Session, id: str, schema):
+    def update(self, db: Session, user_id: str, id: str, data: CreateTestimonial):
         """Updates a testimonial"""
-        pass
-
+        
+        # Validate content length
+        if not data.content or len(data.content.strip()) == 0:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Content must not be empty."
+            )
+        testimonial = check_model_existence(db, Testimonial, id)
+    
+        testimonial.content = data.content
+        db.commit()
+        db.refresh(testimonial)
+        return testimonial
+    
     def delete(self, db: Session, id: str):
         """Deletes a specific testimonial"""
 

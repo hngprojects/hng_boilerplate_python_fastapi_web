@@ -90,3 +90,21 @@ def create_testimonial(
         data={"id": testimonial.id}
     )
     return response
+
+
+@testimonial.patch("/{testimonial_id}", response_model=success_response)
+def update_testimonial(
+    testimonial_id: str,
+    testimonial_data: CreateTestimonial,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    """
+    Endpoint to update testimonial by id
+    """
+    updated_testimonial = testimonial_service.update(db, current_user.id, str(testimonial_id), testimonial_data)
+    return success_response(
+        status_code=200,
+        message="Testimonial updated successfully",
+        data=jsonable_encoder(updated_testimonial)
+)
