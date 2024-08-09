@@ -35,5 +35,5 @@ jobs:
             cd /home/${{ secrets.USERNAME }}/boilerplate-python/staging_source_code
             git pull origin staging
             docker load --input staging.tar.gz
-            docker-compose -f docker-compose.staging.yml up -d
+            docker compose -f docker-compose.staging.yml up -d
             rm -f staging.tar.gz
