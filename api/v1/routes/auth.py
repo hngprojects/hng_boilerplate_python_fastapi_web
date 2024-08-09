@@ -55,10 +55,12 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
             'status_code': 201,
             'message': 'User created successfully',
             'access_token': access_token,
-            'user': jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            'data': {
+                'user': jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                )
+            }
         }
     )
 
@@ -91,10 +93,12 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
             'status_code': 201,
             'message': 'User created successfully',
             'access_token': access_token,
-            'user': jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),  
+            'data': {
+                'user': jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                )
+            }
         }
     )
 
@@ -125,16 +129,17 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
     response = JSONResponse(
-        status_code=200,
+        status_code=201,
         content={
             'status_code': 200,
             'message': 'Login successful',
             'access_token': access_token,
-            'user': jsonable_encoder(
-                user,
-                exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
-            
+            'data': {
+                'user': jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                )
+            }
         }
     )
 

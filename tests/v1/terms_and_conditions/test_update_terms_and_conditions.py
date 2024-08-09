@@ -63,6 +63,6 @@ def test_update_terms_and_conditions(mock_db_session, data):
         LOGIN_URI, json={"email": "user@example.com", "password": "P@ssw0rd"}
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["data"]["user"]["access_token"]
+    token = tok["access_token"]
     res = client.patch(f"{URI}/123", json=data, headers=theader(token))
     assert res.status_code == status_code
