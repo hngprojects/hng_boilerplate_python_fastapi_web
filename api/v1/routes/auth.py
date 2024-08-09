@@ -95,8 +95,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-            ),
-            
+            ),  
         }
     )
 
@@ -114,7 +113,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=success_response)
-def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Session = Depends(get_db)):
+def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     """Endpoint to log in a user"""
 
     # Authenticate the user
