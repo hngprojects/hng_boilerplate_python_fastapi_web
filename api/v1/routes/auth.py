@@ -129,7 +129,7 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
     response = JSONResponse(
-        status_code=201,
+        status_code=200,
         content={
             'status_code': 200,
             'message': 'Login successful',
