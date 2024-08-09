@@ -1,35 +1,39 @@
-name: Staging Branch Deployment
-
+name: Staging cd pipeline
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
+  push:
     branches: [staging]
 
 jobs:
-  on-success:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use SSH Action
+      - name: Build image
+        run: docker build -t anchor-python-bp-staging:latest -f Dockerfile .
+
+      - name: Save image 
+        run: docker save anchor-python-bp-staging:latest | gzip > staging.tar.gz
+
+      - name: Copy image to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          source: "staging.tar.gz"
+          target: "/home/${{ secrets.USERNAME }}/boilerplate-python/staging_source_code"
+ 
+      - name: Deploy image on server
         uses: appleboy/ssh-action@v0.1.8
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd python/staging_source_code/
+            cd /home/${{ secrets.USERNAME }}/boilerplate-python/staging_source_code
             git pull origin staging
-            source .venv/bin/activate
-            pip install -r requirements.txt
-            alembic upgrade head
-
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The triggering workflow failed'
+            docker load --input staging.tar.gz
+            docker compose -f docker-compose.staging.yml up -d
+            rm -f staging.tar.gz

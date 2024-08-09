@@ -41,6 +41,25 @@ async def add_user_to_organization(
     logging.info(f"Processing invitation ID: {invite_id}")
 
     return invite.InviteService.add_user_to_organization(invite_id, session)
+
+
+@invites.delete("", status_code=status.HTTP_204_NO_CONTENT)
+def delete_all_invite(
+    db: Session = Depends(get_session), 
+    admin: User = Depends(user_service.get_current_super_admin)
+):
+    """Delete all invitations from the database
+
+    Args:
+        db (Session, optional): _description_. Defaults to Depends(get_session).
+        admin (User, optional): _description_. Defaults to Depends(user_service.get_current_super_admin).
+    """    
+    print("Deleting all invites")
+    invite.InviteService.delete_all(db)
+
+    logging.info("Deleted all invites successfully")
+
+
 @invites.delete("/{invite_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_invite(
     invite_id: str,
@@ -54,13 +73,3 @@ def delete_invite(
         raise HTTPException(status_code=404, detail="Invalid invitation id")
 
     logging.info(f"Deleted invite. ID: {invite_id}")
-    
-@invites.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT,response_model=None,tags=["Invitation Management"])
-def delete_invitation(
-    id: str, 
-    db: Session = Depends(get_session),
-    current_user: User = Depends(user_service.get_current_super_admin)
-    ):
-    '''Delete invitation from the database'''
-    invite.InviteService.delete_invitation(id, db)
-

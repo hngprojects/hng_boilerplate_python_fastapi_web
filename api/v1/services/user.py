@@ -114,6 +114,12 @@ class UserService(Service):
         if not user.is_deleted:
             return user
 
+    def get_user_by_id(self, db: Session, id: str):
+        """Fetches a user by their id"""
+
+        user = check_model_existence(db, User, id)
+        return user
+
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 

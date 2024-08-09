@@ -23,7 +23,7 @@ def mock_role():
 def mock_permission():
     return Permission(
         id=str(uuid7()),
-        name="Test Permission",
+        title="Test Permission",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

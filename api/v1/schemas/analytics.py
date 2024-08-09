@@ -12,25 +12,39 @@ class AnalyticsChartsResponse(BaseModel):
     data: Dict
 
 
-class MetricData(BaseModel):
-    value: int | float
-    percentage_increase: float
+class Metrics(BaseModel):
+    """
+    Base schema for metrics with current and previous month values and percentage difference.
+    """
+    current_month: Union[float, int]
+    previous_month: Union[float, int]
+    percentage_difference: str
+
+
+class ActiveUsersMetrics(BaseModel):
+    """
+    Schema for active users metrics with the current value and the difference from an hour ago.
+    """
+    current: int
+    difference_an_hour_ago: int
 
 
 class SuperAdminMetrics(BaseModel):
-    total_revenue: MetricData
-    total_products: MetricData
-    total_users: MetricData
-    lifetime_sales: MetricData
+    total_revenue: Metrics
+    total_products: Metrics
+    total_users: Metrics
+    lifetime_sales: Metrics
+
 
 class UserMetrics(BaseModel):
-    total_revenue: MetricData
-    subscriptions: MetricData
-    sales: MetricData
-    active_now: MetricData
+    revenue: Metrics
+    subscriptions: Metrics
+    orders: Metrics
+    active_users: ActiveUsersMetrics
+
 
 class AnalyticsSummaryResponse(BaseModel):
     message: str
     status: str
     status_code: int
-    data: List[Dict[str, Union[float, int, MetricData]]]
+    data: Union[SuperAdminMetrics, UserMetrics]

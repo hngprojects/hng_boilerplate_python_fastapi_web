@@ -60,7 +60,14 @@ def mock_user_services():
         yield mock_create_access_token, mock_create_refresh_token
 
 @patch("requests.get")
-def test_google_login(mock_requests_get, mock_db_session, mock_google_profile_response, mock_google_services, mock_user_services):
+def test_google_login(
+    mock_requests_get, 
+    mock_db_session, 
+    mock_google_profile_response, 
+    mock_google_services, 
+    mock_user_services, 
+    mock_send_email
+):
     mock_requests_get.return_value = mock_google_profile_response
     
     token_request = OAuthToken(id_token="valid_token")
