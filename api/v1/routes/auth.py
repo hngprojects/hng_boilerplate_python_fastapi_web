@@ -1,6 +1,7 @@
 from datetime import timedelta
 from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Request
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from api.core.dependencies.email_sender import send_email
@@ -48,23 +49,19 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
         }
     )
 
-    response = success_response(
+    response = JSONResponse(
         status_code=201,
-        message="User created successfully",
-        data={
-            "access_token": access_token,
-            "token_type": "bearer",
-            "user": jsonable_encoder(
-                user,
-                exclude=[
-                    "password",
-                    "is_super_admin",
-                    "is_deleted",
-                    "is_verified",
-                    "updated_at",
-                ],
-            ),
-        },
+        content={
+            'status_code': 201,
+            'message': 'User created successfully',
+            'access_token': access_token,
+            'data': {
+                'user': jsonable_encoder(
+                    user,
+                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                )
+            }
+        }
     )
 
     # Add refresh token to cookies
@@ -90,19 +87,17 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    response = success_response(
+    response = JSONResponse(
         status_code=201,
-        message="User Created Successfully",
-        data={
+        content={
+            'status_code': 201,
+            'message': 'User created successfully',
             'access_token': access_token,
-            'token_type': 'bearer',
-            'user':  {
-                **jsonable_encoder(
+            'data': {
+                'user': jsonable_encoder(
                     user,
                     exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-                ),
-                'access_token': access_token,
-                'token_type': 'bearer',
+                )
             }
         }
     )
@@ -121,7 +116,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=success_response)
-def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Session = Depends(get_db)):
+def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     """Endpoint to log in a user"""
 
     # Authenticate the user
@@ -133,19 +128,17 @@ def login(background_tasks: BackgroundTasks, login_request: LoginRequest, db: Se
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    response = success_response(
+    response = JSONResponse(
         status_code=200,
-        message='Login successful',
-        data={
+        content={
+            'status_code': 200,
+            'message': 'Login successful',
             'access_token': access_token,
-            'token_type': 'bearer',
-            'user': {
-                **jsonable_encoder(
+            'data': {
+                'user': jsonable_encoder(
                     user,
                     exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
-                ),
-                'access_token': access_token,
-                'token_type': 'bearer',
+                )
             }
         }
     )
