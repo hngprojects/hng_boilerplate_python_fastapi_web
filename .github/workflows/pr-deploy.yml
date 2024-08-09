@@ -6,6 +6,7 @@ on:
       - "README.md"
       - ".github/workflows/**"
 
+
 jobs:
   deploy-pr:
     environment: 
@@ -19,7 +20,7 @@ jobs:
         run: cp .env.sample .env
       - id: deploy
         name: Pull Request Deploy
-        uses: hngprojects/pr-deploy@2.0.1
+        uses: hngprojects/pr-deploy@main
         with:
           server_host: ${{ secrets.HOST }}
           server_username: ${{ secrets.USERNAME }}
