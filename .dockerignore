@@ -1,7 +1,7 @@
 # Ignore node_modules directory
 node_modules
 
-# Ignore Python virtual environment directories
+# Ignore Python virtual environment directories and stuff
 venv
 .venv
 
