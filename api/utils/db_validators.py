@@ -18,7 +18,7 @@ def check_model_existence(db: Session, model, id):
 def check_user_in_org(user: User, organisation: Organisation):
     """Checks if a user is a member of an organisation"""
 
-    if user not in organisation.users and not user.is_super_admin:
+    if user not in organisation.users and not user.is_superadmin:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="You are not a member of this organisation",

@@ -96,7 +96,7 @@ class TestGetAllTeamMembers:
         app.dependency_overrides[get_db] = mock_db
         app.dependency_overrides[oauth2_scheme] = mock_oauth
 
-        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
+        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=False)) as cu:
             response = client.get("/api/v1/teams")
         assert response.status_code == 403
         assert response.json()[

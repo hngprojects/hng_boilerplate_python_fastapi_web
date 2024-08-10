@@ -41,7 +41,7 @@ def test_admin():
         first_name="test",
         last_name="user",
         is_active=True,
-        is_super_admin=True
+        is_superadmin=True
     )
 
 # Test Job 

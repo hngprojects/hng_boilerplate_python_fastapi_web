@@ -54,7 +54,7 @@ def test_update_user(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -66,7 +66,7 @@ def test_update_user(mock_db_session):
         first_name="AdminTest",
         last_name="User",
         is_active=False,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -105,7 +105,7 @@ def test_current_user_update(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

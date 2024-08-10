@@ -44,7 +44,7 @@ def mock_superadmin():
 @pytest.fixture
 def mock_token_verification():
     with patch("api.v1.services.user.UserService.verify_access_token") as mock:
-        mock.return_value = MagicMock(id="superadmin_id", is_super_admin=True)
+        mock.return_value = MagicMock(id="superadmin_id", is_superadmin=True)
         yield mock
 
 def test_get_all_users(mock_db_session, user_service_mock, mock_superadmin, mock_token_verification):
@@ -59,10 +59,10 @@ def test_get_all_users(mock_db_session, user_service_mock, mock_superadmin, mock
         User(id='admin_id', email='admin@email.com', first_name='admin',
              last_name='admin', password='super_admin', created_at=created_at,
              updated_at=updated_at, is_active=True, is_deleted=False,
-             is_verified=True, is_super_admin=False),
+             is_verified=True, is_superadmin=False),
         User(id='user_id', email='user@email.com', first_name='admin',
                           last_name='admin', password='my_password', created_at=created_at, updated_at=updated_at, is_active=True, is_deleted=False,
-                          is_verified=True, is_super_admin=False)
+                          is_verified=True, is_superadmin=False)
     ]
     
     (mock_db_session
@@ -89,7 +89,7 @@ def test_get_all_users(mock_db_session, user_service_mock, mock_superadmin, mock
             is_active=True,
             is_deleted=False,
             is_verified=True,
-            is_super_admin=False,
+            is_superadmin=False,
             created_at=user.created_at,
             updated_at=updated_at
         ) for user in mock_users]
@@ -118,7 +118,7 @@ def test_get_all_users(mock_db_session, user_service_mock, mock_superadmin, mock
                 'is_active': True,
                 'is_deleted': False,
                 'is_verified': True,
-                'is_super_admin': False,
+                'is_superadmin': False,
                 'created_at': mock_users[0].created_at.isoformat(),
                 'updated_at': updated_at.isoformat()
             },
@@ -130,7 +130,7 @@ def test_get_all_users(mock_db_session, user_service_mock, mock_superadmin, mock
                 'is_active': True,
                 'is_deleted': False,
                 'is_verified': True,
-                'is_super_admin': False,
+                'is_superadmin': False,
                 'created_at': mock_users[1].created_at.isoformat(),
                 'updated_at': updated_at.isoformat()
             }

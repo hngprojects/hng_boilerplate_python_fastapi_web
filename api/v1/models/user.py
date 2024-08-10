@@ -4,6 +4,7 @@
 from sqlalchemy import Column, String, text, Boolean
 from sqlalchemy.orm import relationship
 from api.v1.models.associations import user_organisation_association
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.base_model import BaseTableModel
 
 
@@ -16,7 +17,7 @@ class User(BaseTableModel):
     last_name = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     is_active = Column(Boolean, server_default=text("true"))
-    is_super_admin = Column(Boolean, server_default=text("false"))
+    is_superadmin = Column(Boolean, server_default=text("false"))
     is_deleted = Column(Boolean, server_default=text("false"))
     is_verified = Column(Boolean, server_default=text("false"))
 
@@ -24,7 +25,7 @@ class User(BaseTableModel):
         "Profile", uselist=False, back_populates="user", cascade="all, delete-orphan"
     )
     organisations = relationship(
-        "Organisation", secondary=user_organisation_association, back_populates="users"
+        "Organisation", secondary=user_organisation_roles, back_populates="users"
     )
     notifications = relationship(
         "Notification", back_populates="user", cascade="all, delete-orphan"

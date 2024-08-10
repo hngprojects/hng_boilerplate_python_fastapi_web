@@ -43,7 +43,7 @@ class AnalyticsServices(Service):
         user: object = user_service.get_current_user(access_token=token, db=db)
 
         # check if the analytics-line-data is for org admin
-        if not user.is_super_admin:
+        if not user.is_superadmin:
             user_organisation: object = (db.query(user_organisation_association)
                                          .filter_by(user_id=user.id).first())
             if not user_organisation:
@@ -58,7 +58,7 @@ class AnalyticsServices(Service):
             message: str = 'Successfully retrieved line-charts'
 
         # check if user is a super admin
-        elif user.is_super_admin:
+        elif user.is_superadmin:
             data = self.get_line_chart_data(db)
             message: str = 'Successfully retrieved line-charts for super_admin'
 
@@ -141,7 +141,7 @@ class AnalyticsServices(Service):
         """
         user: object = user_service.get_current_user(access_token=token, db=db)
 
-        if user.is_super_admin:
+        if user.is_superadmin:
             data = self.get_summary_data_super_admin(db, start_date, end_date)
             message = "Admin Statistics Fetched"
         else:

@@ -27,7 +27,7 @@ def test_admin():
     return User(
         id="admin_id",  # Ensure the admin has an ID
         email="admin@example.com",
-        is_super_admin=True,
+        is_superadmin=True,
     )
 
 

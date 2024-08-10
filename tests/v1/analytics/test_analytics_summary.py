@@ -28,13 +28,12 @@ def mock_oauth2_scheme(mocker):
 
 @pytest.fixture
 def mock_get_current_user_super_admin(mocker):
-    return mocker.patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=True, id="super_admin_id"))
+    return mocker.patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=True, id="super_admin_id"))
 
 
 @pytest.fixture
 def mock_get_current_user_user(mocker):
-    return mocker.patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False, id="user_id", organisation_id="org_id"))
-
+    return mocker.patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=False, id="user_id", organisation_id="org_id"))
 
 @pytest.fixture
 def mock_db_session():

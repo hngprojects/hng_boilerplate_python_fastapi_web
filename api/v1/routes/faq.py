@@ -15,11 +15,7 @@ faq = APIRouter(prefix="/faqs", tags=["Frequently Asked Questions"])
 
 
 @faq.get("", response_model=success_response, status_code=200)
-async def get_all_faqs(
-    db: Session = Depends(get_db),
-    # limit: int = 10,
-    # skip: int = 0,
-):
+async def get_all_faqs(db: Session = Depends(get_db),):
     """Endpoint to get all FAQs"""
 
     faqs = faq_service.fetch_all(db=db)
@@ -29,13 +25,6 @@ async def get_all_faqs(
         message="FAQs retrieved successfully",
         data=jsonable_encoder(faqs),
     )
-
-    # return paginated_response(
-    #     db=db,
-    #     model=FAQ,
-    #     limit=limit,
-    #     skip=skip,
-    # )
 
 
 @faq.post("", response_model=success_response, status_code=201)
@@ -80,7 +69,7 @@ async def update_faq(
 
     return success_response(
         data=jsonable_encoder(faq),
-        message="Successfully created FAQ",
+        message="FAQ created successfully",
         status_code=status.HTTP_200_OK,
     )
 
@@ -96,6 +85,6 @@ async def delete_faq(
     faq_service.delete(db, faq_id=id)
 
     return success_response(
-        message="Successfully deleted FAQ",
+        message="FAQ successfully deleted",
         status_code=200,
     )
