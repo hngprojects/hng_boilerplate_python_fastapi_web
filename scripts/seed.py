@@ -40,12 +40,12 @@ user_3 = User(
 
 db.add_all([user_1, user_2, user_3])
 
-org_1 = Organization(
-    name="Python Org", type="An organization for python develoers"
+org_1 = Organisation(
+    name="Python Org", type="An organisation for python develoers"
 )
-org_2 = Organization(name="Django Org", type="An organization of django devs")
-org_3 = Organization(
-    name="FastAPI Devs", type="An organization of Fast API devs"
+org_2 = Organisation(name="Django Org", type="An organisation of django devs")
+org_3 = Organisation(
+    name="FastAPI Devs", type="An organisation of Fast API devs"
 )
 
 
@@ -108,5 +108,5 @@ application_2 = JobApplication(id=str(uuid7()), job_id=job_2.id, applicant_name=
 db.add_all([job_1, job_2, application_1, application_2])
 db.commit()
 
-users = db.query(Organization).first().users
+users = db.query(Organisation).first().users
 print("Seed data succesfully")

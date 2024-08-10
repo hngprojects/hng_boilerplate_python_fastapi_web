@@ -12,8 +12,8 @@ from api.v1.schemas.user import Token
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
 from api.v1.schemas.user import UserCreate, MagicLinkRequest
-from api.v1.services.organization import organization_service
-from api.v1.schemas.organization import CreateUpdateOrganization
+from api.v1.services.organisation import organisation_service
+from api.v1.schemas.organisation import CreateUpdateOrganisation
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService

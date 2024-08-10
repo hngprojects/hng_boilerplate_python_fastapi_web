@@ -3,7 +3,7 @@
 
 from sqlalchemy import Column, String, text, Boolean
 from sqlalchemy.orm import relationship
-from api.v1.models.associations import user_organization_association
+from api.v1.models.associations import user_organisation_association
 from api.v1.models.base_model import BaseTableModel
 
 
@@ -23,8 +23,8 @@ class User(BaseTableModel):
     profile = relationship(
         "Profile", uselist=False, back_populates="user", cascade="all, delete-orphan"
     )
-    organizations = relationship(
-        "Organization", secondary=user_organization_association, back_populates="users"
+    organisations = relationship(
+        "Organisation", secondary=user_organisation_association, back_populates="users"
     )
     notifications = relationship(
         "Notification", back_populates="user", cascade="all, delete-orphan"

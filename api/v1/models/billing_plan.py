@@ -7,8 +7,8 @@ from api.v1.models.base_model import BaseTableModel
 class BillingPlan(BaseTableModel):
     __tablename__ = "billing_plans"
 
-    organization_id = Column(
-        String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    organisation_id = Column(
+        String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False
     )
     name = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
@@ -17,4 +17,4 @@ class BillingPlan(BaseTableModel):
     description = Column(String, nullable=True)
     features = Column(ARRAY(String), nullable=False)
 
-    organization = relationship("Organization", back_populates="billing_plans")
+    organisation = relationship("Organisation", back_populates="billing_plans")

@@ -17,7 +17,7 @@ def mock_analytics_service(mocker):
     mock = mocker.patch(
         'api.v1.services.analytics.AnalyticsServices', autospec=True)
     mock.get_summary_data_super_admin = mocker.Mock()
-    mock.get_summary_data_organization = mocker.Mock()
+    mock.get_summary_data_organisation = mocker.Mock()
     return mock
 
 
@@ -33,8 +33,7 @@ def mock_get_current_user_super_admin(mocker):
 
 @pytest.fixture
 def mock_get_current_user_user(mocker):
-    return mocker.patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=False, id="user_id", organization_id="org_id"))
-
+    return mocker.patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=False, id="user_id", organisation_id="org_id"))
 
 @pytest.fixture
 def mock_db_session():

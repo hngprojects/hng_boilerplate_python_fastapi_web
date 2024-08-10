@@ -61,7 +61,7 @@ def test_dislike_comment(
     test_comment,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
+    # Mock the GET method for Organisation
     def mock_get(model, ident):
         if model == Comment and ident == test_comment.id:
             return test_comment
@@ -75,7 +75,7 @@ def test_dislike_comment(
     # Mock the query to return null for existing dislikes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = []
 
-    # Test user belonging to the organization
+    # Test user belonging to the organisation
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
     
@@ -93,7 +93,7 @@ def test_dislike_comment_twice(
     test_comment,
     access_token_user1,
 ):
-    # Mock the GET method for Organization
+    # Mock the GET method for Organisation
     def mock_get(model, ident):
         if model == Comment and ident == test_comment.id:
             return test_comment
@@ -107,7 +107,7 @@ def test_dislike_comment_twice(
     # Mock the query to return null for existing dislikes
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_dislike_comment]
 
-    # Test user belonging to the organization
+    # Test user belonging to the organisation
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
     

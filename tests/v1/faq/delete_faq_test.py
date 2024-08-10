@@ -95,10 +95,10 @@ def test_faq_not_found(client, db_session_mock):
     app.dependency_overrides[user_service.get_current_super_admin] = mock_get_current_admin
     app.dependency_overrides[faq_service.fetch] = lambda: mock_faq
 
-    # Simulate a non-existent organization
+    # Simulate a non-existent organisation
     nonexistent_id = str(uuid7())
 
-    # Mock the organization service to raise an exception for a non-existent FAQ
+    # Mock the organisation service to raise an exception for a non-existent FAQ
     with patch("api.v1.services.faq.faq_service.fetch", side_effect=HTTPException(status_code=404, detail="FAQ not found")):
         response = client.delete(
             f'/api/v1/faqs/{nonexistent_id}',

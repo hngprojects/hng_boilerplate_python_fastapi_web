@@ -7,10 +7,10 @@ from api.v1.services.user import user_service
 # create_database()
 db = next(get_db())
 
-# Add sample organizations
-org_1 = Organization(id=str(uuid7()), name="Python Org", description="An organization for Python developers")
-org_2 = Organization(id=str(uuid7()), name="JavaScript Org", description="An organization for JavaScript developers")
-org_3 = Organization(id=str(uuid7()), name="GoLang Org", description="An organization for GoLang developers")
+# Add sample organisations
+org_1 = Organisation(id=str(uuid7()), name="Python Org", description="An organisation for Python developers")
+org_2 = Organisation(id=str(uuid7()), name="JavaScript Org", description="An organisation for JavaScript developers")
+org_3 = Organisation(id=str(uuid7()), name="GoLang Org", description="An organisation for GoLang developers")
 
 db.add_all([org_1, org_2, org_3])
 db.commit()
@@ -21,7 +21,7 @@ plan1 = BillingPlan(
     price=200,
     currency='$',
     features=['email', 'messaging'],
-    organization_id=org_1.id
+    organisation_id=org_1.id
 )
 db.add_all([plan1])
 db.commit()
@@ -35,7 +35,7 @@ user_1 = User(
     first_name="User",
     last_name="One",
     is_active=True,
-    organizations=[org_1, org_2]
+    organisations=[org_1, org_2]
 )
 
 user_2 = User(
@@ -46,7 +46,7 @@ user_2 = User(
     first_name="User",
     last_name="Two",
     is_active=True,
-    organizations=[org_2, org_3]
+    organisations=[org_2, org_3]
 )
 
 user_3 = User(
@@ -57,7 +57,7 @@ user_3 = User(
     first_name="User",
     last_name="Three",
     is_active=True,
-    organizations=[org_1, org_3]
+    organisations=[org_1, org_3]
 )
 
 db.add_all([user_1, user_2, user_3])
@@ -121,21 +121,21 @@ db.commit()
 invitation_1 = Invitation(
     id=str(uuid7()),
     user_id=user_1.id,
-    organization_id=org_1.id,
+    organisation_id=org_1.id,
     expires_at=datetime.datetime.now() + datetime.timedelta(days=7)
 )
 
 invitation_2 = Invitation(
     id=str(uuid7()),
     user_id=user_2.id,
-    organization_id=org_2.id,
+    organisation_id=org_2.id,
     expires_at=datetime.datetime.now() + datetime.timedelta(days=7)
 )
 
 invitation_3 = Invitation(
     id=str(uuid7()),
     user_id=user_3.id,
-    organization_id=org_3.id,
+    organisation_id=org_3.id,
     expires_at=datetime.datetime.now() + datetime.timedelta(days=7)
 )
 

@@ -27,10 +27,10 @@ from api.utils.dependencies import get_current_user
 from api.v1.services.user import user_service
 from api.v1.models import User
 
-non_organization_product = APIRouter(prefix="/products", tags=["Products"])
+non_organisation_product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@non_organization_product.get("", response_model=success_response, status_code=200)
+@non_organisation_product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
@@ -43,7 +43,7 @@ async def get_all_products(
 
 
 # categories
-@non_organization_product.post("/categories", status_code=status.HTTP_201_CREATED)
+@non_organisation_product.post("/categories", status_code=status.HTTP_201_CREATED)
 def create_product_category(
     category_schema: ProductCategoryCreate,
     current_user: User = Depends(user_service.get_current_user),
@@ -71,7 +71,7 @@ def create_product_category(
     )
 
 
-@non_organization_product.get(
+@non_organisation_product.get(
     "/categories", response_model=success_response, status_code=200
 )
 def retrieve_categories(
@@ -139,7 +139,7 @@ async def get_product_detail(
     This endpoint retrieve details about a product
 
     Args:
-        org_id (UUID): The unique identifier of the organization
+        org_id (UUID): The unique identifier of the organisation
         product_id (UUID): The unique identifier of the product to be retrieved.
         db (Session): The database session, provided by the `get_db` dependency.
         current_user (User): The currently authenticated user, obtained from the `get_current_user` dependency.
@@ -151,7 +151,7 @@ async def get_product_detail(
         HTTPException: If the product with the specified `id` does not exist, a 404 error is raised.
     """
 
-    product = product_service.fetch_single_by_organization(
+    product = product_service.fetch_single_by_organisation(
         db, org_id, product_id, current_user
     )
 
@@ -246,7 +246,7 @@ def delete_product(
     status_code=status.HTTP_200_OK,
     response_model=ProductList,
 )
-def get_organization_products(
+def get_organisation_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
     limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
@@ -254,14 +254,14 @@ def get_organization_products(
     db: Session = Depends(get_db),
 ):
     """
-    Endpoint to retrieve a paginated list of products of an organization.
+    Endpoint to retrieve a paginated list of products of an organisation.
 
     Query parameter:
         - limit: Number of product per page (default: 10, minimum: 1)
         - page: Page number (starts from 1)
     """
 
-    products = product_service.fetch_by_organization(
+    products = product_service.fetch_by_organisation(
         db, user=current_user, org_id=org_id, limit=limit, page=page
     )
 
@@ -288,7 +288,7 @@ def get_organization_products(
 
     return success_response(
         status_code=200,
-        message="Successfully fetched organizations products",
+        message="Successfully fetched organisations products",
         data=data,
     )
 

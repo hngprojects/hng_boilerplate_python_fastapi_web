@@ -196,7 +196,7 @@ async def get_users_by_role(
 
 
 @user_router.get('/organisations', status_code=200, response_model=success_response)
-def get_current_user_organizations(
+def get_current_user_organisations(
     db: Session = Depends(get_db), 
     current_user: User = Depends(user_service.get_current_user)
 ):
@@ -205,7 +205,7 @@ def get_current_user_organizations(
     return success_response(
         status_code=200,
         message='Organisations fetched successfully',
-        data=jsonable_encoder(current_user.organizations)
+        data=jsonable_encoder(current_user.organisations)
     )
 
 
