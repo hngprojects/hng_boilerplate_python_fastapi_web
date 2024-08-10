@@ -73,4 +73,4 @@ def test_get_plan_unauthorized(client, db_session_mock):
 
         response = client.get(f'/api/v1/organisations/billing-plans/{mock_plan_instance.id}')
 
-        assert response.status_code == 404
+        assert response.status_code == 401
