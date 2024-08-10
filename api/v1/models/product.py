@@ -47,7 +47,8 @@ class Product(BaseTableModel):
     )
     archived = Column(Boolean, default=False)
     filter_status = Column(
-        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active)
+        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active
+    )
 
     variants = relationship(
         "ProductVariant", back_populates="product", cascade="all, delete-orphan"

@@ -78,7 +78,7 @@ admin_user = User(
     first_name="Admin",
     last_name="User",
     is_active=True,
-    is_super_admin=True,
+    is_superadmin=True,
     is_deleted=False,
     is_verified=True,
 )

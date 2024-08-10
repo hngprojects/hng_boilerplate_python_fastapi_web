@@ -158,7 +158,7 @@ def test_deleteuser(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

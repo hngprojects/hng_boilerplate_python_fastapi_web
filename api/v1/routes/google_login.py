@@ -10,6 +10,7 @@ from decouple import config
 
 from api.db.database import get_db
 from api.core.dependencies.google_oauth_config import google_oauth
+from api.v1.schemas.organization import CreateUpdateOrganization
 from api.v1.services.google_oauth import GoogleOauthServices
 from api.utils.success_response import success_response
 from api.v1.schemas.google_oauth import OAuthToken
@@ -49,7 +50,7 @@ async def google_login(background_tasks: BackgroundTasks, token_request: OAuthTo
             "data": {
                 "user": jsonable_encoder(
                     user,
-                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                    exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at']
                 )
             }
         }

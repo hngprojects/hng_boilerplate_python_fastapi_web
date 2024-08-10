@@ -39,7 +39,7 @@ def test_get_analytics_line_chart_super_admin(mock_db, mock_user_service, mock_o
     """
     # Arrange
     mock_user = MagicMock()
-    mock_user.is_super_admin = True
+    mock_user.is_superadmin = True
     mock_user_service.return_value = mock_user
 
     mock_db.query.return_value.filter_by.return_value.first.return_value = None
@@ -60,7 +60,7 @@ def test_get_analytics_line_chart_non_super_admin(mock_db, mock_user_service, mo
     """
     # Arrange
     mock_user = MagicMock()
-    mock_user.is_super_admin = False
+    mock_user.is_superadmin = False
     mock_user_service.return_value = mock_user
 
     mock_user_organization = MagicMock()
@@ -82,7 +82,7 @@ def test_get_analytics_line_chart_no_org(mock_db, mock_user_service, mock_oauth2
     """
     # Arrange
     mock_user = MagicMock()
-    mock_user.is_super_admin = False
+    mock_user.is_superadmin = False
     mock_user_service.return_value = mock_user
 
     mock_db.query.return_value.filter_by.return_value.first.return_value = None

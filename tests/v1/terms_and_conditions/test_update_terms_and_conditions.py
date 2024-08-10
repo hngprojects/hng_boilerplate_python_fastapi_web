@@ -38,7 +38,7 @@ def create_mock_super_admin(_):
         id=str(uuid7()),
         email="user@example.com",
         password=user_service.hash_password("P@ssw0rd"),
-        is_super_admin=True,
+        is_superadmin=True,
     )
 
 def create_mock_terms_and_conditions(_):

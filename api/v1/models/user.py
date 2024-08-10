@@ -16,7 +16,7 @@ class User(BaseTableModel):
     last_name = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     is_active = Column(Boolean, server_default=text("true"))
-    is_super_admin = Column(Boolean, server_default=text("false"))
+    is_superadmin = Column(Boolean, server_default=text("false"))
     is_deleted = Column(Boolean, server_default=text("false"))
     is_verified = Column(Boolean, server_default=text("false"))
 

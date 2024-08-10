@@ -40,7 +40,7 @@ def create_built_in_role_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
 ):  # Only super admin can create
-    if not current_user.is_super_admin:
+    if not current_user.is_superadmin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only super admins can create built-in roles.",
@@ -169,7 +169,7 @@ def update_builtin_role_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin)
 ):
-    if not current_user.is_super_admin:
+    if not current_user.is_superadmin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super admins can update built-in roles.")
     # Ensure it's a built-in role
     role_update.is_builtin = True

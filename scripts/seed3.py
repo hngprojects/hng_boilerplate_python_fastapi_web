@@ -25,7 +25,7 @@ if not admin_user:
         first_name="Admin",
         last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         is_deleted=False,
         is_verified=True,
     )
@@ -41,7 +41,7 @@ if not normal_user:
         first_name=fake.file_name(),
         last_name=fake.last_name(),
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         is_deleted=False,
         is_verified=True,
     )

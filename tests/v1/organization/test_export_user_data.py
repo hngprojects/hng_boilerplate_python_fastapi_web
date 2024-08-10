@@ -24,7 +24,7 @@ def mock_get_current_user():
         first_name="Test",
         last_name="User",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -38,7 +38,7 @@ def mock_get_current_admin():
         first_name="Admin",
         last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

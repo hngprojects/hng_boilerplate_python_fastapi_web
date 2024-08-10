@@ -40,7 +40,7 @@ def test_get_user(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

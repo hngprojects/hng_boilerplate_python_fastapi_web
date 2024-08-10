@@ -96,7 +96,7 @@ def paginated_response(
                 results,
                 exclude={
                     'password',
-                    'is_super_admin',
+                    'is_superadmin',
                     'is_deleted',
                     'is_active'
                 }

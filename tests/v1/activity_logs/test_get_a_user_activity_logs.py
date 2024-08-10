@@ -34,7 +34,7 @@ def mock_user_service():
         yield mock_service
 
 
-def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
+def create_mock_user(mock_user_service, mock_db_session, is_superadmin=True):
     """Create a mock user in the mock database session."""
     mock_user = User(
         id=str(uuid7()),
@@ -43,7 +43,7 @@ def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=is_super_admin,
+        is_superadmin=is_superadmin,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -98,7 +98,7 @@ def test_get_all_activity_logs_with_data(mock_user_service, mock_db_session):
 def test_get_all_activity_logs_non_super_admin(mock_user_service, mock_db_session):
     """Test for fetching all activity logs as a non-super admin user."""
     mock_user = create_mock_user(
-        mock_user_service, mock_db_session, is_super_admin=False)
+        mock_user_service, mock_db_session, is_superadmin=False)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     response = client.get(ACTIVITY_LOGS_ENDPOINT, headers={
                           'Authorization': f'Bearer {access_token}'})

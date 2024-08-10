@@ -44,7 +44,7 @@ def mock_superadmin():
 @pytest.fixture
 def mock_token_verification():
     with patch("api.v1.services.user.UserService.verify_access_token") as mock:
-        mock.return_value = MagicMock(id="superadmin_id", is_super_admin=True)
+        mock.return_value = MagicMock(id="superadmin_id", is_superadmin=True)
         yield mock
 
 def test_superadmin_create_user(mock_superadmin, mock_token_verification,
@@ -62,7 +62,7 @@ def test_superadmin_create_user(mock_superadmin, mock_token_verification,
                 is_active=True,
                 is_deleted=False,
                 is_verified=True,
-                is_super_admin=False,
+                is_superadmin=False,
                 created_at=created_at.isoformat(),
                 updated_at=updated_at.isoformat()
             )
@@ -73,7 +73,7 @@ def test_superadmin_create_user(mock_superadmin, mock_token_verification,
     user_request = {'email': 'new_user1@email.com', 'first_name': 'new_user',
              'last_name': 'new_user', 'password': 'new_user_password',
               'is_active': True, 'is_deleted': False,
-             'is_verified': True, 'is_super_admin': False, 'created_at': created_at.isoformat(),
+             'is_verified': True, 'is_superadmin': False, 'created_at': created_at.isoformat(),
              'updated_at': updated_at.isoformat()
     }
     (mock_db_session.query.return_value
@@ -118,7 +118,7 @@ def test_superadmin_create_user(mock_superadmin, mock_token_verification,
                 'is_active': True,
                 'is_deleted': False,
                 'is_verified': True,
-                'is_super_admin': False,
+                'is_superadmin': False,
                 'created_at': created_at.isoformat(),
                 'updated_at': updated_at.isoformat()
         }

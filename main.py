@@ -25,7 +25,12 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title="HNG Boilerplate",
+    description="A boilerplate for creating an API using FastAPI and SQLAlchemy",
+    version="1.0.0",
+)
 
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
