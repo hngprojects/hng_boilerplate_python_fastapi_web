@@ -1,16 +1,16 @@
 
 """ The Organisation model
 """
-from sqlalchemy import Column, String, Text, Enum
+from sqlalchemy import Column, String
 from sqlalchemy.orm import relationship
-from api.v1.models.associations import user_organisation_association
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.base_model import BaseTableModel
 
 
 class Organisation(BaseTableModel):
     __tablename__ = "organisations"
 
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False, unique=False)
     email = Column(String, nullable=True, unique=True)
     industry = Column(String, nullable=True)
     type = Column(String, nullable=True)
@@ -20,7 +20,7 @@ class Organisation(BaseTableModel):
     address = Column(String, nullable=True)
 
     users = relationship(
-        "User", secondary=user_organisation_association, back_populates="organisations"
+        "User", secondary=user_organisation_roles, back_populates="organisations"
     )
     billing_plans = relationship("BillingPlan", back_populates="organisation", cascade="all, delete-orphan")
     invitations = relationship("Invitation", back_populates="organisation", cascade="all, delete-orphan")
@@ -36,8 +36,7 @@ class Organisation(BaseTableModel):
     products = relationship(
         "Product", back_populates="organisation", cascade="all, delete-orphan"
     )
-    sales = relationship('Sales', back_populates='organisation',
-                         cascade='all, delete-orphan')
+    sales = relationship('Sales', back_populates='organisation', cascade='all, delete-orphan')
 
     def __str__(self):
         return self.name

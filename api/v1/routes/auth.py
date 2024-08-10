@@ -29,11 +29,11 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
     user = user_service.create(db=db, schema=user_schema)
 
     # create an organization for the user
-    org = CreateUpdateOrganization(
-        name=f"{user.first_name}'s Organization",
+    org = CreateUpdateOrganisation(
+        name=f"{user.first_name}'s Organisation",
         email=user.email
     )
-    user_org = organization_service.create(db=db, schema=org, user=user)
+    user_org = organisation_service.create(db=db, schema=org, user=user)
 
     # Create access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)

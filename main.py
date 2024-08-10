@@ -1,4 +1,3 @@
-
 import uvicorn
 from fastapi.staticfiles import StaticFiles
 import uvicorn, os
@@ -18,10 +17,13 @@ from api.utils.json_response import JsonResponseDict
 from api.utils.logger import logger
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
+from scripts.populate_db import populate_roles_and_permissions
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    '''Lifespan function'''
+
     yield
 
 

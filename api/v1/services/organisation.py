@@ -9,8 +9,10 @@ from sqlalchemy import select
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence, check_user_in_org
 from api.utils.pagination import paginated_response
+from api.v1.models.permissions.role import Role
 from api.v1.models.product import Product
 from api.v1.models.associations import user_organisation_association
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.organisation import Organisation
 from api.v1.models.user import User
 from api.v1.schemas.organisation import (
@@ -23,23 +25,36 @@ from api.v1.schemas.organisation import (
 class OrganisationService(Service):
     """Organisation service functionality"""
 
+    def get_role_id(self, db: Session, role: str):
+        '''Returns the role id associated with a role'''
+
+        role_ = db.query(Role).filter(Role.name == role).first()
+
+        if not role_:
+            raise HTTPException(status_code=404, detail="Admin role not found")
+
+        return role_.id
+    
+
     def create(self, db: Session, schema: CreateUpdateOrganisation, user: User):
         """Create a new product"""
 
         # Create a new organisation
         new_organisation = Organisation(**schema.model_dump())
+        
         email = schema.model_dump()["email"]
-        name = schema.model_dump()["name"]
         self.check_by_email(db, email)
-        self.check_by_name(db, name)
 
         db.add(new_organisation)
         db.commit()
         db.refresh(new_organisation)
 
         # Add user as owner to the new organisation
-        stmt = user_organisation_association.insert().values(
-            user_id=user.id, organisation_id=new_organisation.id, role="owner"
+        stmt = user_organisation_roles.insert().values(
+            user_id=user.id, 
+            organisation_id=new_organisation.id, 
+            role_id=self.get_role_id(db=db, role='admin'),
+            is_owner=True
         )
         db.execute(stmt)
         db.commit()

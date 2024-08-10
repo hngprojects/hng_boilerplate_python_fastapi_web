@@ -136,7 +136,7 @@ class UserService(Service):
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
-                detail="User with this email or username already exists",
+                detail="User with this email already exists",
             )
 
         # Hash password
@@ -152,7 +152,6 @@ class UserService(Service):
         notification_setting_service.create(db=db, user=user)
 
         # create data privacy setting
-
         data_privacy = DataPrivacySetting(user_id=user.id)
 
         db.add(data_privacy)
