@@ -1,8 +1,8 @@
 from api.db.database import get_db
 from api.v1.models.contact_us import ContactUs
 from fastapi import HTTPException, status
-from api.v1.models.associations import user_organization_association
-from api.v1.services.organization import OrganizationService
+from api.v1.models.associations import user_organisation_association
+from api.v1.services.organisation import OrganisationService
 
 
 class ContactMessage(object):
@@ -17,8 +17,8 @@ class ContactMessage(object):
         return result
 
     def check_admin_access(self, db, admin_id, org_id):
-        org_service_obj = OrganizationService()
-        role = org_service_obj.get_organization_user_role(user_id=admin_id, org_id=org_id, db=db)
+        org_service_obj = OrganisationService()
+        role = org_service_obj.get_organisation_user_role(user_id=admin_id, org_id=org_id, db=db)
         if role != 'admin':
             self.raise_unauthorized_admin()
 

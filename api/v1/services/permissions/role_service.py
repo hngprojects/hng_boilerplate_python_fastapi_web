@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from api.v1.models.permissions.role import Role
-from api.v1.models.permissions.user_org_role import user_organization_roles
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.permissions.role_permissions import role_permissions
 from api.v1.schemas.permissions.roles import RoleDeleteResponse
 from api.v1.models.permissions.permissions import Permission
@@ -11,7 +11,7 @@ from fastapi import HTTPException
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import update, insert
 from api.utils.db_validators import check_model_existence
-from api.v1.services.organization import organization_service as org_service
+from api.v1.services.organisation import organisation_service as org_service
 
 
 class RoleService:
@@ -43,23 +43,23 @@ class RoleService:
     @staticmethod
     def assign_role_to_user(db: Session, org_id: uuid7, user_id: uuid7, role_id: uuid7):
         user_org = db.execute(
-            user_organization_roles.select().where(
-                user_organization_roles.c.user_id == user_id,
-                user_organization_roles.c.organization_id == org_id,
+            user_organisation_roles.select().where(
+                user_organisation_roles.c.user_id == user_id,
+                user_organisation_roles.c.organisation_id == org_id,
             )
         ).fetchone()
         if not user_org:
-            raise HTTPException(status_code=404, detail="User is not part of the organization")
+            raise HTTPException(status_code=404, detail="User is not part of the organisation")
         
 
         if user_org.role_id is not None:
-            raise HTTPException(status_code=400, detail="User already has a role in the organization")
+            raise HTTPException(status_code=400, detail="User already has a role in the organisation")
         
         try:
-        # Update the role_id for the user-organization pair
-            stmt = update(user_organization_roles).where(
-                user_organization_roles.c.user_id == user_id,
-                user_organization_roles.c.organization_id == org_id,
+        # Update the role_id for the user-organisation pair
+            stmt = update(user_organisation_roles).where(
+                user_organisation_roles.c.user_id == user_id,
+                user_organisation_roles.c.organisation_id == org_id,
             ).values(role_id=role_id)
             
             db.execute(stmt)
@@ -83,16 +83,16 @@ class RoleService:
     
     
     @staticmethod
-    def get_roles_by_organization(db: Session, organization_id: str):
+    def get_roles_by_organisation(db: Session, organisation_id: str):
         roles = (
             db.query(Role)
-            .join(user_organization_roles, Role.id == user_organization_roles.c.role_id)
-            .filter(user_organization_roles.c.organization_id == organization_id)
+            .join(user_organisation_roles, Role.id == user_organisation_roles.c.role_id)
+            .filter(user_organisation_roles.c.organisation_id == organisation_id)
             .all()
         )
         if not roles:
             raise HTTPException(
-                status_code=404, detail="Roles not found for the given organization"
+                status_code=404, detail="Roles not found for the given organisation"
             )
         return roles
 
@@ -109,10 +109,10 @@ class RoleService:
         if role.name not in ['user', 'guest', 'admin', 'owner']:
             raise HTTPException(status_code=400, detail="Invalid role")
 
-        stmt = user_organization_roles.select().where(
-            user_organization_roles.c.user_id == user_id,
-            user_organization_roles.c.organization_id == org_id,
-            user_organization_roles.c.role_id == role.id,
+        stmt = user_organisation_roles.select().where(
+            user_organisation_roles.c.user_id == user_id,
+            user_organisation_roles.c.organisation_id == org_id,
+            user_organisation_roles.c.role_id == role.id,
         )
 
         relation = db.execute(stmt).fetchone()
@@ -125,10 +125,10 @@ class RoleService:
     def remove_user_from_role(self, db: Session, org_id: str, user_id: str, role: Role):
         """Delete user role relationship"""
         if self.get_user_role_relation(db, user_id, org_id, role):
-            db.execute(user_organization_roles.delete().where(
-                user_organization_roles.c.user_id == user_id,
-                user_organization_roles.c.organization_id == org_id,
-                user_organization_roles.c.role_id == role.id,
+            db.execute(user_organisation_roles.delete().where(
+                user_organisation_roles.c.user_id == user_id,
+                user_organisation_roles.c.organisation_id == org_id,
+                user_organisation_roles.c.role_id == role.id,
             ))
             db.commit()
             

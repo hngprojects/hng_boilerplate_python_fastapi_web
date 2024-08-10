@@ -19,7 +19,7 @@ def paginated_response(
     Custom response for pagination.\n
     This takes in four atguments:
         * db- this is the database session
-        * model- this is the database table model eg Product, Organization```
+        * model- this is the database table model eg Product, Organisation```
         * limit- this is the number of items to fetch per page, this would be a query parameter
         * skip- this is the number of items to skip before fetching the next page of data. This would also
         be a query parameter
@@ -55,7 +55,7 @@ def paginated_response(
             model=Product,
             limit=limit,
             skip=skip,
-            join=user_organization_association,
+            join=user_organisation_association,
             filters={'org_id': org_id}
         )
         ```

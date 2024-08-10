@@ -16,7 +16,7 @@ from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
-from api.v1.models.associations import user_organization_association
+from api.v1.models.associations import user_organisation_association
 from api.v1.models.user import User
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
@@ -516,7 +516,7 @@ class UserService(Service):
                 detail="Role ID is required"
             )
 
-        user_roles = db.query(user_organization_association).filter(user_organization_association.c.user_id == current_user.id, user_organization_association.c.role.in_(['admin', 'owner'])).all()
+        user_roles = db.query(user_organisation_association).filter(user_organisation_association.c.user_id == current_user.id, user_organisation_association.c.role.in_(['admin', 'owner'])).all()
 
         if len(user_roles) == 0:
             raise HTTPException(
@@ -524,7 +524,7 @@ class UserService(Service):
                 detail="Permission denied. Admin access required."
             )
 
-        users = db.query(User).join(user_organization_association).filter(user_organization_association.c.role == role_id).all()
+        users = db.query(User).join(user_organisation_association).filter(user_organisation_association.c.role == role_id).all()
 
         if len(users) == 0:
             raise HTTPException(

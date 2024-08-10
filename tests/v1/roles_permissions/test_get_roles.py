@@ -61,8 +61,8 @@ def access_token(mock_db_session):
     return access_token
 
 
-def test_get_roles_for_organization_success(mock_db_session, access_token):
-    """Test fetching roles for a specific organization successfully."""
+def test_get_roles_for_organisation_success(mock_db_session, access_token):
+    """Test fetching roles for a specific organisation successfully."""
 
     org_id = str(uuid7())
     role_name = "TestRole"
@@ -76,8 +76,8 @@ def test_get_roles_for_organization_success(mock_db_session, access_token):
     assert response.status_code == 200
 
 
-def test_get_roles_for_organization_not_found(mock_db_session, access_token):
-    """Test fetching roles for a non-existing organization."""
+def test_get_roles_for_organisation_not_found(mock_db_session, access_token):
+    """Test fetching roles for a non-existing organisation."""
 
     org_id = str(uuid7())
     mock_db_session.query(
@@ -90,11 +90,11 @@ def test_get_roles_for_organization_not_found(mock_db_session, access_token):
     )
 
     assert response.status_code == 404
-    assert response.json()["message"] == "Roles not found for the given organization"
+    assert response.json()["message"] == "Roles not found for the given organisation"
 
 
-def test_get_roles_for_organization_unauthorized(mock_db_session):
-    """Test unauthorized access to fetching roles for an organization."""
+def test_get_roles_for_organisation_unauthorized(mock_db_session):
+    """Test unauthorized access to fetching roles for an organisation."""
 
     org_id = str(uuid7())
 

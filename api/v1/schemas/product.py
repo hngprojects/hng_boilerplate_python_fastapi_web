@@ -88,12 +88,12 @@ class ProductVariantBase(BaseModel):
     stock: int
 
 
-class ProductDetailOrganization(BaseModel):
+class ProductDetailOrganisation(BaseModel):
     id: str
     company_name: str
     company_email: EmailStr | None = None
     industry: str | None = None
-    organization_type: str | None = None
+    organisation_type: str | None = None
     country: str | None = None
     state: str | None = None
     address: str | None = None
@@ -107,7 +107,7 @@ class ProductDetail(BaseModel):
     name: str
     description: str | None = None
     price: float
-    organization: ProductDetailOrganization
+    organisation: ProductDetailOrganisation
     quantity: int
     image_url: str
     status: str

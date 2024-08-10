@@ -70,7 +70,7 @@ def override_get_current_user():
         first_name="AdminTest",
         last_name="User",
         is_active=True,
-        # organizations=[org_1],
+        # organisations=[org_1],
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

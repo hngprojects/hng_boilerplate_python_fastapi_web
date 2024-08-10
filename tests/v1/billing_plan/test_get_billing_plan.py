@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
 
 from api.db.database import get_db
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.services.user import user_service
 from api.v1.services.billing_plan import billing_plan_service
 from api.v1.models.user import User
@@ -43,9 +43,9 @@ def mock_get_current_user():
     )
 
 def mock_org():
-    return Organization(
+    return Organisation(
         id=str(uuid7()),
-        name="Test Organization",
+        name="Test Organisation",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -53,7 +53,7 @@ def mock_org():
 def mock_billing_plan():
     return BillingPlan(
         id=str(uuid7()), 
-        organization_id=mock_org().id,  
+        organisation_id=mock_org().id,  
         name="Premium Plan",
         price=49.99,
         currency="NGN",  # Currency code
@@ -71,6 +71,6 @@ def test_get_plan_unauthorized(client, db_session_mock):
 
     with patch("api.v1.services.billing_plan.BillingPlanService.fetch", return_value=mock_plan_instance) as mock_fetch:
 
-        response = client.get(f'/api/v1/organizations/billing-plans/{mock_plan_instance.id}')
+        response = client.get(f'/api/v1/organisations/billing-plans/{mock_plan_instance.id}')
 
         assert response.status_code == 404

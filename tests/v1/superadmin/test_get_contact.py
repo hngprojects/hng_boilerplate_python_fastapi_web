@@ -7,7 +7,7 @@ from api.v1.models.contact_us import ContactUs
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from unittest import mock
-from api.v1.models.associations import user_organization_association
+from api.v1.models.associations import user_organisation_association
 from sqlalchemy import insert
 
 client = TestClient(app)

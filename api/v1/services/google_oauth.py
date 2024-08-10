@@ -2,7 +2,7 @@ from fastapi import BackgroundTasks, Depends, HTTPException
 from datetime import datetime, timezone
 from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.models.user import User
 from api.v1.models.oauth import OAuth
 from api.v1.models.user import User
@@ -13,7 +13,7 @@ from typing import Annotated, Union
 from api.v1.services.user import user_service
 from api.v1.schemas.google_oauth import Tokens
 from api.v1.services.profile import profile_service
-from api.v1.models.associations import user_organization_association
+from api.v1.models.associations import user_organisation_association
 
 
 class GoogleOauthServices(Service): 
@@ -207,15 +207,15 @@ class GoogleOauthServices(Service):
                 access_token=user_service.create_access_token(new_user.id),
                 refresh_token=user_service.create_refresh_token(new_user.id)
             )
-            organization = Organization(
-                name = f'{new_user.first_name} {new_user.last_name} Organization'
+            organisation = Organisation(
+                name = f'{new_user.first_name} {new_user.last_name} Organisation'
             )
-            db.add_all([profile, oauth_data, organization])
+            db.add_all([profile, oauth_data, organisation])
             db.commit()
 
             # TODO: Ensure to update this later
-            stmt = user_organization_association.insert().values(
-                user_id=new_user.id, organization_id=organization.id, role="owner"
+            stmt = user_organisation_association.insert().values(
+                user_id=new_user.id, organisation_id=organisation.id, role="owner"
             )
             db.execute(stmt)
             db.commit()

@@ -316,7 +316,7 @@ class PythonAPIs(unittest.TestCase):
             "Expected status code 200, got {}".format(response.status_code),
         )
 
-    def test_get_all_organization_billing(self):
+    def test_get_all_organisation_billing(self):
         headers = {"Authorization": f"Bearer {self.access_token}"}
         response = requests.get(
             f"{self.baseUrl}/api/v1/organisation/billing-plans", headers=headers

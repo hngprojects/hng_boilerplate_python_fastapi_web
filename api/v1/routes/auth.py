@@ -12,8 +12,8 @@ from api.v1.schemas.user import Token
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
 from api.v1.schemas.user import UserCreate, MagicLinkRequest
-from api.v1.services.organization import organization_service
-from api.v1.schemas.organization import CreateUpdateOrganization
+from api.v1.services.organisation import organisation_service
+from api.v1.schemas.organisation import CreateUpdateOrganisation
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
@@ -28,10 +28,10 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
     # Create user account
     user = user_service.create(db=db, schema=user_schema)
 
-    # create an organization for the user
-    org = CreateUpdateOrganization(name=f"{user.first_name}'s Organization",
+    # create an organisation for the user
+    org = CreateUpdateOrganisation(name=f"{user.first_name}'s Organisation",
                                    email=user.email)
-    user_org = organization_service.create(db=db, schema=org, user=user)
+    user_org = organisation_service.create(db=db, schema=org, user=user)
 
     # Create access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)

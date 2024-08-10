@@ -71,7 +71,7 @@ def test_create_new_plans(mock_user_service, mock_db_session):
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     data = {
         "name": "Advanced",
-        "organization_id": "s2334d",
+        "organisation_id": "s2334d",
         "description": "All you need in one pack",
         "price": 80,
         "duration": "Monthly",

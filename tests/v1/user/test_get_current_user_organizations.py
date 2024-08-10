@@ -7,17 +7,17 @@ from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
 
 from api.db.database import get_db
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.services.user import user_service
 from api.v1.models import User
 from main import app
 
 
-# Mock user with organizations
+# Mock user with organisations
 def mock_get_current_user():
-    # Create mock organizations
-    org1 = Organization(id=str(uuid7()), name="Organization One")
-    org2 = Organization(id=str(uuid7()), name="Organization Two")
+    # Create mock organisations
+    org1 = Organisation(id=str(uuid7()), name="Organisation One")
+    org2 = Organisation(id=str(uuid7()), name="Organisation Two")
 
     # Create mock user
     mock_user = User(
@@ -30,7 +30,7 @@ def mock_get_current_user():
         is_super_admin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
-        organizations=[org1, org2]
+        organisations=[org1, org2]
     )
     return mock_user
 
@@ -48,7 +48,7 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 
-def test_get_user_organizations_unauthorized(client, db_session_mock):
+def test_get_user_organisations_unauthorized(client, db_session_mock):
     '''Test unauthorized response'''
 
     response = client.get(
