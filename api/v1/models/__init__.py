@@ -6,7 +6,7 @@ from api.v1.models.message import Message
 from api.v1.models.payment import Payment
 from api.v1.models.waitlist import Waitlist
 from api.v1.models.user import User
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.models.profile import Profile
 from api.v1.models.notifications import Notification
 from api.v1.models.product import ProductVariant, ProductCategory, Product

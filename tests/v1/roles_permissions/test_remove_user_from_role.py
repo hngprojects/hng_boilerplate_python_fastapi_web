@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 from main import app
 from api.db.database import get_db
-from api.v1.models import User, Organization
+from api.v1.models import User, Organisation
 from api.v1.services.user import user_service
 from api.v1.models.permissions.role import Role
-from api.v1.models.permissions.user_org_role import user_organization_roles
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 
 client = TestClient(app)
 
@@ -31,7 +31,7 @@ def mock_user_service():
 @pytest.fixture
 def mock_org_service():
     with patch(
-        "api.v1.services.organization.organization_service", autospec=True
+        "api.v1.services.organisation.organisation_service", autospec=True
     ) as org_service_mock:
         yield org_service_mock
 
@@ -88,23 +88,23 @@ def test_user(user_role):
 
 @pytest.fixture()
 def test_org():
-    org = Organization(id=str(uuid7()), name="Organization 1")
+    org = Organisation(id=str(uuid7()), name="Organisation 1")
     return org
 
 
 # admin role relation
 @pytest.fixture
 def admin_role_relation():
-    return user_organization_roles(
-        organization_id=test_org.id, user_id=test_admin.id, role_id=admin_role.id
+    return user_organisation_roles(
+        organisation_id=test_org.id, user_id=test_admin.id, role_id=admin_role.id
     )
 
 
 # user role relation
 @pytest.fixture
 def user_role_relation():
-    return user_organization_roles(
-        organization_id=test_org.id, user_id=test_user.id, role_id=user_role.id
+    return user_organisation_roles(
+        organisation_id=test_org.id, user_id=test_user.id, role_id=user_role.id
     )
 
 

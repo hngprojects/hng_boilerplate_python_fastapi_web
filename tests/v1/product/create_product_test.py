@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.product import Product
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.services.user import user_service, UserService
 from api.v1.services.product import product_service, ProductService
 from api.utils.db_validators import check_user_in_org
@@ -88,7 +88,7 @@ def mock_foriegn_org():
     ) as mock_create:
         mock_create.side_effect = HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You are not a member of this organization",
+            detail="You are not a member of this organisation",
         )
 
         yield mock_create
@@ -105,7 +105,7 @@ def mock_get_current_user():
         first_name="AdminTest",
         last_name="User",
         is_active=True,
-        # organizations=[org_1],
+        # organisations=[org_1],
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -190,4 +190,4 @@ def test_user_does_not_belong_to_org(
     )
 
     assert response.status_code == status.HTTP_400_BAD_REQUEST
-    assert response.json()["message"] == "You are not a member of this organization"
+    assert response.json()["message"] == "You are not a member of this organisation"

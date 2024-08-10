@@ -5,7 +5,7 @@ from unittest.mock import MagicMock
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.models.product import Product, ProductCategory
 from api.v1.models.user import User
 from main import app
@@ -52,9 +52,9 @@ user = User(
     updated_at=updated_at,
 )
 
-# Create test organization
+# Create test organisation
 
-org = Organization(
+org = Organisation(
     id=str(org_id),
     name="hng",
     email=None,
@@ -88,7 +88,7 @@ product = Product(
 )
 
 
-# user.organization = org
+# user.organisation = org
 
 
 def test_get_product_detail_success(client, db_session_mock):

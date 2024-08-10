@@ -43,7 +43,7 @@ class PaymentListResponse(BaseModel):
 
 
 class PaymentDetail(BaseModel):
-    organization_id: str
+    organisation_id: str
     plan_id: str
     full_name: str
     billing_option: str

@@ -9,7 +9,7 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.core.base.services import Service
 from api.v1.services.user import oauth2_scheme
-from api.v1.models.user import user_organization_association
+from api.v1.models.user import user_organisation_association
 from api.v1.models.sales import Sales
 from api.v1.models.product import Product
 from api.v1.models.user import User
@@ -44,17 +44,17 @@ class AnalyticsServices(Service):
 
         # check if the analytics-line-data is for org admin
         if not user.is_super_admin:
-            user_organization: object = (db.query(user_organization_association)
+            user_organisation: object = (db.query(user_organisation_association)
                                          .filter_by(user_id=user.id).first())
-            if not user_organization:
+            if not user_organisation:
                 return AnalyticsChartsResponse(
-                    message='User is not part of Any organization yet.',
+                    message='User is not part of Any organisation yet.',
                     status='success',
                     status_code=200,
                     data={month: 0 for month in DATA.values()}
                 )
             data = self.get_line_chart_data(db, super_admin=False,
-                                            org_id=user_organization.organization_id)
+                                            org_id=user_organisation.organisation_id)
             message: str = 'Successfully retrieved line-charts'
 
         # check if user is a super admin
@@ -74,7 +74,7 @@ class AnalyticsServices(Service):
         Args:
             db: database session object
             super_admin: boolean signifying revenues for super admin
-            organization_id: the organization id of the user
+            organisation_id: the organisation id of the user
         Returns:
             MONTHS_AND_DATA: a dict conatining the months(str) and revenue(float) for each month
         """
@@ -100,7 +100,7 @@ class AnalyticsServices(Service):
         Args:
             db: database session object
             super_admin: boolean signifying revenues for super admin
-            organization_id: the organization id of the user
+            organisation_id: the organisation id of the user
         Returns:
             query result: a list conatining the rows of months(int) and revenue(int)
         """
@@ -110,7 +110,7 @@ class AnalyticsServices(Service):
         )
 
         if not super_admin:
-            query = query.filter(Sales.organization_id == org_id)
+            query = query.filter(Sales.organisation_id == org_id)
 
         query = query.group_by(
             cast(extract('month', Sales.created_at), Integer)
@@ -145,9 +145,9 @@ class AnalyticsServices(Service):
             data = self.get_summary_data_super_admin(db, start_date, end_date)
             message = "Admin Statistics Fetched"
         else:
-            user_organization = db.query(
-                user_organization_association).filter_by(user_id=user.id).first()
-            if not user_organization:
+            user_organisation = db.query(
+                user_organisation_association).filter_by(user_id=user.id).first()
+            if not user_organisation:
                 data = {
                     "revenue": {
                         "current_month": 0,
@@ -169,10 +169,10 @@ class AnalyticsServices(Service):
                         "difference_an_hour_ago": 0
                     }
                 }
-                message = "User is not part of any organization"
+                message = "User is not part of any organisation"
             else:
-                data = self.get_summary_data_organization(
-                    db, user_organization.organization_id, start_date, end_date)
+                data = self.get_summary_data_organisation(
+                    db, user_organisation.organisation_id, start_date, end_date)
                 message = "User Statistics Fetched"
 
         return AnalyticsSummaryResponse(
@@ -223,31 +223,31 @@ class AnalyticsServices(Service):
             }
         }
 
-    def get_summary_data_organization(self, db: Session, org_id: str, start_date: datetime, end_date: datetime) -> dict:
+    def get_summary_data_organisation(self, db: Session, org_id: str, start_date: datetime, end_date: datetime) -> dict:
         total_revenue = db.query(func.sum(Sales.amount)).filter(and_(
-            Sales.organization_id == org_id, Sales.created_at.between(start_date, end_date))).scalar() or 0
+            Sales.organisation_id == org_id, Sales.created_at.between(start_date, end_date))).scalar() or 0
         subscriptions = db.query(func.count(BillingPlan.id)).filter(and_(
-            BillingPlan.organization_id == org_id, BillingPlan.created_at.between(start_date, end_date))).scalar() or 0
+            BillingPlan.organisation_id == org_id, BillingPlan.created_at.between(start_date, end_date))).scalar() or 0
         sales = db.query(func.count(Sales.id)).filter(and_(
-            Sales.organization_id == org_id, Sales.created_at.between(start_date, end_date))).scalar() or 0
+            Sales.organisation_id == org_id, Sales.created_at.between(start_date, end_date))).scalar() or 0
 
         last_month_start = start_date - timedelta(days=30)
         last_month_revenue = db.query(func.sum(Sales.amount)).filter(and_(
-            Sales.organization_id == org_id, Sales.created_at.between(last_month_start, start_date))).scalar() or 0
+            Sales.organisation_id == org_id, Sales.created_at.between(last_month_start, start_date))).scalar() or 0
         last_month_subscriptions = db.query(func.count(BillingPlan.id)).filter(and_(
-            BillingPlan.organization_id == org_id, BillingPlan.created_at.between(last_month_start, start_date))).scalar() or 0
+            BillingPlan.organisation_id == org_id, BillingPlan.created_at.between(last_month_start, start_date))).scalar() or 0
         last_month_sales = db.query(func.count(Sales.id)).filter(and_(
-            Sales.organization_id == org_id, Sales.created_at.between(last_month_start, start_date))).scalar() or 0
+            Sales.organisation_id == org_id, Sales.created_at.between(last_month_start, start_date))).scalar() or 0
 
         last_hour = datetime.utcnow() - timedelta(hours=1)
         active_now = db.query(func.count(User.id)).filter(and_(
             User.is_active == True,
-            User.organizations.any(id=org_id)
+            User.organisations.any(id=org_id)
         )).scalar() or 0
         previous_hour = last_hour - timedelta(hours=1)
         active_previous_hour = db.query(func.count(User.id)).filter(and_(
             User.is_active == True,
-            User.organizations.any(id=org_id),
+            User.organisations.any(id=org_id),
             User.created_at >= last_hour - timedelta(hours=1),
             User.created_at < last_hour
         )).scalar() or 0

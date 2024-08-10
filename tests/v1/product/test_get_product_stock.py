@@ -84,7 +84,7 @@ async def test_get_product_stock(
         else:
             return None
 
-    def mock_check_user_in_org(user, organization):
+    def mock_check_user_in_org(user, organisation):
         return True
 
     with patch.object(product_service, "fetch_stock", mock_fetch_stock):
@@ -122,10 +122,10 @@ async def test_get_product_stock_not_found(
 #     def mock_fetch_stock(db, product_id):
 #         return mock_product
 
-#     def mock_check_user_in_org(user, organization):
+#     def mock_check_user_in_org(user, organisation):
 #         raise HTTPException(
 #             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="You are not a member of this organization",
+#             detail="You are not a member of this organisation",
 #         )
 
 #     user = await mock_get_non_member_user_product()
