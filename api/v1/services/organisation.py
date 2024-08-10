@@ -50,11 +50,10 @@ class OrganisationService(Service):
         db.refresh(new_organisation)
 
         # Add user as owner to the new organisation
-        stmt = user_organisation_roles.insert().values(
+        stmt = user_organisation_association.insert().values(
             user_id=user.id, 
             organisation_id=new_organisation.id, 
-            role_id=self.get_role_id(db=db, role='admin'),
-            is_owner=True
+            role='owner'
         )
         db.execute(stmt)
         db.commit()
