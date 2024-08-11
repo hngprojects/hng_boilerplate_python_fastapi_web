@@ -20,7 +20,7 @@ class NewsletterSubscriber(BaseTableModel):
 
     email: Mapped[str] = mapped_column(String(120), nullable=False)
     newsletter_id: Mapped[str] = mapped_column(
-        ForeignKey("newsletters.id"), nullable=False
+        ForeignKey("newsletters.id"), nullable=True
     )
 
     newsletter: Mapped["Newsletter"] = relationship(
