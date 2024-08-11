@@ -27,15 +27,7 @@ class Organisation(BaseTableModel):
     products = relationship("Product", back_populates="organisation", cascade="all, delete-orphan")
     contact_us = relationship("ContactUs", back_populates="organisation", cascade="all, delete-orphan")
     
-    billing_plans = relationship(
-        "BillingPlan", back_populates="organisation", cascade="all, delete-orphan"
-    )
-    invitations = relationship(
-        "Invitation", back_populates="organisation", cascade="all, delete-orphan"
-    )
-    products = relationship(
-        "Product", back_populates="organisation", cascade="all, delete-orphan"
-    )
+    user_subscriptions = relationship("UserSubscription", back_populates="organisation", cascade="all, delete-orphan")
     sales = relationship('Sales', back_populates='organisation', cascade='all, delete-orphan')
 
     def __str__(self):
