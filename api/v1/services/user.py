@@ -225,19 +225,20 @@ class UserService(Service):
 
     def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
         """Function to update a User"""
-        
+
         # Get user from access token if provided, otherwise fetch user by id
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
                 detail="User with this email or username already exists",
             )
-        
-        user = (self.fetch(db=db, id=id) 
-                if current_user.is_superadmin and id is not None
-                else self.fetch(db=db, id=current_user.id)
-            )
-        
+
+        user = (
+            self.fetch(db=db, id=id)
+            if current_user.is_superadmin and id is not None
+            else self.fetch(db=db, id=current_user.id)
+        )
+
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(user, key, value)
@@ -465,6 +466,7 @@ class UserService(Service):
     ):
         """Get the current super admin"""
         user = self.get_current_user(db=db, access_token=token)
+
         if not user.is_superadmin:
             raise HTTPException(
                 status_code=403,
@@ -505,31 +507,36 @@ class UserService(Service):
             random.choices(string.digits, k=6)
         ), datetime.utcnow() + timedelta(minutes=10)
 
-
     def get_users_by_role(self, db: Session, role_id: str, current_user: User):
         """Function to get all users by role"""
         if role_id == "" or role_id is None:
-            raise HTTPException(
-                status_code=400, 
-                detail="Role ID is required"
-            )
+            raise HTTPException(status_code=400, detail="Role ID is required")
 
-        user_roles = db.query(user_organisation_association).filter(user_organisation_association.c.user_id == current_user.id, user_organisation_association.c.role.in_(['admin', 'owner'])).all()
+        user_roles = (
+            db.query(user_organisation_association)
+            .filter(
+                user_organisation_association.c.user_id == current_user.id,
+                user_organisation_association.c.role.in_(["admin", "owner"]),
+            )
+            .all()
+        )
 
         if len(user_roles) == 0:
             raise HTTPException(
-                status_code=403, 
-                detail="Permission denied. Admin access required."
+                status_code=403, detail="Permission denied. Admin access required."
             )
 
-        users = db.query(User).join(user_organisation_association).filter(user_organisation_association.c.role == role_id).all()
+        users = (
+            db.query(User)
+            .join(user_organisation_association)
+            .filter(user_organisation_association.c.role == role_id)
+            .all()
+        )
 
         if len(users) == 0:
-            raise HTTPException(
-                status_code=404, 
-                detail="No users found for this role"
-            )
+            raise HTTPException(status_code=404, detail="No users found for this role")
 
         return users
+
 
 user_service = UserService()
