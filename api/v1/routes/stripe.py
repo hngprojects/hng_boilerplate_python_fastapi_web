@@ -71,7 +71,7 @@ async def webhook_received(
     
 
 @subscription_.get("/organisations/users/plans")
-async def get_organisations_with_users_and_plans(db: Session = Depends(get_db)):
+async def get_organisations_with_users_and_plans(db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
     try:
         data = fetch_all_organisations_with_users_and_plans(db)
         if not data:

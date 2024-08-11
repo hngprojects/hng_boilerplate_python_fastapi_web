@@ -93,6 +93,7 @@ def convert_duration_to_timedelta(duration: str) -> timedelta:
     else:
         raise ValueError("Invalid duration")
 
+
 async def update_user_plan(db: Session, user_id: str, plan_name: str):
     # Fetch the user by ID
     user = db.query(User).filter(User.id == user_id).first()
@@ -128,17 +129,21 @@ async def update_user_plan(db: Session, user_id: str, plan_name: str):
         user_subscription.start_date = datetime.utcnow()
         user_subscription.end_date = datetime.utcnow() + duration
     else:
-        new_subscription = UserSubscription(
+        user_subscription = UserSubscription(
             user_id=user_id,
             plan_id=plan.id,
             organisation_id=organisation_id,
             start_date=datetime.utcnow(),
             end_date=datetime.utcnow() + duration
         )
-        db.add(new_subscription)
+        db.add(user_subscription)
 
     # Commit the transaction
     db.commit()
+    db.refresh(user_subscription)  # Refresh the session to get the updated data
+
+    # Return the updated or newly created subscription
+    return user_subscription
 
 
 def fetch_all_organisations_with_users_and_plans(db: Session):
