@@ -65,7 +65,7 @@ def override_get_current_super_admin():
         first_name="AdminTest",
         last_name="User",
         is_active=False,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -88,7 +88,7 @@ def create_dummy_mock_user(mock_user_service: UserService, mock_db_session: Sess
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -142,7 +142,7 @@ def test_non_admin_access(
         first_name="AdminTest",
         last_name="User",
         is_active=False,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

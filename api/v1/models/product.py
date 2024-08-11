@@ -35,7 +35,7 @@ class Product(BaseTableModel):
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)
     org_id = Column(
-        String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+        String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False
     )
     category_id = Column(
         String, ForeignKey("product_categories.id", ondelete="CASCADE"), nullable=False
@@ -47,12 +47,13 @@ class Product(BaseTableModel):
     )
     archived = Column(Boolean, default=False)
     filter_status = Column(
-        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active)
+        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active
+    )
 
     variants = relationship(
         "ProductVariant", back_populates="product", cascade="all, delete-orphan"
     )
-    organization = relationship("Organization", back_populates="products")
+    organisation = relationship("Organisation", back_populates="products")
     category = relationship("ProductCategory", back_populates="products")
     sales = relationship('Sales', back_populates='product',
                          cascade='all, delete-orphan')

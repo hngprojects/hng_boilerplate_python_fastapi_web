@@ -22,7 +22,6 @@ class UserCreate(BaseModel):
     password: str
     first_name: str
     last_name: str
-    admin_secret: Optional[str] = None
 
     @field_validator("password")
     @classmethod
@@ -41,6 +40,7 @@ class UserUpdate(BaseModel):
     first_name : Optional[str] = None
     last_name : Optional[str] = None
     email : Optional[str] = None
+
 class UserData(BaseModel):
     """
     Schema for users to be returned to superadmin
@@ -52,13 +52,11 @@ class UserData(BaseModel):
     is_active: bool
     is_deleted: bool
     is_verified: bool
-    is_super_admin: bool
+    is_superadmin: bool
     created_at: datetime
     updated_at: datetime
 
-
     model_config = ConfigDict(from_attributes=True)
-
 
 class AllUsersResponse(BaseModel):
     """
@@ -83,7 +81,7 @@ class AdminCreateUser(BaseModel):
     is_active: bool = False
     is_deleted: bool = False
     is_verified: bool = False
-    is_super_admin: bool = False
+    is_superadmin: bool = False
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -38,15 +38,18 @@ def create_mock_user(mock_user_service, mock_db_session):
         id=str(uuid7()),
         email="testuser@gmail.com",
         password=user_service.hash_password("Testpassword@123"),
-        first_name='Test',
-        last_name='User',
+        first_name="Test",
+        last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
+        updated_at=datetime.now(timezone.utc),
     )
-    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
+    mock_db_session.query.return_value.filter.return_value.first.return_value = (
+        mock_user
+    )
     return mock_user
+
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_update_billing_plan(mock_user_service, mock_db_session):
@@ -54,22 +57,19 @@ def test_update_billing_plan(mock_user_service, mock_db_session):
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     data = {
-            "name": "Advanced",
-            "organization_id": "s2334d",
-            "description": "All you need in one pack",
-            "price": 80,
-            "duration": "Monthly",
-            "currency": "Naira",
-            "features": [
-                "Multiple team",
-                "Premium support"
-            ]
-            }
-    
+        "name": "Advanced",
+        "organisation_id": "s2334d",
+        "description": "All you need in one pack",
+        "price": 80,
+        "duration": "Monthly",
+        "currency": "Naira",
+        "features": ["Multiple team", "Premium support"],
+    }
+
     response = client.patch(
-        "/api/v1/organizations/billing-plans/123-1221-090",
-        headers={'Authorization': f'Bearer {access_token}'},
-        json=data
-        )
-    
+        "/api/v1/organisations/billing-plans/123-1221-090",
+        headers={"Authorization": f"Bearer {access_token}"},
+        json=data,
+    )
+
     assert response.status_code == status.HTTP_200_OK

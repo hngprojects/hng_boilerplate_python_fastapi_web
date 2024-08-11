@@ -33,7 +33,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_regions_id'), 'regions', ['id'], unique=False)
     op.add_column('contact_us', sa.Column('org_id', sa.String(), nullable=False))
-    op.create_foreign_key(None, 'contact_us', 'organizations', ['org_id'], ['id'], ondelete='CASCADE')
+    op.create_foreign_key(None, 'contact_us', 'organisations', ['org_id'], ['id'], ondelete='CASCADE')
     # ### end Alembic commands ###
 
 

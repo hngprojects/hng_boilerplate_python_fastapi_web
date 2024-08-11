@@ -40,7 +40,7 @@ def mock_jwt_decode(mocker):
 
 @pytest.fixture
 def mock_get_current_user(mocker):
-    user = User(id="user_id", is_super_admin=False)
+    user = User(id="user_id", is_superadmin=False)
     mock = mocker.patch("api.utils.dependencies.get_current_user", return_value=user)
     return mock
 

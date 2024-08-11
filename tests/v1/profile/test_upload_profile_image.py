@@ -40,7 +40,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -80,7 +80,7 @@ def test_errors(mock_user_service, mock_db_session):
     })
     response = login.json()
     assert response.get("status_code") == status.HTTP_200_OK
-    access_token = response.get('data').get('user').get('access_token')
+    access_token = response.get('access_token')
 
     missing_field = client.post(PROFILE_ENDPOINT, json={
         "username": "testuser",
@@ -117,7 +117,7 @@ def test_user_profile_upload(mock_user_service, mock_db_session):
     })
     response = login.json()
     assert response.get("status_code") == status.HTTP_200_OK
-    access_token = response.get('data').get('user').get('access_token')
+    access_token = response.get('access_token')
     profile_exists = client.post(PROFILE_ENDPOINT, json={
         "username": "testuser",
         "pronouns": "he/him",

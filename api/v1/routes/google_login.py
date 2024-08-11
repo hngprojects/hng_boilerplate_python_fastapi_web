@@ -1,4 +1,4 @@
-from fastapi import Depends, APIRouter, status, HTTPException, Response, Request
+from fastapi import BackgroundTasks, Depends, APIRouter, status, HTTPException, Response, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -23,7 +23,7 @@ FRONTEND_URL = config("FRONTEND_URL")
 
 
 @google_auth.post("/google", status_code=200)
-async def google_login(token_request: OAuthToken, db: Session = Depends(get_db)):
+async def google_login(background_tasks: BackgroundTasks, token_request: OAuthToken, db: Session = Depends(get_db)):
 
     google_oauth_service = GoogleOauthServices()
 
@@ -35,7 +35,7 @@ async def google_login(token_request: OAuthToken, db: Session = Depends(get_db))
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
 
     profile_data = profile_response.json()
-    user = google_oauth_service.create(db=db, google_response=profile_data)
+    user = google_oauth_service.create(background_tasks=background_tasks, db=db, google_response=profile_data)
 
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
@@ -49,7 +49,7 @@ async def google_login(token_request: OAuthToken, db: Session = Depends(get_db))
             "data": {
                 "user": jsonable_encoder(
                     user,
-                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                    exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at']
                 )
             }
         }

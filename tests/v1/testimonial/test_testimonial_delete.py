@@ -43,13 +43,13 @@ def mock_current_admin():
             first_name='Admin',
             last_name='User',
             is_active=True,
-            is_super_admin=True,
+            is_superadmin=True,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
         )
         yield mock_admin
 
-def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
+def create_mock_user(mock_user_service, mock_db_session, is_superadmin=True):
     """Create a mock user in the mock database session."""
 
     mock_user = User(
@@ -59,7 +59,7 @@ def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=is_super_admin,
+        is_superadmin=is_superadmin,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -69,7 +69,7 @@ def create_mock_user(mock_user_service, mock_db_session, is_super_admin=True):
 def create_testimonial(mock_user_service, mock_db_session):
     """Create a mock testimonial in the mock database session."""
 
-    mock_user = create_mock_user(mock_user_service, mock_db_session, is_super_admin=True)
+    mock_user = create_mock_user(mock_user_service, mock_db_session, is_superadmin=True)
     mock_testimonial = Testimonial(
         id=str(uuid7()),
         content='Product is good',

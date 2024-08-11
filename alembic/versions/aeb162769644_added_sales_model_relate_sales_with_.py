@@ -1,4 +1,4 @@
-"""Added sales model, relate sales with product, organization, and payments
+"""Added sales model, relate sales with product, organisation, and payments
 
 Revision ID: aeb162769644
 Revises: 854472eb449d
@@ -24,12 +24,12 @@ def upgrade() -> None:
     sa.Column('quantity', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Float(), nullable=False),
     sa.Column('product_id', sa.String(), nullable=False),
-    sa.Column('organization_id', sa.String(), nullable=False),
+    sa.Column('organisation_id', sa.String(), nullable=False),
     sa.Column('payment_id', sa.String(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['organisation_id'], ['organisations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['payment_id'], ['payments.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')

@@ -50,11 +50,11 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_newsletters_id'), 'newsletters', ['id'], unique=False)
-    op.create_table('organizations',
+    op.create_table('organisations',
     sa.Column('company_name', sa.String(), nullable=False),
     sa.Column('company_email', sa.String(), nullable=True),
     sa.Column('industry', sa.String(), nullable=True),
-    sa.Column('organization_type', sa.String(), nullable=True),
+    sa.Column('organisation_type', sa.String(), nullable=True),
     sa.Column('country', sa.String(), nullable=True),
     sa.Column('state', sa.String(), nullable=True),
     sa.Column('address', sa.String(), nullable=True),
@@ -66,7 +66,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('company_email'),
     sa.UniqueConstraint('company_name')
     )
-    op.create_index(op.f('ix_organizations_id'), 'organizations', ['id'], unique=False)
+    op.create_index(op.f('ix_organisations_id'), 'organisations', ['id'], unique=False)
     op.create_table('product_categories',
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('id', sa.String(), nullable=False),
@@ -125,7 +125,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_activity_logs_id'), 'activity_logs', ['id'], unique=False)
     op.create_table('billing_plans',
-    sa.Column('organization_id', sa.String(), nullable=False),
+    sa.Column('organisation_id', sa.String(), nullable=False),
     sa.Column('name', sa.String(), nullable=False),
     sa.Column('price', sa.Numeric(), nullable=False),
     sa.Column('currency', sa.String(), nullable=False),
@@ -135,7 +135,7 @@ def upgrade() -> None:
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['organisation_id'], ['organisations.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_billing_plans_id'), 'billing_plans', ['id'], unique=False)
@@ -156,13 +156,13 @@ def upgrade() -> None:
     op.create_index(op.f('ix_blogs_id'), 'blogs', ['id'], unique=False)
     op.create_table('invitations',
     sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('organization_id', sa.String(), nullable=False),
+    sa.Column('organisation_id', sa.String(), nullable=False),
     sa.Column('expires_at', sa.DateTime(timezone=True), nullable=False),
     sa.Column('is_valid', sa.Boolean(), nullable=True),
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
-    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['organisation_id'], ['organisations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -278,7 +278,7 @@ def upgrade() -> None:
     sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=True),
     sa.ForeignKeyConstraint(['category_id'], ['product_categories.id'], ondelete='CASCADE'),
-    sa.ForeignKeyConstraint(['org_id'], ['organizations.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['org_id'], ['organisations.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_products_id'), 'products', ['id'], unique=False)
@@ -327,14 +327,14 @@ def upgrade() -> None:
     sa.UniqueConstraint('user_id')
     )
     op.create_index(op.f('ix_token_logins_id'), 'token_logins', ['id'], unique=False)
-    op.create_table('user_organization',
+    op.create_table('user_organisation',
     sa.Column('user_id', sa.String(), nullable=False),
-    sa.Column('organization_id', sa.String(), nullable=False),
+    sa.Column('organisation_id', sa.String(), nullable=False),
     sa.Column('role', sa.Enum('admin', 'user', 'guest', 'owner', name='user_org_role'), nullable=False),
     sa.Column('status', sa.Enum('member', 'suspended', 'left', name='user_org_status'), nullable=False),
-    sa.ForeignKeyConstraint(['organization_id'], ['organizations.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['organisation_id'], ['organisations.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-    sa.PrimaryKeyConstraint('user_id', 'organization_id')
+    sa.PrimaryKeyConstraint('user_id', 'organisation_id')
     )
     op.create_table('blog_dislikes',
     sa.Column('blog_id', sa.String(), nullable=False),
@@ -425,7 +425,7 @@ def downgrade() -> None:
     op.drop_table('blog_likes')
     op.drop_index(op.f('ix_blog_dislikes_id'), table_name='blog_dislikes')
     op.drop_table('blog_dislikes')
-    op.drop_table('user_organization')
+    op.drop_table('user_organisation')
     op.drop_index(op.f('ix_token_logins_id'), table_name='token_logins')
     op.drop_table('token_logins')
     op.drop_index(op.f('ix_testimonials_id'), table_name='testimonials')
@@ -464,8 +464,8 @@ def downgrade() -> None:
     op.drop_table('topics')
     op.drop_index(op.f('ix_product_categories_id'), table_name='product_categories')
     op.drop_table('product_categories')
-    op.drop_index(op.f('ix_organizations_id'), table_name='organizations')
-    op.drop_table('organizations')
+    op.drop_index(op.f('ix_organisations_id'), table_name='organisations')
+    op.drop_table('organisations')
     op.drop_index(op.f('ix_newsletters_id'), table_name='newsletters')
     op.drop_table('newsletters')
     op.drop_index(op.f('ix_faqs_id'), table_name='faqs')

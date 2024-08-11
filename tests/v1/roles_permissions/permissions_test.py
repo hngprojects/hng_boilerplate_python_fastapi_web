@@ -53,10 +53,10 @@ def create_mock_user(mock_db_session, user_id):
     return mock_user
 
 
-def create_mock_permissions(mock_db_session, name, permision_id):
+def create_mock_permissions(mock_db_session, title, permision_id):
     mock_permission= Permission(
         id=permision_id,
-        name=name
+        title=title
     )
     mock_db_session.query(Permission).filter_by(id=permision_id).first.return_value = mock_permission
     return mock_permission
@@ -75,7 +75,7 @@ def test_create_permission(mock_db_session, mock_permission_service):
     mock_db_session.execute.return_value.fetchall.return_value = []
 
     paylod = {
-        "name" : "Read"
+        "title" : "Read"
     }
 
     response = client.post(CREATE_PERMISSIONS_ENDPOINT, json=paylod, headers={'Authorization': f'Bearer {access_token}'})
@@ -85,7 +85,7 @@ def test_create_permission(mock_db_session, mock_permission_service):
 
 def test_create_permission_endpoint_integrity_error(mock_db_session, mock_permission_service):
     """Test for handling IntegrityError when creating a permission."""
-    permission_data = {"name": "Read"}
+    permission_data = {"title": "Read"}
     user_email = "mike@example.com"
     access_token = user_service.create_access_token(str(user_email))
     mock_db_session.execute.return_value.fetchall.return_value = []
@@ -94,7 +94,7 @@ def test_create_permission_endpoint_integrity_error(mock_db_session, mock_permis
     headers={'Authorization': f'Bearer {access_token}'}
     response = client.post("/api/v1/permissions", json=permission_data, headers=headers)
     assert response.status_code == 400
-    assert response.json()["message"] == "A permission with this name already exists."
+    assert response.json()["message"] == "A permission with this title already exists."
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_permission_service")
@@ -158,7 +158,7 @@ def test_deleteuser(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -166,7 +166,7 @@ def test_deleteuser(mock_db_session):
 
     dummy_permission = Permission(
         id = mock_id,
-        name='DummyPermissionname',
+        title='DummyPermissionname',
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

@@ -18,7 +18,7 @@ def mock_get_db():
 
 
 def mock_get_current_super_admin():
-    return User(id="1", is_super_admin=True)
+    return User(id="1", is_superadmin=True)
 
 @pytest.fixture
 def db_session_mock():

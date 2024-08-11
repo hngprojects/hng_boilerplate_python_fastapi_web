@@ -1,4 +1,3 @@
-
 import uvicorn
 from fastapi.staticfiles import StaticFiles
 import uvicorn, os
@@ -18,14 +17,22 @@ from api.utils.json_response import JsonResponseDict
 from api.utils.logger import logger
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
+from scripts.populate_db import populate_roles_and_permissions
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    '''Lifespan function'''
+
     yield
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(
+    lifespan=lifespan,
+    title="HNG Boilerplate",
+    description="A boilerplate for creating an API using FastAPI and SQLAlchemy",
+    version="1.0.0",
+)
 
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
@@ -41,6 +48,7 @@ app.mount('/media', StaticFiles(directory=MEDIA_DIR), name='media')
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
+    'https://anchor-python.teams.hng.tech',
 ]
 
 

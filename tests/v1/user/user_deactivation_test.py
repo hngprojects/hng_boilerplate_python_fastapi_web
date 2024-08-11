@@ -44,7 +44,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name="Test",
         last_name="User",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -103,7 +103,7 @@ def test_success_deactivation(mock_user_service, mock_db_session):
     # mock_user_service.authenticate_user.return_value = create_mock_user(mock_user_service, mock_db_session)
     response = login.json()
     assert response.get("status_code") == status.HTTP_200_OK
-    access_token = response.get('data').get('user').get('access_token')
+    access_token = response.get('access_token')
 
     success_deactivation = client.post(
         DEACTIVATION_ENDPOINT,
@@ -125,7 +125,7 @@ def test_user_inactive(mock_user_service, mock_db_session):
         first_name="Test",
         last_name="User",
         is_active=False,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -142,7 +142,7 @@ def test_user_inactive(mock_user_service, mock_db_session):
     assert (
         response.get("status_code") == status.HTTP_200_OK
     )  # check for the right response before proceeding
-    access_token = response.get('data').get('user').get('access_token')
+    access_token = response.get('access_token')
 
     user_already_deactivated = client.post(
         DEACTIVATION_ENDPOINT,

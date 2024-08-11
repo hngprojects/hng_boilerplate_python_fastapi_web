@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-MAGIC_ENDPOINT = '/api/v1/auth/request-magic-link'
+MAGIC_ENDPOINT = '/api/v1/auth/magic-link'
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def test_request_magic_link(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=False,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

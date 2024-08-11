@@ -16,7 +16,7 @@ from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
-from api.v1.models.associations import user_organization_association
+from api.v1.models.associations import user_organisation_association
 from api.v1.models.user import User
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
@@ -114,6 +114,12 @@ class UserService(Service):
         if not user.is_deleted:
             return user
 
+    def get_user_by_id(self, db: Session, id: str):
+        """Fetches a user by their id"""
+
+        user = check_model_existence(db, User, id)
+        return user
+
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
@@ -127,12 +133,10 @@ class UserService(Service):
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
 
-        del schema.admin_secret
-
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
-                detail="User with this email or username already exists",
+                detail="User with this email already exists",
             )
 
         # Hash password
@@ -148,7 +152,6 @@ class UserService(Service):
         notification_setting_service.create(db=db, user=user)
 
         # create data privacy setting
-
         data_privacy = DataPrivacySetting(user_id=user.id)
 
         db.add(data_privacy)
@@ -199,8 +202,6 @@ class UserService(Service):
     def create_admin(self, db: Session, schema: user.UserCreate):
         """Creates a new admin"""
 
-        del schema.admin_secret
-
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
@@ -217,23 +218,26 @@ class UserService(Service):
         db.refresh(user)
 
         # Set user to super admin
-        user.is_super_admin = True
+        user.is_superadmin = True
         db.commit()
 
         return user
 
     def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
         """Function to update a User"""
+        
         # Get user from access token if provided, otherwise fetch user by id
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
                 detail="User with this email or username already exists",
             )
-        if current_user.is_super_admin and id is not None:
-            user = self.fetch(db=db, id=id)
-        else:
-            user = self.fetch(db=db, id=current_user.id)
+        
+        user = (self.fetch(db=db, id=id) 
+                if current_user.is_superadmin and id is not None
+                else self.fetch(db=db, id=current_user.id)
+            )
+        
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(user, key, value)
@@ -461,7 +465,7 @@ class UserService(Service):
     ):
         """Get the current super admin"""
         user = self.get_current_user(db=db, access_token=token)
-        if not user.is_super_admin:
+        if not user.is_superadmin:
             raise HTTPException(
                 status_code=403,
                 detail="You do not have permission to access this resource",
@@ -510,7 +514,7 @@ class UserService(Service):
                 detail="Role ID is required"
             )
 
-        user_roles = db.query(user_organization_association).filter(user_organization_association.c.user_id == current_user.id, user_organization_association.c.role.in_(['admin', 'owner'])).all()
+        user_roles = db.query(user_organisation_association).filter(user_organisation_association.c.user_id == current_user.id, user_organisation_association.c.role.in_(['admin', 'owner'])).all()
 
         if len(user_roles) == 0:
             raise HTTPException(
@@ -518,7 +522,7 @@ class UserService(Service):
                 detail="Permission denied. Admin access required."
             )
 
-        users = db.query(User).join(user_organization_association).filter(user_organization_association.c.role == role_id).all()
+        users = db.query(User).join(user_organisation_association).filter(user_organisation_association.c.role == role_id).all()
 
         if len(users) == 0:
             raise HTTPException(

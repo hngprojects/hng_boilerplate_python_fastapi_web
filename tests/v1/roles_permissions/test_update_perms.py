@@ -25,7 +25,7 @@ def mock_role():
 def mock_permission():
     return Permission(
         id=str(uuid7()),
-        name="Test Permission",
+        title="Test Permission",
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -39,7 +39,7 @@ def mock_superuser():
         first_name="Super",
         last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

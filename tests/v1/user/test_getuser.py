@@ -32,9 +32,6 @@ def mock_db_session():
 mock_id = str(uuid7())
 
 
-
-
-
 def test_get_user(mock_db_session):
     dummy_mock_user =  User(
         id=mock_id,
@@ -43,7 +40,7 @@ def test_get_user(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -51,7 +48,7 @@ def test_get_user(mock_db_session):
     '''First Login in'''
     url = 'api/v1/auth/login'
     login_response = client.post(url,json={'email':'dummyuser1@gmail.com', 'password': 'Testpassword@123'})
-    access_token = login_response.json()['data']['user']['access_token']
+    access_token = login_response.json()['access_token']
     user_id = login_response.json()['data']['user']['id']
     
     """Testing the endpoint with an authorized user"""
