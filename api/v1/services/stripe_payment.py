@@ -1,7 +1,9 @@
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
 from api.v1.models.billing_plan import BillingPlan, UserSubscription
+from api.v1.models.organisation import Organisation
 import stripe
+from sqlalchemy import select, join
 from fastapi.encoders import jsonable_encoder
 from api.utils.success_response import success_response
 import os
@@ -71,7 +73,7 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
 
                 return success_response(
                     status_code=status.HTTP_201_CREATED,
-                    message=f'payment in progress',
+                    message='payment in progress',
                     data=data,
                 )
 
@@ -92,12 +94,17 @@ def convert_duration_to_timedelta(duration: str) -> timedelta:
         raise ValueError("Invalid duration")
 
 async def update_user_plan(db: Session, user_id: str, plan_name: str):
+    # Fetch the user by ID
     user = db.query(User).filter(User.id == user_id).first()
+
+    # Fetch the plan by name
     plan = get_plan_by_name(db, plan_name)
 
+    # Check if the user exists
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    # Check if the plan exists
     if not plan:
         raise HTTPException(status_code=404, detail="Plan not found")
 
@@ -107,8 +114,14 @@ async def update_user_plan(db: Session, user_id: str, plan_name: str):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+    # Fetch the organisation ID from the plan
+    organisation_id = plan.organisation_id
+
     # Update the user's subscription in the database
-    user_subscription = db.query(UserSubscription).filter(UserSubscription.user_id == user_id).first()
+    user_subscription = db.query(UserSubscription).filter(
+        UserSubscription.user_id == user_id,
+        UserSubscription.organisation_id == organisation_id
+    ).first()
 
     if user_subscription:
         user_subscription.plan_id = plan.id
@@ -118,9 +131,59 @@ async def update_user_plan(db: Session, user_id: str, plan_name: str):
         new_subscription = UserSubscription(
             user_id=user_id,
             plan_id=plan.id,
+            organisation_id=organisation_id,
             start_date=datetime.utcnow(),
             end_date=datetime.utcnow() + duration
         )
         db.add(new_subscription)
-    
+
+    # Commit the transaction
     db.commit()
+
+
+def fetch_all_organisations_with_users_and_plans(db: Session):
+    # Perform a join to retrieve the relevant data
+    stmt = (
+        select(
+            Organisation.id,
+            Organisation.name,
+            User.id.label("user_id"),
+            (User.first_name + " " + User.last_name).label("user_name"),
+            BillingPlan.name.label("plan_name"),
+            BillingPlan.price,
+            BillingPlan.currency,
+            BillingPlan.duration,
+            UserSubscription.start_date,
+            UserSubscription.end_date
+        )
+        .join(UserSubscription, Organisation.id == UserSubscription.organisation_id)
+        .join(User, User.id == UserSubscription.user_id)
+        .join(BillingPlan, BillingPlan.id == UserSubscription.plan_id)
+    )
+
+    result = db.execute(stmt).all()
+
+    # Organize the data by organizations, users, and their plans
+    organizations_data = {}
+    for row in result:
+        org_id = row.id
+        if org_id not in organizations_data:
+            organizations_data[org_id] = {
+                "organisation_name": row.name,
+                "users": []
+            }
+
+        user_info = {
+            "user_id": row.user_id,
+            "user_name": row.user_name,
+            "plan_name": row.plan_name,
+            "price": row.price,
+            "currency": row.currency,
+            "duration": row.duration,
+            "start_date": row.start_date,
+            "end_date": row.end_date
+        }
+
+        organizations_data[org_id]["users"].append(user_info)
+
+    return list(organizations_data.values())

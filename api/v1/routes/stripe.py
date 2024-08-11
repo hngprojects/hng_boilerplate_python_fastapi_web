@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 import stripe
-from api.v1.services.stripe_payment import stripe_payment_request, update_user_plan
+from api.v1.services.stripe_payment import stripe_payment_request, update_user_plan, fetch_all_organisations_with_users_and_plans
 import json
 from api.v1.schemas.stripe import PlanUpgradeRequest
+from typing import List
 from api.db.database import get_db
 import os
+from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from dotenv import load_dotenv, find_dotenv
@@ -66,3 +68,18 @@ async def webhook_received(
         # Send email in background task
         await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
         return {"message": response_details}
+    
+
+@subscription_.get("/organisations/users/plans")
+async def get_organisations_with_users_and_plans(db: Session = Depends(get_db)):
+    try:
+        data = fetch_all_organisations_with_users_and_plans(db)
+        if not data:
+            return {"status_code": 404, "success": False, "message": "No data found"}
+        return success_response(
+            status_code=status.HTTP_302_FOUND,
+            message='billing details successfully retrieved',
+            data=data,
+            )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

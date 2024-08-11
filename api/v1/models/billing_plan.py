@@ -17,7 +17,8 @@ class BillingPlan(BaseTableModel):
     description = Column(String, nullable=True)
     features = Column(ARRAY(String), nullable=False)
 
-    organization = relationship("Organization", back_populates="billing_plans")
+    organisation = relationship("Organisation", back_populates="billing_plans")
+    user_subscriptions = relationship("UserSubscription", back_populates="billing_plan", cascade="all, delete-orphan")
 
 
 class UserSubscription(BaseTableModel):
@@ -25,9 +26,11 @@ class UserSubscription(BaseTableModel):
 
     user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     plan_id = Column(String, ForeignKey("billing_plans.id", ondelete="CASCADE"), nullable=False)
+    organisation_id = Column(String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False)
     active = Column(Boolean, default=True)
     start_date = Column(String, nullable=False)
     end_date = Column(String, nullable=True)
+    
     user = relationship("User", back_populates="subscriptions")
-    billing_plan = relationship("BillingPlan")
-    organisation = relationship("Organisation", back_populates="billing_plans")
+    billing_plan = relationship("BillingPlan", back_populates="user_subscriptions")
+    organisation = relationship("Organisation", back_populates="user_subscriptions")
