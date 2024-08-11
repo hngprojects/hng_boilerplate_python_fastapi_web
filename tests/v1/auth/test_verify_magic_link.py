@@ -32,7 +32,7 @@ def create_mock_user(mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -44,7 +44,7 @@ def test_verify_magic_link(client, db_session_mock):
     user = create_mock_user(db_session_mock)
     token = user_service.create_access_token(user_id=user.id)
 
-    response = client.post("/api/v1/auth/verify-magic-link", json={
+    response = client.post("/api/v1/auth/magic-link/verify", json={
         "access_token": token,
         "token_type": "access"
     })
@@ -52,5 +52,5 @@ def test_verify_magic_link(client, db_session_mock):
     data = response.json()
     print(data)
     assert data['message'] == 'Login successful'
-    assert data['data']['access_token'] == token
+    assert data['access_token'] == token
 

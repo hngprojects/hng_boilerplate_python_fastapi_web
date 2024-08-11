@@ -7,8 +7,8 @@ from api.v1.models.base_model import BaseTableModel
 class BillingPlan(BaseTableModel):
     __tablename__ = "billing_plans"
 
-    organization_id = Column(
-        String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+    organisation_id = Column(
+        String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False
     )
     name = Column(String, nullable=False, unique=True)
     price = Column(Numeric, nullable=False)
@@ -28,6 +28,6 @@ class UserSubscription(BaseTableModel):
     active = Column(Boolean, default=True)
     start_date = Column(String, nullable=False)
     end_date = Column(String, nullable=True)
-
     user = relationship("User", back_populates="subscriptions")
     billing_plan = relationship("BillingPlan")
+    organisation = relationship("Organisation", back_populates="billing_plans")

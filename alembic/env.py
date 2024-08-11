@@ -6,7 +6,7 @@ from decouple import config as decouple_config
 from api.v1.models import *
 from api.v1.models.permissions.permissions import Permission
 from api.v1.models.permissions.role_permissions import role_permissions
-from api.v1.models.permissions.user_org_role import user_organization_roles
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.permissions.role import Role
 from api.v1.models.associations import Base
 

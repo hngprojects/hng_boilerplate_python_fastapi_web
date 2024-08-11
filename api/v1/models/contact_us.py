@@ -11,6 +11,6 @@ class ContactUs(BaseTableModel):
     email = Column(String, nullable=False)
     title = Column(String, nullable=False)
     message = Column(Text, nullable=False)
-    org_id = Column(String, ForeignKey('organizations.id', ondelete="CASCADE"), nullable=False)
+    org_id = Column(String, ForeignKey('organisations.id', ondelete="CASCADE"), nullable=False)
 
-    organization = relationship("Organization", back_populates="contact_us")
+    organisation = relationship("Organisation", back_populates="contact_us")

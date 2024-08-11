@@ -14,7 +14,7 @@ analytics = APIRouter(prefix='/analytics')
 async def get_analytics_line_chart_data(token: Annotated[OAuth2, Depends(oauth2_scheme)],
                                         db: Annotated[Session, Depends(get_db)]):
     """
-    Retrieves analytics line-chart-data for an organization or super admin.
+    Retrieves analytics line-chart-data for an organisation or super admin.
     Args:
         token: access_token
         db: database Session object

@@ -7,13 +7,13 @@ from fastapi import HTTPException, Request, Depends, status
 from collections import OrderedDict
 from fastapi.responses import JSONResponse
 from api.v1.models.invitation import Invitation
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.models.user import User
 from sqlalchemy.exc import IntegrityError
 from api.v1.models.permissions.role import Role
 from api.v1.schemas.permissions.roles import RoleCreate
 from api.v1.services.permissions.role_service import role_service
-from api.v1.models.permissions.user_org_role import user_organization_roles
+from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.schemas import invitations
 from api.core.base.services import Service
 from urllib.parse import urlencode
@@ -26,30 +26,30 @@ class InviteService(Service):
     ):
 
         user_email = session.query(User).filter_by(email=invite.user_email).first()
-        org = session.query(Organization).filter_by(id=invite.organization_id).first()
+        org = session.query(Organisation).filter_by(id=invite.organisation_id).first()
 
         if not user_email or not org:
             exceptions = HTTPException(
-                status_code=404, detail="invalid user or organization id"
+                status_code=404, detail="invalid user or organisation id"
             )
             print(exceptions)
             raise exceptions
 
-        user_organizations = session.execute(
-            user_organization_roles.select().where(
-                user_organization_roles.c.user_id == user_email.id,
-                user_organization_roles.c.organization_id == org.id,
+        user_organisations = session.execute(
+            user_organisation_roles.select().where(
+                user_organisation_roles.c.user_id == user_email.id,
+                user_organisation_roles.c.organisation_id == org.id,
             )
         ).fetchall()
 
-        if user_organizations:
-            logging.warning(f"User {user_email.id} already in organization {org.id}")
-            raise HTTPException(status_code=400, detail="User already in organization")
+        if user_organisations:
+            logging.warning(f"User {user_email.id} already in organisation {org.id}")
+            raise HTTPException(status_code=400, detail="User already in organisation")
 
         expiration = datetime.now(utc) + timedelta(days=1)
         new_invite = Invitation(
             user_id=user_email.id,
-            organization_id=invite.organization_id,
+            organisation_id=invite.organisation_id,
             expires_at=expiration,
         )
 
@@ -73,7 +73,7 @@ class InviteService(Service):
 
 
     @staticmethod
-    def add_user_to_organization(invite_id: str, session: Session):
+    def add_user_to_organisation(invite_id: str, session: Session):
         logging.info(f"Processing invitation ID: {invite_id}")
 
         # Fetch the invitation
@@ -96,13 +96,13 @@ class InviteService(Service):
             session.commit()
             raise HTTPException(status_code=400, detail="Expired invitation link")
 
-        # Fetch user and organization
+        # Fetch user and organisation
         user = session.query(User).filter_by(id=invite.user_id).first()
-        org = session.query(Organization).filter_by(id=invite.organization_id).first()
+        org = session.query(Organisation).filter_by(id=invite.organisation_id).first()
 
         if not org:
-            logging.error(f"Organization not found: {invite.organization_id}")
-            raise HTTPException(status_code=404, detail="Invalid organization ID")
+            logging.error(f"Organisation not found: {invite.organisation_id}")
+            raise HTTPException(status_code=404, detail="Invalid organisation ID")
 
         if not user:
             logging.error(f"User not found: {invite.user_id}")
@@ -120,25 +120,25 @@ class InviteService(Service):
             role_create_data = RoleCreate(name=default_role_name, is_builtin=True)
             role = role_service.create_role(session, role_create_data)
 
-        # Check if the user is already assigned to the role within the organization
-        existing_assignment = session.query(user_organization_roles).filter_by(
+        # Check if the user is already assigned to the role within the organisation
+        existing_assignment = session.query(user_organisation_roles).filter_by(
             user_id=user.id,
-            organization_id=org.id,
+            organisation_id=org.id,
             role_id=role.id
         ).first()
 
         if existing_assignment:
-            #logging.warning(f"User {user} is already assigned to the role '{role.name}' in organization {org.id}")
+            #logging.warning(f"User {user} is already assigned to the role '{role.name}' in organisation {org.id}")
             raise HTTPException(
                 status_code=400, 
-                detail=f"User is already assigned to the role in this organization"
+                detail=f"User is already assigned to the role in this organisation"
             )
 
         try:
-            # Insert user-organization-role association
-            stmt = insert(user_organization_roles).values(
+            # Insert user-organisation-role association
+            stmt = insert(user_organisation_roles).values(
                 user_id=user.id,
-                organization_id=org.id,
+                organisation_id=org.id,
                 role_id=role.id,
                 status="active"  # Default status
             )
@@ -151,10 +151,10 @@ class InviteService(Service):
             response = OrderedDict(
                 [
                     ("status", "success"),
-                    ("message", "User added to organization and default role assigned successfully"),
+                    ("message", "User added to organisation and default role assigned successfully"),
                 ]
             )
-            logging.info(f"User {user.id} added to organization {org.id} and default role assigned successfully.")
+            logging.info(f"User {user.id} added to organisation {org.id} and default role assigned successfully.")
             return JSONResponse(content=response)
 
         except IntegrityError as e:
@@ -162,14 +162,14 @@ class InviteService(Service):
             logging.error(f"IntegrityError: {e}")
             raise HTTPException(
                 status_code=400, 
-                detail="An error occurred while assigning the role to the user in the organization"
+                detail="An error occurred while assigning the role to the user in the organisation"
             )
         except Exception as e:
             session.rollback()
-            logging.error(f"Error adding user to organization: {e}")
+            logging.error(f"Error adding user to organisation: {e}")
             raise HTTPException(
                 status_code=500,
-                detail="An error occurred while adding the user to the organization"
+                detail="An error occurred while adding the user to the organisation"
             )
     @staticmethod
     def delete(session: Session, id: str):

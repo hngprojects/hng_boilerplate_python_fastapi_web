@@ -43,7 +43,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
@@ -78,7 +78,7 @@ def test_success_retrieval(mock_user_service, mock_db_session):
         "password": "Testpassword@123"
     })
     response = login.json()
-    access_token = response.get('data').get('user').get('access_token')
+    access_token = response.get('access_token')
 
     # ensure testimonial is already created
     testimonial = create_testimonial(mock_user_service, mock_db_session)

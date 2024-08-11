@@ -37,7 +37,7 @@ def test_user():
 
 @pytest.fixture
 def mock_request():
-    return PaymentDetail(organization_id="se4", plan_id="1", billing_option="Monthly", full_name="helo", redirect_url="http://example.com/redirect")
+    return PaymentDetail(organisation_id="se4", plan_id="1", billing_option="Monthly", full_name="helo", redirect_url="http://example.com/redirect")
 
 @pytest.fixture
 def mock_plan():

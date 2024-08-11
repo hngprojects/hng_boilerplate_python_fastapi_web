@@ -105,7 +105,7 @@ class TestCodeUnderTest:
 
 
         # from api.v1.services.user import user_service
-        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
+        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=False)) as cu:
             response = client.post("/api/v1/jobs", json=test_job)
         assert response.status_code == 403
         assert response.json()['message'] == 'You do not have permission to access this resource'

@@ -51,7 +51,7 @@ def test_add_comment_to_blog(
     test_blog, 
     access_token_user1,
 ):
-    # Mock the GET method for Organization
+    # Mock the GET method for Organisation
     def mock_get(model, ident):
         if model == Blog and ident == test_blog.id:
             return test_blog
@@ -59,10 +59,10 @@ def test_add_comment_to_blog(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query for checking if user is in the organization
+    # Mock the query for checking if user is in the organisation
     mock_db_session.query().return_value = test_blog
 
-    # Test user belonging to the organization
+    # Test user belonging to the organisation
     content = {"content": "Test comment"}
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.post(f"/api/v1/blogs/{test_blog.id}/comments", headers=headers, json=content)

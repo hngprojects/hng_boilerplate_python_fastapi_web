@@ -43,7 +43,7 @@ def before_all(client: client, session: session, mock_send_email) -> pytest.fixt
         }
     )
     global auth_token
-    auth_token = user.json()["data"]["access_token"]
+    auth_token = user.json()["access_token"]
 
 
 def test_create_testimonial(client: client, session: session) -> pytest:

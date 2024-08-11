@@ -63,7 +63,7 @@ def create_mock_super_admin(_):
         id=str(uuid7()),
         email="user1@example.com",
         password=user_service.hash_password("P@ssw0rd"),
-        is_super_admin=True,
+        is_superadmin=True,
     )
 
 
@@ -79,7 +79,7 @@ def test_create_squeeze_page(mock_db_session, data):
         LOGIN_URI, json={"email": "user1@example.com", "password": "P@ssw0rd"}
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["data"]["user"]["access_token"]
+    token = tok["access_token"]
     res = client.post(URI, json=data, headers=theader(token))
     assert res.status_code == data["status_code"]
     assert res.json()['data']['title'] == data["title"]

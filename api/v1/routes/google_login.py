@@ -49,7 +49,7 @@ async def google_login(background_tasks: BackgroundTasks, token_request: OAuthTo
             "data": {
                 "user": jsonable_encoder(
                     user,
-                    exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at']
+                    exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at']
                 )
             }
         }

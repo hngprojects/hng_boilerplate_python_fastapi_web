@@ -27,7 +27,7 @@ def mock_db_session(mocker):
     yield mock_db
     app.dependency_overrides = {}
 
-def create_mock_user(mock_db_session, user_id, is_super_admin=False):
+def create_mock_user(mock_db_session, user_id, is_superadmin=False):
     mock_user = User(
         id=user_id,
         email="testuser@gmail.com",
@@ -35,7 +35,7 @@ def create_mock_user(mock_db_session, user_id, is_super_admin=False):
         first_name="Test",
         last_name="User",
         is_active=True,
-        is_super_admin=is_super_admin,
+        is_superadmin=is_superadmin,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -53,7 +53,7 @@ def create_mock_role(mock_db_session, role_name):
 @pytest.fixture
 def access_token(mock_db_session):
     user_id = str(uuid7())
-    create_mock_user(mock_db_session, user_id, is_super_admin=True)
+    create_mock_user(mock_db_session, user_id, is_superadmin=True)
     access_token = user_service.create_access_token(user_id)
     return access_token
 
@@ -72,7 +72,7 @@ def create_role(mock_db_session):
 
 def test_update_role_permissions(mock_db_session, access_token, create_permissions):
     # Simulate login
-    create_user = create_mock_user(mock_db_session, str(uuid7()), is_super_admin=True)
+    create_user = create_mock_user(mock_db_session, str(uuid7()), is_superadmin=True)
     create_role = create_mock_role(mock_db_session, "test_role")
     permission_ids = [perm.id for perm in create_permissions]
 
@@ -90,7 +90,7 @@ def test_update_role_permissions(mock_db_session, access_token, create_permissio
 
 def test_update_role_permissions_role_not_found(mock_db_session, access_token, create_permissions):
     # Simulate login
-    create_user = create_mock_user(mock_db_session, str(uuid7()), is_super_admin=True)
+    create_user = create_mock_user(mock_db_session, str(uuid7()), is_superadmin=True)
     permission_ids = [perm.id for perm in create_permissions]
 
     non_existent_role_id = str(uuid7())

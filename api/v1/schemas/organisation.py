@@ -5,8 +5,8 @@ from typing import Optional
 
 from api.utils.success_response import success_response
 
-class OrganizationBase(BaseModel):
-    """Base organization schema"""
+class OrganisationBase(BaseModel):
+    """Base organisation schema"""
 
     id: str
     created_at: datetime
@@ -21,8 +21,8 @@ class OrganizationBase(BaseModel):
     description: Optional[str] = None
 
 
-class CreateUpdateOrganization(BaseModel):
-    """Organization schema to create or update organization"""
+class CreateUpdateOrganisation(BaseModel):
+    """Organisation schema to create or update organisation"""
 
     name: str
     email: Optional[EmailStr] = None
@@ -34,8 +34,8 @@ class CreateUpdateOrganization(BaseModel):
     description: Optional[str] = None
 
 
-class AddUpdateOrganizationRole(BaseModel):
-    """Schema to update a user role in an organization"""
+class AddUpdateOrganisationRole(BaseModel):
+    """Schema to update a user role in an organisation"""
 
     role: str
     user_id: str
@@ -48,15 +48,15 @@ class AddUpdateOrganizationRole(BaseModel):
         return value
 
 
-class RemoveUserFromOrganization(BaseModel):
-    """Schema to delete a user role in an organization"""
+class RemoveUserFromOrganisation(BaseModel):
+    """Schema to delete a user role in an organisation"""
 
     user_id: str
     org_id: str
 
 
 class PaginatedOrgUsers(BaseModel):
-    """Describe response object for paginated users in organization"""
+    """Describe response object for paginated users in organisation"""
     page: int
     per_page: int
     per_page: int

@@ -18,7 +18,7 @@ from uuid_extensions import uuid7
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from api.utils.success_response import success_response
-from api.v1.services.organization import organization_service as org_service
+from api.v1.services.organisation import organisation_service as org_service
 
 role_perm = APIRouter(tags=["permissions management"])
 
@@ -40,7 +40,7 @@ def create_built_in_role_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
 ):  # Only super admin can create
-    if not current_user.is_super_admin:
+    if not current_user.is_superadmin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only super admins can create built-in roles.",
@@ -57,7 +57,7 @@ def create_built_in_role_endpoint(
 )
 def assign_role(
     request: RoleAssignRequest,
-    org_id: str = Path(..., description="The ID of the organization"),
+    org_id: str = Path(..., description="The ID of the organisation"),
     user_id: str = Path(..., description="The ID of the user"),
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
@@ -70,7 +70,7 @@ def assign_role(
     response_model=RemoveUserFromRoleResponse,
 )
 def remove_user_from_role(
-    org_id: str = Path(..., description="The ID of the organization"),
+    org_id: str = Path(..., description="The ID of the organisation"),
     user_id: str = Path(..., description="The ID of the user"),
     role_id: str = Path(..., description="The ID of the role"),
     db: Session = Depends(get_db),
@@ -119,16 +119,16 @@ def delete_role(
     response_model=List[RoleResponse],
     tags=["Fetch Roles"],
 )
-def get_roles_for_organization(
-    org_id: str = Path(..., description="The ID of the organization"),
+def get_roles_for_organisation(
+    org_id: str = Path(..., description="The ID of the organisation"),
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
 ):
-    roles = (role_service.get_roles_by_organization(db, org_id),)
+    roles = (role_service.get_roles_by_organisation(db, org_id),)
     if not roles:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Roles not found for the given organization",
+            detail="Roles not found for the given organisation",
         )
     return success_response(
         status_code=status.HTTP_200_OK, message="Roles fetched successfully", data=roles
@@ -169,7 +169,7 @@ def update_builtin_role_endpoint(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin)
 ):
-    if not current_user.is_super_admin:
+    if not current_user.is_superadmin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only super admins can update built-in roles.")
     # Ensure it's a built-in role
     role_update.is_builtin = True
