@@ -6,7 +6,6 @@ on:
       - "README.md"
       - ".github/workflows/**"
 
-
 jobs:
   deploy-pr:
     environment: 
