@@ -3,8 +3,8 @@ from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from main import app
 from api.v1.models.user import User
-from api.v1.models.organization import Organization
-from api.v1.models.user import user_organization_association
+from api.v1.models.organisation import Organisation
+from api.v1.models.user import user_organisation_association
 from api.v1.services.user import user_service, UserService
 from uuid_extensions import uuid7
 from api.db.database import get_db
@@ -46,7 +46,7 @@ def test_get_user_by_role(mock_db_session):
         first_name="Mr",
         last_name="Dummy",
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

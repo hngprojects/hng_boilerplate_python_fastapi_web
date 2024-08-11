@@ -18,7 +18,7 @@ def mock_db():
 @pytest.fixture
 def mock_current_user():
     user = Mock()
-    user.is_super_admin = True
+    user.is_superadmin = True
     user.id = 1
     return user
 

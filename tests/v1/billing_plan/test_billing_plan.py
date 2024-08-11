@@ -41,7 +41,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name="Test",
         last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -71,7 +71,7 @@ def test_create_new_plans(mock_user_service, mock_db_session):
     access_token = user_service.create_access_token(user_id=str(uuid7()))
     data = {
         "name": "Advanced",
-        "organization_id": "s2334d",
+        "organisation_id": "s2334d",
         "description": "All you need in one pack",
         "price": 80,
         "duration": "Monthly",

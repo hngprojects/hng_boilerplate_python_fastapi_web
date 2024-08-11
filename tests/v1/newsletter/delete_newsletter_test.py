@@ -66,7 +66,7 @@ def override_get_current_super_admin():
         first_name="AdminTest",
         last_name="User",
         is_active=False,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

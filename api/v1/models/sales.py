@@ -11,7 +11,7 @@ class Sales(BaseTableModel):
     amount = Column(Float, nullable=False)
     product_id = Column(String, ForeignKey('products.id', ondelete='CASCADE'),
                         nullable=False)
-    organization_id = Column(String, ForeignKey('organizations.id', ondelete='CASCADE'),
+    organisation_id = Column(String, ForeignKey('organisations.id', ondelete='CASCADE'),
                              nullable=False)
     payment_id = Column(String, ForeignKey('payments.id', ondelete='CASCADE'),
                              nullable=True)
@@ -20,7 +20,7 @@ class Sales(BaseTableModel):
 
 
     product = relationship("Product", back_populates="sales")
-    organization = relationship("Organization", back_populates="sales")
+    organisation = relationship("Organisation", back_populates="sales")
     payment = relationship("Payment", back_populates="sales")
    
     __table_args__ = (

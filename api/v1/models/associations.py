@@ -10,16 +10,16 @@ from sqlalchemy import (
 from api.db.database import Base
 
 
-user_organization_association = Table(
-    "user_organization",
+user_organisation_association = Table(
+    "user_organisation",
     Base.metadata,
     Column(
         "user_id", String, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     ),
     Column(
-        "organization_id",
+        "organisation_id",
         String,
-        ForeignKey("organizations.id", ondelete="CASCADE"),
+        ForeignKey("organisations.id", ondelete="CASCADE"),
         primary_key=True,
     ),
     Column(

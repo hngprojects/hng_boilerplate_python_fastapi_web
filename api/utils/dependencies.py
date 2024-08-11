@@ -48,7 +48,7 @@ def get_current_user(
 
 def get_super_admin(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     user = get_current_user(db, token)
-    if not user.is_super_admin:
+    if not user.is_superadmin:
         logger.error("User is not a super admin")
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

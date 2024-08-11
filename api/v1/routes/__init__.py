@@ -5,7 +5,7 @@ from fastapi import APIRouter
 from api.v1.routes.auth import auth
 from api.v1.routes.newsletter import newsletter
 from api.v1.routes.user import user_router
-from api.v1.routes.product import product, non_organization_product
+from api.v1.routes.product import product, non_organisation_product
 from api.v1.routes.product_comment import product_comment
 from api.v1.routes.notification import notification
 from api.v1.routes.testimonial import testimonial
@@ -18,7 +18,7 @@ from api.v1.routes.invitations import invites
 from api.v1.routes.profiles import profile
 from api.v1.routes.jobs import jobs
 from api.v1.routes.payment import payment
-from api.v1.routes.organization import organization
+from api.v1.routes.organisation import organisation
 from api.v1.routes.request_password import pwd_reset
 from api.v1.routes.activity_logs import activity_logs
 from api.v1.routes.contact_us import contact_us
@@ -43,6 +43,7 @@ from api.v1.routes.job_application import job_application
 from api.v1.routes.privacy import privacies
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
+from api.v1.routes.stripe import subscription_
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -52,8 +53,8 @@ api_version_one.include_router(fb_auth)
 api_version_one.include_router(pwd_reset)
 api_version_one.include_router(user_router)
 api_version_one.include_router(profile)
-api_version_one.include_router(organization)
-api_version_one.include_router(non_organization_product)
+api_version_one.include_router(organisation)
+api_version_one.include_router(non_organisation_product)
 api_version_one.include_router(product)
 api_version_one.include_router(payment)
 api_version_one.include_router(bill_plan)
@@ -89,3 +90,4 @@ api_version_one.include_router(settings)
 api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
 api_version_one.include_router(product_comment)
+api_version_one.include_router(subscription_)

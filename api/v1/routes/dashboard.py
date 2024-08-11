@@ -104,7 +104,7 @@ async def get_analytics_summary(
     end_date: datetime = None
 ):
     """
-    Retrieves analytics summary data for an organization or super admin.
+    Retrieves analytics summary data for an organisation or super admin.
     Args:
         token: access_token
         db: database Session object

@@ -14,7 +14,7 @@ from api.v1.models.product import (
     ProductCategory,
 )
 from api.v1.models.user import User
-from api.v1.models import Organization
+from api.v1.models import Organisation
 from api.v1.schemas.product import ProductCategoryCreate, ProductCreate
 from api.utils.db_validators import check_user_in_org
 from api.v1.schemas.product import ProductFilterResponse
@@ -34,9 +34,9 @@ class ProductService(Service):
     #             detail="product doesn't belong to the specified organisation",
     #         )
 
-    #     organization = check_model_existence(db, Organization, org_id)
+    #     organisation = check_model_existence(db, Organisation, org_id)
 
-    #     check_user_in_org(user=current_user, organization=organization)
+    #     check_user_in_org(user=current_user, organisation=organisation)
 
     def create(
         self, db: Session, schema: ProductCreate, org_id: str, current_user: User
@@ -45,9 +45,9 @@ class ProductService(Service):
 
         # check if user belongs to org
 
-        organization = check_model_existence(db, Organization, org_id)
+        organisation = check_model_existence(db, Organisation, org_id)
 
-        check_user_in_org(user=current_user, organization=organization)
+        check_user_in_org(user=current_user, organisation=organisation)
 
         # check if user inputted a valid category
 
@@ -81,16 +81,16 @@ class ProductService(Service):
 
         return new_product
 
-    def fetch_single_by_organization(
+    def fetch_single_by_organisation(
         self, db: Session, org_id: str, product_id: str, current_user: User
     ) -> Product:
         """Fetches a product by id"""
 
         # check if user belongs to org
 
-        organization = check_model_existence(db, Organization, org_id)
+        organisation = check_model_existence(db, Organisation, org_id)
 
-        check_user_in_org(user=current_user, organization=organization)
+        check_user_in_org(user=current_user, organisation=organisation)
 
         product = check_model_existence(db, Product, product_id)
         return product
@@ -100,7 +100,7 @@ class ProductService(Service):
     ):
         """Updates a product"""
 
-        product = self.fetch_single_by_organization(
+        product = self.fetch_single_by_organisation(
             db, org_id, product_id, current_user
         )
 
@@ -116,7 +116,7 @@ class ProductService(Service):
     def delete(self, db: Session, org_id: str, product_id: str, current_user: User):
         """Deletes a product"""
 
-        product: Product = self.fetch_single_by_organization(
+        product: Product = self.fetch_single_by_organisation(
             db, org_id, product_id, current_user
         )
 
@@ -144,14 +144,14 @@ class ProductService(Service):
         product = check_model_existence(db, Product, id)
         return product
 
-    def fetch_by_organization(self, db: Session, user, org_id, limit, page):
-        """Fetches all products of an organization"""
+    def fetch_by_organisation(self, db: Session, user, org_id, limit, page):
+        """Fetches all products of an organisation"""
 
-        # check if organization exists
-        organization = check_model_existence(db, Organization, org_id)
+        # check if organisation exists
+        organisation = check_model_existence(db, Organisation, org_id)
 
-        # Check if the user exist in the organization
-        check_user_in_org(user=user, organization=organization)
+        # Check if the user exist in the organisation
+        check_user_in_org(user=user, organisation=organisation)
 
         # calculating offset value from page and limit given
         offset_value = (page - 1) * limit
@@ -202,7 +202,7 @@ class ProductService(Service):
         self, db: Session, product_id: str, current_user: User, org_id: str
     ) -> dict:
         """Fetches the current stock level for a specific product"""
-        product = self.fetch_single_by_organization(
+        product = self.fetch_single_by_organisation(
             db=db, org_id=org_id, product_id=product_id, current_user=current_user
         )
 
@@ -220,9 +220,9 @@ class ProductCategoryService(Service):
 
     @staticmethod
     def create(db: Session, schema: ProductCategoryCreate, current_user: User):
-        # organization = check_model_existence(db, Organization, org_id)
+        # organisation = check_model_existence(db, Organisation, org_id)
 
-        # check_user_in_org(user=current_user, organization=organization)
+        # check_user_in_org(user=current_user, organisation=organisation)
 
         try:
             new_category = ProductCategory(**schema.model_dump())

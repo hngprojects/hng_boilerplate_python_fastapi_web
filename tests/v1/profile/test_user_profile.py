@@ -40,7 +40,7 @@ def create_mock_user(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=True,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

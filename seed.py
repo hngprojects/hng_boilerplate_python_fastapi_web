@@ -13,7 +13,7 @@ admin_user = User(
     first_name="Habeeb",
     last_name="Habeeb",
     is_active=True,
-    is_super_admin=True,
+    is_superadmin=True,
     is_deleted=False,
     is_verified=True,
 )

@@ -36,7 +36,7 @@ def mock_superuser():
         first_name="Super",
         last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

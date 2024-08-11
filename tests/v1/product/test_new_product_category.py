@@ -7,10 +7,10 @@ from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
 
 from api.db.database import get_db
-from api.v1.models.organization import Organization
+from api.v1.models.organisation import Organisation
 from api.v1.models.product import ProductCategory
 from api.v1.services.product import ProductCategoryService
-from api.v1.services.organization import organization_service
+from api.v1.services.organisation import organisation_service
 from api.v1.services.user import user_service
 from api.v1.models.user import User
 from main import app
@@ -38,7 +38,7 @@ def mock_get_current_user():
         first_name="Test",
         last_name="User",
         is_active=True,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )
@@ -52,9 +52,9 @@ def mock_product_category():
 
 
 # def mock_org():
-#     return Organization(
+#     return Organisation(
 #         id=str(uuid7()),
-#         name="Test Organization",
+#         name="Test Organisation",
 #         created_at=datetime.now(timezone.utc),
 #         updated_at=datetime.now(timezone.utc)
 #     )
@@ -67,7 +67,7 @@ def test_create_category_success(client, db_session_mock):
     app.dependency_overrides[user_service.get_current_user] = (
         lambda: mock_get_current_user
     )
-    # app.dependency_overrides[organization_service.create] = lambda: mock_org
+    # app.dependency_overrides[organisation_service.create] = lambda: mock_org
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
