@@ -6,28 +6,21 @@ from faker import Faker
 class PythonAPIs(unittest.TestCase):
     fake = Faker()
     baseUrl = "https://deployment.api-python.boilerplate.hng.tech"
-    pss = fake.password(
-        length=12,
-        special_characters=True,
-        digits=True,
-        upper_case=True,
-        lower_case=True,
-    )
     valid_body = {
         "email": "woss7@mailinator.com",
-        "password": pss,
+        "password": "Pa$$w0rd!",
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
     }
     existing_body = {
         "email": "woss5@mailinator.com",
-        "password": pss,
+        "password": "Pa$$w0rd!",
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
     }
     invalid_body = {
         "email": 12345678,
-        "password": pss,
+        "password": "Pa$$w0rd!",
         "first_name": 10110111,
         "last_name": fake.last_name(),
     }
@@ -35,24 +28,24 @@ class PythonAPIs(unittest.TestCase):
     user_id = None
     valid_body1 = {
         "email": fake.email(),
-        "password": pss,
+        "password": "Pa$$w0rd!",
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
     }
     valid_body2 = {
         "email": fake.email(),
-        "password": pss,
+        "password": "Pa$$w0rd!",
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
     }
-    change_password = {"old_password": pss, "new_password": "Pa$$w0rd!!"}
+    change_password = {"old_password": "Pa$$w0rd!", "new_password": "Pa$$w0rd!!"}
     VALID_CREDENTIALS = {
         "email": "woss1@mailinator.com",
-        "password": pss,
+        "password": "Pa$$w0rd!",
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
     }
-    LOGIN_CREDENTIALS = {"email": "woss2@mailinator.com", "password": pss}
+    LOGIN_CREDENTIALS = {"email": "woss2@mailinator.com", "password": "Pa$$w0rd!"}
     INVALID_CREDENTIALS = {"username": "test@mail.com", "password": "wrongpassword"}
     create_profile = {
         "username": fake.user_name(),
@@ -70,7 +63,7 @@ class PythonAPIs(unittest.TestCase):
     def setUpClass(cls):
         auth_response = requests.post(
             f"{cls.baseUrl}/api/v1/auth/login",
-            json={"email": "woss2@mailinator.com", "password": cls.pss},
+            json={"email": "woss2@mailinator.com", "password": "Pa$$w0rd!"},
         )
         auth_response_data = auth_response.json()
         cls.access_token = auth_response_data["data"]["access_token"]
