@@ -30,7 +30,7 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
 
     # create an organization for the user
     org = CreateUpdateOrganisation(
-        name=f"{user.first_name}'s Organisation",
+        name=f"{user.email}'s Organisation",
         email=user.email
     )
     user_org = organisation_service.create(db=db, schema=org, user=user)
