@@ -31,11 +31,12 @@ def stripe_payment(
 
 @subscription_.get("/stripe/success")
 def success_upgrade():
-    return {"message" : "Payment successful"}
+
+    return success_response(status_code=status.HTTP_201_CREATED, message="Payment intent initiated")
 
 @subscription_.get("/stripe/cancel")
 def cancel_upgrade():
-    return {"message" : "Payment canceled"}
+    return success_response(status_code=status.HTTP_201_CREATED, message="Payment intent canceled")
 
 
 @subscription_.get("/plans")
