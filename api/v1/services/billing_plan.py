@@ -1,10 +1,11 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from api.v1.models.billing_plan import BillingPlan
 from typing import Any, Optional
 from api.core.base.services import Service
 from api.v1.schemas.plans import CreateSubscriptionPlan
 from api.utils.db_validators import check_model_existence
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 
 
 class BillingPlanService(Service):
@@ -14,13 +15,35 @@ class BillingPlanService(Service):
         """
         Create and return a new billing plan
         """
-
         plan = BillingPlan(**request.dict())
-        db.add(plan)
-        db.commit()
-        db.refresh(plan)
+        
+        try:
+            db.add(plan)
+            db.commit()
+            db.refresh(plan)
+            return plan
+        
+        except IntegrityError as e:
+            db.rollback()
+            # Check if it's a foreign key violation error
+            if "foreign key constraint" in str(e.orig):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Organisation with id {request.organisation_id} not found."
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="A database integrity error occurred."
+                )
 
-        return plan
+        except SQLAlchemyError as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="A database error occurred."
+            )
+
 
     def delete(self, db: Session, id: str):
         """
