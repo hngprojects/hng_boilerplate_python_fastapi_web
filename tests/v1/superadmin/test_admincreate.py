@@ -25,7 +25,7 @@ data2 = {
 data3 = {
 
     "first_name": "Marvelu",
-    "last_name": "Ub",
+    "last_name": "Ubloin",
     "password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
     

@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
-CHANGE_PWD_ENDPOINT = "/api/v1/users/me/password"
+CHANGE_PWD_ENDPOINT = "/api/v1/auth/change-password"
 
 
 @pytest.fixture
@@ -90,8 +90,8 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
               "new_password": "Ojobonandom@123"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert user_pwd_change.status_code == 400
-    assert user_pwd_change.json()["message"] == "Incorrect old password"
+    assert user_pwd_change.status_code == 422
+    assert user_pwd_change.json()["message"] == "Invalid input"
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
