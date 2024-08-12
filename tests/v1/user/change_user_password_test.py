@@ -108,7 +108,7 @@ def test_user_password(mock_db_session, mock_user_service):
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
         json={"old_password": "Testpassword@123",
-              "new_password": "Ojobonandom@123"},
+              "new_password": "Testpassword@1234"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
