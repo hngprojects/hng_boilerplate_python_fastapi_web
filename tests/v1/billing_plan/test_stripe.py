@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from api.v1.models.user import User
 from api.v1.models.billing_plan import UserSubscription, BillingPlan
 from main import app
+from fastapi import status
 from api.v1.services.user import user_service
 from api.db.database import get_db
 from datetime import datetime, timezone, timedelta
@@ -79,3 +80,16 @@ async def test_subscribe_user_to_plan(mock_db_session, mock_subscribe_user_to_pl
     assert response.user_id == user_id
     assert response.plan_id == plan_id
     assert response.organisation_id == org_id
+
+
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_fetch_billing_plans(mock_user_service, mock_db_session):
+    """Billing plan fetch test."""
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    access_token = user_service.create_access_token(user_id=str(uuid7()))
+
+    response = client.get(
+        "/api/v1/payment/plans",
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
+    assert response.status_code == status.HTTP_200_OK

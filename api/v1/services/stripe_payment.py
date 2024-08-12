@@ -23,7 +23,7 @@ def get_all_plans(db: Session):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="No billing plans found."
             )
-        return {"status_code" : status.HTTP_201_CREATED, "message":'payment in progress', "billing_plans":data}
+        return {"status_code" : status.HTTP_302_FOUND, "message":'plans retrieved successfully', "billing_plans":data}
         # return data
         
     except SQLAlchemyError as e:
