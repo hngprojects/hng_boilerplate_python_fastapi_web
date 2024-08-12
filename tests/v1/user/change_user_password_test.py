@@ -12,7 +12,8 @@ from datetime import datetime, timezone
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
 CHANGE_PWD_ENDPOINT = "/api/v1/auth/change-password"
-
+p1 = "Testpassword@123"
+p2 = "Testpassword@1234"
 
 @pytest.fixture
 def mock_db_session():
@@ -107,8 +108,8 @@ def test_user_password(mock_db_session, mock_user_service):
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassword@123",
-              "new_password": "Testpassword@1234"},
+        json={"old_password": p1,
+              "new_password": p2},
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
