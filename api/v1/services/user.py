@@ -447,18 +447,28 @@ class UserService(Service):
 
     def change_password(
         self,
-        old_password: str,
         new_password: str,
         user: User,
         db: Session,
+        old_password: Optional[str] = None
     ):
         """Endpoint to change the user's password"""
-
-        if not self.verify_password(old_password, user.password):
+        if old_password == new_password:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                detail="Old Password and New Password cannot be the same")
+        if old_password is None:
+            if user.password is None:
+                user.password = self.hash_password(new_password)
+                db.commit()
+                return
+            else:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                    detail="Old Password must not be empty, unless setting password for the first time.")
+        elif not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
-
-        user.password = self.hash_password(new_password)
-        db.commit()
+        else:
+            user.password = self.hash_password(new_password)
+            db.commit()
 
     def get_current_super_admin(
         self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
