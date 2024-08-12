@@ -11,8 +11,9 @@ from datetime import datetime, timezone
 
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
-CHANGE_PWD_ENDPOINT = "/api/v1/users/me/password"
-
+CHANGE_PWD_ENDPOINT = "/api/v1/auth/change-password"
+p1 = "Testrandom@123"
+p2 = "Testrandom@1234"
 
 @pytest.fixture
 def mock_db_session():
@@ -39,7 +40,7 @@ def create_mock_user(mock_user_service, mock_db_session):
     mock_user = User(
         id=str(uuid7()),
         email="testuser@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
+        password=user_service.hash_password(p1),
         first_name="Test",
         last_name="User",
         is_active=True,
@@ -60,7 +61,7 @@ def test_autheniticated_user(mock_db_session, mock_user_service):
 
     login = client.post(
         LOGIN_ENDPOINT,
-        json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
+        json={"email": "testuser@gmail.com", "password": p1},
     )
     access_token = login.json()["access_token"]
 
@@ -80,13 +81,13 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
 
     login = client.post(
         LOGIN_ENDPOINT,
-        json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
+        json={"email": "testuser@gmail.com", "password": p1},
     )
     access_token = login.json()["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassw23",
+        json={"old_password": "Testpassw23@",
               "new_password": "Ojobonandom@123"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
@@ -101,14 +102,14 @@ def test_user_password(mock_db_session, mock_user_service):
 
     login = client.post(
         LOGIN_ENDPOINT,
-        json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
+        json={"email": "testuser@gmail.com", "password": p1},
     )
     access_token = login.json()["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassword@123",
-              "new_password": "Ojobonandom@123"},
+        json={"old_password": p1,
+              "new_password": p2},
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
