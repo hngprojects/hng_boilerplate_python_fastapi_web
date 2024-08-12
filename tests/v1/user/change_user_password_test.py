@@ -1,3 +1,4 @@
+import os
 from main import app
 from api.v1.services.user import user_service
 from api.v1.models.user import User
@@ -12,8 +13,8 @@ from datetime import datetime, timezone
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
 CHANGE_PWD_ENDPOINT = "/api/v1/auth/change-password"
-p1 = "Testrandom@123"
-p2 = "Testrandom@1234"
+p1 = os.getenv("TEST_PASSWORD_1", "Testrandom@123")  # This is a test password, safe to ignore.
+p2 = os.getenv("TEST_PASSWORD_2", "Testrandom@1234")  # This is a test password, safe to ignore.
 
 @pytest.fixture
 def mock_db_session():
