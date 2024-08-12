@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 import stripe
-from api.v1.services.stripe_payment import stripe_payment_request, update_user_plan, fetch_all_organisations_with_users_and_plans
+from api.v1.services.stripe_payment import stripe_payment_request, \
+update_user_plan, fetch_all_organisations_with_users_and_plans, get_all_plans
 import json
 from api.v1.schemas.stripe import PlanUpgradeRequest
 from typing import List
@@ -35,6 +36,15 @@ def success_upgrade():
 @subscription_.get("/stripe/cancel")
 def cancel_upgrade():
     return {"message" : "Payment canceled"}
+
+
+@subscription_.get("/plans")
+def get_plans(
+    request: Request, 
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)):
+    data = get_all_plans(db)
+    return data
 
 @subscription_.post("/webhook")
 async def webhook_received(
@@ -75,7 +85,7 @@ async def get_organisations_with_users_and_plans(db: Session = Depends(get_db), 
     try:
         data = fetch_all_organisations_with_users_and_plans(db)
         if not data:
-            return {"status_code": 404, "success": False, "message": "No data found"}
+            raise HTTPException(status_code=404, detail="No data found")
         return success_response(
             status_code=status.HTTP_302_FOUND,
             message='billing details successfully retrieved',
