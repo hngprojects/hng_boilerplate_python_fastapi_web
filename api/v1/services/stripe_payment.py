@@ -3,6 +3,8 @@ from api.v1.models.user import User
 from api.v1.models.billing_plan import BillingPlan, UserSubscription
 from api.v1.models.organisation import Organisation
 import stripe
+from sqlalchemy.orm import joinedload
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, join
 from fastapi.encoders import jsonable_encoder
 from api.utils.success_response import success_response
@@ -12,8 +14,28 @@ from datetime import datetime, timedelta
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
+
+def get_all_plans(db: Session):
+    try:
+        data = db.query(BillingPlan).all()
+        if not data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="No billing plans found."
+            )
+        return {"status_code" : status.HTTP_201_CREATED, "message":'payment in progress', "billing_plans":data}
+        # return data
+        
+    except SQLAlchemyError as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while fetching billing plans."
+        )
+    
+
 def get_plan_by_name(db: Session, plan_name: str):
     return db.query(BillingPlan).filter(BillingPlan.name == plan_name).first()
+
 
 def stripe_payment_request(db: Session, user_id: str, request: Request, plan_name: str):
 
