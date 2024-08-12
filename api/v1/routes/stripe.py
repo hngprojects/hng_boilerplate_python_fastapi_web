@@ -44,7 +44,7 @@ def get_plans(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)):
     data = get_all_plans(db)
-    return {"data" : data}
+    return data
 
 @subscription_.post("/webhook")
 async def webhook_received(

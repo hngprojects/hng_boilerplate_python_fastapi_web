@@ -16,22 +16,17 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 
 def get_all_plans(db: Session):
+    """
+    Retrieve all billing plan details.
+    """
     try:
         data = db.query(BillingPlan).all()
         if not data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="No billing plans found."
-            )
-        return {"status_code" : status.HTTP_302_FOUND, "message":'plans retrieved successfully', "billing_plans":data}
-        # return data
-        
+            raise HTTPException(status_code=404, detail="No billing plans found")
+        return success_response(status_code=status.HTTP_302_FOUND, message="Plans successfully retrieved", data=data)
     except SQLAlchemyError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while fetching billing plans."
-        )
-    
+        raise HTTPException(status_code=500, detail="An error occurred while fetching billing plans")
+
 
 def get_plan_by_name(db: Session, plan_name: str):
     return db.query(BillingPlan).filter(BillingPlan.name == plan_name).first()
