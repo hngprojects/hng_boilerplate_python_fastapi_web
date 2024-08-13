@@ -312,7 +312,7 @@ class OrganisationService(Service):
         """
         user_organisations = db.query(Organisation).join(
             user_organisation_association,
-            user_organisation_association.c.user_id == user.id
+            Organisation.id == user_organisation_association.c.organisation_id
         ).filter(
             user_organisation_association.c.user_id == user.id
         ).all()
