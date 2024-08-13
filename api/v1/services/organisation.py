@@ -1,8 +1,8 @@
 import csv
 from io import StringIO
 import logging
-from typing import Any, Optional
-from fastapi import HTTPException
+from typing import Any, Optional, Annotated
+from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -18,8 +18,10 @@ from api.v1.models.user import User
 from api.v1.schemas.organisation import (
     CreateUpdateOrganisation,
     AddUpdateOrganisationRole,
-    RemoveUserFromOrganisation
+    RemoveUserFromOrganisation,
+    OrganisationData
 )
+from api.db.database import get_db
 
 
 class OrganisationService(Service):
@@ -299,6 +301,25 @@ class OrganisationService(Service):
         csv_file.seek(0)
 
         return csv_file
+    
+    def retrieve_user_organizations(self, user: User,
+                                    db: Annotated[Session, Depends(get_db)]):
+        """
+        Retrieves all organizations a user belongs to.
+       
+        Args:
+            user: the user to retrieve the organizations
+        """
+        user_organisations = db.query(Organisation).join(
+            user_organisation_association,
+            user_organisation_association.c.user_id == user.id
+        ).filter(
+            user_organisation_association.c.user_id == user.id
+        ).all()
+       
+        if user_organisations:
+            return [OrganisationData.model_validate(org, from_attributes=True) for org in user_organisations]
+        return [{"name": '', "id": '', "description": '', "created_at": "", "updated_at": ''}]
 
 
 organisation_service = OrganisationService()
