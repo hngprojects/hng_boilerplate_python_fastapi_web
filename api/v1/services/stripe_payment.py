@@ -23,7 +23,7 @@ def get_all_plans(db: Session):
         data = db.query(BillingPlan).all()
         if not data:
             raise HTTPException(status_code=404, detail="No billing plans found")
-        return success_response(status_code=status.HTTP_302_FOUND, message="Plans successfully retrieved", data=data)
+        return success_response(status_code=status.HTTP_200_OK, message="Plans successfully retrieved", data=data)
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail="An error occurred while fetching billing plans")
 
@@ -89,7 +89,7 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
                 }
 
                 return success_response(
-                    status_code=status.HTTP_201_CREATED,
+                    status_code=status.HTTP_200_OK,
                     message='payment in progress',
                     data=data,
                 )

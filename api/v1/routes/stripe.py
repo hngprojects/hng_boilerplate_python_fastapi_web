@@ -32,11 +32,11 @@ def stripe_payment(
 @subscription_.get("/stripe/success")
 def success_upgrade():
 
-    return success_response(status_code=status.HTTP_201_CREATED, message="Payment intent initiated")
+    return success_response(status_code=status.HTTP_200_OK, message="Payment intent initiated")
 
 @subscription_.get("/stripe/cancel")
 def cancel_upgrade():
-    return success_response(status_code=status.HTTP_201_CREATED, message="Payment intent canceled")
+    return success_response(status_code=status.HTTP_200_OK, message="Payment intent canceled")
 
 
 @subscription_.get("/plans")
@@ -88,7 +88,7 @@ async def get_organisations_with_users_and_plans(db: Session = Depends(get_db), 
         if not data:
             raise HTTPException(status_code=404, detail="No data found")
         return success_response(
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_200_OK,
             message='billing details successfully retrieved',
             data=data,
             )
