@@ -208,7 +208,7 @@ class GoogleOauthServices(Service):
                 refresh_token=user_service.create_refresh_token(new_user.id)
             )
             organisation = Organisation(
-                name = f'{new_user.first_name} {new_user.last_name} Organisation'
+                name = f'{new_user.email} {new_user.last_name} Organisation'
             )
             db.add_all([profile, oauth_data, organisation])
             db.commit()
