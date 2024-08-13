@@ -33,7 +33,8 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
         name=f"{user.email}'s Organisation",
         email=user.email
     )
-    user_org = organisation_service.create(db=db, schema=org, user=user)
+    organisation_service.create(db=db, schema=org, user=user)
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Create access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
@@ -61,7 +62,8 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organizations': user_organizations
         }
     )
 
@@ -121,6 +123,7 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     user = user_service.authenticate_user(
         db=db, email=login_request.email, password=login_request.password
     )
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Generate access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
@@ -134,7 +137,8 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organizations': user_organizations
         }
     )
 
@@ -287,6 +291,7 @@ def request_magic_link(
 @auth.post("/magic-link/verify")
 async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
     user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
@@ -298,7 +303,8 @@ async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organizations': user_organizations
         }
     )
 
