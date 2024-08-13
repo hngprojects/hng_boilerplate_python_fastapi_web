@@ -41,14 +41,17 @@ def mock_verify_reset_token():
 
 @patch('api.v1.services.request_pwd.RequestPasswordService.fetch')
 @patch('api.v1.services.request_pwd.RequestPasswordService.create')
-def test_request_reset_link(mock_create, mock_fetch):
+@patch('api.core.dependencies.email_sender.send_email')
+def test_request_reset_link(mock_send_email, mock_create, mock_fetch):
     # Set up the mock objects
     mock_user = User(id=1, email="test@example.com", first_name="Test", last_name="User", password="PassDam!23w")
     mock_fetch.return_value = mock_user
     mock_create.return_value = 'mock_reset_token'
+    mock_send_email.return_value = None
     
     # Act
-    response = client.post("/api/v1/auth/forgot-password", json={"email": "test@example.com"})
+    response = client.post("/api/v1/auth/forgot-password",
+                           json={"email": "test@example.com"})
     
     # Assert
     assert response.status_code == 200
