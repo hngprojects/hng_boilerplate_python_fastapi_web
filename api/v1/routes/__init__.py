@@ -3,7 +3,7 @@ from api.v1.routes.privacy import privacies
 from api.v1.routes.team import team
 from fastapi import APIRouter
 from api.v1.routes.auth import auth
-from api.v1.routes.newsletter import newsletter
+from api.v1.routes.newsletter import newsletter, news_sub
 from api.v1.routes.user import user_router
 from api.v1.routes.product import product, non_organisation_product
 from api.v1.routes.product_comment import product_comment
@@ -73,6 +73,7 @@ api_version_one.include_router(topic)
 api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
+api_version_one.include_router(news_sub)
 api_version_one.include_router(testimonial)
 api_version_one.include_router(test_rout)
 api_version_one.include_router(email_sender)
