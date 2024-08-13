@@ -36,7 +36,7 @@ def test_get_all_invitations(mock_db_session):
         is_superadmin = True
     )
 
-    res = client.get('/api/v1/organisations/invites')
+    response = client.get('/api/v1/organisations/invites')
 
-    assert res.status_code == 200
+    assert response.status_code == 200
     
