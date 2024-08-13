@@ -11,7 +11,7 @@ from api.v1.models import User
 from api.v1.schemas.user import Token
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
-from api.v1.schemas.user import UserCreate, MagicLinkRequest
+from api.v1.schemas.user import UserCreate, MagicLinkRequest, ChangePasswordSchema
 from api.v1.services.organisation import organisation_service
 from api.v1.schemas.organisation import CreateUpdateOrganisation
 from api.db.database import get_db
@@ -313,3 +313,18 @@ async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
     )
 
     return response
+
+
+@auth.patch("/change-password", status_code=200)
+async def change_password(
+    schema: ChangePasswordSchema,
+    db: Session = Depends(get_db),
+    user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to change the user's password"""
+    user_service.change_password(new_password=schema.new_password,
+                                 user=user,
+                                 db=db,
+                                 old_password=schema.old_password)
+
+    return success_response(status_code=200, message="Password changed successfully")
