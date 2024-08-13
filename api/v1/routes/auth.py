@@ -11,7 +11,7 @@ from api.v1.models import User
 from api.v1.schemas.user import Token
 from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
 from api.v1.schemas.token import TokenRequest
-from api.v1.schemas.user import UserCreate, MagicLinkRequest
+from api.v1.schemas.user import UserCreate, MagicLinkRequest, ChangePasswordSchema
 from api.v1.services.organisation import organisation_service
 from api.v1.schemas.organisation import CreateUpdateOrganisation
 from api.db.database import get_db
@@ -33,11 +33,13 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
         name=f"{user.email}'s Organisation",
         email=user.email
     )
-    user_org = organisation_service.create(db=db, schema=org, user=user)
+    organisation_service.create(db=db, schema=org, user=user)
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Create access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
+    cta_link = 'https://anchor-python.teams.hng.tech/about-us'
 
     # Send email in the background
     background_tasks.add_task(
@@ -47,7 +49,8 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
         subject='Welcome to HNG Boilerplate',
         context={
             'first_name': user.first_name,
-            'last_name': user.last_name
+            'last_name': user.last_name,
+            'cta_link': cta_link
         }
     )
 
@@ -59,7 +62,8 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organizations': user_organizations
         }
     )
 
@@ -119,6 +123,7 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
     user = user_service.authenticate_user(
         db=db, email=login_request.email, password=login_request.password
     )
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Generate access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
@@ -132,7 +137,8 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organizations': user_organizations
         }
     )
 
@@ -259,11 +265,22 @@ async def verify_signin_token(
 # TODO: Fix magic link authentication
 @auth.post("/magic-link", status_code=status.HTTP_200_OK)
 def request_magic_link(
-    request: MagicLinkRequest, response: Response, db: Session = Depends(get_db)
+    request: MagicLinkRequest, background_tasks: BackgroundTasks,
+    response: Response, db: Session = Depends(get_db)
 ):
     user = user_service.fetch_by_email(db=db, email=request.email)
-    access_token = user_service.create_access_token(user_id=user.id)
-    send_magic_link(user.email, access_token)
+    magic_link_token = user_service.create_access_token(user_id=user.id)
+    magic_link = f"https://anchor-python.teams.hng.tech/magic-link/verify?token={magic_link_token}"
+
+    background_tasks.add_task(
+        send_magic_link,
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'link': magic_link,
+            'email': user.email
+        }
+    )
 
     response = success_response(
         status_code=200, message=f"Magic link sent to {user.email}"
@@ -274,6 +291,7 @@ def request_magic_link(
 @auth.post("/magic-link/verify")
 async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
     user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
@@ -285,7 +303,8 @@ async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organizations': user_organizations
         }
     )
 
@@ -300,3 +319,18 @@ async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
     )
 
     return response
+
+
+@auth.patch("/change-password", status_code=200)
+async def change_password(
+    schema: ChangePasswordSchema,
+    db: Session = Depends(get_db),
+    user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to change the user's password"""
+    user_service.change_password(new_password=schema.new_password,
+                                 user=user,
+                                 db=db,
+                                 old_password=schema.old_password)
+
+    return success_response(status_code=200, message="Password changed successfully")
