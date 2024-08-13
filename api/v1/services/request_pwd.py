@@ -20,8 +20,6 @@ SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
 
 
-
-
 class RequestPasswordService(Service):
     def fetch(self, email: str, db: Annotated[Session, Depends(get_db)]):
         """
