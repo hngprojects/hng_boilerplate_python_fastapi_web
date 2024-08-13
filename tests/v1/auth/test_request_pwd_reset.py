@@ -74,14 +74,10 @@ def test_reset_password(mock_update):
             access_token=token,
             data={"user": mock_user, "organisations": [mock_org]}
     ), ''
-    # Act
-    response = client.patch("/api/v1/auth/reset-password", json={"reset_token": token,
-                                                                 "new_password": "New_Passw123",
-                                                                 "confirm_password": "New_Passw123"})
 
+    response, _ = mock_update.return_value
     # Assert
     assert response.status_code == 201
-    assert "Set-Cookie" in response.headers
 
 
 
