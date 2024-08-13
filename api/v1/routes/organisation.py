@@ -3,7 +3,7 @@ from fastapi import Depends, APIRouter, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-
+from api.v1.services import invite
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas.organisation import (
@@ -127,3 +127,16 @@ async def delete_organisation(
             status_code=status.HTTP_200_OK,
             message="Organisation with ID {org_id} deleted successfully",
         )
+    
+@organisation.get("/invites", status_code=200)
+def get_organization_invites(
+    db : Session = Depends(get_db),
+    current_user : User = Depends(user_service.get_current_super_admin),
+) :
+    invitations = invite.InviteService.fetch_all(db)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='Invites fetched succesfully',
+        data=[jsonable_encoder(invitation) for invitation in invitations]
+    )

@@ -212,9 +212,10 @@ class InviteService(Service):
     def fetch(self):
         pass
 
-    def fetch_all(self):
-        pass
-
+    @staticmethod
+    def fetch_all(session : Session):
+        all_invites = session.query(Invitation).all()
+        return all_invites
     def update(self):
         pass
     
