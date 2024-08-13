@@ -63,7 +63,7 @@ def register(background_tasks: BackgroundTasks, response: Response, user_schema:
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
             ),
-            'organizations': user_organizations
+            'organisations': user_organizations
         }
     )
 
@@ -85,6 +85,7 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
     """Endpoint for super admin creation"""
 
     user = user_service.create_admin(db=db, schema=user)
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Create access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
@@ -98,7 +99,8 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organisations': user_organizations
         }
     )
 
@@ -138,7 +140,7 @@ def login(login_request: LoginRequest, db: Session = Depends(get_db)):
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
             ),
-            'organizations': user_organizations
+            'organisations': user_organizations
         }
     )
 
@@ -231,6 +233,7 @@ async def verify_signin_token(
     """Verify the 6-digit sign-in token and log in the user"""
 
     user = user_service.verify_login_token(db, schema=token_schema)
+    user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Generate JWT token
     access_token = user_service.create_access_token(user_id=user.id)
@@ -245,7 +248,8 @@ async def verify_signin_token(
             'user': jsonable_encoder(
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
-            )
+            ),
+            'organisations': user_organizations
         }
     )
 
@@ -304,7 +308,7 @@ async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
                 user,
                 exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
             ),
-            'organizations': user_organizations
+            'organisations': user_organizations
         }
     )
 
