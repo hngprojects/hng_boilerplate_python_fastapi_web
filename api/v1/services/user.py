@@ -17,7 +17,7 @@ from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
 from api.v1.models.associations import user_organisation_association
-from api.v1.models.user import User
+from api.v1.models import User, Profile, Region
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
@@ -153,8 +153,15 @@ class UserService(Service):
 
         # create data privacy setting
         data_privacy = DataPrivacySetting(user_id=user.id)
+        profile = Profile(
+            user_id=user.id
+        )
+        region = Region(
+            user_id=user.id,
+            region='Empty'
+        )
 
-        db.add(data_privacy)
+        db.add_all([data_privacy, profile, region])
         db.commit()
         db.refresh(data_privacy)
 
