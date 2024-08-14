@@ -57,5 +57,4 @@ def test_newsletter_subscribe_missing_fields(mock_unsubscribe, db_session_mock, 
     response = client.post('/api/v1/newsletter-subscription', json={
         
         })
-
     assert response.status_code == 422
