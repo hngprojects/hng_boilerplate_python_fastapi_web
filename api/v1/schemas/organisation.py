@@ -74,10 +74,10 @@ class OrganisationData(BaseModel):
     name: str
     email: Optional[EmailStr] = None
     industry: Optional[str] = None
+    user_role: List[str]
     type: Optional[str] = None
     country: Optional[str] = None
     state: Optional[str] = None
     address: Optional[str] = None
     description: Optional[str] = None
-   
-    model_config = ConfigDict(from_attributes=True)
+    organisation_id: str
