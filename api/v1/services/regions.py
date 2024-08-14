@@ -11,7 +11,9 @@ class RegionService(Service):
 
     def create(self, db: Session, schema: RegionCreate, user_id: str):
         '''Create a new Region'''
-
+        region_exists = db.query(Region).filter_by(user_id=user_id).first()
+        if region_exists:
+            self.update(db, region_exists.id, schema)
         new_region = Region(**schema.model_dump(), user_id=user_id)
         db.add(new_region)
         db.commit()
