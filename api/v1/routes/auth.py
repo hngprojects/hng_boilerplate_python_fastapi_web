@@ -274,7 +274,7 @@ def request_magic_link(
 ):
     user = user_service.fetch_by_email(db=db, email=request.email)
     magic_link_token = user_service.create_access_token(user_id=user.id)
-    magic_link = f"https://anchor-python.teams.hng.tech/magic-link/verify?token={magic_link_token}"
+    magic_link = f"https://anchor-python.teams.hng.tech/login/magic-link?token={magic_link_token}"
 
     background_tasks.add_task(
         send_magic_link,
