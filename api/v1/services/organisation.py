@@ -4,7 +4,7 @@ import logging
 from typing import Any, Optional, Annotated
 from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from api.core.base.services import Service
@@ -348,8 +348,11 @@ class OrganisationService(Service):
                     Role.id == user_organisation_roles.c.role_id,
                 ).filter(
                     or_(
-                        user_organisation_roles.c.user_id == user.id,
-                        Role.is_builtin == True,
+                        and_(
+                            user_organisation_roles.c.user_id == user.id,
+                            Role.is_builtin == False
+                        ),
+                        Role.is_builtin == True
                     )
                 ).all()
 
