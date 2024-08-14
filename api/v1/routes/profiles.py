@@ -19,19 +19,19 @@ profile = APIRouter(prefix="/profile", tags=["Profiles"])
 
 
 @profile.get(
-    "/current-user", status_code=status.HTTP_200_OK, response_model=success_response
+    "/{user_id}", status_code=status.HTTP_200_OK, response_model=success_response
 )
-def get_current_user_profile(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
+def get_current_user_profile(user_id: str,
+                             db: Session = Depends(get_db),
+                             current_user: User = Depends(user_service.get_current_user)
 ):
     """Endpoint to get current user profile details"""
 
-    profile = profile_service.fetch_by_user_id(db, user_id=current_user.id)
+    profile = profile_service.fetch_by_user_id(db, user_id=user_id)
 
     return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="User profile create successfully",
+        status_code=status.HTTP_200_OK,
+        message="User profile retrieved successfully",
         data=profile.to_dict(),
     )
 
