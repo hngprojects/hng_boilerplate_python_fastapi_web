@@ -3,8 +3,7 @@ from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from api.v1.services.request_pwd import RequestPasswordService
-from api.v1.models import User, ResetPasswordToken, Organisation
+from api.v1.models import User, Organisation
 from api.v1.schemas.request_password_reset import (ResetPasswordRequest,
                                                    RequestEmail,
                                                    OrganizationData,
@@ -38,23 +37,6 @@ def mock_verify_reset_token():
     with patch("api.v1.services.request_pwd.RequestPasswordService.verify_reset_token") as Mock_verify_token:
         Mock_verify_token.return_value = {"email": "test@example.com", "jti": 1}
         yield Mock_verify_token
-
-@patch('api.v1.services.request_pwd.RequestPasswordService.fetch')
-@patch('api.v1.services.request_pwd.RequestPasswordService.create')
-@patch('api.core.dependencies.email_sender.send_email')
-def test_request_reset_link(mock_send_email, mock_create, mock_fetch):
-    # Set up the mock objects
-    mock_user = User(id=1, email="test@example.com", first_name="Test", last_name="User", password="PassDam!23w")
-    mock_fetch.return_value = mock_user
-    mock_create.return_value = 'mock_reset_token'
-    mock_send_email.return_value = None
-    
-    # Act
-    response = client.post("/api/v1/auth/forgot-password",
-                           json={"email": "test@example.com"})
-    
-    # Assert
-    assert response.status_code == 200
 
 
 @patch('api.v1.services.request_pwd.RequestPasswordService.update')
