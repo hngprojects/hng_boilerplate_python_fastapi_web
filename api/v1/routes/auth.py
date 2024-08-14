@@ -85,6 +85,12 @@ def register_as_super_admin(user: UserCreate, db: Session = Depends(get_db)):
     """Endpoint for super admin creation"""
 
     user = user_service.create_admin(db=db, schema=user)
+    # create an organization for the user
+    org = CreateUpdateOrganisation(
+        name=f"{user.email}'s Organisation",
+        email=user.email
+    )
+    organisation_service.create(db=db, schema=org, user=user)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Create access and refresh tokens
