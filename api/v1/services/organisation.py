@@ -62,6 +62,24 @@ class OrganisationService(Service):
         )
         db.execute(stmt)
         db.commit()
+        admin_role = db.query(Role).filter_by(name="admin").first()
+        if not admin_role:
+            admin_role = Role(
+                name="admin",
+                description="Organization Admin",
+                is_builtin=True
+                )
+            db.add(admin_role)
+            db.commit()
+        else:
+            user_role_stmt = user_organisation_roles.insert().values(
+                user_id=user.id,
+                organisation_id=new_organisation.id,
+                role_id=admin_role.id,
+                is_owner=True,
+            )
+            db.execute(user_role_stmt)
+            db.commit()
 
         return new_organisation
 
