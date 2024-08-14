@@ -134,9 +134,10 @@ def get_organization_invites(
     current_user : User = Depends(user_service.get_current_super_admin),
 ) :
     invitations = invite.InviteService.fetch_all(db)
+    
 
     return success_response(
         status_code=status.HTTP_200_OK,
         message='Invites fetched succesfully',
-        data=[jsonable_encoder(invitation) for invitation in invitations]
+        data=[jsonable_encoder(invitation, exclude=['user_id','organisation_id']) for invitation in invitations]
     )

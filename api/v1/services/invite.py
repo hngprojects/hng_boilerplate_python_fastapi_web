@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from pytz import utc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session,joinedload
 from sqlalchemy import insert
 from fastapi import HTTPException, Request, Depends, status
 from collections import OrderedDict
@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from api.v1.models.invitation import Invitation
 from api.v1.models.organisation import Organisation
 from api.v1.models.user import User
+from api.v1.services.user import user_service
 from sqlalchemy.exc import IntegrityError
 from api.v1.models.permissions.role import Role
 from api.v1.schemas.permissions.roles import RoleCreate
@@ -214,7 +215,10 @@ class InviteService(Service):
 
     @staticmethod
     def fetch_all(session : Session):
-        all_invites = session.query(Invitation).all()
+        all_invites = session.query(Invitation).options(joinedload(Invitation.organisation)).all()
+        for invite in all_invites :
+            user = user_service.get_user_by_id(db=session , id=invite.user_id)
+            invite.email = user.email
         return all_invites
     def update(self):
         pass
