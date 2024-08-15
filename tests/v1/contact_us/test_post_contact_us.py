@@ -3,10 +3,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
+from fastapi import status
 from sqlalchemy.orm import Session
 from uuid_extensions import uuid7
 
 from api.db.database import get_db
+from api.utils.send_mail import send_contact_mail
 from api.v1.models.contact_us import ContactUs
 from api.v1.models.organisation import Organisation
 from api.v1.services.user import user_service
@@ -27,20 +29,6 @@ def client(db_session_mock):
     yield client
     app.dependency_overrides = {}
 
-
-def mock_get_current_user():
-    return User(
-        id=str(uuid7()),
-        email="test@gmail.com",
-        password=user_service.hash_password("Testuser@123"),
-        first_name='Test',
-        last_name='User',
-        is_active=True,
-        is_super_admin=True,
-        created_at=datetime.now(timezone.utc),
-        updated_at=datetime.now(timezone.utc)
-    )
-
 def mock_org():
     return Organisation(
         id=str(uuid7()),
@@ -54,60 +42,66 @@ def mock_contact_us():
         id=str(uuid7()), 
         full_name="Jane Doe",
         email="jane.doe@example.com",
-        title="Inquiry about services",
+        title="08058878456",
         message="Hello, I would like more information about your services and pricing.",
         org_id=mock_org().id
     )
 
-
-def test_post_contact_us(client, db_session_mock):
-    '''Test to successfully create a new product category'''
-
-    from api.v1.services.contact_us import contact_us_service
-
-    app.dependency_overrides[contact_us_service.create] = lambda: mock_contact_us
+@patch('fastapi.BackgroundTasks.add_task')
+@patch("api.v1.services.contact_us.contact_us_service.create")
+def test_post_contact_us(mock_create, mock_add_task, db_session_mock, client):
+    '''Test to successfully create a new contact request'''
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    mock_contact_instance = mock_contact_us()
+    mock_create.return_value = mock_contact_us()
+    # mock_email_send.return_value = None
+
+    response = client.post('/api/v1/contact', json={
+        "full_name": "Jane Doe",
+        "email": "jane.doe@example.com",
+        "phone_number": "08058878456",
+        "message": "Hello, I would like more information about your services and pricing.",
+        "org_id": mock_org().id
+    })
+
+    print(response.json())
+    assert response.status_code == 201
+
+    # Assert that the contact_us_service.create was called with the expected arguments
+    mock_create.assert_called_once()
+
+    mock_add_task.assert_called_once()
+    mock_add_task.assert_called_with(
+            send_contact_mail,
+            context={
+                "full_name": "Jane Doe",
+                "email": "jane.doe@example.com",
+                "phone": "08058878456",
+                "message": "Hello, I would like more information about your services and pricing.",
+            }
+        )
 
 
-    with patch("api.v1.services.contact_us.contact_us_service.create", return_value=mock_contact_instance) as mock_create:
-
-        response = client.post('/api/v1/contact', json={
-            "full_name": "Josh Oloton",
-            "email": "josh@example.com",
-            "phone_number": "07017796046",
-            "message": "I can't log in to my account",
-            "org_id": mock_org().id
-        })
-
-        print(response.json())
-        assert response.status_code == 201
-
-
-def test_post_contact_us_missing_fields(client, db_session_mock):
-    '''Test to unsuccessfully create a new product category with missing fields'''
-
-    from api.v1.services.contact_us import contact_us_service
-
-    app.dependency_overrides[contact_us_service.create] = lambda: mock_contact_us
+@patch('fastapi.BackgroundTasks.add_task')
+@patch("api.v1.services.contact_us.contact_us_service.create")
+def test_post_contact_missing_fields(mock_create, mock_add_task, db_session_mock, client):
+    '''Test to unsuccessfully create a new contact request withz category'''
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    mock_contact_instance = mock_contact_us()
+    mock_create.return_value = mock_contact_us()
+
+    response = client.post('/api/v1/contact', json={
+        "email": "jane.doe@example.com",
+        "message": "Hello, I would like more information about your services and pricing.",
+    })
+
+    print(response.json())
+    assert response.status_code == 422
 
 
-    with patch("api.v1.services.contact_us.contact_us_service.create", return_value=mock_contact_instance) as mock_create:
-
-        response = client.post('/api/v1/contact', json={
-            "email": "josh@example.com",
-            "message": "I can't log in to my account",
-        })
-
-        print(response.json())
-        assert response.status_code == 422
