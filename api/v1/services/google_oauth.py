@@ -3,9 +3,8 @@ from datetime import datetime, timezone
 from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.v1.models.organisation import Organisation
-from api.v1.models.user import User
 from api.v1.models.oauth import OAuth
-from api.v1.models.user import User
+from api.v1.models import User, DataPrivacySetting, Region, NewsletterSubscriber
 from api.v1.models.profile import Profile
 from api.core.base.services import Service
 from sqlalchemy.orm import Session
@@ -14,6 +13,12 @@ from api.v1.services.user import user_service
 from api.v1.schemas.google_oauth import Tokens
 from api.v1.services.profile import profile_service
 from api.v1.models.associations import user_organisation_association
+from api.v1.models.permissions.role_permissions import role_permissions
+from api.v1.models.permissions.permissions import Permission
+from api.v1.models.permissions.role import Role
+from api.v1.models.permissions.user_org_role import user_organisation_roles
+from api.v1.services.notification_settings import notification_setting_service
+from api.v1.services.newsletter import NewsletterService, EmailSchema
 
 
 class GoogleOauthServices(Service): 
@@ -199,27 +204,40 @@ class GoogleOauthServices(Service):
             db.commit()
             db.refresh(new_user)
 
-            profile = Profile(user_id=new_user.id, avatar_url=google_response.get("picture"))
+            profile = Profile(user_id=new_user.id,
+                              avatar_url=google_response.get("picture"))
             oauth_data = OAuth(
                 provider="google",
                 user_id=new_user.id,
-                sub=google_response.get("sub"),
-                access_token=user_service.create_access_token(new_user.id),
-                refresh_token=user_service.create_refresh_token(new_user.id)
+                sub=google_response.get("sub")
             )
             organisation = Organisation(
                 name = f'{new_user.email} {new_user.last_name} Organisation'
             )
-            db.add_all([profile, oauth_data, organisation])
-            db.commit()
+            
+            region = Region(
+                user_id=new_user.id,
+                region='Empty'
+            )
+            # Create notification settings directly for the user
+            notification_setting_service.create(db=db, user=new_user)
+            
+            # create data privacy setting
+            data_privacy = DataPrivacySetting(user_id=new_user.id)
 
+            db.add_all([profile, oauth_data, organisation, region, data_privacy])
+
+            news_letter = db.query(NewsletterSubscriber).filter_by(email=new_user.email)
+            if not news_letter:
+                news_letter = NewsletterService.create(db, EmailSchema(email=new_user.email))
+            
             # TODO: Ensure to update this later
             stmt = user_organisation_association.insert().values(
                 user_id=new_user.id, organisation_id=organisation.id, role="owner"
             )
             db.execute(stmt)
-            db.commit()
 
+            db.commit()         
             return new_user
         except Exception as e:
             raise HTTPException(status_code=500, detail=f'Error {e}')

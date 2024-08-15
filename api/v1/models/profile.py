@@ -39,5 +39,4 @@ class Profile(BaseTableModel):
             "recovery_email": self.recovery_email,
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
-            "user": self.user.to_dict() if self.user else None,
         }
