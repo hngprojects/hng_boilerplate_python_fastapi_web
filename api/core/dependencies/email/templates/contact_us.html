@@ -1,0 +1,57 @@
+{% extends 'admin-base.html' %}
+
+{% block title %}
+    Magic Link
+{% endblock %}
+
+{% block content %}
+<div class="container"
+        style="
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: #333;
+        ">
+    <div class="header"
+        style="
+            text-align: center;
+            padding-bottom: 20px;
+        ">
+        <h1>Dear Admin,</h1>
+        <p>You have received a new contact form submission with the following details:</p>
+    </div>
+    <div class="content"
+            style="
+                margin-bottom: 20px;
+            ">
+        <h3>User Details</h3>
+        <ul>
+            <li><span class="highlight"
+                style="
+                    font-weight: bold; color: #333;
+                ">
+                Full Name:</span> {{ full_name }}</li>
+            <li>
+                <span class="highlight"
+                style="
+                    font-weight: bold; color: #333;
+                ">
+                Email:</span> {{ email }}
+            </li>
+            <li>
+                <span class="highlight" style="
+                    font-weight: bold; color: #333;
+                ">
+                    Phone Number:</span> {{ phone }}
+            </li>
+        </ul>
+        <h3>Message</h3>
+        <p class="message" style="margin-top: 10px;">
+            {{ message }}
+        </p>
+    </div>
+</div>
+{% endblock %}
+    
