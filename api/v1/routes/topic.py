@@ -1,6 +1,7 @@
 from fastapi import (
 	APIRouter,
 	Depends,
+	Response,
 	status,
 	)
 from fastapi.encoders import jsonable_encoder
@@ -37,7 +38,7 @@ async def retrieve_all_topics(
 		data=jsonable_encoder(topics)
 	)
 
-@topic.get('/topic/{topic_id}', response_model=TopicData)
+@topic.get('/topics/{topic_id}', response_model=TopicData)
 async def retrieve_topic(
     topic_id: str,
 	db: Session = Depends(get_db)
@@ -63,7 +64,7 @@ async def retrieve_topic(
 
 @topic.get('/search', response_model=TopicList)
 async def search_for_topic(
-	schema: TopicSearchSchema,
+	query: str,
 	db: Session = Depends(get_db)
 ):
 	"""
@@ -76,7 +77,7 @@ async def search_for_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
-	topics = topic_service.search(db=db,search_query=schema.query)
+	topics = topic_service.search(db=db,search_query=query)
 
 	return success_response(
 		status_code=status.HTTP_200_OK,
@@ -84,9 +85,9 @@ async def search_for_topic(
 		data=jsonable_encoder(topics)
 	)
 
-@topic.delete('/topics', status_code=status.HTTP_204_NO_CONTENT)
+@topic.delete('/topics/{topic_id}')
 async def delete_a_topic(
-	id: TopicDeleteSchema,
+	topic_id: str,
 	db: Session = Depends(get_db),
 	current_user: User = Depends(user_service.get_current_super_admin),
 ):
@@ -102,11 +103,14 @@ async def delete_a_topic(
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
 
-	topic_service.delete(db, id.id)
+	topic_service.delete(db, topic_id)
+
+	return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@topic.patch("/topics")
+@topic.patch("/topics/{topic_id}")
 async def update_a_topic(
+	topic_id: str,
 	schema: TopicUpdateSchema,
 	db: Session = Depends(get_db),
  	current_user: User = Depends(user_service.get_current_super_admin),
@@ -123,11 +127,11 @@ async def update_a_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
-	updated_topic = topic_service.update(db, schema)
+	updated_topic = topic_service.update(db, schema, topic_id)
 	return success_response(
 		status_code=status.HTTP_200_OK,
 		message='Topic updated successfully!',
-		# data=jsonable_encoder(updated_topic)
+		data=jsonable_encoder(updated_topic)
 	)
 	
 @topic.post("/topics")

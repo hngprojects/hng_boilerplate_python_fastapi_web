@@ -41,10 +41,10 @@ class TopicService(Service):
         topic = check_model_existence(db, Topic, id)
         return topic
 
-    def update(self, db: Session, schema: TopicUpdateSchema):
+    def update(self, db: Session, schema: TopicUpdateSchema, topic_id: str):
         '''Updates a topic'''
 
-        topic = self.fetch(db=db, id=schema.id)
+        topic = self.fetch(db=db, id=topic_id)
         
         update_data = schema.dict(exclude_unset=True, exclude={"id"})
         for key, value in update_data.items():
@@ -60,7 +60,6 @@ class TopicService(Service):
         topic = self.fetch(db=db, id=id)
         db.delete(topic)
         db.commit()
-        return True
     
     def search(self, db: Session, search_query: str):
         """

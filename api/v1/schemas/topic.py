@@ -24,7 +24,6 @@ class TopicList(BaseModel):
     data: List[TopicData]
     
 class TopicUpdateSchema(BaseModel):
-    id: str
     title: Optional[str] = None
     content: Optional[str] = None
     tags: Optional[List[str]] = None
