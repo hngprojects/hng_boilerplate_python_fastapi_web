@@ -23,8 +23,13 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd boilerplate-python/staging/
+            cd hng_boilerplate_python_fastapi_web
+            git add .
+            git stash
+            git checkout staging
             git pull origin staging
-            source .venv/bin/activate
+            source venv-staging/bin/activate
             pip install -r requirements.txt
             alembic upgrade head
+            echo "${{ secrets.PASSWORD }}" | sudo -S systemctl restart python-bp-staging.service
+

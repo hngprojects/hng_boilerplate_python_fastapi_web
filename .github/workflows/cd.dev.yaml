@@ -23,10 +23,10 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd hng_boilerplate_python_fastapi_web
-            # git add .
-            # git stash
-            # git checkout dev
-            # git pull origin dev
+            git add .
+            git stash
+            git checkout dev
+            git pull origin dev
             source venv-dev/bin/activate
             pip install -r requirements.txt
             alembic upgrade head
