@@ -213,7 +213,7 @@ def refresh_access_token(
 
 
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
-async def request_signin_token(
+async def request_signin_token(background_tasks: BackgroundTasks,
     email_schema: EmailRequest, db: Session = Depends(get_db)
 ):
     """Generate and send a 6-digit sign-in token to the user's email"""
@@ -221,11 +221,24 @@ async def request_signin_token(
     user = user_service.fetch_by_email(db, email_schema.email)
 
     token, token_expiry = user_service.generate_token()
-
     # Save the token and expiry
     user_service.save_login_token(db, user, token, token_expiry)
 
     # Send mail notification
+    link = f'https://anchor-python.teams.hng.tech/login/verify-token?token={token}'
+
+    # Send email in the background
+    background_tasks.add_task(
+        send_email, 
+        recipient=user.email,
+        template_name='request-token.html',
+        subject='Request Token Login',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'link': link
+        }
+    )
 
     return success_response(
         status_code=200, message=f"Sign-in token sent to {user.email}"

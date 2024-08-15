@@ -252,6 +252,7 @@ class ProductCategoryService(Service):
                     )
 
         return query.all()
-
-
+    
+    
+    
 product_service = ProductService()

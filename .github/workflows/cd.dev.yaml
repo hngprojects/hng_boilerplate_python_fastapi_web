@@ -1,0 +1,33 @@
+name: Dev Deployment
+
+on:
+  push:
+    branches: [dev]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use SSH Action
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd hng_boilerplate_python_fastapi_web
+            # git add .
+            # git stash
+            # git checkout dev
+            # git pull origin dev
+            source venv-dev/bin/activate
+            pip install -r requirements.txt
+            alembic upgrade head
+            echo "${{ secrets.PASSWORD }}" | sudo -S systemctl restart python-bp-dev.service

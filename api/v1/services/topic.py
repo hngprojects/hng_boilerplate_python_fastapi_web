@@ -41,10 +41,10 @@ class TopicService(Service):
         topic = check_model_existence(db, Topic, id)
         return topic
 
-    def update(self, db: Session, schema: TopicUpdateSchema):
+    def update(self, db: Session, schema: TopicUpdateSchema, topic_id: str):
         '''Updates a topic'''
 
-        topic = self.fetch(db=db, id=schema.id)
+        topic = self.fetch(db=db, id=topic_id)
         
         update_data = schema.dict(exclude_unset=True, exclude={"id"})
         for key, value in update_data.items():
@@ -60,17 +60,14 @@ class TopicService(Service):
         topic = self.fetch(db=db, id=id)
         db.delete(topic)
         db.commit()
-        return True
     
-    def search(self, db: Session, search_query: str):
+    def search(self, db: Session, title_query: str, content_query: str):
         """
         Search for topics based on title, content, tags, or topic IDs.
         """
         query = db.query(Topic).filter(
-            (Topic.title.ilike(f'%{search_query}%')) |
-            (Topic.content.ilike(f'%{search_query}%')) |
-            (Topic.tags.any(search_query)) |
-            (Topic.id == search_query)  # Include searching by topic ID
+            (Topic.title.ilike(f'%{title_query}%')) |
+            (Topic.content.ilike(f'%{content_query}%'))
         )
         return query.all()
 

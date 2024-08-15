@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from api.v1.models.invitation import Invitation
 from api.v1.models.organisation import Organisation
 from api.v1.models.user import User
+from api.v1.services.user import user_service
 from sqlalchemy.exc import IntegrityError
 from api.v1.models.permissions.role import Role
 from api.v1.schemas.permissions.roles import RoleCreate
@@ -214,7 +215,6 @@ class InviteService(Service):
 
     def fetch_all(self):
         pass
-
     def update(self):
         pass
     

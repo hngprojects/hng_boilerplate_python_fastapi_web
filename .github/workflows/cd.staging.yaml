@@ -1,11 +1,12 @@
-name: Prod Branch Deployment
+name: Staging Branch Deployment
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
-    branches: [main]
+  push:
+    branches: [staging]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
+  workflow_dispatch:
 
 jobs:
   on-success:
@@ -22,14 +23,8 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd python/prod_source_code/
-            git pull origin main
+            cd boilerplate-python/staging/
+            git pull origin staging
             source .venv/bin/activate
             pip install -r requirements.txt
             alembic upgrade head
-
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The triggering workflow failed'
