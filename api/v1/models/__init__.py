@@ -27,3 +27,4 @@ from api.v1.models.team import TeamMember
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.privacy import PrivacyPolicy
 from api.v1.models.terms import TermsAndConditions
+from api.v1.models.reset_password_token import ResetPasswordToken

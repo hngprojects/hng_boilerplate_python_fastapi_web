@@ -4,6 +4,7 @@ import logging
 from typing import Any, Optional, Annotated
 from fastapi import HTTPException, Depends, status
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, and_
 from fastapi import HTTPException, status
 from sqlalchemy import select
 from api.core.base.services import Service
@@ -11,6 +12,8 @@ from api.utils.db_validators import check_model_existence, check_user_in_org
 from api.utils.pagination import paginated_response
 from api.v1.models.permissions.role import Role
 from api.v1.models.product import Product
+from api.v1.models.permissions.role_permissions import role_permissions
+from api.v1.models.permissions.permissions import Permission
 from api.v1.models.associations import user_organisation_association
 from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.organisation import Organisation
@@ -59,6 +62,24 @@ class OrganisationService(Service):
         )
         db.execute(stmt)
         db.commit()
+        admin_role = db.query(Role).filter_by(name="admin").first()
+        if not admin_role:
+            admin_role = Role(
+                name="admin",
+                description="Organization Admin",
+                is_builtin=True
+                )
+            db.add(admin_role)
+            db.commit()
+        else:
+            user_role_stmt = user_organisation_roles.insert().values(
+                user_id=user.id,
+                organisation_id=new_organisation.id,
+                role_id=admin_role.id,
+                is_owner=True,
+            )
+            db.execute(user_role_stmt)
+            db.commit()
 
         return new_organisation
 
@@ -310,6 +331,8 @@ class OrganisationService(Service):
         Args:
             user: the user to retrieve the organizations
         """
+        builtin_roles = ['user', 'admin', 'manager', 'guest']
+
         user_organisations = db.query(Organisation).join(
             user_organisation_association,
             Organisation.id == user_organisation_association.c.organisation_id
@@ -318,8 +341,41 @@ class OrganisationService(Service):
         ).all()
        
         if user_organisations:
-            return [OrganisationData.model_validate(org, from_attributes=True) for org in user_organisations]
-        return [{"name": '', "id": '', "description": '', "created_at": "", "updated_at": ''}]
+            organisation_roles = db.query(
+                Role
+                ).outerjoin(
+                    user_organisation_roles,
+                    Role.id == user_organisation_roles.c.role_id,
+                ).filter(
+                    or_(
+                        and_(
+                            user_organisation_roles.c.user_id == user.id,
+                            Role.is_builtin == False
+                        ),
+                        Role.is_builtin == True
+                    )
+                ).all()
+
+            if len(organisation_roles) < 1:
+                organisation_roles = builtin_roles
+            else:
+                organisation_roles = [role.name for role in organisation_roles if role]
+
+            return [OrganisationData(
+                id=org.id,
+                created_at=org.created_at,
+                updated_at=org.updated_at,
+                name=org.name,
+                email=org.email,
+                industry=org.industry,
+                user_role=organisation_roles,
+                type=org.type,
+                country=org.country,
+                state=org.state,
+                address=org.address,
+                description=org.description,
+                organisation_id=org.id
+            ) for org in user_organisations]
 
 
 organisation_service = OrganisationService()

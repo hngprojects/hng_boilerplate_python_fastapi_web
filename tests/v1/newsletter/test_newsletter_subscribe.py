@@ -26,29 +26,37 @@ def client(db_session_mock):
     app.dependency_overrides = {}
 
 
-@patch("api.v1.services.newsletter.NewsletterService.unsubscribe")
-def test_newsletter_subscribe(mock_unsubscribe, db_session_mock, client):
-    """Tests the POST /api/v1/newsletter-subscription endpoint to ensure successful subscription with valid input."""
+def mock_subscriber():
+    return NewsletterSubscriber(
+        id=str(uuid7()), 
+        email="jane.doe@example.com",
+    )
 
-    mock_unsubscribe.return_value = None
+@patch("api.v1.services.newsletter.NewsletterService.create")
+@patch("api.v1.services.newsletter.NewsletterService.check_existing_subscriber")
+def test_newsletter_subscribe(mock_create, mock_check_existing, db_session_mock, client):
+    """Tests the POST /api/v1/newsletter-subscription endpoint to ensure successful subscription with valid input."""
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    response = client.post('/api/v1/newsletters/unsubscribe', json={
+    mock_create.return_value = mock_subscriber()
+    mock_check_existing.return_value = None
+
+    response = client.post('/api/v1/newsletter-subscription', json={
         "email": "jane.doe@example.com"
         })
 
     print('response', response.json())
-    assert response.status_code == 200
+    assert response.status_code == 201
 
 
-@patch("api.v1.services.newsletter.NewsletterService.unsubscribe")
-def test_newsletter_subscribe_missing_fields(mock_unsubscribe, db_session_mock, client):
+@patch("api.v1.services.newsletter.NewsletterService.create")
+def test_newsletter_subscribe_missing_fields(mock_create, db_session_mock, client):
     """Tests the POST /api/v1/newsletter-subscription endpoint for missing required fields."""
 
-    mock_unsubscribe.return_value = None
+    mock_create.return_value = mock_subscriber()
 
     db_session_mock.add.return_value = None
     db_session_mock.commit.return_value = None
@@ -57,4 +65,5 @@ def test_newsletter_subscribe_missing_fields(mock_unsubscribe, db_session_mock, 
     response = client.post('/api/v1/newsletter-subscription', json={
         
         })
+
     assert response.status_code == 422
