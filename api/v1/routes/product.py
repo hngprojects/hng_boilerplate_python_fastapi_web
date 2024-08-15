@@ -265,31 +265,10 @@ def get_organisation_products(
         db, user=current_user, org_id=org_id, limit=limit, page=page
     )
 
-    total_products = len(products)
-
-    total_pages = int(total_products / limit) + (total_products % limit > 0)
-
-    product_data = [
-        {
-            "name": product.name,
-            "description": product.description,
-            "price": str(product.price),
-        }
-        for product in products
-    ]
-
-    data = {
-        "current_page": page,
-        "total_pages": total_pages,
-        "limit": limit,
-        "total_items": total_products,
-        "products": product_data,
-    }
-
     return success_response(
         status_code=200,
         message="Successfully fetched organisations products",
-        data=data,
+        data=[jsonable_encoder(product) for product in products],
     )
 
 
