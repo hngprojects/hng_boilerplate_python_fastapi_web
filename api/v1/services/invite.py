@@ -213,13 +213,8 @@ class InviteService(Service):
     def fetch(self):
         pass
 
-    @staticmethod
-    def fetch_all(session : Session):
-        all_invites = session.query(Invitation).options(joinedload(Invitation.organisation)).all()
-        for invite in all_invites :
-            user = user_service.get_user_by_id(db=session , id=invite.user_id)
-            invite.email = user.email
-        return all_invites
+    def fetch_all(self):
+        pass
     def update(self):
         pass
     
