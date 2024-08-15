@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>{% block title %}{% endblock %}</title>
+  </head>
+  <body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
+
+      <!-- Header -->
+      <table role="presentation" width="100%" style="background-color: #E1D6D6; height: 7.625rem; text-align: center;">
+          <tr>
+              <td>
+                  <h2 style="color: #121a26; font-size: 1.5rem; font-weight: 600;">HNG Boilerplate</h2>
+              </td>
+          </tr>
+      </table>
+
+      {% block content %} {% endblock %}
+
+      <!-- Footer -->
+      <table role="presentation" width="100%" style="background-color: #F3EFEF; padding: 2rem 3rem; text-align: center;">
+          <tr>
+              <td>
+                  <hr style="border: 1px dashed #969696; margin-bottom: 1.5rem;">
+                  <p style="color: #5B5B5D; font-size: 0.875rem; font-weight: 400;">Please address this inquiry at your earliest convenience.</p>
+                  <p style="color: #5B5B5D; font-size: 0.875rem; font-weight: 400;">You are receiving this email because a user submitted a contact form on our website.</p>
+              </td>
+          </tr>
+      </table>
+  </body>
+</html>
