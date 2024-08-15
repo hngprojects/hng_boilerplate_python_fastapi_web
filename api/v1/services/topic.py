@@ -61,15 +61,13 @@ class TopicService(Service):
         db.delete(topic)
         db.commit()
     
-    def search(self, db: Session, search_query: str):
+    def search(self, db: Session, title_query: str, content_query: str):
         """
         Search for topics based on title, content, tags, or topic IDs.
         """
         query = db.query(Topic).filter(
-            (Topic.title.ilike(f'%{search_query}%')) |
-            (Topic.content.ilike(f'%{search_query}%')) |
-            (Topic.tags.any(search_query)) |
-            (Topic.id == search_query)  # Include searching by topic ID
+            (Topic.title.ilike(f'%{title_query}%')) |
+            (Topic.content.ilike(f'%{content_query}%'))
         )
         return query.all()
 

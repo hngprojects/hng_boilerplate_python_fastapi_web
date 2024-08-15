@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import (
 	APIRouter,
 	Depends,
@@ -64,7 +65,8 @@ async def retrieve_topic(
 
 @topic.get('/search', response_model=TopicList)
 async def search_for_topic(
-	query: str,
+	title: Optional[str] = None,
+	content: Optional[str] = None,
 	db: Session = Depends(get_db)
 ):
 	"""
@@ -77,7 +79,7 @@ async def search_for_topic(
 	Returns:
 		Response: a response object containing details if successful or appropriate errors if not
 	"""	
-	topics = topic_service.search(db=db,search_query=query)
+	topics = topic_service.search(db=db,title_query=title, content_query=content)
 
 	return success_response(
 		status_code=status.HTTP_200_OK,
