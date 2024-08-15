@@ -255,7 +255,4 @@ class ProductCategoryService(Service):
     
     
     
-    
-
-
 product_service = ProductService()

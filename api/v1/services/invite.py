@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 from pytz import utc
-from sqlalchemy.orm import Session,joinedload
+from sqlalchemy.orm import Session
 from sqlalchemy import insert
 from fastapi import HTTPException, Request, Depends, status
 from collections import OrderedDict
