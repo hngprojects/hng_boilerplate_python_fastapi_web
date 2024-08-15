@@ -1,5 +1,5 @@
-from typing import Optional
-from pydantic import BaseModel, EmailStr
+from typing import Optional, Annotated
+from pydantic import BaseModel, EmailStr, StringConstraints
 
 
 # Pydantic models for request and response
@@ -14,8 +14,15 @@ class TokenData(BaseModel):
 
 
 class TokenRequest(BaseModel):
-    email: EmailStr
-    token: str
+    email: Optional[EmailStr] = None
+    token: Annotated[
+        str,
+        StringConstraints(
+            max_length=6,
+            min_length=6,
+            strip_whitespace=True
+        )
+    ]
 
 
 class OAuthToken(BaseModel):

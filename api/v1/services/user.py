@@ -530,34 +530,30 @@ class UserService(Service):
         self, db: Session, user: User, token: str, expiration: datetime
     ):
         """Save the token and expiration in the user's record"""
-
-        db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
-
+        db.query(TokenLogin).filter_by(user_id=user.id).delete(synchronize_session='fetch')
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
         db.add(token)
         db.commit()
-        db.refresh(token)
 
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
-
-        user = db.query(User).filter(User.email == schema.email).first()
-
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or token")
-
-        token = db.query(TokenLogin).filter(TokenLogin.user_id == user.id).first()
+        token = db.query(TokenLogin).filter_by(token=schema.token).first()
+        if not token:
+            raise HTTPException(status_code=404, detail="Token Expired")
 
         if token.token != schema.token or token.expiry_time < datetime.utcnow():
             raise HTTPException(status_code=401, detail="Invalid email or token")
 
-        return user
+        db.delete(token)
+        db.commit()
+
+        return db.query(User).filter_by(id=token.user_id).first()
 
     def generate_token(self):
         """Generate a 6-digit token"""
         return "".join(
             random.choices(string.digits, k=6)
-        ), datetime.utcnow() + timedelta(minutes=10)
+        ), datetime.utcnow() + timedelta(minutes=1)
 
 
     def get_users_by_role(self, db: Session, role_id: str, current_user: User):
