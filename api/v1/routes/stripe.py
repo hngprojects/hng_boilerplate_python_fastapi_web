@@ -120,7 +120,7 @@ async def webhook_received(
         }
         # Save to DB
         # Send email in background task
-        await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
+        #await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
         return {"message": response_details}
     
 
