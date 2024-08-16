@@ -29,7 +29,7 @@ class ContactUsService(Service):
             email=getattr(data, self.adabtingMapper["email"]),
             title=getattr(data, self.adabtingMapper["title"]),
             message=getattr(data, self.adabtingMapper["message"]),
-            org_id=getattr(data, self.adabtingMapper["org_id"])
+            # org_id=getattr(data, self.adabtingMapper["org_id"])
         )
         db.add(contact_message)
         db.commit()
