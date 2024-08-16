@@ -60,6 +60,7 @@ jobs:
 
       - name: Run migrations
         run: |
+          alembic revision --autogenerate
           alembic upgrade head
 
       - name: Run tests
