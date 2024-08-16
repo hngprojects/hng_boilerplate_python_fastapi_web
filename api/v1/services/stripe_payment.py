@@ -39,7 +39,7 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
 
     base_urls = "https://anchor-python.teams.hng.tech/"
     success_url = f"{base_urls}payment" + "/success?session_id={CHECKOUT_SESSION_ID}"
-    cancel_url = f"{base_urls}payment/cancel"
+    cancel_url = f"{base_urls}payment/pricing"
 
     user = db.query(User).filter(User.id == user_id).first()
 

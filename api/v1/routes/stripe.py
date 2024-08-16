@@ -35,9 +35,46 @@ def stripe_payment(
     return stripe_payment_request(db, plan_upgrade_request.user_id, request, plan_upgrade_request.plan_name) 
 
 @subscription_.get("/stripe/success")
-def success_upgrade():
+def success_upgrade(session_id: str):
+    return success_response(
+        status_code=status.HTTP_200_OK, 
+        message="Payment intent initiated. Please verify the payment using the session ID.",
+        data={"session_id": session_id}
+    )
 
-    return success_response(status_code=status.HTTP_200_OK, message="Payment intent initiated")
+
+@subscription_.get("/stripe/status")
+async def verify_payment(session_id: str, db: Session = Depends(get_db)):
+    try:
+        # Retrieve the session from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+
+        # Check if the payment was successful
+        if session.payment_status == "paid":
+            # If payment was successful, update the user's plan
+            user_id = session.metadata["user_id"]
+            plan_name = session.metadata["plan_name"]
+            await update_user_plan(db, user_id, plan_name)
+
+            return { "status": "SUCCESS" }
+
+            # return success_response(
+            #     status_code=status.HTTP_200_OK,
+            #     message="Payment successful and plan updated.",
+            #     data={"session_id": session_id, "payment_status": session.payment_status}
+            # )
+        else:
+            return fail_response(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Payment not successful.",
+                data={"session_id": session_id, "status": session.payment_status}
+            )
+
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=500, detail=f"Stripe error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @subscription_.get("/stripe/cancel")
 def cancel_upgrade():
@@ -83,7 +120,7 @@ async def webhook_received(
         }
         # Save to DB
         # Send email in background task
-        await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
+        #await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
         return {"message": response_details}
     
 
