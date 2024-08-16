@@ -56,7 +56,7 @@ async def verify_payment(session_id: str, db: Session = Depends(get_db)):
             plan_name = session.metadata["plan_name"]
             await update_user_plan(db, user_id, plan_name)
 
-            return { "status": "SUCCESS" },
+            return { "status": "SUCCESS" }
 
             # return success_response(
             #     status_code=status.HTTP_200_OK,
