@@ -128,6 +128,26 @@ class AdminCreateUserResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    
+    @model_validator(mode='before')
+    @classmethod
+    def validate_password(cls, values: dict):
+        """
+        Validates passwords
+        """
+        password = values.get('password')
+
+        # constraints for password
+        if not any(c.islower() for c in password):
+            raise ValueError("password must include at least one lowercase character")
+        if not any(c.isupper() for c in password):
+            raise ValueError("password must include at least one uppercase character")
+        if not any(c.isdigit() for c in password):
+            raise ValueError("password must include at least one digit")
+        if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in password):
+            raise ValueError("password must include at least one special character")
+        
+        return values
 
 
 class EmailRequest(BaseModel):
@@ -136,7 +156,7 @@ class EmailRequest(BaseModel):
 
 class Token(BaseModel):
     access_token: str
-    token_type: str
+    token_type: str = None
 
 
 class TokenData(BaseModel):

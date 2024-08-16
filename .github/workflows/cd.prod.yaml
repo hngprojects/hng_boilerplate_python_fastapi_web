@@ -1,16 +1,16 @@
 name: Prod Branch Deployment
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
+  push:
     branches: [main]
+    paths-ignore:
+      - "README.md"
+    #   - ".github/workflows/**"
+  workflow_dispatch:
 
 jobs:
   on-success:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,14 +22,14 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd python/prod_source_code/
+            cd hng_boilerplate_python_fastapi_web
+            git add .
+            git stash
+            git checkout main
             git pull origin main
-            source .venv/bin/activate
+            source venv-prod/bin/activate
             pip install -r requirements.txt
             alembic upgrade head
+            echo "${{ secrets.PASSWORD }}" | sudo -S systemctl restart python-bp-prod.service
 
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The triggering workflow failed'
+

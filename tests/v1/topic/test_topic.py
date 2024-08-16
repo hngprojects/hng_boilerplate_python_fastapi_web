@@ -95,10 +95,9 @@ def test_update_topic(
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     data = {
-        "id": test_topic.id,
         "title": "Uploading profile picture."
     }
-    response = client.patch(f"/api/v1/help-center/topics", headers=headers, json=data)    
+    response = client.patch(f"/api/v1/help-center/topics/{test_topic.id}", headers=headers, json=data)    
     assert response.status_code == 200
 
 def test_delete_topic(
@@ -119,7 +118,7 @@ def test_delete_topic(
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
 
     headers = {'Authorization': f'Bearer {access_token_user1}'}
-    response = client.request("DELETE",f"/api/v1/help-center/topics", headers=headers, json={"id":test_topic.id})    
+    response = client.delete(f"/api/v1/help-center/topics/{test_topic.id}", headers=headers)    
     assert response.status_code == 204
 
 def test_search_topic(
@@ -138,7 +137,7 @@ def test_search_topic(
     mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
     mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_topic]
-    response = client.request("GET","/api/v1/help-center/search", json={"query":test_topic.title})    
+    response = client.get(f"/api/v1/help-center/search?title={test_topic.title}")    
     assert response.status_code == 200
 
 def test_fetch_a_topic(

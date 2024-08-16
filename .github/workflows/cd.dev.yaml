@@ -1,16 +1,16 @@
-name: Dev Branch Deployment
+name: Dev Deployment
 
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types:
-      - completed
+  push:
     branches: [dev]
+    paths-ignore:
+      - "README.md"
+      # - ".github/workflows/**"
+  workflow_dispatch:
 
 jobs:
-  on-success:
+  deploy:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,14 +22,12 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd python/dev_source_code/
+            cd hng_boilerplate_python_fastapi_web
+            git add .
+            git stash
+            git checkout dev
             git pull origin dev
-            source .venv/bin/activate
+            source venv-dev/bin/activate
             pip install -r requirements.txt
             alembic upgrade head
-
-  on-failure:
-    runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
-    steps:
-      - run: echo 'The triggering workflow failed'
+            echo "${{ secrets.PASSWORD }}" | sudo -S systemctl restart python-bp-dev.service

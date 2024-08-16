@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from api.db.database import get_db
+from api.utils.send_mail import send_contact_mail
 from typing import Annotated
 from api.core.responses import SUCCESS
 from api.utils.success_response import success_response
@@ -25,10 +26,23 @@ contact_us = APIRouter(prefix="/contact", tags=["Contact-Us"])
     },
 )
 async def create_contact_us(
-    data: CreateContactUs, db: Annotated[Session, Depends(get_db)]
+    data: CreateContactUs, db: Annotated[Session, Depends(get_db)],
+    background_tasks: BackgroundTasks,
 ):
     """Add a new contact us message."""
     new_contact_us_message = contact_us_service.create(db, data)
+
+    # Send email to admin
+    background_tasks.add_task(
+        send_contact_mail, 
+        context={
+            "full_name": new_contact_us_message.full_name,
+            "email": new_contact_us_message.email,
+            "phone": new_contact_us_message.title,
+            "message": new_contact_us_message.message,
+        }
+    )
+
     response = success_response(
         message=SUCCESS,
         data={"id": new_contact_us_message.id},
