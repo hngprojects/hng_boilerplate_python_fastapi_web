@@ -11,6 +11,7 @@ from api.utils.success_response import success_response
 import os
 from fastapi import HTTPException, status, Request
 from datetime import datetime, timedelta
+from api.v1.routes.stripe import fail_response
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
@@ -44,12 +45,12 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return fail_response(status_code=404, message="User not found")
 
     plan = get_plan_by_name(db, plan_name)
 
     if not plan:
-        raise HTTPException(status_code=404, detail="Plan not found")
+        return fail_response(status_code=404, message="Plan not found")
 
     if plan.name != "Free":
         try:
@@ -101,7 +102,7 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
             raise HTTPException(status_code=500, detail=f"Payment failed: {str(e)}")
 
     else:
-        raise HTTPException(status_code=400, detail="No payment is required for the Free plan")
+        return fail_response(status_code=400, message="No payment is required for the Free plan")
 
 
 def convert_duration_to_timedelta(duration: str) -> timedelta:
