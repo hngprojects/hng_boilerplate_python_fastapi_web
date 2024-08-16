@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select, join
 from fastapi.encoders import jsonable_encoder
-from api.utils.success_response import success_response
+from api.utils.success_response import success_response, fail_response
 import os
 from fastapi import HTTPException, status, Request
 from datetime import datetime, timedelta
@@ -34,20 +34,22 @@ def get_plan_by_name(db: Session, plan_name: str):
 
 def stripe_payment_request(db: Session, user_id: str, request: Request, plan_name: str):
 
-    base_url = request.base_url
+    # base_url = request.base_url
+    # base_urls = str(request.url.scheme) + "://" + str(request.url.netloc)
 
-    success_url = f"{base_url}api/v1/payment/stripe/success"
-    cancel_url = f"{base_url}api/v1/payment/stripe/cancel"
+    base_urls = "https://anchor-python.teams.hng.tech/"
+    success_url = f"{base_urls}payment" + "/success?session_id={CHECKOUT_SESSION_ID}"
+    cancel_url = f"{base_urls}payment/cancel"
 
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        return fail_response(status_code=404, message="User not found")
 
     plan = get_plan_by_name(db, plan_name)
 
     if not plan:
-        raise HTTPException(status_code=404, detail="Plan not found")
+        return fail_response(status_code=404, message="Plan not found")
 
     if plan.name != "Free":
         try:
@@ -99,7 +101,7 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
             raise HTTPException(status_code=500, detail=f"Payment failed: {str(e)}")
 
     else:
-        raise HTTPException(status_code=400, detail="No payment is required for the Free plan")
+        return fail_response(status_code=400, message="No payment is required for the Free plan")
 
 
 def convert_duration_to_timedelta(duration: str) -> timedelta:
