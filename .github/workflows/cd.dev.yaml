@@ -25,7 +25,6 @@ jobs:
             cd hng_boilerplate_python_fastapi_web/dev
             git add .
             git stash
-            git checkout dev
             git pull origin dev
             source venv/bin/activate
             pip install -r requirements.txt
