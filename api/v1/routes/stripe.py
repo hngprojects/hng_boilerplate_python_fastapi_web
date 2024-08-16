@@ -7,10 +7,14 @@ import json
 from api.v1.schemas.stripe import PlanUpgradeRequest
 from typing import List
 from api.db.database import get_db
+from typing import Optional, Dict, Any
+from fastapi.responses import JSONResponse
+from fastapi.responses import RedirectResponse
 import os
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.services.user import user_service
+from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -19,6 +23,22 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 subscription_ = APIRouter(prefix="/payment", tags=["subscribe-plan"])
+
+
+def fail_response(status_code: int, message: str, data: Optional[dict] = None):
+    '''Returns a JSON response for success responses'''
+
+    response_data = {
+        "status_code": status_code,
+        "success": False,
+        "message": message
+    }
+    
+    if data is not None:
+        response_data["data"] = data
+
+    return JSONResponse(status_code=status_code, content=jsonable_encoder(response_data))
+
 
 @subscription_.post("/stripe/upgrade-plan")
 def stripe_payment(
@@ -36,6 +56,7 @@ def success_upgrade():
 
 @subscription_.get("/stripe/cancel")
 def cancel_upgrade():
+
     return success_response(status_code=status.HTTP_200_OK, message="Payment intent canceled")
 
 
@@ -86,7 +107,7 @@ async def get_organisations_with_users_and_plans(db: Session = Depends(get_db), 
     try:
         data = fetch_all_organisations_with_users_and_plans(db)
         if not data:
-            raise HTTPException(status_code=404, detail="No data found")
+            return fail_response(status_code=404, message="No data found")
         return success_response(
             status_code=status.HTTP_200_OK,
             message='billing details successfully retrieved',

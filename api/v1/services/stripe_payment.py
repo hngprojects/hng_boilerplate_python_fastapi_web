@@ -34,10 +34,12 @@ def get_plan_by_name(db: Session, plan_name: str):
 
 def stripe_payment_request(db: Session, user_id: str, request: Request, plan_name: str):
 
-    base_url = request.base_url
+    # base_url = request.base_url
+    # base_urls = str(request.url.scheme) + "://" + str(request.url.netloc)
 
-    success_url = f"{base_url}api/v1/payment/stripe/success"
-    cancel_url = f"{base_url}api/v1/payment/stripe/cancel"
+    base_urls = "https://anchor-python.teams.hng.tech/"
+    success_url = f"{base_urls}payment" + "/success?session_id={CHECKOUT_SESSION_ID}"
+    cancel_url = f"{base_urls}payment/cancel"
 
     user = db.query(User).filter(User.id == user_id).first()
 
