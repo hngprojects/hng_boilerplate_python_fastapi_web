@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any
 from fastapi.responses import JSONResponse
 from fastapi.responses import RedirectResponse
 import os
-from api.utils.success_response import success_response
+from api.utils.success_response import success_response, fail_response
 from api.v1.models.user import User
 from api.v1.services.user import user_service
 from fastapi.encoders import jsonable_encoder
@@ -23,21 +23,6 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 subscription_ = APIRouter(prefix="/payment", tags=["subscribe-plan"])
-
-
-def fail_response(status_code: int, message: str, data: Optional[dict] = None):
-    '''Returns a JSON response for success responses'''
-
-    response_data = {
-        "status_code": status_code,
-        "success": False,
-        "message": message
-    }
-    
-    if data is not None:
-        response_data["data"] = data
-
-    return JSONResponse(status_code=status_code, content=jsonable_encoder(response_data))
 
 
 @subscription_.post("/stripe/upgrade-plan")
