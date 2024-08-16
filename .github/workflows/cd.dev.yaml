@@ -1,10 +1,10 @@
 name: Dev Deployment
 
 on:
-  push:
-    branches: [dev]
-    paths-ignore:
-      - "README.md"
+  # push:
+  #   branches: [dev]
+  #   paths-ignore:
+  #     - "README.md"
       # - ".github/workflows/**"
   workflow_dispatch:
 
