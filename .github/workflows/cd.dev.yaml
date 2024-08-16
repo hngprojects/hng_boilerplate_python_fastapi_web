@@ -22,12 +22,11 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd hng_boilerplate_python_fastapi_web
+            cd hng_boilerplate_python_fastapi_web/dev
             git add .
             git stash
             git checkout dev
             git pull origin dev
-            source venv-dev/bin/activate
+            source venv/bin/activate
             pip install -r requirements.txt
             alembic upgrade head
-            echo "${{ secrets.PASSWORD }}" | sudo -S systemctl restart python-bp-dev.service
