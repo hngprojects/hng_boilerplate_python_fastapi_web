@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - "README.md"
-    #   - ".github/workflows/**"
+      - ".github/workflows/**"
   workflow_dispatch:
 
 jobs:
@@ -28,4 +28,5 @@ jobs:
             git pull origin main
             source venv/bin/activate
             pip install -r requirements.txt
+            alembic revision --autogenerate
             alembic upgrade head
