@@ -20,9 +20,10 @@ class CreateSubscriptionPlan(BaseModel):
 
     @validator("duration")
     def validate_duration(cls, value):
-        if value not in ["monthly", "yearly"]:
+        v = value.lower()
+        if v not in ["monthly", "yearly"]:
             raise ValueError("Duration must be either 'monthly' or 'yearly'")
-        return value
+        return v
 
 
 class SubscriptionPlanResponse(CreateSubscriptionPlan):
