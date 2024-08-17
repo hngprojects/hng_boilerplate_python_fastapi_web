@@ -54,6 +54,7 @@ async def verify_payment(session_id: str, db: Session = Depends(get_db)):
             # If payment was successful, update the user's plan
             user_id = session.metadata["user_id"]
             plan_name = session.metadata["plan_name"]
+            print(user_id, plan_name)
             await update_user_plan(db, user_id, plan_name)
 
             return { "status": "SUCCESS" }

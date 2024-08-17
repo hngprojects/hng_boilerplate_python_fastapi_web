@@ -10,7 +10,7 @@ class BillingPlan(BaseTableModel):
     organisation_id = Column(
         String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False
     )
-    name = Column(String, nullable=False, unique=True)
+    name = Column(String, nullable=False)
     price = Column(Numeric, nullable=False)
     currency = Column(String, nullable=False)
     duration = Column(String, nullable=False)

@@ -57,7 +57,7 @@ def mock_billing_plan():
         name="Premium Plan",
         price=49.99,
         currency="NGN",  # Currency code
-        duration="1 year",  # Duration of the plan
+        duration="yearly",  # Duration of the plan
         description="This is a premium billing plan with extra features.",
         features=["Feature 1", "Feature 2", "Feature 3"],
         updated_at=datetime.now(timezone.utc)
