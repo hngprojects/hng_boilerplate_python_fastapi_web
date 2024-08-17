@@ -13,10 +13,45 @@ class BillingPlanService(Service):
 
     def create(self, db: Session, request: CreateSubscriptionPlan):
         """
-        Create and return a new billing plan
+        Create and return a new billing plan, ensuring a plan name can only exist 
+        once for each 'monthly' and 'yearly' duration, and cannot be created 
+        if it already exists for both durations.
         """
+
+        # Check if a plan with the same name already exists for the provided duration
+        existing_plan_for_same_duration = db.query(BillingPlan).filter(
+            BillingPlan.name == request.name,
+            BillingPlan.duration == request.duration
+        ).first()
+
+        if existing_plan_for_same_duration:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"A billing plan with the name '{request.name}' already exists for duration '{request.duration}'."
+            )
+
+        # Check if a plan with the same name exists for the other duration
+        other_duration = "yearly" if request.duration == "monthly" else "monthly"
+        existing_plan_for_other_duration = db.query(BillingPlan).filter(
+            BillingPlan.name == request.name,
+            BillingPlan.duration == other_duration
+        ).first()
+
+        if existing_plan_for_other_duration:
+            # If a plan with the same name exists for both durations, raise an exception
+            if existing_plan_for_same_duration and existing_plan_for_other_duration:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"A billing plan with the name '{request.name}' already exists for both 'monthly' and 'yearly' durations."
+                )
+
+        # Adjust the price if the duration is 'yearly'
+        if request.duration == "yearly":
+            request.price = request.price * 12 * 0.8  # Apply yearly discount
+
+        # Create a BillingPlan instance using the modified request
         plan = BillingPlan(**request.dict())
-        
+
         try:
             db.add(plan)
             db.commit()
@@ -43,6 +78,7 @@ class BillingPlanService(Service):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="A database error occurred."
             )
+
 
 
     def delete(self, db: Session, id: str):

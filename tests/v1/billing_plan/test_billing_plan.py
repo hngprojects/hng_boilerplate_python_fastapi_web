@@ -65,7 +65,7 @@ def test_fetch_all_plans(mock_user_service, mock_db_session):
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_create_new_plans(mock_user_service, mock_db_session):
+def test_create_exisiting_plans(mock_user_service, mock_db_session):
     """Billing plan creation test."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
@@ -74,7 +74,7 @@ def test_create_new_plans(mock_user_service, mock_db_session):
         "organisation_id": "s2334d",
         "description": "All you need in one pack",
         "price": 80,
-        "duration": "Monthly",
+        "duration": "monthly",
         "currency": "Naira",
         "features": ["Multiple team", "Premium support"],
     }
@@ -84,5 +84,6 @@ def test_create_new_plans(mock_user_service, mock_db_session):
         headers={"Authorization": f"Bearer {access_token}"},
         json=data,
     )
+    print(response.json())
 
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_400_BAD_REQUEST

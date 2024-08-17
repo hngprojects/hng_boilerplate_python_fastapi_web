@@ -35,22 +35,26 @@ async def send_contact_mail(context: dict):
     """
     from main import email_templates
     sender_email = settings.MAIL_FROM
-    reciever_email = settings.MAIL_USERNAME
-    password = settings.MAIL_PASSWORD
+    admin_email = settings.MAIL_USERNAME
+    user_email = context.get('email')
 
-    html = email_templates.get_template("contact_us.html").render(context)
+    admin_html = email_templates.get_template("contact_us.html").render(context)
+    customer_html = email_templates.get_template("email_feedback.html").render(context)
 
+    send_mail_handler(sender_email, admin_email, admin_html, "New Contact Request")
+    send_mail_handler(admin_email, user_email, customer_html, "Thank you for contacting us")
+
+
+def send_mail_handler(sender, reciever, html, subject):
     message = MIMEMultipart("alternative")
-    message["Subject"] = "New Contact Request"
-    message["From"] = sender_email
-    message["To"] = reciever_email
+    message["Subject"] = subject
+    message["From"] = sender
+    message["To"] = reciever
 
     part = MIMEText(html, "html")
 
     message.attach(part)
 
     with smtplib.SMTP_SSL(settings.MAIL_SERVER, settings.MAIL_PORT) as server:
-        server.login(settings.MAIL_USERNAME, password)
-        server.sendmail(sender_email, reciever_email, message.as_string())
-
-
+        server.login(settings.MAIL_USERNAME, settings.MAIL_PASSWORD)
+        server.sendmail(sender, reciever, message.as_string())
