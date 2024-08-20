@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Magic Link
+{% endblock %}
+
+{% block content %}
+<div class="container"
+        style="
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            color: #333;
+        ">
+    <div class="header"
+        style="
+            text-align: center;
+            padding-bottom: 20px;
+        ">
+        <h1>Welcome to HNG Boilerplates!  {{ first_name }}</h1>
+    </div>
+    <div class="content"
+            style="
+                margin-bottom: 20px;
+            ">
+        <p>Click the link below to sign in:</p>
+        <a href="{{ link }}" class="btn"
+        style="
+            display: inline-block;
+            padding: 10px 200px;
+            background-color: orangered;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 10px;
+        ">Please click here to sign in!</a>
+    </div>
+    <p>If the button doesn't work, copy and paste the following link into your browser:</p>
+    <p>{{ link }}</p>
+</div>
+{% endblock %}
+    

@@ -1,0 +1,14 @@
+apiVersion: actions.summerwind.dev/v1alpha1
+kind: RunnerDeployment
+metadata:
+  name: example-runner-deployment
+  namespace: actions-runner-system
+spec:
+  replicas: 2
+  template:
+    spec:
+      repository: Mekzy/hng_boilerplate_python_fastapi_web
+      group: ""
+      labels:
+        - self-hosted
+

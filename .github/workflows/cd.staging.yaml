@@ -1,0 +1,32 @@
+name: Staging Branch Deployment
+
+on:
+  push:
+    branches: [staging]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Use SSH Action
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd hng_boilerplate_python_fastapi_web/staging
+            git add .
+            git stash
+            git pull origin staging
+            source venv/bin/activate
+            pip install -r requirements.txt
+            alembic revision --autogenerate
+            alembic upgrade head
