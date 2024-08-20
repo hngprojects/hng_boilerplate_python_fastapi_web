@@ -1,7 +1,11 @@
 from pydantic_settings import BaseSettings
 from decouple import config
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
+# Load environment variables from .env file
+load_dotenv()
 
 # Use this to build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent
@@ -37,3 +41,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+

@@ -147,4 +147,4 @@ os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=7001, reload=True)
+    uvicorn.run("main:app", port=8000, reload=True)
