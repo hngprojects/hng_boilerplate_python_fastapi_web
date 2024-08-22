@@ -246,6 +246,13 @@ class ChangePasswordSchema(BaseModel):
                           strip_whitespace=True)
     ]
 
+    confirm_new_password: Annotated[
+        str,
+        StringConstraints(min_length=8,
+                          max_length=64,
+                          strip_whitespace=True)
+    ]
+
     @model_validator(mode='before')
     @classmethod
     def validate_password(cls, values: dict):
@@ -254,6 +261,7 @@ class ChangePasswordSchema(BaseModel):
         """
         old_password = values.get('old_password')
         new_password = values.get('new_password')
+        confirm_new_password = values.get("confirm_new_password")
 
         if (old_password and old_password.strip() == '') or old_password == '':
             values['old_password'] = None
@@ -277,6 +285,9 @@ class ChangePasswordSchema(BaseModel):
             raise ValueError("New password must include at least one digit")
         if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in new_password):
             raise ValueError("New password must include at least one special character")
+        
+        if confirm_new_password != new_password:
+            raise ValueError("New Password and Confirm New Password must match")
         
         return values
 
