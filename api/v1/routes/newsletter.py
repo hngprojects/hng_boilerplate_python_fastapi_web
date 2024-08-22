@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Query
+from fastapi import APIRouter, Depends, status, Query, BackgroundTasks
 from typing import Annotated
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
@@ -13,6 +13,7 @@ from api.v1.services.newsletter import NewsletterService, Newsletter
 from fastapi.encoders import jsonable_encoder
 from api.v1.models.user import User
 from api.v1.services.user import user_service
+from api.core.dependencies.email_sender import send_email
 
 newsletter = APIRouter(prefix="/newsletters", tags=["Newsletter"])
 news_sub = APIRouter(prefix="/newsletter-subscription", tags=["Newsletter"])
@@ -20,16 +21,32 @@ from api.utils.pagination import paginated_response
 
 
 @news_sub.post("")
-async def sub_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
+async def sub_newsletter(request: EmailSchema,
+                         db: Annotated[Session, Depends(get_db)],
+                         background_tasks: BackgroundTasks):
     """
     Newsletter subscription endpoint
     """
 
     # check for duplicate email
-    NewsletterService.check_existing_subscriber(db, request)
+    is_subscribed = NewsletterService.check_existing_subscriber(db, request)
 
-    # Save user to the database
-    NewsletterService.create(db, request)
+    if not is_subscribed:
+        # Save user to the database
+        NewsletterService.create(db, request)
+
+    link = 'https://anchor-python.teams.hng.tech/'
+
+    # Send email in the background
+    background_tasks.add_task(
+        send_email,
+        recipient=request.email,
+        template_name='newsletter-subscription.html',
+        subject='Thank You for Subscribing to HNG Boilerplate Newsletters',
+        context={
+            'link': link
+        }
+    )
 
     return success_response(
         message="Thank you for subscribing to our newsletter.",
