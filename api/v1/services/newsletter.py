@@ -37,11 +37,7 @@ class NewsletterService(Service):
             .first()
         )
         if newsletter:
-            raise HTTPException(
-                status_code=400, detail="User already subscribed to newsletter"
-            )
-
-        return newsletter
+            return newsletter
 
     @staticmethod
     def fetch(db: Session, id: str):

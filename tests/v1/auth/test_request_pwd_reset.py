@@ -35,14 +35,14 @@ def mock_request_password_service():
 @pytest.fixture
 def mock_verify_reset_token():
     with patch("api.v1.services.request_pwd.RequestPasswordService.verify_reset_token") as Mock_verify_token:
-        Mock_verify_token.return_value = {"email": "test@example.com", "jti": 1}
+        Mock_verify_token.return_value = {"email": "test@gmail.com", "jti": 1}
         yield Mock_verify_token
 
 
 @patch('api.v1.services.request_pwd.RequestPasswordService.update')
 def test_reset_password(mock_update):
     token = "mock_reset_tokenmock_reset_tokenmock_reset_tokenmock_reset_token"
-    mock_user = User(id='user_id', email="test@example.com",
+    mock_user = User(id='user_id', email="test@gmail.com",
                      first_name="Test",
                      last_name="User",
                      password="PassDam!23w",
@@ -50,7 +50,7 @@ def test_reset_password(mock_update):
                      is_deleted=False,
                      is_superadmin=False)
     
-    org = Organisation(name="my org", id="org_id", email="org@example.com")
+    org = Organisation(name="my org", id="org_id", email="org@gmail.com")
     mock_org = OrganizationData.model_validate(org, from_attributes=True)
 
     mock_update.return_value = ResetPasswordSuccesful(
@@ -70,7 +70,7 @@ def test_request_reset_link_user_not_found(mock_db_session, mock_request_passwor
     # Arrange
     mock_request_password_service.fetch.side_effect = HTTPException(status_code=404, detail="User not found")
 
-    reset_email = RequestEmail(email="unknown@example.com")
+    reset_email = RequestEmail(email="unknown@gmail.com")
 
     # Act
     response = client.post("/api/v1/auth/forgot-password", json={"email": reset_email.email})
