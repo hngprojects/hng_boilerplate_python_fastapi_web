@@ -1,22 +1,29 @@
 from datetime import timedelta
-from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Request
+from fastapi import (BackgroundTasks, Depends,
+                     status, APIRouter,
+                     Response, Request)
 from fastapi.encoders import jsonable_encoder
-from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
+from typing import Annotated
 
 from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import auth_response, success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from api.v1.schemas.user import Token
-from api.v1.schemas.user import LoginRequest, UserCreate, EmailRequest
+from api.v1.schemas.user import (LoginRequest, UserCreate, EmailRequest,
+                                 ProfileData, UserData2)
 from api.v1.schemas.token import TokenRequest
-from api.v1.schemas.user import UserCreate, MagicLinkRequest, ChangePasswordSchema
+from api.v1.schemas.user import (UserCreate,
+                                 MagicLinkRequest,
+                                 ChangePasswordSchema,
+                                 AuthMeResponse)
 from api.v1.services.organisation import organisation_service
 from api.v1.schemas.organisation import CreateUpdateOrganisation
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
+from api.v1.services.profile import profile_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -357,3 +364,25 @@ async def change_password(
                                  old_password=schema.old_password)
 
     return success_response(status_code=200, message="Password changed successfully")
+
+
+@auth.get("/@me",
+          status_code=status.HTTP_200_OK,
+          response_model=AuthMeResponse)
+def get_current_user_details(
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+):
+    """Endpoint to get current user details.
+    """
+    profile = profile_service.fetch_by_user_id(db, current_user.id)
+    organisation = organisation_service.retrieve_user_organizations(current_user, db)
+    return AuthMeResponse(
+        message='User details retrieved successfully',
+        status_code=200,
+        data={
+            'user': UserData2.model_validate(current_user, from_attributes=True),
+            'organisations': organisation,
+            'profile': ProfileData.model_validate(profile, from_attributes=True)
+        }
+    )
