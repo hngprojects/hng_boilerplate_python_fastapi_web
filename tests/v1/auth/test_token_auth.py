@@ -32,7 +32,7 @@ token = TokenLogin(token="123456", expiry_time=datetime.utcnow() + timedelta(sec
 @patch('api.v1.services.user.UserService.generate_token')
 def test_request_signin_token(mock_generate_token, db_session_mock):
     # Mock user
-    user = User(email="user@example.com", id="someid")
+    user = User(email="user@gmail.com", id="someid")
     db_session_mock.query.return_value.filter.return_value.first.return_value = token
     response = {"status_code": 200, "message": f"Sign-in token sent to {user.email}"}
 
@@ -43,13 +43,13 @@ def test_request_signin_token(mock_generate_token, db_session_mock):
 @patch('api.v1.services.user.UserService.verify_login_token')
 def test_verify_signin_token(mock_verify_login_token, db_session_mock):
     # Mock user with token
-    user = User(email="user@example.com", id="someid")
+    user = User(email="user@gmail.com", id="someid")
     db_session_mock.query.return_value.filter.return_value.first.return_value = user
     
     mock_verify_login_token.return_value = user
 
     response = client.post("/api/v1/auth/verify-token",
-                           json={"email": "user@example.com", "token": "123456"})
+                           json={"email": "user@gmail.com", "token": "123456"})
 
     assert response.status_code == 200
     assert "access_token" in response.json()

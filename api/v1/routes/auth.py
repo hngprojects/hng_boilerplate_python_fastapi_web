@@ -313,7 +313,7 @@ def request_magic_link(
 
 @auth.post("/magic-link/verify")
 async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
-    user, access_token = AuthService.verify_magic_token(token_schema.access_token, db)
+    user, access_token = AuthService.verify_magic_token(token_schema.token, db)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     refresh_token = user_service.create_refresh_token(user_id=user.id)

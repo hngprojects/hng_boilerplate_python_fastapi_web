@@ -33,7 +33,7 @@ def test_status_code(db_session_mock, mock_send_email):
         "password": "strin8Hsg263@",
         "first_name": "string",
         "last_name": "string",
-        "email": "user@example.com"
+        "email": "user@gmail.com"
     }
 
     response = client.post("/api/v1/auth/register", json=user)
