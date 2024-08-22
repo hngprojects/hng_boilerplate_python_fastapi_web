@@ -20,7 +20,7 @@ def mock_user_service():
     """Fixture to mock the user service."""
     mock_user_service = MagicMock()
     mock_user_service.create_access_token.return_value = "mocked_access_token"
-    mock_user_service.get_current_super_admin = MagicMock(return_value=MagicMock(is_super_admin=True))
+    mock_user_service.get_current_super_admin = MagicMock(return_value=MagicMock(is_superadmin=True))
     return mock_user_service
 
 def test_delete_activity_log(mock_db_session, mock_user_service):

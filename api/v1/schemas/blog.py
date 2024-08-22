@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import List, Optional
-
 from pydantic import BaseModel, Field
+
+from api.v1.schemas.comment import CommentData
 
 
 class BlogCreate(BaseModel):
@@ -72,3 +73,13 @@ class BlogLikeDislikeResponse(BaseModel):
     status_code: str
     message: str
     data: BlogLikeDislikeCreateData
+
+
+class CommentRequest(BaseModel):
+    content: str
+
+
+class CommentUpdateResponseModel(BaseModel):
+    status: str
+    message: str
+    data: CommentData

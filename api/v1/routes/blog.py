@@ -16,7 +16,9 @@ from api.v1.schemas.blog import (
     BlogPostResponse,
     BlogRequest,
     BlogUpdateResponseModel,
-    BlogLikeDislikeResponse
+    BlogLikeDislikeResponse,
+    CommentRequest,
+    CommentUpdateResponseModel
 )
 from api.v1.services.blog import BlogService
 from api.v1.services.user import user_service
@@ -295,3 +297,39 @@ async def comments(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                                 detail="Blog not found")
     return comments_response
+
+# Update a blog comment
+@blog.put("/{blog_id}/comments/{comment_id}", response_model=CommentUpdateResponseModel)
+async def update_blog_comment(
+    blog_id: str,
+    comment_id: str,
+    blogComment: CommentRequest,
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    db: Annotated[Session, Depends(get_db)],
+):
+    """Updates a blog comment
+
+    Args:
+        - blog_id (str): the ID of the blog
+        - comment_id (str): the ID of the comment
+        - blogComment: the new comment to update to
+        - current_user: the current authenticated user
+        - db: the database session
+
+    Returns:
+        dict: updated comment body
+    """
+
+    blog_service = BlogService(db)
+    updated_blog_comment = blog_service.update_blog_comment(
+        blog_id=blog_id,
+        comment_id=comment_id,
+        content=blogComment.content,
+        current_user=current_user,
+    )
+
+    return success_response(
+        message="Blog comment updated successfully",
+        status_code=200,
+        data=jsonable_encoder(updated_blog_comment)
+    )

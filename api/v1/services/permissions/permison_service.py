@@ -7,13 +7,14 @@ from api.v1.models.permissions.role_permissions import role_permissions
 from uuid import UUID
 from fastapi import HTTPException,status
 from sqlalchemy.exc import IntegrityError
+from fastapi.responses import JSONResponse
 from sqlalchemy import delete
 
 class PermissionService:
     @staticmethod
     def create_permission(db: Session, permission: PermissionCreate) -> Permission:
         try:
-            db_permission = Permission(name=permission.name)
+            db_permission = Permission(title=permission.title)
             db.add(db_permission)
             db.commit()
             db.refresh(db_permission)
@@ -21,10 +22,11 @@ class PermissionService:
             return response
         except IntegrityError as e:
             db.rollback()
-            raise HTTPException(status_code=400, detail="A permission with this name already exists.")
+            raise HTTPException(status_code=400, detail="A permission with this title already exists.")
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))
+        
         
     @staticmethod
     def assign_permission_to_role(db: Session, role_id: str, permission_id: str):
@@ -32,8 +34,14 @@ class PermissionService:
             # Check if the role exists
             role = db.query(Role).filter_by(id=role_id).first()
             if not role:
-                raise HTTPException(status_code=404, detail="Role not found.")
-            
+                # issue with global http exception handler
+                response = {
+                    "status": False,
+                    "status_code" : status.HTTP_404_NOT_FOUND,
+                    "message": "Role not found."
+                }
+                return JSONResponse(content=response, status_code=status.HTTP_404_NOT_FOUND)       
+                 
             # Check if the permission exists
             permission = db.query(Permission).filter_by(id=permission_id).first()
             if not permission:
@@ -49,7 +57,7 @@ class PermissionService:
 
         except IntegrityError:
             db.rollback()
-            raise HTTPException(status_code=400, detail="An error occurred while assigning the permission.")
+            raise HTTPException(status_code=400, detail="This permission already exists for the role")
         except Exception as e:
             db.rollback()
             raise HTTPException(status_code=500, detail=str(e))
@@ -65,7 +73,7 @@ class PermissionService:
                 return {}
             except IntegrityError as e :
                db.rollback()
-               raise HTTPException(status_code=400, detail="A Permission with this name already exists.")
+               raise HTTPException(status_code=400, detail="A Permission with this title already exists.")
             except Exception as e:
                db.rollback()
                raise HTTPException(status_code=500, detail="An unexpected error occurred: " + str(e))

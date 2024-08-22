@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 
 client = TestClient(app)
 LOGIN_ENDPOINT = "api/v1/auth/login"
-CHANGE_PWD_ENDPOINT = "/api/v1/users/me/password"
+CHANGE_PWD_ENDPOINT = "/api/v1/auth/change-password"
 
 
 @pytest.fixture
@@ -62,7 +62,7 @@ def test_autheniticated_user(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["user"]["access_token"]
+    access_token = login.json()["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
@@ -82,11 +82,11 @@ def test_wrong_pwd(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["user"]["access_token"]
+    access_token = login.json()["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,
-        json={"old_password": "Testpassw23",
+        json={"old_password": "Testpassw23@",
               "new_password": "Ojobonandom@123"},
         headers={"Authorization": f"Bearer {access_token}"},
     )
@@ -103,7 +103,7 @@ def test_user_password(mock_db_session, mock_user_service):
         LOGIN_ENDPOINT,
         json={"email": "testuser@gmail.com", "password": "Testpassword@123"},
     )
-    access_token = login.json()["data"]["user"]["access_token"]
+    access_token = login.json()["access_token"]
 
     user_pwd_change = client.patch(
         CHANGE_PWD_ENDPOINT,

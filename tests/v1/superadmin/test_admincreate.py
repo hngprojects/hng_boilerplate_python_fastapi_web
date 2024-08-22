@@ -25,7 +25,7 @@ data2 = {
 data3 = {
 
     "first_name": "Marvelu",
-    "last_name": "Ub",
+    "last_name": "Ubah",
     "password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
     
@@ -61,7 +61,7 @@ def test_super_user_creation(data, db_session_mock):
     response = client.post(url, json=data)
 
     
-    assert response.json()['message'] == 'User Created Successfully'
+    assert response.json()['message'] == 'User created successfully'
     assert response.status_code == 201
     # Assert that create_user was called with the correct data
    

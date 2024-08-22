@@ -1,3 +1,4 @@
+
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
@@ -11,7 +12,7 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-MAGIC_ENDPOINT = '/api/v1/auth/request-magic-link'
+MAGIC_ENDPOINT = '/api/v1/auth/magic-link'
 
 
 @pytest.fixture
@@ -45,13 +46,13 @@ def test_request_magic_link(mock_user_service, mock_db_session):
         first_name='Test',
         last_name='User',
         is_active=False,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
 
-    with patch("api.utils.send_mail.smtplib.SMTP") as mock_smtp:
+    with patch("api.utils.send_mail.smtplib.SMTP_SSL") as mock_smtp:
         # Configure the mock SMTP server
         mock_smtp_instance = MagicMock()
         mock_smtp.return_value = mock_smtp_instance
@@ -66,8 +67,6 @@ def test_request_magic_link(mock_user_service, mock_db_session):
         #assert response.get("status_code") == status.HTTP_200_OK  # check for the right response before proceeding
         assert response.get("message") == f"Magic link sent to {mock_user.email}"
 
-        # Ensure the SMTP server was called correctly
-        #mock_smtp_instance.send_magic_link.assert_called_once()
         # Test for requesting magic link for a non-existing user
         mock_db_session.query.return_value.filter.return_value.first.return_value = None
         magic_login = client.post(MAGIC_ENDPOINT, json={

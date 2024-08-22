@@ -41,7 +41,7 @@ def test_user_login(db_session_mock):
         first_name='Test',
         last_name='User',
         is_active=False,
-        is_super_admin=False,
+        is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )

@@ -1,3 +1,4 @@
+from typing import Optional
 from pydantic import BaseModel, EmailStr
 
 
@@ -18,3 +19,4 @@ class CreateContactUs(BaseModel):
     email: EmailStr
     phone_number: str
     message: str
+    org_id: Optional[str] = None

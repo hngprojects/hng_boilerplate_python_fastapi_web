@@ -15,7 +15,7 @@ LOGIN_URI = "api/v1/auth/login"
 
 squeeze1 = {
     "title": "My Squeeze Page",
-    "email": "user1@example.com",
+    "email": "user1@gmail.com",
     "headline": "My Headline 1",
     "sub_headline": "My Sub Headline 1",
     "body": "My Body 1",
@@ -28,7 +28,7 @@ squeeze1 = {
 }
 squeeze2 = {
     "title": "My Squeeze Page",
-    "email": "user1@example.com",
+    "email": "user1@gmail.com",
     "headline": "My Headline 2",
     "sub_headline": "My Sub Headline 2",
     "type": "product",
@@ -39,7 +39,7 @@ squeeze2 = {
 }
 squeeze3 = {
     "title": "My Squeeze Page",
-    "email": "user2@example.com",
+    "email": "user2@gmail.com",
     "headline": "My Headline 3",
     "body": "My Body 3",
     "user_id": str(uuid7()),
@@ -61,9 +61,9 @@ def create_mock_super_admin(_):
     """Mock super admin"""
     _.query.return_value.filter.return_value.first.return_value = User(
         id=str(uuid7()),
-        email="user1@example.com",
+        email="user1@gmail.com",
         password=user_service.hash_password("P@ssw0rd"),
-        is_super_admin=True,
+        is_superadmin=True,
     )
 
 
@@ -76,10 +76,10 @@ def test_create_squeeze_page(mock_db_session, data):
     """Test create squeeze page."""
     create_mock_super_admin(mock_db_session)
     tok = client.post(
-        LOGIN_URI, json={"email": "user1@example.com", "password": "P@ssw0rd"}
+        LOGIN_URI, json={"email": "user1@gmail.com", "password": "P@ssw0rd"}
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["data"]["user"]["access_token"]
+    token = tok["access_token"]
     res = client.post(URI, json=data, headers=theader(token))
     assert res.status_code == data["status_code"]
     assert res.json()['data']['title'] == data["title"]

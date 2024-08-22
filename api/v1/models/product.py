@@ -14,6 +14,7 @@ from sqlalchemy import (
     func,
 )
 from api.v1.models.base_model import BaseTableModel
+from api.v1.models import User
 from sqlalchemy.orm import relationship
 from enum import Enum
 
@@ -34,7 +35,7 @@ class Product(BaseTableModel):
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)
     org_id = Column(
-        String, ForeignKey("organizations.id", ondelete="CASCADE"), nullable=False
+        String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False
     )
     category_id = Column(
         String, ForeignKey("product_categories.id", ondelete="CASCADE"), nullable=False
@@ -46,12 +47,13 @@ class Product(BaseTableModel):
     )
     archived = Column(Boolean, default=False)
     filter_status = Column(
-        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active)
+        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active
+    )
 
     variants = relationship(
         "ProductVariant", back_populates="product", cascade="all, delete-orphan"
     )
-    organization = relationship("Organization", back_populates="products")
+    organisation = relationship("Organisation", back_populates="products")
     category = relationship("ProductCategory", back_populates="products")
     sales = relationship('Sales', back_populates='product',
                          cascade='all, delete-orphan')
@@ -86,8 +88,13 @@ class ProductComment(BaseTableModel):
     __tablename__ = "product_comments"
 
     product_id = Column(String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True) 
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
 
     product = relationship("Product", back_populates="comments")
+    user = relationship("User", back_populates="product_comments")  
+
+    def __str__(self):
+        return f"Comment by User ID: {self.user_id} on Product ID: {self.product_id}"

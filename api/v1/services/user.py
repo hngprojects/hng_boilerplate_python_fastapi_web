@@ -16,13 +16,14 @@ from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
 from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
-from api.v1.models.associations import user_organization_association
-from api.v1.models.user import User
+from api.v1.models.associations import user_organisation_association
+from api.v1.models import User, Profile, Region, NewsletterSubscriber
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
 from api.v1.schemas import user
 from api.v1.schemas import token
 from api.v1.services.notification_settings import notification_setting_service
+from api.v1.services.newsletter import NewsletterService, EmailSchema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -114,6 +115,12 @@ class UserService(Service):
         if not user.is_deleted:
             return user
 
+    def get_user_by_id(self, db: Session, id: str):
+        """Fetches a user by their id"""
+
+        user = check_model_existence(db, User, id)
+        return user
+
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
@@ -127,12 +134,10 @@ class UserService(Service):
     def create(self, db: Session, schema: user.UserCreate):
         """Creates a new user"""
 
-        del schema.admin_secret
-
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
-                detail="User with this email or username already exists",
+                detail="User with this email already exists",
             )
 
         # Hash password
@@ -148,10 +153,20 @@ class UserService(Service):
         notification_setting_service.create(db=db, user=user)
 
         # create data privacy setting
-
         data_privacy = DataPrivacySetting(user_id=user.id)
+        profile = Profile(
+            user_id=user.id
+        )
+        region = Region(
+            user_id=user.id,
+            region='Empty'
+        )
+        
+        news_letter = db.query(NewsletterSubscriber).filter_by(email=user.email)
+        if not news_letter:
+            news_letter = NewsletterService.create(db, EmailSchema(email=user.email))
 
-        db.add(data_privacy)
+        db.add_all([data_privacy, profile, region])
         db.commit()
         db.refresh(data_privacy)
 
@@ -185,6 +200,23 @@ class UserService(Service):
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
+            
+            # Create notification settings directly for the user
+            notification_setting_service.create(db=db, user=new_user)
+
+            # create data privacy setting
+            data_privacy = DataPrivacySetting(user_id=new_user.id)
+            profile = Profile(
+                user_id=new_user.id
+            )
+            region = Region(
+                user_id=new_user.id,
+                region='Empty'
+            )
+
+            db.add_all([data_privacy, profile, region])
+            db.commit()
+
             user_schema = user.UserData.model_validate(new_user, from_attributes=True)
             return user.AdminCreateUserResponse(
                 message="User created successfully",
@@ -199,8 +231,6 @@ class UserService(Service):
     def create_admin(self, db: Session, schema: user.UserCreate):
         """Creates a new admin"""
 
-        del schema.admin_secret
-
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
@@ -212,28 +242,46 @@ class UserService(Service):
 
         # Create user object with hashed password and other attributes from schema
         user = User(**schema.model_dump())
+
+        user.is_superadmin = True
         db.add(user)
         db.commit()
-        db.refresh(user)
 
-        # Set user to super admin
-        user.is_super_admin = True
+        # # Create notification settings directly for the user
+        notification_setting_service.create(db=db, user=user)
+
+        # create data privacy setting
+        data_privacy = DataPrivacySetting(user_id=user.id)
+        profile = Profile(
+            user_id=user.id
+        )
+        region = Region(
+            user_id=user.id,
+            region='Empty'
+        )
+
+        db.add_all([data_privacy, profile, region])
         db.commit()
+
+        db.refresh(user)
 
         return user
 
     def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
         """Function to update a User"""
+        
         # Get user from access token if provided, otherwise fetch user by id
         if db.query(User).filter(User.email == schema.email).first():
             raise HTTPException(
                 status_code=400,
                 detail="User with this email or username already exists",
             )
-        if current_user.is_super_admin and id is not None:
-            user = self.fetch(db=db, id=id)
-        else:
-            user = self.fetch(db=db, id=current_user.id)
+        
+        user = (self.fetch(db=db, id=id) 
+                if current_user.is_superadmin and id is not None
+                else self.fetch(db=db, id=current_user.id)
+            )
+        
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
             setattr(user, key, value)
@@ -443,25 +491,35 @@ class UserService(Service):
 
     def change_password(
         self,
-        old_password: str,
         new_password: str,
         user: User,
         db: Session,
+        old_password: Optional[str] = None
     ):
         """Endpoint to change the user's password"""
-
-        if not self.verify_password(old_password, user.password):
+        if old_password == new_password:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                detail="Old Password and New Password cannot be the same")
+        if old_password is None:
+            if user.password is None:
+                user.password = self.hash_password(new_password)
+                db.commit()
+                return
+            else:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                                    detail="Old Password must not be empty, unless setting password for the first time.")
+        elif not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
-
-        user.password = self.hash_password(new_password)
-        db.commit()
+        else:
+            user.password = self.hash_password(new_password)
+            db.commit()
 
     def get_current_super_admin(
         self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
     ):
         """Get the current super admin"""
         user = self.get_current_user(db=db, access_token=token)
-        if not user.is_super_admin:
+        if not user.is_superadmin:
             raise HTTPException(
                 status_code=403,
                 detail="You do not have permission to access this resource",
@@ -472,34 +530,30 @@ class UserService(Service):
         self, db: Session, user: User, token: str, expiration: datetime
     ):
         """Save the token and expiration in the user's record"""
-
-        db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
-
+        db.query(TokenLogin).filter_by(user_id=user.id).delete(synchronize_session='fetch')
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
         db.add(token)
         db.commit()
-        db.refresh(token)
 
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
-
-        user = db.query(User).filter(User.email == schema.email).first()
-
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or token")
-
-        token = db.query(TokenLogin).filter(TokenLogin.user_id == user.id).first()
+        token = db.query(TokenLogin).filter_by(token=schema.token).first()
+        if not token:
+            raise HTTPException(status_code=404, detail="Token Expired")
 
         if token.token != schema.token or token.expiry_time < datetime.utcnow():
             raise HTTPException(status_code=401, detail="Invalid email or token")
 
-        return user
+        db.delete(token)
+        db.commit()
+
+        return db.query(User).filter_by(id=token.user_id).first()
 
     def generate_token(self):
         """Generate a 6-digit token"""
         return "".join(
             random.choices(string.digits, k=6)
-        ), datetime.utcnow() + timedelta(minutes=10)
+        ), datetime.utcnow() + timedelta(minutes=1)
 
 
     def get_users_by_role(self, db: Session, role_id: str, current_user: User):
@@ -510,7 +564,7 @@ class UserService(Service):
                 detail="Role ID is required"
             )
 
-        user_roles = db.query(user_organization_association).filter(user_organization_association.c.user_id == current_user.id, user_organization_association.c.role.in_(['admin', 'owner'])).all()
+        user_roles = db.query(user_organisation_association).filter(user_organisation_association.c.user_id == current_user.id, user_organisation_association.c.role.in_(['admin', 'owner'])).all()
 
         if len(user_roles) == 0:
             raise HTTPException(
@@ -518,7 +572,7 @@ class UserService(Service):
                 detail="Permission denied. Admin access required."
             )
 
-        users = db.query(User).join(user_organization_association).filter(user_organization_association.c.role == role_id).all()
+        users = db.query(User).join(user_organisation_association).filter(user_organisation_association.c.role == role_id).all()
 
         if len(users) == 0:
             raise HTTPException(

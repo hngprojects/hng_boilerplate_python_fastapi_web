@@ -11,10 +11,7 @@ import logging
 
 invites = APIRouter(prefix="/invite", tags=["Invitation Management"])
 
-# Add other necessary imports
-
-
-# generate invitation link to join organization
+# generate invitation link to join organisation
 @invites.post("/create", tags=["Invitation Management"])
 async def generate_invite_link(
     invite_schema: invitations.InvitationCreate, 
@@ -25,11 +22,11 @@ async def generate_invite_link(
     return invite.InviteService.create(invite_schema, request, session)
 
 
-# Add user to organization
+# Add user to organisation
 @invites.post("/accept", tags=["Invitation Management"])
-async def add_user_to_organization(
+async def add_user_to_organisation(
     request: Request, 
-    user_data: invitations.UserAddToOrganization, 
+    user_data: invitations.UserAddToOrganisation, 
     session: Session = Depends(get_session), 
     current_user: User = Depends(user_service.get_current_user)
 ):
@@ -43,7 +40,25 @@ async def add_user_to_organization(
 
     logging.info(f"Processing invitation ID: {invite_id}")
 
-    return invite.InviteService.add_user_to_organization(invite_id, session)
+    return invite.InviteService.add_user_to_organisation(invite_id, session)
+
+
+@invites.delete("", status_code=status.HTTP_204_NO_CONTENT)
+def delete_all_invite(
+    db: Session = Depends(get_session), 
+    admin: User = Depends(user_service.get_current_super_admin)
+):
+    """Delete all invitations from the database
+
+    Args:
+        db (Session, optional): _description_. Defaults to Depends(get_session).
+        admin (User, optional): _description_. Defaults to Depends(user_service.get_current_super_admin).
+    """    
+    print("Deleting all invites")
+    invite.InviteService.delete_all(db)
+
+    logging.info("Deleted all invites successfully")
+
 
 @invites.delete("/{invite_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_invite(

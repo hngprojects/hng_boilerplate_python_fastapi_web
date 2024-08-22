@@ -66,9 +66,10 @@ class TestGetAllTeamMembers:
         with patch('api.v1.services.team.TeamServices.fetch_all') as mock_fetch_all:
             mock_fetch_all.return_value = test_members
 
-            response = client.get("/api/v1/team/members")
+            response = client.get("/api/v1/teams")
             assert response.status_code == 200
-            assert response.json()['message'] == "Team members retrieved successfully"
+            assert response.json()[
+                'message'] == "Team members retrieved successfully"
             assert response.json()['data'] == test_members
             assert response.json()['success'] == True
 
@@ -77,7 +78,7 @@ class TestGetAllTeamMembers:
         with patch('api.v1.services.team.TeamServices.fetch_all') as mock_fetch_all:
             mock_fetch_all.return_value = []
 
-            response = client.get("/api/v1/team/members")
+            response = client.get("/api/v1/teams")
             assert response.status_code == 404
             assert response.json()['message'] == 'No team members found'
 
@@ -85,7 +86,7 @@ class TestGetAllTeamMembers:
     def test_get_all_team_members_unauthorized(self, client):
         app.dependency_overrides = {}
 
-        response = client.get("/api/v1/team/members")
+        response = client.get("/api/v1/teams")
         assert response.status_code == 401
         assert response.json()['message'] == 'Not authenticated'
 
@@ -95,7 +96,8 @@ class TestGetAllTeamMembers:
         app.dependency_overrides[get_db] = mock_db
         app.dependency_overrides[oauth2_scheme] = mock_oauth
 
-        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_super_admin=False)) as cu:
-            response = client.get("/api/v1/team/members")
+        with patch('api.v1.services.user.user_service.get_current_user', return_value=MagicMock(is_superadmin=False)) as cu:
+            response = client.get("/api/v1/teams")
         assert response.status_code == 403
-        assert response.json()['message'] == 'You do not have permission to access this resource'
+        assert response.json()[
+            'message'] == 'You do not have permission to access this resource'

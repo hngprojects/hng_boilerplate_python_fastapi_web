@@ -1,0 +1,36 @@
+services:
+  app_staging:
+    image: anchor-python-bp-staging:latest
+    command: ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 7001 --reload"]
+    container_name: app_staging
+    networks:
+      - hng-network
+    restart: unless-stopped
+    ports:
+      - 7008:7001
+    working_dir: /app 
+    volumes:
+      - .env:/app/.env    
+    depends_on:
+      - staging_db
+
+  staging_db:
+    image: postgres:14.12
+    container_name: staging_db
+    restart: always
+    volumes:
+      - staging_db:/var/lib/postgresql/data
+      - .env:/app/.env
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD?Variable not set}
+      - POSTGRES_USER=${DB_USER?Variable not set}
+      - POSTGRES_DB=${DB_NAME?Variable not set}
+    networks:
+      - hng-network
+
+volumes:
+  staging_db:
+
+networks:
+  hng-network:
+    driver: bridge

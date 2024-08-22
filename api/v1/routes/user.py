@@ -6,19 +6,17 @@ from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas.user import (
-    DeactivateUserSchema,
-    ChangePasswordSchema,
-    ChangePwdRet, AllUsersResponse, UserUpdate,
+    AllUsersResponse, UserUpdate,
     AdminCreateUserResponse, AdminCreateUser
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
 
 
-user = APIRouter(prefix="/users", tags=["Users"])
+user_router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@user.get("/me", status_code=status.HTTP_200_OK, response_model=success_response)
+@user_router.get("/me", status_code=status.HTTP_200_OK, response_model=success_response)
 def get_current_user_details(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
@@ -32,7 +30,6 @@ def get_current_user_details(
             current_user,
             exclude=[
                 "password",
-                "is_super_admin",
                 "is_deleted",
                 "is_verified",
                 "updated_at",
@@ -41,7 +38,7 @@ def get_current_user_details(
     )
 
 
-@user.get('/delete', status_code=200)
+@user_router.get('/delete', status_code=200)
 async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
     '''Endpoint to delete a user account'''
 
@@ -53,44 +50,13 @@ async def delete_account(request: Request, db: Session = Depends(get_db), curren
         message='User deleted successfully',
     )
 
-
-
-@user.patch("/me/password", status_code=200)
-async def change_password(
-    schema: ChangePasswordSchema,
-    db: Session = Depends(get_db),
-    user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to change the user's password"""
-
-    user_service.change_password(schema.old_password, schema.new_password, user, db)
-
-    return success_response(status_code=200, message="Password changed successfully")
-
-
-@user.get(path="/{user_id}", status_code=status.HTTP_200_OK)
-def get_user(
-    user_id : str,
-    current_user : Annotated[User , Depends(user_service.get_current_user)],
-    db : Session = Depends(get_db)
-):
-    
-    user = user_service.fetch(db=db, id=user_id)
-
-    return success_response(
-        status_code=status.HTTP_200_OK,
-        message='User retrieved successfully',
-        data = jsonable_encoder(
-            user, 
-            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
-        )
-    )
-@user.patch(path="/",status_code=status.HTTP_200_OK)
+@user_router.patch("/",status_code=status.HTTP_200_OK)
 def update_current_user(
-                        current_user : Annotated[User , Depends(user_service.get_current_user)],
-                        schema : UserUpdate,
-                        db : Session = Depends(get_db)):
-    
+    current_user : Annotated[User , Depends(user_service.get_current_user)],
+    schema : UserUpdate,
+    db : Session = Depends(get_db),
+):
+
     user = user_service.update(db=db, schema= schema, current_user=current_user)
 
     return success_response(
@@ -98,15 +64,18 @@ def update_current_user(
         message='User Updated Successfully',
         data= jsonable_encoder(
             user,
-            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+            exclude=['password', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
     )
-@user.patch(path="/{user_id}", status_code=status.HTTP_200_OK)
-def update_user(user_id : str,
-                current_user : Annotated[User , Depends(user_service.get_current_super_admin)],
-                schema : UserUpdate,
-                db : Session = Depends(get_db)
-               ):
+
+
+@user_router.patch("/{user_id}", status_code=status.HTTP_200_OK)
+def update_user(
+    user_id : str,
+    current_user : Annotated[User , Depends(user_service.get_current_super_admin)],
+    schema : UserUpdate,
+    db : Session = Depends(get_db)
+):
     user = user_service.update(db=db, schema=schema, id=user_id, current_user=current_user)
 
     return success_response(
@@ -114,12 +83,12 @@ def update_user(user_id : str,
         message='User Updated Successfully',
         data= jsonable_encoder(
             user,
-            exclude=['password', 'is_super_admin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+            exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
     )
 
 
-@user.delete(path="/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@user_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(
     user_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
@@ -144,7 +113,7 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
 
-@user.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
+@user_router.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
 async def get_users(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     db: Annotated[Session, Depends(get_db)],
@@ -152,7 +121,7 @@ async def get_users(
     is_active: Optional[bool] = Query(None),
     is_deleted: Optional[bool] = Query(None),
     is_verified: Optional[bool] = Query(None),
-    is_super_admin: Optional[bool] = Query(None)
+    is_superadmin: Optional[bool] = Query(None)
 ):
     """
     Retrieves all users.
@@ -164,7 +133,7 @@ async def get_users(
         is_active: boolean to filter active users
         is_deleted: boolean to filter deleted users
         is_verified: boolean to filter verified users
-        is_super_admin: boolean to filter users that are super admin
+        is_superadmin: boolean to filter users that are super admin
     Returns:
         UserData
     """
@@ -172,14 +141,16 @@ async def get_users(
         'is_active': is_active,
         'is_deleted': is_deleted,
         'is_verified': is_verified,
-        'is_super_admin': is_super_admin,
+        'is_superadmin': is_superadmin,
     }
     return user_service.fetch_all(db, page, per_page, **query_params)
 
-@user.post("/", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
-def admin_registers_user(user_request: AdminCreateUser,
-             current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-             db: Session = Depends(get_db)):
+@user_router.post("/", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
+def admin_registers_user(
+    user_request: AdminCreateUser,
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    db: Session = Depends(get_db)
+):
     '''
     Endpoint for an admin to register a user.
     Args:
@@ -192,8 +163,12 @@ def admin_registers_user(user_request: AdminCreateUser,
     return user_service.super_admin_create_user(db, user_request)
     
 
-@user.get('/{role_id}/roles', status_code=status.HTTP_200_OK)
-async def get_users_by_role(role_id: Literal["admin", "user", "guest", "owner"], db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+@user_router.get('/{role_id}/roles', status_code=status.HTTP_200_OK)
+async def get_users_by_role(
+    role_id: Literal["admin", "user", "guest", "owner"], 
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(user_service.get_current_user)
+):
     '''Endpoint to get all users by role'''
     users = user_service.get_users_by_role(db, role_id, current_user)
 
@@ -201,4 +176,37 @@ async def get_users_by_role(role_id: Literal["admin", "user", "guest", "owner"],
         status_code=200,
         message='Users retrieved successfully',
         data=jsonable_encoder(users)
+    )
+
+
+@user_router.get('/organisations', status_code=200, response_model=success_response)
+def get_current_user_organisations(
+    db: Session = Depends(get_db), 
+    current_user: User = Depends(user_service.get_current_user)
+):
+    '''Endpoint to get all current user organisations'''
+
+    return success_response(
+        status_code=200,
+        message='Organisations fetched successfully',
+        data=jsonable_encoder(current_user.organisations)
+    )
+
+
+@user_router.get("/{user_id}", status_code=status.HTTP_200_OK)
+def get_user_by_id(
+    user_id : str,
+    db : Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    
+    user = user_service.get_user_by_id(db=db, id=user_id)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message='User retrieved successfully',
+        data = jsonable_encoder(
+            user, 
+            exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
+        )
     )

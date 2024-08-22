@@ -18,7 +18,7 @@ from api.v1.services.user import user_service, UserService
 from api.v1.services.newsletter import NewsletterService
 
 client = TestClient(app)
-ENDPOINT = "/api/v1/pages/newsletters"
+ENDPOINT = "/api/v1/newsletters"
 
 
 @pytest.fixture
@@ -66,7 +66,7 @@ def override_get_current_super_admin():
         first_name="AdminTest",
         last_name="User",
         is_active=False,
-        is_super_admin=True,
+        is_superadmin=True,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc),
     )

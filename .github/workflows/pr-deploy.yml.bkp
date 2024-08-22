@@ -1,0 +1,32 @@
+name: PR Deploy
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    
+
+jobs:
+  deploy-pr:
+    environment: 
+      name: preview
+      url: ${{ steps.deploy.outputs.preview-url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to branch
+        uses: actions/checkout@v4
+      - name: Copy .env.sample to .env
+        run: cp .env.sample .env
+      - id: deploy
+        name: Pull Request Deploy
+        uses: hngprojects/pr-deploy@main
+        with:
+          server_host: ${{ secrets.HOST }}
+          server_username: ${{ secrets.USERNAME }}
+          server_password: ${{ secrets.PASSWORD }}
+          comment: true
+          context: '.'
+          dockerfile: 'Dockerfile'
+          exposed_port: '7001'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print Preview Url
+        run: |
+          echo "Preview Url: ${{ steps.deploy.outputs.preview-url }}" 

@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
 from api.v1.models.blog import Blog, BlogDislike, BlogLike
+from api.v1.models.comment import Comment
 from api.v1.models.user import User
 from api.v1.schemas.blog import BlogCreate
 
@@ -139,3 +140,58 @@ class BlogService:
                     status_code=400,
                     detail="An error occurred while updating the blog post",
                 )
+
+    def update_blog_comment(
+        self,
+        blog_id: str,
+        comment_id: str,
+        content: Optional[str] = None,
+        current_user: User = None,
+    ):
+        """Updates a blog comment
+
+        Args:
+            - blog_id: the blog ID
+            - comment_id: the comment ID
+            - content: the blog content to be updateed. Defaults to None.
+            - current_user: the current authenticated user. Defaults to None.
+
+        Raises:
+            - HTTPException: 400 error if comment is null
+            - HTTPException: 403 error if the current user_id is not the comment user_id
+            - HTTPException: 500 error if the database operation fails
+
+        Returns:
+            dict: updated comment response
+        """
+
+        db = self.db
+
+        if not content:
+            raise HTTPException(
+                status_code=400, detail="Blog comment cannot be empty"
+            )
+
+        # check if the blog and comment exist
+        blog_post = check_model_existence(db, Blog, blog_id)
+
+        comment = check_model_existence(db, Comment, comment_id)
+
+        if comment.user_id != current_user.id:
+            raise HTTPException(
+                status_code=403, detail="You are not authorized to update this comment"
+            )
+
+        # Update the comment content
+        comment.content = content
+
+        try:
+            db.commit()
+            db.refresh(comment)
+        except Exception as exc:
+            db.rollback()
+            raise HTTPException(
+                status_code=500, detail=f"An error occurred while updating the blog comment; {exc}"
+            )
+
+        return comment
