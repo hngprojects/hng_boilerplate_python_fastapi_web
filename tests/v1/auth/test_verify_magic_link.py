@@ -45,8 +45,7 @@ def test_verify_magic_link(client, db_session_mock):
     token = user_service.create_access_token(user_id=user.id)
 
     response = client.post("/api/v1/auth/magic-link/verify", json={
-        "access_token": token,
-        "token_type": "access"
+        "token": token,
     })
     assert response.status_code == 200
     data = response.json()
