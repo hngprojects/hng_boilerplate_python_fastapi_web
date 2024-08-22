@@ -1,5 +1,5 @@
-
-import re
+from email_validator import validate_email, EmailNotValidError
+import dns.resolver
 from datetime import datetime
 from typing import Optional, Union, List, Annotated
 
@@ -8,6 +8,21 @@ from pydantic import (BaseModel, EmailStr,
                       StringConstraints,
                       model_validator)
 
+def validate_mx_record(domain: str):
+    """
+    Validate mx records for email
+    """
+    try:
+        # Try to resolve the MX record for the domain
+        mx_records = dns.resolver.resolve(domain, 'MX')
+        print('mx_records: ', mx_records.response)
+        return True if mx_records else False
+    except dns.resolver.NoAnswer:
+        return False
+    except dns.resolver.NXDOMAIN:
+        return False
+    except Exception:
+        return False
 
 class UserBase(BaseModel):
     """Base user schema"""
@@ -52,6 +67,7 @@ class UserCreate(BaseModel):
         Validates passwords
         """
         password = values.get('password')
+        email = values.get("email")
 
         # constraints for password
         if not any(c.islower() for c in password):
@@ -62,6 +78,17 @@ class UserCreate(BaseModel):
             raise ValueError("password must include at least one digit")
         if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in password):
             raise ValueError("password must include at least one special character")
+        
+        try:
+            email = validate_email(email, check_deliverability=True)
+            if email.domain.count(".com") > 1:
+                raise EmailNotValidError("Email address contains multiple '.com' endings.")
+            if not validate_mx_record(email.domain):
+                raise ValueError('Email is invalid')
+        except EmailNotValidError as exc:
+            raise ValueError(exc) from exc
+        except Exception as exc:
+            raise ValueError(exc) from exc
         
         return values
 
@@ -136,6 +163,7 @@ class LoginRequest(BaseModel):
         Validates passwords
         """
         password = values.get('password')
+        email = values.get("email")
 
         # constraints for password
         if not any(c.islower() for c in password):
@@ -147,16 +175,45 @@ class LoginRequest(BaseModel):
         if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in password):
             raise ValueError("password must include at least one special character")
         
+        try:
+            email = validate_email(email, check_deliverability=True)
+            if email.domain.count(".com") > 1:
+                raise EmailNotValidError("Email address contains multiple '.com' endings.")
+            if not validate_mx_record(email.domain):
+                raise ValueError('Email is invalid')
+        except EmailNotValidError as exc:
+            raise ValueError(exc) from exc
+        except Exception as exc:
+            raise ValueError(exc) from exc
+        
         return values
 
 
 class EmailRequest(BaseModel):
     email: EmailStr
 
+    @model_validator(mode='before')
+    @classmethod
+    def validate_email(cls, values: dict):
+        """
+        Validates email
+        """
+        email = values.get("email")
+        try:
+            email = validate_email(email, check_deliverability=True)
+            if email.domain.count(".com") > 1:
+                raise EmailNotValidError("Email address contains multiple '.com' endings.")
+            if not validate_mx_record(email.domain):
+                raise ValueError('Email is invalid')
+        except EmailNotValidError as exc:
+            raise ValueError(exc) from exc
+        except Exception as exc:
+            raise ValueError(exc) from exc
+        return values
+
 
 class Token(BaseModel):
-    access_token: str
-    token_type: str = None
+    token: str
 
 
 class TokenData(BaseModel):
@@ -236,6 +293,25 @@ class MagicLinkRequest(BaseModel):
 
     email: EmailStr
 
+    @model_validator(mode='before')
+    @classmethod
+    def validate_email(cls, values: dict):
+        """
+        Validate email
+        """
+        email = values.get("email")
+        try:
+            email = validate_email(email, check_deliverability=True)
+            if email.domain.count(".com") > 1:
+                raise EmailNotValidError("Email address contains multiple '.com' endings.")
+            if not validate_mx_record(email.domain):
+                raise ValueError('Email is invalid')
+        except EmailNotValidError as exc:
+            raise ValueError(exc) from exc
+        except Exception as exc:
+            raise ValueError(exc) from exc
+        return values
+
 
 class MagicLinkResponse(BaseModel):
     """Schema for magic link respone"""
@@ -250,7 +326,11 @@ class UserRoleSchema(BaseModel):
     org_id: str
 
     @field_validator("role")
+    @classmethod
     def role_validator(cls, value):
+        """
+        Validate role
+        """
         if value not in ["admin", "user", "guest", "owner"]:
             raise ValueError("Role has to be one of admin, guest, user, or owner")
         return value
