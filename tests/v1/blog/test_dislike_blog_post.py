@@ -73,7 +73,9 @@ def make_request(blog_id, token):
     )
 
 
+@patch("api.v1.services.blog.BlogService.create_blog_dislike")
 def test_successful_dislike(
+    mock_create_blog_dislike,
     mock_db_session, 
     test_user, 
     test_blog,
@@ -84,7 +86,10 @@ def test_successful_dislike(
     mock_db_session.query().filter().first.side_effect = [test_user, test_blog]
 
     # mock existing-blog-dislike AND new-blog-dislike
-    mock_db_session.query().filter_by().first.side_effect = [None, test_blog_dislike]
+    mock_db_session.query().filter_by().first.side_effect = None
+
+    # mock created-blog-dislike
+    mock_create_blog_dislike.return_value = test_blog_dislike
 
     # mock dislike-count
     mock_db_session.query().filter_by().count.return_value = 1
@@ -128,7 +133,7 @@ def test_wrong_blog_id(
     access_token_user,
 ):
     mock_user_service.get_current_user = test_user
-    mock_blog_service.fetch = None
+    mock_db_session.query().filter().first.return_value = None
 
     ### TEST REQUEST WITH WRONG blog_id ###
     ### using random uuid instead of blog1.id  ###
