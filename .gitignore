@@ -26,6 +26,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+test_case1.py
 api/core/dependencies/mailjet.py
 
 # PyInstaller
@@ -36,6 +37,7 @@ api/core/dependencies/mailjet.py
 
 # Installer logs
 pip-log.txt
+test_case1.py
 pip-delete-this-directory.txt
 
 # Unit test / coverage reports
