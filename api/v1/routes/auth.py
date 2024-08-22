@@ -344,7 +344,7 @@ async def verify_magic_link(token_schema: Token, db: Session = Depends(get_db)):
     return response
 
 
-@auth.patch("/change-password", status_code=200)
+@auth.put("/password", status_code=200)
 async def change_password(
     schema: ChangePasswordSchema,
     db: Session = Depends(get_db),
