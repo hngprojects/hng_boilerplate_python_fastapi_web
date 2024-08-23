@@ -3,6 +3,8 @@ from fastapi.staticfiles import StaticFiles
 import uvicorn, os
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -33,6 +35,11 @@ app = FastAPI(
     description="A boilerplate for creating an API using FastAPI and SQLAlchemy",
     version="1.0.0",
 )
+
+
+# Initialize the rate limiter
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
 
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory='api/core/dependencies/email/templates')
