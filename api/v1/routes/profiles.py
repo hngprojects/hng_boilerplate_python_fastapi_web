@@ -12,7 +12,10 @@ import os
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.profile import ProfileCreateUpdate, ProfileUpdateResponse
+from api.v1.schemas.profile import (ProfileCreateUpdate,
+                                    ProfileUpdateResponse,
+                                    ProfileRecoveryEmailResponse,
+                                    Token)
 from api.db.database import get_db
 from api.v1.schemas.user import DeactivateUserSchema
 from api.v1.services.user import user_service
@@ -75,6 +78,15 @@ async def update_user_profile(
                                   current_user,
                                   background_tasks)
 
+
+@profile.post("/verify-recovery-email", status_code=status.HTTP_200_OK,
+              response_model=ProfileRecoveryEmailResponse)
+async def verify_recovery_email(
+    token: Token,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+):
+    return profile_service.update_recovery_email(current_user, db, token)
 
 @profile.post("/deactivate", status_code=status.HTTP_200_OK)
 async def deactivate_account(
