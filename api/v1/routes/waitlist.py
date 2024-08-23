@@ -54,7 +54,6 @@ async def waitlist_signup(
     try:
         if db_user:
             cta_link = 'https://anchor-python.teams.hng.tech/about-us'
-
             # Send email in the background
             background_tasks.add_task(
                 send_email, 
