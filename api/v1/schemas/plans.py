@@ -43,7 +43,7 @@ class CreateBillingPlanResponse(ResponseBase):
 
 
 class GetBillingPlanData(BaseModel):
-    billing_plans: List[CreateBillingPlanReturnData]
+    plans: List[CreateBillingPlanReturnData]
 
 
 class GetBillingPlanListResponse(ResponseBase):
