@@ -1,29 +1,28 @@
+import datetime as dt
 import random
 import string
-from typing import Any, Optional, Annotated
-import datetime as dt
-from fastapi import status
+from datetime import datetime, timedelta
+from typing import Annotated, Any, Optional
+
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, Request
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
-from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
+from api.utils.settings import settings
+from api.v1.models import NewsletterSubscriber, Profile, Region, User
 from api.v1.models.associations import user_organisation_association
-from api.v1.models import User, Profile, Region, NewsletterSubscriber
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
-from api.v1.schemas import user
-from api.v1.schemas import token
+from api.v1.schemas import token, user
+from api.v1.services.newsletter import EmailSchema, NewsletterService
 from api.v1.services.notification_settings import notification_setting_service
-from api.v1.services.newsletter import NewsletterService, EmailSchema
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -154,14 +153,9 @@ class UserService(Service):
 
         # create data privacy setting
         data_privacy = DataPrivacySetting(user_id=user.id)
-        profile = Profile(
-            user_id=user.id
-        )
-        region = Region(
-            user_id=user.id,
-            region='Empty'
-        )
-        
+        profile = Profile(user_id=user.id)
+        region = Region(user_id=user.id, region="Empty")
+
         news_letter = db.query(NewsletterSubscriber).filter_by(email=user.email)
         if not news_letter:
             news_letter = NewsletterService.create(db, EmailSchema(email=user.email))
@@ -200,19 +194,14 @@ class UserService(Service):
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
-            
+
             # Create notification settings directly for the user
             notification_setting_service.create(db=db, user=new_user)
 
             # create data privacy setting
             data_privacy = DataPrivacySetting(user_id=new_user.id)
-            profile = Profile(
-                user_id=new_user.id
-            )
-            region = Region(
-                user_id=new_user.id,
-                region='Empty'
-            )
+            profile = Profile(user_id=new_user.id)
+            region = Region(user_id=new_user.id, region="Empty")
 
             db.add_all([data_privacy, profile, region])
             db.commit()
@@ -252,13 +241,8 @@ class UserService(Service):
 
         # create data privacy setting
         data_privacy = DataPrivacySetting(user_id=user.id)
-        profile = Profile(
-            user_id=user.id
-        )
-        region = Region(
-            user_id=user.id,
-            region='Empty'
-        )
+        profile = Profile(user_id=user.id)
+        region = Region(user_id=user.id, region="Empty")
 
         db.add_all([data_privacy, profile, region])
         db.commit()
@@ -269,16 +253,23 @@ class UserService(Service):
 
     def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
         """Function to update a User"""
-        
+
         # Get user from access token if provided, otherwise fetch user by id
-        user = (self.fetch(db=db, id=id) 
-                if current_user.is_superadmin and id is not None
-                else self.fetch(db=db, id=current_user.id)
+        if db.query(User).filter(User.email == schema.email).first():
+            raise HTTPException(
+                status_code=400,
+                detail="User with this email or username already exists",
             )
-        
+
+        user = (
+            self.fetch(db=db, id=id)
+            if current_user.is_superadmin and id is not None
+            else self.fetch(db=db, id=current_user.id)
+        )
+
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
-            if key == 'email':
+            if key == "email":
                 continue
             setattr(user, key, value)
         db.commit()
@@ -490,20 +481,24 @@ class UserService(Service):
         new_password: str,
         user: User,
         db: Session,
-        old_password: Optional[str] = None
+        old_password: Optional[str] = None,
     ):
         """Endpoint to change the user's password"""
         if old_password == new_password:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                detail="Old Password and New Password cannot be the same")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Old Password and New Password cannot be the same",
+            )
         if old_password is None:
             if user.password is None:
                 user.password = self.hash_password(new_password)
                 db.commit()
                 return
             else:
-                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                    detail="Old Password must not be empty, unless setting password for the first time.")
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Old Password must not be empty, unless setting password for the first time.",
+                )
         elif not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
         else:
@@ -515,6 +510,7 @@ class UserService(Service):
     ):
         """Get the current super admin"""
         user = self.get_current_user(db=db, access_token=token)
+
         if not user.is_superadmin:
             raise HTTPException(
                 status_code=403,
@@ -526,7 +522,9 @@ class UserService(Service):
         self, db: Session, user: User, token: str, expiration: datetime
     ):
         """Save the token and expiration in the user's record"""
-        db.query(TokenLogin).filter_by(user_id=user.id).delete(synchronize_session='fetch')
+        db.query(TokenLogin).filter_by(user_id=user.id).delete(
+            synchronize_session="fetch"
+        )
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
         db.add(token)
         db.commit()
@@ -549,33 +547,38 @@ class UserService(Service):
         """Generate a 6-digit token"""
         return "".join(
             random.choices(string.digits, k=6)
-        ), datetime.utcnow() + timedelta(minutes=1)
-
+        ), datetime.utcnow() + timedelta(minutes=10)
 
     def get_users_by_role(self, db: Session, role_id: str, current_user: User):
         """Function to get all users by role"""
         if role_id == "" or role_id is None:
-            raise HTTPException(
-                status_code=400, 
-                detail="Role ID is required"
-            )
+            raise HTTPException(status_code=400, detail="Role ID is required")
 
-        user_roles = db.query(user_organisation_association).filter(user_organisation_association.c.user_id == current_user.id, user_organisation_association.c.role.in_(['admin', 'owner'])).all()
+        user_roles = (
+            db.query(user_organisation_association)
+            .filter(
+                user_organisation_association.c.user_id == current_user.id,
+                user_organisation_association.c.role.in_(["admin", "owner"]),
+            )
+            .all()
+        )
 
         if len(user_roles) == 0:
             raise HTTPException(
-                status_code=403, 
-                detail="Permission denied. Admin access required."
+                status_code=403, detail="Permission denied. Admin access required."
             )
 
-        users = db.query(User).join(user_organisation_association).filter(user_organisation_association.c.role == role_id).all()
+        users = (
+            db.query(User)
+            .join(user_organisation_association)
+            .filter(user_organisation_association.c.role == role_id)
+            .all()
+        )
 
         if len(users) == 0:
-            raise HTTPException(
-                status_code=404, 
-                detail="No users found for this role"
-            )
+            raise HTTPException(status_code=404, detail="No users found for this role")
 
         return users
+
 
 user_service = UserService()
