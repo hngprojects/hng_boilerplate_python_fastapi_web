@@ -39,7 +39,7 @@ def before_all(client: client, session: session, mock_send_email) -> pytest.fixt
             "password": "strin8Hsg263@",
             "first_name": "string",
             "last_name": "string",
-            "email": "test@email.com",
+            "email": "test@gmail.com",
         }
     )
     global auth_token
