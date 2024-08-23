@@ -1,7 +1,9 @@
 from email_validator import validate_email, EmailNotValidError
 import dns.resolver
 from datetime import datetime
-from typing import Optional, Union, List, Annotated
+from typing import (Optional, Union,
+                    List, Annotated, Dict,
+                    Literal)
 
 from pydantic import (BaseModel, EmailStr,
                       field_validator, ConfigDict,
@@ -114,6 +116,66 @@ class UserData(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+class UserData2(BaseModel):
+    """
+    Schema for users to be returned to superadmin
+    """
+    id: str
+    email: EmailStr
+    first_name: str
+    last_name: str
+    is_active: bool
+    is_deleted: bool
+    is_verified: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+class ProfileData(BaseModel):
+    """
+    Pydantic model for a profile.
+    """
+    id: str
+    created_at: datetime
+    pronouns: Optional[str] = None
+    job_title: Optional[str] = None
+    department: Optional[str] = None
+    social: Optional[str] = None
+    bio: Optional[str] = None
+    phone_number: Optional[str] = None
+    avatar_url: Optional[str] = None
+    recovery_email: Optional[EmailStr]
+
+    model_config = ConfigDict(from_attributes=True)
+
+class OrganisationData(BaseModel):
+    """Base organisation schema"""
+    id: str
+    created_at: datetime
+    updated_at: datetime
+    name: str
+    email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    user_role: List[str]
+    type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    description: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AuthMeResponse(BaseModel):
+    """
+    Auth response
+    """
+    message: str
+    status_code: int
+    data: Dict[Literal["user", "organisations", "profile"],
+               Union[UserData2, List[OrganisationData], ProfileData]]
+
 
 class AllUsersResponse(BaseModel):
     """
