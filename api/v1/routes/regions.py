@@ -61,3 +61,16 @@ def update_region(region_id: str, region: RegionUpdate, db: Session = Depends(ge
 def delete_region(region_id: str, db: Session = Depends(get_db)):
     region = region_service.delete(db, region_id)
     return
+
+
+@regions.get(
+    '/', response_model=List[str])
+def get_unique_timezones(db: Session = Depends(get_db)):
+    
+    '''Get unique time zones'''
+    timezones = region_service.fetch_unique_timezones(db)
+    return success_response(
+        status_code=200,
+        message='Timezones retrieved successfully',
+        data=jsonable_encoder(timezones)
+    )
