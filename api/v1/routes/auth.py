@@ -310,10 +310,11 @@ async def verify_signin_token(
 @auth.post("/magic-link", status_code=status.HTTP_200_OK)
 @limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def request_magic_link(
-    request: MagicLinkRequest, background_tasks: BackgroundTasks,
+    request: Request, 
+    requests: MagicLinkRequest, background_tasks: BackgroundTasks,
     response: Response, db: Session = Depends(get_db)
 ):
-    user = user_service.fetch_by_email(db=db, email=request.email)
+    user = user_service.fetch_by_email(db=db, email=requests.email)
     magic_link_token = user_service.create_access_token(user_id=user.id)
     magic_link = f"https://anchor-python.teams.hng.tech/login/magic-link?token={magic_link_token}"
 
