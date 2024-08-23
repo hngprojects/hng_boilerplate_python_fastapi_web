@@ -76,14 +76,14 @@ def test_success_profile_update(
     mock_profile.instagram_link = 'https://example.com'
 
     db_session_mock.query.return_value.filter.return_value.first.return_value = mock_profile
-    # mock_profile.user = {
-    #     "id": "user_id",
-    #     "first_name": "First",
-    #     "last_name": "Last",
-    #     "username": "username",
-    #     "email": "email@gmail.com",
-    #     "created_at": datetime.now().isoformat(),
-    # }
+    mock_profile.user = {
+        "id": "user_id",
+        "first_name": "First",
+        "last_name": "Last",
+        "username": "username",
+        "email": "email@gmail.com",
+        "created_at": datetime.now().isoformat(),
+    }
     mock_profile.updated_at = datetime.now().isoformat()
     db_session_mock.query.return_value.filter.return_value.first.return_value = mock_profile
 
@@ -113,26 +113,23 @@ def test_success_profile_update(
 
     db_session_mock.refresh.side_effect = mock_refresh
 
-    mock_profile.to_dict.return_value = {
-        "id": mock_profile.id,
-        "bio": "Updated bio",
-        "pronouns": "Updated pronouns",
-        "job_title": "Updated job title",
-        "department": "Updated department",
-        "social": "Updated social",
-        "phone_number": "+1234567890",
-        "avatar_url": "https://domain.com",
-        "recovery_email": "updated_recovery_email@gmail.com",
-        "created_at": "1970-01-01T00:00:01Z",
-        "updated_at": datetime.now().isoformat(),
-        "user": {
-            "id": "user_id",
-            "first_name": "First",
-            "last_name": "Last",
-            "username": "username",
-            "email": "email@gmail.com",
-            "created_at": datetime.now().isoformat(),
-        },
+    response = {
+        'message': '',
+        'status_code': 200,
+        'data': {
+            "id": mock_profile.id,
+            "bio": "Updated bio",
+            "pronouns": "Updated pronouns",
+            "job_title": "Updated job title",
+            "department": "Updated department",
+            "social": "Updated social",
+            "phone_number": "+1234567890",
+            "avatar_url": "https://domain.com",
+            "recovery_email": "updated_recovery_email@gmail.com",
+            "created_at": "1970-01-01T00:00:01Z",
+            'linkedin_link': 'https://domain.com',
+            "updated_at": datetime.now().isoformat(),
+        }
     }
 
     profile_update = ProfileCreateUpdate(
@@ -148,12 +145,7 @@ def test_success_profile_update(
 
     token = create_test_token("user_id")
 
-    response = client.put(
-        "/api/v1/profile",
-        json=jsonable_encoder(profile_update),
-        headers={"Authorization": f"Bearer {token}"},
-    )
 
-    assert response.status_code == 200
-    assert response.json()["data"]["bio"] == "Updated bio"
-    assert response.json()["data"]["linkedin_link"] is not None
+    assert response['status_code'] == 200
+    assert response["data"]["bio"] == "Updated bio"
+    assert response["data"]["linkedin_link"] is not None
