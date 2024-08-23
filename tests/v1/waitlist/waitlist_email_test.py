@@ -46,13 +46,16 @@ def test_waitlist_signup(mock_send_email, client_with_mocks):
 def test_duplicate_email(mock_send_email, client_with_mocks):
     client, mock_db = client_with_mocks
     # Simulate an existing user in the database
-    mock_db.query.return_value.filter.return_value.first.return_value = MagicMock()
+    existing_user = MagicMock()
+    mock_db.query.return_value.filter.return_value.first.return_value = existing_user
 
     response = client.post(
         "/api/v1/waitlist/", json={"email": "duplicate@gmail.com", "full_name": "Test User"}
     )
-    assert response.status_code == 400
 
+    # Ensure that the response status code reflects the duplicate email case
+    assert response.status_code == 400
+    
 def test_invalid_email(mock_send_email, client_with_mocks):
     client, _ = client_with_mocks
     response = client.post(
