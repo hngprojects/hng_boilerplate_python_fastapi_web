@@ -74,7 +74,7 @@ def test_update_user(mock_db_session):
 
     """Testing the endpoint with an authorized user"""
     data = {
-        "email": "dummyuser20@gmail.com"
+        "first_name": "AdminTest"
     }
     
     mock_db_session.query().filter().first.return_value = False
@@ -85,7 +85,7 @@ def test_update_user(mock_db_session):
     get_user_response = client.patch(get_user_url,json=data)
     assert get_user_response.status_code == 200
     assert get_user_response.json()['message'] == 'User Updated Successfully'
-    assert get_user_response.json()['data']['email'] == data['email']
+    assert get_user_response.json()['data']['first_name'] == data['first_name']
 
     """Testing endpoint with an unauthorized user"""
 
@@ -110,7 +110,7 @@ def test_current_user_update(mock_db_session):
         updated_at=datetime.now(timezone.utc),
     )
     data = {
-        "email": "dummyuser20@gmail.com"
+        "first_name": "Mr"
     }
     app.dependency_overrides[user_service.get_current_user] = lambda : dummy_mock_user
 
@@ -120,5 +120,5 @@ def test_current_user_update(mock_db_session):
     get_response = client.patch(get_user_url,json=data)
     assert get_response.status_code == 200
     assert get_response.json()['message'] == 'User Updated Successfully'
-    assert get_response.json()['data']['email'] == data['email']
+    assert get_response.json()['data']['first_name'] == data['first_name']
 
