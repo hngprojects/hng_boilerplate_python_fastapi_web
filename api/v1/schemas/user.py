@@ -17,7 +17,6 @@ def validate_mx_record(domain: str):
     try:
         # Try to resolve the MX record for the domain
         mx_records = dns.resolver.resolve(domain, 'MX')
-        print('mx_records: ', mx_records.response)
         return True if mx_records else False
     except dns.resolver.NoAnswer:
         return False
