@@ -17,7 +17,6 @@ def validate_mx_record(domain: str):
     try:
         # Try to resolve the MX record for the domain
         mx_records = dns.resolver.resolve(domain, 'MX')
-        print('mx_records: ', mx_records.response)
         return True if mx_records else False
     except dns.resolver.NoAnswer:
         return False
@@ -98,7 +97,6 @@ class UserUpdate(BaseModel):
     
     first_name : Optional[str] = None
     last_name : Optional[str] = None
-    email : Optional[str] = None
 
 class UserData(BaseModel):
     """

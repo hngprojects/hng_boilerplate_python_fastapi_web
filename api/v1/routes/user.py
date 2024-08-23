@@ -28,7 +28,7 @@ async def delete_account(request: Request, db: Session = Depends(get_db), curren
         message='User deleted successfully',
     )
 
-@user_router.patch("/",status_code=status.HTTP_200_OK)
+@user_router.patch("",status_code=status.HTTP_200_OK)
 def update_current_user(
     current_user : Annotated[User , Depends(user_service.get_current_user)],
     schema : UserUpdate,
@@ -91,7 +91,7 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
 
-@user_router.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
+@user_router.get('', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
 async def get_users(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     db: Annotated[Session, Depends(get_db)],
@@ -123,7 +123,7 @@ async def get_users(
     }
     return user_service.fetch_all(db, page, per_page, **query_params)
 
-@user_router.post("/", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
+@user_router.post("", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
 def admin_registers_user(
     user_request: AdminCreateUser,
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
