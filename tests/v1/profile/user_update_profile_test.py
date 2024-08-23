@@ -61,22 +61,31 @@ def test_success_profile_update(
     mock_profile.id = "c9752bcc-1cf4-4476-a1ee-84b19fd0c521"
     mock_profile.bio = "Old bio"
     mock_profile.pronouns = "Old pronouns"
+    mock_profile.username = 'some user'
     mock_profile.job_title = "Old job title"
     mock_profile.department = "Old department"
     mock_profile.social = "Old social"
     mock_profile.phone_number = "1234567890"
-    mock_profile.avatar_url = "old_avatar_url"
-    mock_profile.recovery_email = "old_recovery_email@example.com"
-    mock_profile.user = {
-        "id": "user_id",
-        "first_name": "First",
-        "last_name": "Last",
-        "username": "username",
-        "email": "email@example.com",
-        "created_at": datetime.now().isoformat(),
-    }
+    mock_profile.avatar_url = "https://example.com"
+    mock_profile.recovery_email = "old_recovery_email@gmail.com"
+    mock_profile.email = "user_email@example.com"  # Mock the email attribute properly
     mock_profile.updated_at = datetime.now().isoformat()
-    db_session_mock.query().filter().first.return_value = mock_profile
+    mock_profile.facebook_link = 'https://example.com'
+    mock_profile.linkedin_link = 'https://example.com'
+    mock_profile.twitter_link = 'https://example.com'
+    mock_profile.instagram_link = 'https://example.com'
+
+    db_session_mock.query.return_value.filter.return_value.first.return_value = mock_profile
+    # mock_profile.user = {
+    #     "id": "user_id",
+    #     "first_name": "First",
+    #     "last_name": "Last",
+    #     "username": "username",
+    #     "email": "email@gmail.com",
+    #     "created_at": datetime.now().isoformat(),
+    # }
+    mock_profile.updated_at = datetime.now().isoformat()
+    db_session_mock.query.return_value.filter.return_value.first.return_value = mock_profile
 
     def mock_commit():
         mock_profile.bio = "Updated bio"
@@ -85,8 +94,8 @@ def test_success_profile_update(
         mock_profile.department = "Updated department"
         mock_profile.social = "Updated social"
         mock_profile.phone_number = "+1234567890"
-        mock_profile.avatar_url = "updated_avatar_url"
-        mock_profile.recovery_email = "updated_recovery_email@example.com"
+        mock_profile.avatar_url = "https://example.com"
+        mock_profile.recovery_email = "updated_recovery_email@gmail.com"
         mock_profile.updated_at = datetime.now()
 
     db_session_mock.commit.side_effect = mock_commit
@@ -98,8 +107,8 @@ def test_success_profile_update(
         instance.department = "Updated department"
         instance.social = "Updated social"
         instance.phone_number = "+1234567890"
-        instance.avatar_url = "updated_avatar_url"
-        instance.recovery_email = "updated_recovery_email@example.com"
+        instance.avatar_url = "https://example.com"
+        instance.recovery_email = "updated_recovery_email@gmail.com"
         instance.updated_at = datetime.now()
 
     db_session_mock.refresh.side_effect = mock_refresh
@@ -112,8 +121,8 @@ def test_success_profile_update(
         "department": "Updated department",
         "social": "Updated social",
         "phone_number": "+1234567890",
-        "avatar_url": "updated_avatar_url",
-        "recovery_email": "updated_recovery_email@example.com",
+        "avatar_url": "https://domain.com",
+        "recovery_email": "updated_recovery_email@gmail.com",
         "created_at": "1970-01-01T00:00:01Z",
         "updated_at": datetime.now().isoformat(),
         "user": {
@@ -121,7 +130,7 @@ def test_success_profile_update(
             "first_name": "First",
             "last_name": "Last",
             "username": "username",
-            "email": "email@example.com",
+            "email": "email@gmail.com",
             "created_at": datetime.now().isoformat(),
         },
     }
@@ -133,18 +142,18 @@ def test_success_profile_update(
         social="Updated social",
         bio="Updated bio",
         phone_number="+1234567890",
-        avatar_url="updated_avatar_url",
-        recovery_email="updated_recovery_email@example.com",
+        avatar_url="https://example.com",
+        recovery_email="updated_recovery_email@gmail.com",
     )
 
     token = create_test_token("user_id")
 
-    response = client.patch(
-        "/api/v1/profile/",
+    response = client.put(
+        "/api/v1/profile",
         json=jsonable_encoder(profile_update),
         headers={"Authorization": f"Bearer {token}"},
     )
 
     assert response.status_code == 200
     assert response.json()["data"]["bio"] == "Updated bio"
-    assert response.json()["data"]["updated_at"] is not None
+    assert response.json()["data"]["linkedin_link"] is not None
