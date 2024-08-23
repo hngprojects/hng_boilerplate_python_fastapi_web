@@ -156,6 +156,7 @@ async def unsubscribe_newsletter(
         recipient=request.email,
         template_name="unsubscribe.html",
         subject="Unsubscription from HNG Boilerplate Newsletter",
+        context={},
     )
     return success_response(
         message="Unsubscribed successfully.",
