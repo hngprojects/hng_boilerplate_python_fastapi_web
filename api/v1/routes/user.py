@@ -6,9 +6,7 @@ from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas.user import (
-    DeactivateUserSchema,
-    ChangePasswordSchema,
-    ChangePwdRet, AllUsersResponse, UserUpdate,
+    AllUsersResponse, UserUpdate,
     AdminCreateUserResponse, AdminCreateUser
 )
 from api.db.database import get_db
@@ -16,28 +14,6 @@ from api.v1.services.user import user_service
 
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
-
-
-@user_router.get("/me", status_code=status.HTTP_200_OK, response_model=success_response)
-def get_current_user_details(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to get current user details"""
-
-    return success_response(
-        status_code=200,
-        message="User details retrieved successfully",
-        data=jsonable_encoder(
-            current_user,
-            exclude=[
-                "password",
-                "is_deleted",
-                "is_verified",
-                "updated_at",
-            ],
-        ),
-    )
 
 
 @user_router.get('/delete', status_code=200)
@@ -52,21 +28,7 @@ async def delete_account(request: Request, db: Session = Depends(get_db), curren
         message='User deleted successfully',
     )
 
-
-@user_router.patch("/me/password", status_code=200)
-async def change_password(
-    schema: ChangePasswordSchema,
-    db: Session = Depends(get_db),
-    user: User = Depends(user_service.get_current_user),
-):
-    """Endpoint to change the user's password"""
-
-    user_service.change_password(schema.old_password, schema.new_password, user, db)
-
-    return success_response(status_code=200, message="Password changed successfully")
-
-
-@user_router.patch("/",status_code=status.HTTP_200_OK)
+@user_router.patch("",status_code=status.HTTP_200_OK)
 def update_current_user(
     current_user : Annotated[User , Depends(user_service.get_current_user)],
     schema : UserUpdate,
@@ -129,7 +91,7 @@ def delete_user(
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
 
-@user_router.get('/', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
+@user_router.get('', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
 async def get_users(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     db: Annotated[Session, Depends(get_db)],
@@ -161,7 +123,7 @@ async def get_users(
     }
     return user_service.fetch_all(db, page, per_page, **query_params)
 
-@user_router.post("/", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
+@user_router.post("", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
 def admin_registers_user(
     user_request: AdminCreateUser,
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],

@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 
 client = TestClient(app)
-PROFILE_ENDPOINT = '/api/v1/profile/'
+PROFILE_ENDPOINT = '/api/v1/profile'
 LOGIN_ENDPOINT = 'api/v1/auth/login'
 
 
@@ -60,7 +60,7 @@ def create_mock_user_profile(mock_user_service, mock_db_session):
         social="facebook",
         bio="a foody",
         phone_number="17045060889999",
-        avatar_url="avatalink",
+        avatar_url="https://example.com",
         recovery_email="user@gmail.com",
         user_id=mock_user.id,
         created_at=datetime.now(timezone.utc),
@@ -82,52 +82,18 @@ def test_errors(mock_user_service, mock_db_session):
     assert response.get("status_code") == status.HTTP_200_OK
     access_token = response.get('access_token')
 
-    missing_field = client.post(PROFILE_ENDPOINT, json={
+    missing_field = client.put(PROFILE_ENDPOINT, json={
         "username": "testuser",
         "job_title": "developer",
         "department": "backend",
         "social": "facebook",
         "bio": "a foody",
         "phone_number": "17045060889999",
-        "avatar_url": "avatalink",
+        "avatar_url": "string",
         "recovery_email": "user@gmail.com"
     }, headers={'Authorization': f'Bearer {access_token}'})
-    assert missing_field.status_code == 400 
+    assert missing_field.status_code == 422
 
-    unauthorized_error = client.post(PROFILE_ENDPOINT, json={
-        "username": "testuser",
-        "pronouns": "male",
-        "job_title": "developer",
-        "department": "backend",
-        "social": "facebook",
-        "bio": "a foody",
-        "phone_number": "17045060889999",
-        "avatar_url": "avatalink",
-        "recovery_email": "user@gmail.com"
-    })
+    unauthorized_error = client.put(PROFILE_ENDPOINT, json={})
     assert unauthorized_error.status_code == 401
 
-
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_user_profile_exists(mock_user_service, mock_db_session):
-    """Test for profile creation when profile already exists"""
-    create_mock_user(mock_user_service, mock_db_session)
-    login = client.post(LOGIN_ENDPOINT, json={
-        "email": "testuser@gmail.com",
-        "password": "Testpassword@123"
-    })
-    response = login.json()
-    assert response.get("status_code") == status.HTTP_200_OK
-    access_token = response.get('access_token')
-    profile_exists = client.post(PROFILE_ENDPOINT, json={
-        "username": "testuser",
-        "pronouns": "he/him",
-        "job_title": "developer",
-        "department": "backend",
-        "social": "facebook",
-        "bio": "a foody",
-        "phone_number": "17045060889999",
-        "avatar_url": "avatalink",
-        "recovery_email": "user@gmail.com"
-    }, headers={'Authorization': f'Bearer {access_token}'})
-    assert profile_exists.status_code == 400

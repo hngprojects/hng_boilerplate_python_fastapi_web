@@ -7,10 +7,14 @@ import json
 from api.v1.schemas.stripe import PlanUpgradeRequest
 from typing import List
 from api.db.database import get_db
+from typing import Optional, Dict, Any
+from fastapi.responses import JSONResponse
+from fastapi.responses import RedirectResponse
 import os
-from api.utils.success_response import success_response
+from api.utils.success_response import success_response, fail_response
 from api.v1.models.user import User
 from api.v1.services.user import user_service
+from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -19,6 +23,7 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 endpoint_secret = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 subscription_ = APIRouter(prefix="/payment", tags=["subscribe-plan"])
+
 
 @subscription_.post("/stripe/upgrade-plan")
 def stripe_payment(
@@ -30,12 +35,52 @@ def stripe_payment(
     return stripe_payment_request(db, plan_upgrade_request.user_id, request, plan_upgrade_request.plan_name) 
 
 @subscription_.get("/stripe/success")
-def success_upgrade():
-    return {"message" : "Payment successful"}
+def success_upgrade(session_id: str):
+    return success_response(
+        status_code=status.HTTP_200_OK, 
+        message="Payment intent initiated. Please verify the payment using the session ID.",
+        data={"session_id": session_id}
+    )
+
+
+@subscription_.get("/stripe/status")
+async def verify_payment(session_id: str, db: Session = Depends(get_db)):
+    try:
+        # Retrieve the session from Stripe
+        session = stripe.checkout.Session.retrieve(session_id)
+
+        # Check if the payment was successful
+        if session.payment_status == "paid":
+            # If payment was successful, update the user's plan
+            user_id = session.metadata["user_id"]
+            plan_name = session.metadata["plan_name"]
+            print(user_id, plan_name)
+            await update_user_plan(db, user_id, plan_name)
+
+            return { "status": "SUCCESS" }
+
+            # return success_response(
+            #     status_code=status.HTTP_200_OK,
+            #     message="Payment successful and plan updated.",
+            #     data={"session_id": session_id, "payment_status": session.payment_status}
+            # )
+        else:
+            return fail_response(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                message="Payment not successful.",
+                data={"session_id": session_id, "status": session.payment_status}
+            )
+
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=500, detail=f"Stripe error: {str(e)}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @subscription_.get("/stripe/cancel")
 def cancel_upgrade():
-    return {"message" : "Payment canceled"}
+
+    return success_response(status_code=status.HTTP_200_OK, message="Payment intent canceled")
 
 
 @subscription_.get("/plans")
@@ -76,7 +121,7 @@ async def webhook_received(
         }
         # Save to DB
         # Send email in background task
-        await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
+        #await update_user_plan(db, payment["metadata"]["user_id"], payment["metadata"]["plan_name"])
         return {"message": response_details}
     
 
@@ -85,9 +130,9 @@ async def get_organisations_with_users_and_plans(db: Session = Depends(get_db), 
     try:
         data = fetch_all_organisations_with_users_and_plans(db)
         if not data:
-            raise HTTPException(status_code=404, detail="No data found")
+            return fail_response(status_code=404, message="No data found")
         return success_response(
-            status_code=status.HTTP_302_FOUND,
+            status_code=status.HTTP_200_OK,
             message='billing details successfully retrieved',
             data=data,
             )

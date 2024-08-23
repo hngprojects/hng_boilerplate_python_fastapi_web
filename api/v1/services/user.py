@@ -1,27 +1,27 @@
+import datetime as dt
 import random
 import string
-from typing import Any, Optional, Annotated
-import datetime as dt
-from fastapi import status
+from datetime import datetime, timedelta
+from typing import Annotated, Any, Optional
+
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from fastapi import Depends, HTTPException, Request
-from sqlalchemy.orm import Session
-from sqlalchemy import desc
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from sqlalchemy import desc
+from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
 from api.core.dependencies.email_sender import send_email
 from api.db.database import get_db
-from api.utils.settings import settings
 from api.utils.db_validators import check_model_existence
+from api.utils.settings import settings
+from api.v1.models import NewsletterSubscriber, Profile, Region, User
 from api.v1.models.associations import user_organisation_association
-from api.v1.models.user import User
 from api.v1.models.data_privacy import DataPrivacySetting
 from api.v1.models.token_login import TokenLogin
-from api.v1.schemas import user
-from api.v1.schemas import token
+from api.v1.schemas import token, user
+from api.v1.services.newsletter import EmailSchema, NewsletterService
 from api.v1.services.notification_settings import notification_setting_service
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -153,8 +153,14 @@ class UserService(Service):
 
         # create data privacy setting
         data_privacy = DataPrivacySetting(user_id=user.id)
+        profile = Profile(user_id=user.id)
+        region = Region(user_id=user.id, region="Empty")
 
-        db.add(data_privacy)
+        news_letter = db.query(NewsletterSubscriber).filter_by(email=user.email)
+        if not news_letter:
+            news_letter = NewsletterService.create(db, EmailSchema(email=user.email))
+
+        db.add_all([data_privacy, profile, region])
         db.commit()
         db.refresh(data_privacy)
 
@@ -188,6 +194,18 @@ class UserService(Service):
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
+
+            # Create notification settings directly for the user
+            notification_setting_service.create(db=db, user=new_user)
+
+            # create data privacy setting
+            data_privacy = DataPrivacySetting(user_id=new_user.id)
+            profile = Profile(user_id=new_user.id)
+            region = Region(user_id=new_user.id, region="Empty")
+
+            db.add_all([data_privacy, profile, region])
+            db.commit()
+
             user_schema = user.UserData.model_validate(new_user, from_attributes=True)
             return user.AdminCreateUserResponse(
                 message="User created successfully",
@@ -213,13 +231,23 @@ class UserService(Service):
 
         # Create user object with hashed password and other attributes from schema
         user = User(**schema.model_dump())
+
+        user.is_superadmin = True
         db.add(user)
         db.commit()
-        db.refresh(user)
 
-        # Set user to super admin
-        user.is_superadmin = True
+        # # Create notification settings directly for the user
+        notification_setting_service.create(db=db, user=user)
+
+        # create data privacy setting
+        data_privacy = DataPrivacySetting(user_id=user.id)
+        profile = Profile(user_id=user.id)
+        region = Region(user_id=user.id, region="Empty")
+
+        db.add_all([data_privacy, profile, region])
         db.commit()
+
+        db.refresh(user)
 
         return user
 
@@ -241,6 +269,8 @@ class UserService(Service):
 
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
+            if key == "email":
+                continue
             setattr(user, key, value)
         db.commit()
         db.refresh(user)
@@ -448,18 +478,32 @@ class UserService(Service):
 
     def change_password(
         self,
-        old_password: str,
         new_password: str,
         user: User,
         db: Session,
+        old_password: Optional[str] = None,
     ):
         """Endpoint to change the user's password"""
-
-        if not self.verify_password(old_password, user.password):
+        if old_password == new_password:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Old Password and New Password cannot be the same",
+            )
+        if old_password is None:
+            if user.password is None:
+                user.password = self.hash_password(new_password)
+                db.commit()
+                return
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Old Password must not be empty, unless setting password for the first time.",
+                )
+        elif not self.verify_password(old_password, user.password):
             raise HTTPException(status_code=400, detail="Incorrect old password")
-
-        user.password = self.hash_password(new_password)
-        db.commit()
+        else:
+            user.password = self.hash_password(new_password)
+            db.commit()
 
     def get_current_super_admin(
         self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
@@ -478,28 +522,26 @@ class UserService(Service):
         self, db: Session, user: User, token: str, expiration: datetime
     ):
         """Save the token and expiration in the user's record"""
-
-        db.query(TokenLogin).filter(TokenLogin.user_id == user.id).delete()
-
+        db.query(TokenLogin).filter_by(user_id=user.id).delete(
+            synchronize_session="fetch"
+        )
         token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
         db.add(token)
         db.commit()
-        db.refresh(token)
 
     def verify_login_token(self, db: Session, schema: token.TokenRequest):
         """Verify the token and email combination"""
-
-        user = db.query(User).filter(User.email == schema.email).first()
-
-        if not user:
-            raise HTTPException(status_code=401, detail="Invalid email or token")
-
-        token = db.query(TokenLogin).filter(TokenLogin.user_id == user.id).first()
+        token = db.query(TokenLogin).filter_by(token=schema.token).first()
+        if not token:
+            raise HTTPException(status_code=404, detail="Token Expired")
 
         if token.token != schema.token or token.expiry_time < datetime.utcnow():
             raise HTTPException(status_code=401, detail="Invalid email or token")
 
-        return user
+        db.delete(token)
+        db.commit()
+
+        return db.query(User).filter_by(id=token.user_id).first()
 
     def generate_token(self):
         """Generate a 6-digit token"""

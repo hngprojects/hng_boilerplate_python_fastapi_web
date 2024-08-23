@@ -61,7 +61,7 @@ def test_update_billing_plan(mock_user_service, mock_db_session):
         "organisation_id": "s2334d",
         "description": "All you need in one pack",
         "price": 80,
-        "duration": "Monthly",
+        "duration": "monthly",
         "currency": "Naira",
         "features": ["Multiple team", "Premium support"],
     }
@@ -71,5 +71,7 @@ def test_update_billing_plan(mock_user_service, mock_db_session):
         headers={"Authorization": f"Bearer {access_token}"},
         json=data,
     )
+
+    print(response.json())
 
     assert response.status_code == status.HTTP_200_OK

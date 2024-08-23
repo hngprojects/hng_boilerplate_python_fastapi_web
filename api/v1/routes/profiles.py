@@ -1,6 +1,10 @@
-from fastapi import Depends, APIRouter, Request, logger, status,  File, UploadFile, HTTPException
+from fastapi import (Depends, APIRouter,
+                     Request,
+                     status,  File,
+                     UploadFile, HTTPException,
+                     BackgroundTasks)
 from sqlalchemy.orm import Session
-import logging
+from typing import Annotated
 from PIL import Image
 from io import BytesIO
 from fastapi.responses import JSONResponse
@@ -8,7 +12,10 @@ import os
 
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.schemas.profile import ProfileCreateUpdate
+from api.v1.schemas.profile import (ProfileCreateUpdate,
+                                    ProfileUpdateResponse,
+                                    ProfileRecoveryEmailResponse,
+                                    Token)
 from api.db.database import get_db
 from api.v1.schemas.user import DeactivateUserSchema
 from api.v1.services.user import user_service
@@ -19,24 +26,26 @@ profile = APIRouter(prefix="/profile", tags=["Profiles"])
 
 
 @profile.get(
-    "/current-user", status_code=status.HTTP_200_OK, response_model=success_response
+    "/{user_id}", status_code=status.HTTP_200_OK, response_model=success_response
 )
-def get_current_user_profile(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
+def get_current_user_profile(user_id: str,
+                             db: Session = Depends(get_db),
+                             current_user: User = Depends(user_service.get_current_user)
 ):
     """Endpoint to get current user profile details"""
 
-    profile = profile_service.fetch_by_user_id(db, user_id=current_user.id)
+    profile = profile_service.fetch_by_user_id(db, user_id=user_id)
 
     return success_response(
-        status_code=status.HTTP_201_CREATED,
-        message="User profile create successfully",
+        status_code=status.HTTP_200_OK,
+        message="User profile retrieved successfully",
         data=profile.to_dict(),
     )
 
 
-@profile.post('/', status_code=status.HTTP_201_CREATED, response_model=success_response)
+@profile.post('/', status_code=status.HTTP_201_CREATED,
+              response_model=success_response,
+              include_in_schema=False)
 def create_user_profile(
     schema: ProfileCreateUpdate, 
     db: Session = Depends(get_db), 
@@ -55,24 +64,29 @@ def create_user_profile(
     return response
 
 
-@profile.patch("/", status_code=status.HTTP_200_OK, response_model=success_response)
-def update_user_profile(
+@profile.put("", status_code=status.HTTP_200_OK,
+             response_model=ProfileUpdateResponse)
+async def update_user_profile(
     schema: ProfileCreateUpdate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user),
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+    background_tasks: BackgroundTasks
 ):
     """Endpoint to update user profile"""
+    return profile_service.update(db,
+                                  schema,
+                                  current_user,
+                                  background_tasks)
 
-    updated_profile = profile_service.update(db, schema=schema, user_id=current_user.id)
 
-    response = success_response(
-        status_code=status.HTTP_200_OK,
-        message="User profile updated successfully",
-        data=updated_profile.to_dict(),
-    )
-
-    return response
-
+@profile.post("/verify-recovery-email", status_code=status.HTTP_200_OK,
+              response_model=ProfileRecoveryEmailResponse)
+async def verify_recovery_email(
+    token: Token,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_user)],
+):
+    return profile_service.update_recovery_email(current_user, db, token)
 
 @profile.post("/deactivate", status_code=status.HTTP_200_OK)
 async def deactivate_account(

@@ -37,11 +37,7 @@ class NewsletterService(Service):
             .first()
         )
         if newsletter:
-            raise HTTPException(
-                status_code=400, detail="User already subscribed to newsletter"
-            )
-
-        return newsletter
+            return newsletter
 
     @staticmethod
     def fetch(db: Session, id: str):
@@ -70,9 +66,11 @@ class NewsletterService(Service):
         newsletter_subscriber = db.query(NewsletterSubscriber).filter(NewsletterSubscriber.email == request.email).first()
         if not newsletter_subscriber:
             raise HTTPException(
-                status_code=404, detail="Email not found."
+                status_code=400,
+                detail="No active subscription found for your email."
             )
         db.delete(newsletter_subscriber)
+        db.commit()
 
     def delete(db: Session, id: str):
         """Deletes a single newsletter by id"""

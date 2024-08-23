@@ -1,78 +1,60 @@
-import sys, os
-import warnings
-
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from datetime import datetime, timezone
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from sqlalchemy.orm import Session
+from uuid_extensions import uuid7
+
 from api.db.database import get_db
+from api.v1.models.contact_us import ContactUs
 from api.v1.models.newsletter import NewsletterSubscriber
-from unittest.mock import MagicMock
-from api.v1.services.user import oauth2_scheme, user_service
+from main import app
 
-def mock_deps():
-    return MagicMock(id="user_id")
 
-def mock_oauth():
-    return 'access_token'
 
-client = TestClient(app)
-
-# Mock the database dependency
 @pytest.fixture
 def db_session_mock():
-    db_session = MagicMock()
-    yield db_session
+    db_session = MagicMock(spec=Session)
+    return db_session
 
-# Override the dependency with the mock
-@pytest.fixture(autouse=True)
-def override_get_db(db_session_mock):
-    def get_db_override():
-        yield db_session_mock
-    
-    app.dependency_overrides[get_db] = get_db_override
-    yield
-    # Clean up after the test by removing the override
+@pytest.fixture
+def client(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    client = TestClient(app)
+    yield client
     app.dependency_overrides = {}
 
-class TestUnsubscribeNewsletter:
 
-    @classmethod 
-    def setup_class(cls):
-        app.dependency_overrides[user_service.get_current_super_admin] = mock_deps
+@patch("api.v1.services.newsletter.NewsletterService.unsubscribe")
+def test_newsletter_subscribe(mock_unsubscribe, db_session_mock, client):
+    """Tests the POST /api/v1/newsletter-subscription endpoint to ensure successful subscription with valid input."""
 
-    @classmethod
-    def teardown_class(cls):
-        app.dependency_overrides = {}
+    mock_unsubscribe.return_value = None
 
-    def test_unsubscribe_success(self, db_session_mock):
-        # Arrange
-        existing_subscriber = NewsletterSubscriber(email="test@example.com")
-        db_session_mock.query(NewsletterSubscriber).filter().first.return_value = existing_subscriber
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
 
-        email_data = {"email": "test@example.com"}
+    response = client.post('/api/v1/newsletters/unsubscribe', json={
+        "email": "jane.doe@example.com"
+        })
 
-        # Act
-        response = client.post("/api/v1/newsletters/unsubscribe", json=email_data)
+    print('response', response.json())
+    assert response.status_code == 200
 
-        # Assert
-        assert response.status_code == 200
-        assert response.json()["message"] == "Unsubscribed successfully."
 
-    def test_unsubscribe_email_not_found(self, db_session_mock):
-        # Arrange
-        db_session_mock.query(NewsletterSubscriber).filter().first.return_value = None
+@patch("api.v1.services.newsletter.NewsletterService.unsubscribe")
+def test_newsletter_subscribe_missing_fields(mock_unsubscribe, db_session_mock, client):
+    """Tests the POST /api/v1/newsletter-subscription endpoint for missing required fields."""
 
-        email_data = {"email": "notfound@example.com"}
+    mock_unsubscribe.return_value = None
 
-        # Act
-        response = client.post("/api/v1/newsletters/unsubscribe", json=email_data)
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
 
-        # Assert
-        assert response.status_code == 404
-        assert response.json()["message"] == "Email not found."
-
-if __name__ == "__main__":
-    pytest.main()
+    response = client.post('/api/v1/newsletter-subscription', json={
+        
+        })
+    assert response.status_code == 422

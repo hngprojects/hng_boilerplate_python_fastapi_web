@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Dict, List
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, ConfigDict
 from typing import Optional
 
 from api.utils.success_response import success_response
@@ -65,3 +65,19 @@ class PaginatedOrgUsers(BaseModel):
     success: bool
     message: str
     data: List[Dict]
+
+class OrganisationData(BaseModel):
+    """Base organisation schema"""
+    id: str
+    created_at: datetime
+    updated_at: datetime
+    name: str
+    email: Optional[EmailStr] = None
+    industry: Optional[str] = None
+    user_role: List[str]
+    type: Optional[str] = None
+    country: Optional[str] = None
+    state: Optional[str] = None
+    address: Optional[str] = None
+    description: Optional[str] = None
+    organisation_id: str

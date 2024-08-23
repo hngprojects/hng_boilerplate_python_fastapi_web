@@ -3,7 +3,6 @@ from fastapi import Depends, APIRouter, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-
 from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas.organisation import (

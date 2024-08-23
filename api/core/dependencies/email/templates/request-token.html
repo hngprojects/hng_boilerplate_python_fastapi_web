@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Request Token Login{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/email-verification.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">Request Token Login</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi {{ first_name }} {{ last_name }},</p>
+    <p class="template-message">
+      Here is the six digit token for login.
+    </p>
+    <div class="editable-content">
+      <p>
+        This link will expire in about 60 seconds from the time of requesting for the token. If
+        you did not make this request, you can ignore this email.
+      </p>
+      <p>To verify your email, please click the button below:</p>
+      <a href="{{ link }}"><button style="
+        display: inline-block;
+        padding: 10px 200px;
+        background-color: orangered;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 10px;
+    ">Login</button></a>
+      <p>
+        Or copy this link:
+        <p>{{ link }}</p>
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

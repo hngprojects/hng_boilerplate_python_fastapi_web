@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Newsletter Subscription{% endblock %}
+{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/email-confirmed.css') }}">{% endblock %}
+
+{% block content %}
+<div class="template-main">
+  <div class="heading">
+    <p class="template-header">successfully Subscribed</p>
+  </div>
+  <div class="content">
+    <p class="template-receiver-name">Hi</p>
+    <p class="template-message">
+      We are thrilled to inform you that you have successfully
+      subscribed to our newsletter!
+    </p>
+    <div class="editable-content">
+      <p>
+        You can now get and enjoy all the features and benefits that come with our newsletters.
+      </p>
+
+      <a class="template-btn" href="{{ link }}">Proceed back to our Platform</a>
+
+      <div class="template-farewell">
+        <p>Regards,</p>
+        <p>Boilerplate</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

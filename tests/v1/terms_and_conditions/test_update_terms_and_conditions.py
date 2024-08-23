@@ -36,7 +36,7 @@ def create_mock_super_admin(_):
     """Mock super admin"""
     _.query.return_value.filter.return_value.first.return_value = User(
         id=str(uuid7()),
-        email="user@example.com",
+        email="user@gmail.com",
         password=user_service.hash_password("P@ssw0rd"),
         is_superadmin=True,
     )
@@ -60,7 +60,7 @@ def test_update_terms_and_conditions(mock_db_session, data):
     status_code = status.HTTP_200_OK
     create_mock_super_admin(mock_db_session)
     tok = client.post(
-        LOGIN_URI, json={"email": "user@example.com", "password": "P@ssw0rd"}
+        LOGIN_URI, json={"email": "user@gmail.com", "password": "P@ssw0rd"}
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
     token = tok["access_token"]
