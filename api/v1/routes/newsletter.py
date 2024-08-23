@@ -21,9 +21,11 @@ from api.utils.pagination import paginated_response
 
 
 @news_sub.post("")
-async def sub_newsletter(request: EmailSchema,
-                         db: Annotated[Session, Depends(get_db)],
-                         background_tasks: BackgroundTasks):
+async def sub_newsletter(
+    request: EmailSchema,
+    db: Annotated[Session, Depends(get_db)],
+    background_tasks: BackgroundTasks,
+):
     """
     Newsletter subscription endpoint
     """
@@ -35,17 +37,15 @@ async def sub_newsletter(request: EmailSchema,
         # Save user to the database
         NewsletterService.create(db, request)
 
-    link = 'https://anchor-python.teams.hng.tech/'
+    link = "https://anchor-python.teams.hng.tech/"
 
     # Send email in the background
     background_tasks.add_task(
         send_email,
         recipient=request.email,
-        template_name='newsletter-subscription.html',
-        subject='Thank You for Subscribing to HNG Boilerplate Newsletters',
-        context={
-            'link': link
-        }
+        template_name="newsletter-subscription.html",
+        subject="Thank You for Subscribing to HNG Boilerplate Newsletters",
+        context={"link": link},
     )
 
     return success_response(
@@ -142,11 +142,21 @@ def get_all_newsletters(
 
 
 @newsletter.post("/unsubscribe")
-async def unsubscribe_newsletter(request: EmailSchema, db: Session = Depends(get_db)):
+async def unsubscribe_newsletter(
+    background_tasks: BackgroundTasks,
+    request: EmailSchema,
+    db: Session = Depends(get_db),
+):
     """
     Newsletter unsubscription endpoint
     """
     NewsletterService.unsubscribe(db, request)
+    background_tasks.add_task(
+        send_email,
+        recipient=request.email,
+        template_name="unsubscribe.html",
+        subject="Unsubscription from HNG Boilerplate Newsletter",
+    )
     return success_response(
         message="Unsubscribed successfully.",
         status_code=status.HTTP_200_OK,
