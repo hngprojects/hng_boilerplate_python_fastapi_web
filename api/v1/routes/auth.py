@@ -34,7 +34,7 @@ auth = APIRouter(prefix="/auth", tags=["Authentication"])
 limiter = Limiter(key_func=get_remote_address)
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
-@limiter.limit("100/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
 
@@ -94,7 +94,7 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
 
 
 @auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED, response_model=auth_response)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 5 requests per minute per IP
 def register_as_super_admin(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     """Endpoint for super admin creation"""
 
@@ -138,7 +138,7 @@ def register_as_super_admin(request: Request, user: UserCreate, db: Session = De
 
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=auth_response)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def login(request: Request, login_request: LoginRequest, db: Session = Depends(get_db)):
     """Endpoint to log in a user"""
 
@@ -179,7 +179,7 @@ def login(request: Request, login_request: LoginRequest, db: Session = Depends(g
 
 
 @auth.post("/logout", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def logout(
     request: Request, 
     response: Response,
@@ -197,7 +197,7 @@ def logout(
 
 
 @auth.post("/refresh-access-token", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def refresh_access_token(
     request: Request, response: Response, db: Session = Depends(get_db)
 ):
@@ -231,7 +231,7 @@ def refresh_access_token(
 
 
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 async def request_signin_token(request: Request, background_tasks: BackgroundTasks,
     email_schema: EmailRequest, db: Session = Depends(get_db)
 ):
@@ -265,7 +265,7 @@ async def request_signin_token(request: Request, background_tasks: BackgroundTas
 
 
 @auth.post("/verify-token", status_code=status.HTTP_200_OK, response_model=auth_response)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 async def verify_signin_token(
     request: Request, 
     token_schema: TokenRequest, db: Session = Depends(get_db)
@@ -308,7 +308,7 @@ async def verify_signin_token(
 
 # TODO: Fix magic link authentication
 @auth.post("/magic-link", status_code=status.HTTP_200_OK)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def request_magic_link(
     request: MagicLinkRequest, background_tasks: BackgroundTasks,
     response: Response, db: Session = Depends(get_db)
@@ -334,7 +334,7 @@ def request_magic_link(
 
 
 @auth.post("/magic-link/verify")
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 async def verify_magic_link(request: Request, token_schema: Token, db: Session = Depends(get_db)):
     user, access_token = AuthService.verify_magic_token(token_schema.token, db)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
@@ -368,7 +368,7 @@ async def verify_magic_link(request: Request, token_schema: Token, db: Session =
 
 
 @auth.put("/password", status_code=200)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 async def change_password(
     request: Request, 
     schema: ChangePasswordSchema,
@@ -387,7 +387,7 @@ async def change_password(
 @auth.get("/@me",
           status_code=status.HTTP_200_OK,
           response_model=AuthMeResponse)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def get_current_user_details(
     request: Request, 
     db: Annotated[Session, Depends(get_db)],
