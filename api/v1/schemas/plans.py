@@ -1,8 +1,11 @@
 from pydantic import BaseModel, validator
 from typing import List, Optional
+from datetime import datetime
+
+from api.v1.schemas.base_schema import ResponseBase
 
 
-class CreateSubscriptionPlan(BaseModel):
+class CreateBillingPlanSchema(BaseModel):
     name: str
     description: Optional[str] = None
     price: int
@@ -26,22 +29,22 @@ class CreateSubscriptionPlan(BaseModel):
         return v
 
 
-class SubscriptionPlanResponse(CreateSubscriptionPlan):
+class CreateBillingPlanReturnData(CreateBillingPlanSchema):
     id: str
+    created_at: datetime
+    updated_at: datetime
 
     class Config:
         from_attributes = True
 
 
-class BillingPlanSchema(BaseModel):
-    id: str
-    organisation_id: str
-    name: str
-    price: float
-    currency: str
-    duration: str
-    description: Optional[str] = None
-    features: List[str]
+class CreateBillingPlanResponse(ResponseBase):
+    data: CreateBillingPlanReturnData
 
-    class Config:
-        orm_mode = True
+
+class GetBillingPlanData(BaseModel):
+    billing_plans: List[CreateBillingPlanReturnData]
+
+
+class GetBillingPlanListResponse(ResponseBase):
+    data: GetBillingPlanData

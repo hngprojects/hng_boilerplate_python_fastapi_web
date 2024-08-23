@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from api.v1.models.billing_plan import BillingPlan
 from typing import Any, Optional
 from api.core.base.services import Service
-from api.v1.schemas.plans import CreateSubscriptionPlan
+from api.v1.schemas.plans import CreateBillingPlanSchema
 from api.utils.db_validators import check_model_existence
 from fastapi import HTTPException, status
 
@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 class BillingPlanService(Service):
     """Product service functionality"""
 
-    def create(self, db: Session, request: CreateSubscriptionPlan):
+    def create(self, db: Session, request: CreateBillingPlanSchema):
         """
         Create and return a new billing plan, ensuring a plan name can only exist 
         once for each 'monthly' and 'yearly' duration, and cannot be created 
