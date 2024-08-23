@@ -21,8 +21,10 @@ class Profile(BaseTableModel):
     phone_number = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     recovery_email = Column(String, nullable=True)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    facebook_link = Column(String, nullable=True)
+    instagram_link = Column(String, nullable=True)
+    twitter_link = Column(String, nullable=True)
+    linkedin_link = Column(String, nullable=True)
 
     user = relationship("User", back_populates="profile")
 
