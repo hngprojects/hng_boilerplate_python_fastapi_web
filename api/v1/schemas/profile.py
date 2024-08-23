@@ -18,7 +18,6 @@ def validate_mx_record(domain: str):
     try:
         # Try to resolve the MX record for the domain
         mx_records = dns.resolver.resolve(domain, 'MX')
-        print('mx_records: ', mx_records.response)
         return True if mx_records else False
     except dns.resolver.NoAnswer:
         return False
@@ -83,23 +82,23 @@ class ProfileCreateUpdate(BaseModel):
 
     pronouns: Annotated[
         Optional[str],
-        StringConstraints(max_length=10, strip_whitespace=True)
+        StringConstraints(max_length=20, strip_whitespace=True)
     ] = None
     job_title: Annotated[
         Optional[str],
-        StringConstraints(max_length=20, strip_whitespace=True)
+        StringConstraints(max_length=60, strip_whitespace=True)
     ] = None
     username: Annotated[
         Optional[str],
-        StringConstraints(max_length=20, strip_whitespace=True)
+        StringConstraints(max_length=30, strip_whitespace=True)
     ] = None
     department: Annotated[
         Optional[str],
-        StringConstraints(max_length=20, strip_whitespace=True)
+        StringConstraints(max_length=60, strip_whitespace=True)
     ] = None
     social: Annotated[
         Optional[str],
-        StringConstraints(max_length=20, strip_whitespace=True)
+        StringConstraints(max_length=60, strip_whitespace=True)
     ] = None
     bio: Annotated[
         Optional[str],
@@ -132,7 +131,8 @@ class ProfileCreateUpdate(BaseModel):
             raise ValueError("Cannot update profile with empty field")
         
         for key, value in values.items():
-            values[key] = clean(value.strip())
+            if value:
+                values[key] = clean(value)
         if recovery_email:
             try:
                 recovery_email = validate_email(recovery_email, check_deliverability=True)
@@ -144,7 +144,7 @@ class ProfileCreateUpdate(BaseModel):
                 raise ValueError(exc) from exc
             except Exception as exc:
                 raise ValueError(exc) from exc
-        
+
         return values
 
 class ProfileData(BaseModel):
@@ -152,19 +152,19 @@ class ProfileData(BaseModel):
     Pydantic model for a profile.
     """
 
-    pronouns: str = None
-    job_title: str = None
-    username: str = None
-    department: str = None
-    social: str = None
-    bio: str = None
-    phone_number: str = None
-    recovery_email: str = None
-    avatar_url: str = None
-    facebook_link: str = None
-    instagram_link: str = None
-    twitter_link: str = None
-    linkedin_link: str = None
+    pronouns: Optional[str] = None
+    job_title: Optional[str] = None
+    username: Optional[str] = None
+    department: Optional[str] = None
+    social: Optional[str] = None
+    bio: Optional[str] = None
+    phone_number: Optional[str] = None
+    recovery_email: Optional[EmailStr] = None
+    avatar_url: Optional[HttpUrl] = None
+    facebook_link: Optional[HttpUrl] = None
+    instagram_link: Optional[HttpUrl] = None
+    twitter_link: Optional[HttpUrl] = None
+    linkedin_link: Optional[HttpUrl] = None
     
     model_config = ConfigDict(from_attributes=True)
 
@@ -175,3 +175,22 @@ class ProfileUpdateResponse(BaseModel):
     message: str
     status_code: int
     data: ProfileData
+
+class ProfileRecoveryEmailResponse(BaseModel):
+    """
+    Schema for recovery_email response
+    """
+    message: str
+    status_code: int
+
+class Token(BaseModel):
+    """
+    Token schema
+    """
+    token: Annotated[
+        str,
+        StringConstraints(
+            min_length=30,
+            strip_whitespace=True
+        )
+    ]
