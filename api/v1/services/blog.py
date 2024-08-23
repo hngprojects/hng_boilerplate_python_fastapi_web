@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
@@ -117,6 +117,22 @@ class BlogService:
             .first()
         )
         return blog_dislike
+    
+    def check_user_already_liked_blog(self, blog: Blog, user: Blog):
+        existing_like = self.fetch_blog_like(blog.id, user.id)
+        if isinstance(existing_like, BlogLike):
+            raise HTTPException(
+                detail="You have already liked this blog post",
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
+    
+    def check_user_already_disliked_blog(self, blog: Blog, user: Blog):
+        existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
+        if isinstance(existing_dislike, BlogDislike):
+            raise HTTPException(
+                detail="You have already disliked this blog post",
+                status_code=status.HTTP_403_FORBIDDEN,
+            )
 
     def num_of_likes(self, blog_id: str) -> int:
         """Get the number of likes a blog post has"""
