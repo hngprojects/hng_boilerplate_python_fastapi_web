@@ -1,7 +1,8 @@
 from typing import Optional
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
-
 from api.utils.settings import settings
+from premailer import transform
+
 
 
 async def send_email(
@@ -11,7 +12,6 @@ async def send_email(
     context: Optional[dict] = None
 ):
     from main import email_templates
-    from premailer import transform
 
     conf = ConnectionConfig(
         MAIL_USERNAME=settings.MAIL_USERNAME,

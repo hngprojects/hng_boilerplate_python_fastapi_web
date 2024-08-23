@@ -6,8 +6,8 @@ from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.utils.json_response import JsonResponseDict
 from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
-
-from fastapi import APIRouter, HTTPException, Depends, Request, status
+from api.core.dependencies.email_sender import send_email
+from fastapi import APIRouter, HTTPException, Depends, Request, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.v1.services.waitlist_email import (
@@ -21,11 +21,20 @@ from api.v1.services.waitlist import waitlist_service
 
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
 
+def process_waitlist_signup(user: WaitlistAddUserSchema, db: Session):
+    """
+    Process a waitlist signup request.
 
-@waitlist.post("/", response_model=success_response, status_code=201)
-async def waitlist_signup(
-    request: Request, user: WaitlistAddUserSchema, db: Session = Depends(get_db)
-):
+    Args:
+    - user (WaitlistAddUserSchema): The user details to be added to the waitlist.
+    - db (Session): The database session.
+
+    Returns:
+    - db_user: The added user object.
+
+    Raises:
+    - HTTPException: If the full name is not provided or if the email is already registered.
+    """
     if not user.full_name:
         logger.error("Full name is required")
         raise HTTPException(
@@ -50,22 +59,47 @@ async def waitlist_signup(
         )
 
     db_user = add_user_to_waitlist(db, user.email, user.full_name)
+    return db_user
 
-    try:
-        # await send_confirmation_email(user.email, user.full_name)
-        logger.info(f"Confirmation email sent successfully to {user.email}")
-    except HTTPException as e:
-        logger.error(f"Failed to send confirmation email: {e.detail}")
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": "Failed to send confirmation email",
-                "success": False,
-                "status_code": 500,
-            },
+@waitlist.post("/", response_model=success_response, status_code=201)
+async def waitlist_signup(
+    background_tasks: BackgroundTasks,
+    request: Request,
+    user: WaitlistAddUserSchema,
+    db: Session = Depends(get_db)
+):
+    """
+    Add a user to the waitlist.
+
+    Args:
+    - user (WaitlistAddUserSchema): The user details to be added to the waitlist.
+
+    Returns:
+    - success_response: A success response with a message and status code.
+
+    Example:
+    ```
+    curl -X POST \
+      http://localhost:8000/waitlist/ \
+      -H 'Content-Type: application/json' \
+      -d '{"email": "user@example.com", "full_name": "John Doe"}'
+    ```
+    """
+     
+    db_user = process_waitlist_signup(user, db)
+    if db_user:
+        cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+        # Send email in the background
+        background_tasks.add_task(
+            send_email, 
+            recipient=user.email,
+            template_name='waitlists.html',
+            subject='Welcome to HNG Waitlist',
+            context={
+                'name': user.full_name,
+                'cta_link': cta_link
+            }
         )
-
-    logger.info(f"User signed up successfully: {user.email}")
     return success_response(message="You are all signed up!", status_code=201)
 
 
@@ -79,19 +113,25 @@ def admin_add_user_to_waitlist(
     db: Session = Depends(get_db),
 ):
     """
-    Manually adds a user to the waitlist.
-    This endpoint allows an admin to add a user to the waitlist.
+    Manually add a user to the waitlist as an admin.
 
-    Parameters:
-    - item: WaitlistAddUserSchema
-        The details of the user to be added to the waitlist.
-    - admin: User (Depends on get_super_admin)
-        The current admin making the request. This is a dependency that provides the current admin context.
+    Args:
+    - item (WaitlistAddUserSchema): The user details to be added to the waitlist.
+    - admin (User): The current admin making the request.
 
     Returns:
-    - 201: User added successfully
-    - 400: Validation error
-    - 403: Forbidden
+    - success_response: A success response with a message and status code.
+
+    Raises:
+    - HTTPException: If the full name is not provided or if the email is already registered.
+
+    Example:
+    ```
+    curl -X POST \
+      http://localhost:8000/waitlist/admin \
+      -H 'Content-Type: application/json' \
+      -d '{"email": "user@example.com", "full_name": "John Doe"}'
+    ```
     """
 
     try:
