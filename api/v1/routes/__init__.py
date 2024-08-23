@@ -3,7 +3,7 @@ from api.v1.routes.privacy import privacies
 from api.v1.routes.team import team
 from fastapi import APIRouter
 from api.v1.routes.auth import auth
-from api.v1.routes.newsletter import newsletter
+from api.v1.routes.newsletter import newsletter, news_sub
 from api.v1.routes.user import user_router
 from api.v1.routes.product import product, non_organisation_product
 from api.v1.routes.product_comment import product_comment
@@ -43,6 +43,7 @@ from api.v1.routes.job_application import job_application
 from api.v1.routes.privacy import privacies
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
+from api.v1.routes.stripe import subscription_
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -72,6 +73,7 @@ api_version_one.include_router(topic)
 api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
+api_version_one.include_router(news_sub)
 api_version_one.include_router(testimonial)
 api_version_one.include_router(test_rout)
 api_version_one.include_router(email_sender)
@@ -89,3 +91,4 @@ api_version_one.include_router(settings)
 api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
 api_version_one.include_router(product_comment)
+api_version_one.include_router(subscription_)
