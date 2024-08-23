@@ -6,8 +6,8 @@ from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.utils.json_response import JsonResponseDict
 from fastapi.exceptions import HTTPException
 from sqlalchemy.exc import IntegrityError
-
-from fastapi import APIRouter, HTTPException, Depends, Request, status
+from api.core.dependencies.email_sender import send_email
+from fastapi import APIRouter, HTTPException, Depends, Request, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from api.v1.schemas.waitlist import WaitlistAddUserSchema
 from api.v1.services.waitlist_email import (
@@ -24,7 +24,7 @@ waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
 
 @waitlist.post("/", response_model=success_response, status_code=201)
 async def waitlist_signup(
-    request: Request, user: WaitlistAddUserSchema, db: Session = Depends(get_db)
+    background_tasks: BackgroundTasks, request: Request, user: WaitlistAddUserSchema, db: Session = Depends(get_db)
 ):
     if not user.full_name:
         logger.error("Full name is required")
@@ -52,8 +52,22 @@ async def waitlist_signup(
     db_user = add_user_to_waitlist(db, user.email, user.full_name)
 
     try:
-        # await send_confirmation_email(user.email, user.full_name)
-        logger.info(f"Confirmation email sent successfully to {user.email}")
+        if db_user:
+            cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+
+            # Send email in the background
+            background_tasks.add_task(
+                send_email, 
+                recipient=user.email,
+                template_name='waitlist.html',
+                subject='Welcome to HNG Waitlist',
+                context={
+                    'name': user.full_name,
+                    'cta_link': cta_link
+                }
+            )
+            # await send_confirmation_email(user.email, user.full_name)
+            logger.info(f"Confirmation email sent successfully to {user.email}")
     except HTTPException as e:
         logger.error(f"Failed to send confirmation email: {e.detail}")
         raise HTTPException(

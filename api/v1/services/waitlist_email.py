@@ -15,9 +15,20 @@ async def send_confirmation_email(email: EmailStr, full_name: str):
 
     try:
         logger.info(f"Attempting to send confirmation email to {email}")
-        mail_service.send_mail(
-            to=email, subject="Welcome to our Waitlist!", body=plain_text_body
-        )
+        cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+        send_email(
+            recipient=email, 
+            template_name="waitlist.html", 
+            subject="Welcome to our waitlist", 
+            context={
+                'cta_link': cta_link,
+                'name': full_name
+                }
+            )
+        
+        # mail_service.send_mail(
+        #     to=email, subject="Welcome to our Waitlist!", body=plain_text_body
+        # )
         logger.info(f"Confirmation email sent successfully to {email}")
     except HTTPException as e:
         logger.warning(f"Failed to send email: {e.detail}")
