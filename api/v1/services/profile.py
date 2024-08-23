@@ -10,7 +10,9 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models import Profile, User
 from api.v1.schemas.profile import (ProfileCreateUpdate,
                                     ProfileUpdateResponse,
-                                    ProfileData)
+                                    ProfileData,
+                                    ProfileRecoveryEmailResponse,
+                                    Token)
 from api.core.dependencies.email_sender import send_email
 from api.utils.settings import settings
 from api.db.database import get_db
@@ -67,6 +69,7 @@ class ProfileService(Service):
         """
         Updates a user's profile data.
         """
+        message = 'Profile updated successfully.'
         profile = db.query(Profile).filter(Profile.user_id == user.id).first()
         if not profile:
             raise HTTPException(status_code=404, detail="User profile not found")
@@ -74,15 +77,16 @@ class ProfileService(Service):
         # Update only the fields that are provided in the schema
         for field, value in schema.model_dump().items():
             if value is not None:
-                if field == 'recover_email':
+                if field == 'recovery_email':
                     self.send_token_to_user_email(value, user, background_tasks)
-                else:
-                    setattr(profile, field, value)
+                    message = 'Profile updated successfully. Access your email to verify recovery_email'
+                    continue
+                setattr(profile, field, value)
 
         db.commit()
         db.refresh(profile)
         return ProfileUpdateResponse(
-            message='Profile updated successfully.',
+            message=message,
             status_code=status.HTTP_200_OK,
             data=ProfileData.model_validate(profile, from_attributes=True)
         )
@@ -117,7 +121,7 @@ class ProfileService(Service):
 
     def update_recovery_email(self, user: User,
                               db: Annotated[Session, Depends(get_db)],
-                              token: str):
+                              token: Token):
         """
         Update user recovery_email.
         Args:
@@ -127,7 +131,7 @@ class ProfileService(Service):
         Return:
             response: feedback to the user.
         """
-        payload = self.decode_verify_email_token(token)
+        payload = self.decode_verify_email_token(token.token)
         if payload.get("email") != user.email:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                 detail='Invalid user email')
@@ -137,7 +141,11 @@ class ProfileService(Service):
                                 detail="User profile not found")
         profile.recovery_email = payload.get("recovery_email")
         db.commit()
-        return profile
+                                    
+        return ProfileRecoveryEmailResponse(
+            message='Recover email successfully updated',
+            status_code=status.HTTP_200_OK
+        )
         
 
     def delete(self, db: Session, id: str):
@@ -175,7 +183,7 @@ class ProfileService(Service):
             token: token to be sent to the user.
         """
         try:
-            now = datetime.utcnow(timezone.utc)
+            now = datetime.now(timezone.utc)
             claims = {
                 "iat": now,
                 'exp': now + timedelta(minutes=5),
