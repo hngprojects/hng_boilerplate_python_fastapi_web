@@ -34,7 +34,7 @@ auth = APIRouter(prefix="/auth", tags=["Authentication"])
 limiter = Limiter(key_func=get_remote_address)
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
-@limiter.limit("10/minute")  # Limit to 10 requests per minute per IP
+@limiter.limit("100/minute")  # Limit to 10 requests per minute per IP
 def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
 
