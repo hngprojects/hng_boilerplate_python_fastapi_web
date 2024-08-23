@@ -3,6 +3,7 @@ from api.v1.routes.privacy import privacies
 from api.v1.routes.team import team
 from fastapi import APIRouter
 from api.v1.routes.auth import auth
+from api.v1.routes.faq_inquiries import faq_inquiries
 from api.v1.routes.newsletter import newsletter, news_sub
 from api.v1.routes.user import user_router
 from api.v1.routes.product import product, non_organisation_product
@@ -48,6 +49,7 @@ from api.v1.routes.stripe import subscription_
 api_version_one = APIRouter(prefix="/api/v1")
 
 api_version_one.include_router(auth)
+api_version_one.include_router(faq_inquiries)
 api_version_one.include_router(google_auth)
 api_version_one.include_router(fb_auth)
 api_version_one.include_router(pwd_reset)
