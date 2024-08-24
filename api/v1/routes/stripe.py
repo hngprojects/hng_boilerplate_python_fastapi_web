@@ -82,6 +82,7 @@ def cancel_upgrade():
 
     return success_response(status_code=status.HTTP_200_OK, message="Payment intent canceled")
 
+#TODO create automatic billing cycle based on when initial billing end date
 
 @subscription_.get("/plans")
 def get_plans(
