@@ -21,21 +21,20 @@ async def get_all_faqs(
     keyword: Optional[str] = Query(None, min_length=1)
 ):
     """Endpoint to get all FAQs or search by keyword in both question and answer"""
-    
+
     query_params = {}
     if keyword:
-        """Search by both question and answer fields"""
         query_params["question"] = keyword
         query_params["answer"] = keyword
 
-    faqs = faq_service.fetch_all(db=db, **query_params)
+    grouped_faqs = faq_service.fetch_all_grouped_by_category(
+        db=db, **query_params)
 
     return success_response(
         status_code=200,
         message="FAQs retrieved successfully",
-        data=jsonable_encoder(faqs),
+        data=jsonable_encoder(grouped_faqs),
     )
-
 
 
 @faq.post("", response_model=success_response, status_code=201)
