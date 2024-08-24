@@ -147,13 +147,13 @@ class BlogService:
             existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
             if existing_dislike:
                 # delete, but do not commit yet. Allow everything 
-                # to be commited when operation like created
+                # to be commited after the actual like is created
                 self.db.delete(existing_dislike)
         elif creating == "dislike":
             existing_like = self.fetch_blog_like(blog.id, user.id)
             if existing_like:
                 # delete, but do not commit yet. Allow everything 
-                # to be commited when operation dislike created
+                # to be commited after the actual dislike is created
                 self.db.delete(existing_like)
         else:
             raise HTTPException(
