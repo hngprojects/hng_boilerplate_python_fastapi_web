@@ -117,80 +117,80 @@ def like_blog_post(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
+    """Endpoint to add `like` to a blog post.
 
+    args:
+        blog_id: `str` The ID of the blog post.
+        request: `default` Request.
+        db: `default` Session.
+
+    return:
+        In the `data` returned, `"object"` represents details of the 
+        BlogLike obj and the `"objects_count"` represents the number 
+        of BlogLike for the blog post
+    """
     blog_service = BlogService(db)
 
-    # GET blog post
+    # get blog post
     blog_p = blog_service.fetch(blog_id)
-    if not isinstance(blog_p, Blog):
-        raise HTTPException(
-            detail="Post not found", status_code=status.HTTP_404_NOT_FOUND
-        )
 
-    # CONFIRM current user has NOT liked before
-    existing_like = blog_service.fetch_blog_like(blog_p.id, current_user.id)
-    if isinstance(existing_like, BlogLike):
-        raise HTTPException(
-            detail="You have already liked this blog post",
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+    # confirm current user has NOT liked before
+    blog_service.check_user_already_liked_blog(blog_p, current_user)
 
-    # UPDATE likes
-    blog_service.create_blog_like(
+    # update likes
+    new_like = blog_service.create_blog_like(
         db, blog_p.id, current_user.id, ip_address=get_ip_address(request))
-    
-    # CONFIRM new like
-    new_like = blog_service.fetch_blog_like(blog_p.id, current_user.id)
-    if not isinstance(new_like, BlogLike):
-        raise HTTPException(
-            detail="Unable to record like.", status_code=status.HTTP_400_BAD_REQUEST
-        )
 
     # Return success response
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Like recorded successfully.",
-        data=new_like.to_dict(),
+        data={
+            'object': new_like.to_dict(), 
+            'objects_count': blog_service.num_of_likes(blog_id)
+        },
     )
 
 
-@blog.put("/{blog_id}/dislike", response_model=BlogLikeDislikeResponse)
+@blog.post("/{blog_id}/dislike", response_model=BlogLikeDislikeResponse)
 def dislike_blog_post(
     blog_id: str,
+    request: Request,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
+    """Endpoint to add `dislike` to a blog post.
 
+    args:
+        blog_id: `str` The ID of the blog post.
+        request: `default` Request.
+        db: `default` Session.
+
+    return:
+        In the `data` returned, `"object"` represents details of the 
+        BlogDislike obj and the `"objects_count"` represents the number 
+        of BlogDislike for the blog post
+    """
     blog_service = BlogService(db)
 
-    # GET blog post
+    # get blog post
     blog_p = blog_service.fetch(blog_id)
-    if not isinstance(blog_p, Blog):
-        raise HTTPException(
-            detail="Post not found", status_code=status.HTTP_404_NOT_FOUND
-        )
 
-    # CONFIRM current user has NOT disliked before
-    existing_dislike = blog_service.fetch_blog_dislike(blog_p.id, current_user.id)
-    if isinstance(existing_dislike, BlogDislike):
-        raise HTTPException(
-            detail="You have already disliked this blog post",
-            status_code=status.HTTP_403_FORBIDDEN,
-        )
+    # confirm current user has NOT disliked before
+    blog_service.check_user_already_disliked_blog(blog_p, current_user)
 
-    # UPDATE disikes
-    new_dislike = blog_service.create_blog_dislike(db, blog_p.id, current_user.id)
-
-    if not isinstance(new_dislike, BlogDislike):
-        raise HTTPException(
-            detail="Unable to record dislike.", status_code=status.HTTP_400_BAD_REQUEST
-        )
+    # update disikes
+    new_dislike = blog_service.create_blog_dislike(
+        db, blog_p.id, current_user.id, ip_address=get_ip_address(request))
 
     # Return success response
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Dislike recorded successfully.",
-        data=new_dislike.to_dict(),
+        data={
+            'object': new_dislike.to_dict(), 
+            'objects_count': blog_service.num_of_dislikes(blog_id)
+        },
     )
 
 

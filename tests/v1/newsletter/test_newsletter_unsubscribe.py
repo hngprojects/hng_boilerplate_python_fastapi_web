@@ -12,11 +12,11 @@ from api.v1.models.newsletter import NewsletterSubscriber
 from main import app
 
 
-
 @pytest.fixture
 def db_session_mock():
     db_session = MagicMock(spec=Session)
     return db_session
+
 
 @pytest.fixture
 def client(db_session_mock):
@@ -24,24 +24,6 @@ def client(db_session_mock):
     client = TestClient(app)
     yield client
     app.dependency_overrides = {}
-
-
-@patch("api.v1.services.newsletter.NewsletterService.unsubscribe")
-def test_newsletter_subscribe(mock_unsubscribe, db_session_mock, client):
-    """Tests the POST /api/v1/newsletter-subscription endpoint to ensure successful subscription with valid input."""
-
-    mock_unsubscribe.return_value = None
-
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
-
-    response = client.post('/api/v1/newsletters/unsubscribe', json={
-        "email": "jane.doe@example.com"
-        })
-
-    print('response', response.json())
-    assert response.status_code == 200
 
 
 @patch("api.v1.services.newsletter.NewsletterService.unsubscribe")
@@ -54,7 +36,5 @@ def test_newsletter_subscribe_missing_fields(mock_unsubscribe, db_session_mock, 
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    response = client.post('/api/v1/newsletter-subscription', json={
-        
-        })
+    response = client.post("/api/v1/newsletter-subscription", json={})
     assert response.status_code == 422

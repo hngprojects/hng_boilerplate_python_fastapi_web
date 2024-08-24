@@ -75,7 +75,7 @@ def test_google_login(
     
     assert response.status_code == 200
     response_data = response.json()
-    assert response_data["message"] == "Successfully authenticated"
+    assert response_data["message"] == "Login successful"
     assert response_data["access_token"] == "access_token_example"
     assert response_data["data"]["user"]["email"] == "test@example.com"
     assert "refresh_token" in response.cookies

@@ -24,47 +24,102 @@ FRONTEND_URL = config("FRONTEND_URL")
 
 @google_auth.post("/google", status_code=200)
 async def google_login(background_tasks: BackgroundTasks, token_request: OAuthToken, db: Session = Depends(get_db)):
+    """
+    Handles Google OAuth login.
 
-    google_oauth_service = GoogleOauthServices()
+    Args:
+    - background_tasks (BackgroundTasks): Background tasks to be executed.
+    - token_request (OAuthToken): OAuth token request.
+    - db (Session): Database session.
 
-    id_token = token_request.id_token
-    profile_endpoint = f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={id_token}'
-    profile_response = requests.get(profile_endpoint)
+    Returns:
+    - JSONResponse: JSON response with user details and access token.
+
+    Example:
+    ```
+    POST /google HTTP/1.1
+    Content-Type: application/json
+
+    {
+        "id_token": "your_id_token_here"
+    }
+    ```
+    """
+    try:
+
+        id_token = token_request.id_token
+        profile_endpoint = f'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token={id_token}'
+        profile_response = requests.get(profile_endpoint)
+        
+        if profile_response.status_code != 200:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
+        
+        profile_data = profile_response.json()
+
+        
+        email = profile_data.get('email')
+        user = user_service.get_user_by_email(db=db, email=email)
+
+        # Check if the user exists
+        if user:
+            # User already exists, return their details
+            access_token = user_service.create_access_token(user_id=user.id)
+            refresh_token = user_service.create_refresh_token(user_id=user.id)
+            response = JSONResponse(
+                status_code=200,
+                content={
+                    "status_code": 200,
+                    "message": "Login successful",
+                    "access_token": access_token,
+                    "data": {
+                        "user": jsonable_encoder(
+                            user, exclude=["password", "is_deleted", "updated_at"]
+                        )
+                    },
+                },
+            )
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                expires=timedelta(days=30),
+                httponly=True,
+                secure=True,
+                samesite="none",
+            )
+            return response
+        else:
+
+            google_oauth_service = GoogleOauthServices()
+            # User does not exist, create a new user
+            user = google_oauth_service.create(background_tasks=background_tasks, db=db, google_response=profile_data)
+            access_token = user_service.create_access_token(user_id=user.id)
+            refresh_token = user_service.create_refresh_token(user_id=user.id)
+            response = JSONResponse(
+                status_code=200,
+                content={
+                    "status_code": 200,
+                    "message": "Login successful",
+                    "access_token": access_token,
+                    "data": {
+                        "user": jsonable_encoder(
+                            user, exclude=["password", "is_deleted", "updated_at"]
+                        )
+                    },
+                },
+            )
+            response.set_cookie(
+                key="refresh_token",
+                value=refresh_token,
+                expires=timedelta(days=30),
+                httponly=True,
+                secure=True,
+                samesite="none",
+            )
+            return response
+    except ValueError:
+        # Invalid ID token
+        return JSONResponse(status_code=401, content={"error": "Invalid ID token"})
     
-    if profile_response.status_code != 200:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token or failed to fetch user info")
-
-    profile_data = profile_response.json()
-    user = google_oauth_service.create(background_tasks=background_tasks, db=db, google_response=profile_data)
-
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
-
-    response = JSONResponse(
-        status_code=200,
-        content={
-            "status_code": 200,
-            "message": "Successfully authenticated",
-            "access_token": access_token,
-            "data": {
-                "user": jsonable_encoder(
-                    user,
-                    exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at']
-                )
-            }
-        }
-    )
-
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        expires=timedelta(days=60),
-        httponly=True,
-        secure=True,
-        samesite="none",
-    )
-
-    return response
 
 
 @google_auth.get("/callback/google")

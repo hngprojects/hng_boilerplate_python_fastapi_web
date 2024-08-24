@@ -120,7 +120,26 @@ class UserService(Service):
 
         user = check_model_existence(db, User, id)
         return user
+    
+    
+    def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
+        """
+        Fetches a user by their email address.
 
+        Args:
+            db: The database session.
+            email: The email address of the user.
+
+        Returns:
+            The user object if found, otherwise None.
+        """
+        user = db.query(User).filter(User.email == email).first()
+
+        if not user:
+            return None
+
+        return user
+    
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
@@ -271,12 +290,6 @@ class UserService(Service):
         """Function to update a User"""
         
         # Get user from access token if provided, otherwise fetch user by id
-        if db.query(User).filter(User.email == schema.email).first():
-            raise HTTPException(
-                status_code=400,
-                detail="User with this email or username already exists",
-            )
-        
         user = (self.fetch(db=db, id=id) 
                 if current_user.is_superadmin and id is not None
                 else self.fetch(db=db, id=current_user.id)
@@ -284,6 +297,8 @@ class UserService(Service):
         
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
+            if key == 'email':
+                continue
             setattr(user, key, value)
         db.commit()
         db.refresh(user)
