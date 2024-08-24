@@ -248,7 +248,7 @@ class BlogDislikeService:
 
     def fetch(self, blog_dislike_id: str):
         """Fetch a blog dislike by its ID"""
-        return check_model_existence(self.db, BlogLike, blog_dislike_id)
+        return check_model_existence(self.db, BlogDislike, blog_dislike_id)
 
     def delete(self, blog_dislike_id: str, user_id: str):
         """Delete blog dislike"""
