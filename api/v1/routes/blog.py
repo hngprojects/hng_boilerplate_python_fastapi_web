@@ -309,21 +309,21 @@ async def update_blog_comment(
     )
 
 
-@blog.delete("/likes/{blog_like_id}", 
+@blog.delete("/dislikes/{blog_dislike_id}", 
              status_code=status.HTTP_204_NO_CONTENT)
-def delete_blog_like(
-    blog_like_id: str,
+def delete_blog_dislike(
+    blog_dislike_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
 ):
-    """Endpoint to delete `BlogLike`
+    """Endpoint to delete `BlogDislike`
 
     args:
-        blog_like_id: `str` The ID of the BlogLike object.
+        blog_dislike_id: `str` The ID of the BlogDislike object.
         request: `default` Request.
         db: `default` Session.
     """
-    blog_like_service = BlogLikeService(db)
+    blog_dislike_service = BlogDislikeService(db)
 
-    # delete blog like
-    blog_like_service.delete(blog_like_id, current_user.id)
+    # delete blog dislike
+    blog_dislike_service.delete(blog_dislike_id, current_user.id)

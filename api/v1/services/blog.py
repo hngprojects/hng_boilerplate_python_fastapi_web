@@ -240,31 +240,6 @@ class BlogService:
         return comment
 
 
-class BlogLikeService:
-    """BlogLike service functionality"""
-
-    def __init__(self, db: Session):
-        self.db = db
-
-    def fetch(self, blog_like_id: str):
-        """Fetch a blog like by its ID"""
-        return check_model_existence(self.db, BlogLike, blog_like_id)
-
-    def delete(self, blog_like_id: str, user_id: str):
-        """Delete blog like"""
-        blog_like = self.fetch(blog_like_id)
-
-        # check that current user owns the blog like
-        if blog_like.user_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Insufficient permission"
-            )
-
-        self.db.delete(blog_like)
-        self.db.commit()
-
-
 class BlogDislikeService:
     """BlogDislike service functionality"""
 
