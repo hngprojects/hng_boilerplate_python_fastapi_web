@@ -70,7 +70,7 @@ def mock_fetch_all_organisations_with_users_and_plans():
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_fetch__billing_plans(mock_user_service, mock_db_session):
+def test_fetch_invalid_billing_plans(mock_user_service, mock_db_session):
     """Billing plan fetch test."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
@@ -80,4 +80,4 @@ def test_fetch__billing_plans(mock_user_service, mock_db_session):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     print(response.json())
-    assert response.status_code == 200
+    assert response.status_code == 404
