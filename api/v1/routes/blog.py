@@ -326,4 +326,4 @@ def delete_blog_dislike(
     blog_dislike_service = BlogDislikeService(db)
 
     # delete blog dislike
-    blog_dislike_service.delete(blog_dislike_id, current_user.id)
+    return blog_dislike_service.delete(blog_dislike_id, current_user.id)
