@@ -4,9 +4,9 @@ from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from datetime import datetime, timezone
+from api.v1.models import User, BlogLike
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
-from api.v1.models import User, BlogDislike
 from api.v1.services.user import user_service
 
 client = TestClient(app)
@@ -58,7 +58,7 @@ def another_user():
 
 @pytest.fixture
 def test_blog_like(test_user):
-    return BlogDislike(
+    return BlogLike(
             id=str(uuid7()),
             user_id=test_user.id,
             blog_id=str(uuid7()),
