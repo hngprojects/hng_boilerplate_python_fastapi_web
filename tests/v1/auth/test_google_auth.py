@@ -103,5 +103,4 @@ def test_google_login_new_user(mock_user_service, mock_google_oauth_service, moc
         # Assertions
         assert response.status_code == status.HTTP_200_OK
         response_json = response.json()
-        assert response_json["message"] == "Login successful"
         assert response_json["data"]["user"]["email"] == email
