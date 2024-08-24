@@ -47,6 +47,15 @@ squeeze3 = {
     "status_code": 201,
 }
 
+# Mock the BackgroundTasks to call the task function directly
+@pytest.fixture(scope='module')
+def mock_send_email():
+    with patch("api.core.dependencies.email_sender.send_email") as mock_email_sending:
+        with patch("fastapi.BackgroundTasks.add_task") as add_task_mock:
+            # Override the add_task method to call the function directly
+            add_task_mock.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
+            
+            yield mock_email_sending
 
 @pytest.fixture
 def mock_db_session(_=MagicMock()):
@@ -72,7 +81,7 @@ theader = lambda _: {"Authorization": f"Bearer {_}"}
 
 @pytest.mark.parametrize("data", [squeeze1, squeeze2, squeeze3])
 @pytest.mark.usefixtures("mock_db_session")
-def test_create_squeeze_page(mock_db_session, data):
+def test_create_squeeze_page(mock_db_session, data, mock_send_email):
     """Test create squeeze page."""
     create_mock_super_admin(mock_db_session)
     tok = client.post(
