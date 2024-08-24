@@ -19,6 +19,26 @@ class FAQService(Service):
 
         return new_faq
 
+    def fetch_all_grouped_by_category(self, db: Session, **query_params: Optional[Any]):
+        """Fetch all FAQs grouped by category"""
+        query = db.query(FAQ.category, FAQ.question, FAQ.answer)
+
+        if query_params:
+            for column, value in query_params.items():
+                if hasattr(FAQ, column) and value:
+                    query = query.filter(
+                        getattr(FAQ, column).ilike(f"%{value}%"))
+        faqs = query.order_by(FAQ.category).all()
+
+        grouped_faqs = {}
+        for faq in faqs:
+            if faq.category not in grouped_faqs:
+                grouped_faqs[faq.category] = []
+            grouped_faqs[faq.category].append(
+                {"question": faq.question, "answer": faq.answer})
+
+        return grouped_faqs
+
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all FAQs with option to search using query parameters"""
 
@@ -28,7 +48,8 @@ class FAQService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(FAQ, column) and value:
-                    query = query.filter(getattr(FAQ, column).ilike(f"%{value}%"))
+                    query = query.filter(
+                        getattr(FAQ, column).ilike(f"%{value}%"))
 
         return query.all()
 
