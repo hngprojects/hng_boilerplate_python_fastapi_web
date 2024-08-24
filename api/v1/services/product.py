@@ -126,24 +126,16 @@ class ProductService(Service):
         db.commit()
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all products with option to search using query parameters"""
+        """Fetch all products with option tto search using query parameters"""
 
         query = db.query(Product)
 
+        # Enable filter by query parameter
         if query_params:
-            filters = []
-            if query_params.get('name'):
-                filters.append(Product.name.ilike(f"%{query_params['name']}%"))
-            if query_params.get('category'):
-                filters.append(Product.category.has(
-                    ProductCategory.name.ilike(f"%{query_params['category']}%")))
-            if query_params.get('min_price'):
-                filters.append(Product.price >= query_params['min_price'])
-            if query_params.get('max_price'):
-                filters.append(Product.price <= query_params['max_price'])
-
-            if filters:
-                query = query.filter(and_(*filters))
+            for column, value in query_params.items():
+                if hasattr(Product, column) and value:
+                    query = query.filter(
+                        getattr(Product, column).ilike(f"%{value}%"))
 
         return query.all()
 
@@ -222,6 +214,34 @@ class ProductService(Service):
             "current_stock": total_stock,
             "last_updated": product.updated_at,
         }
+
+    def search_products(
+            db: Session,
+            org_id: str,
+            name: Optional[str] = None,
+            category: Optional[str] = None,
+            min_price: Optional[float] = None,
+            max_price: Optional[float] = None,
+            limit: int = 10,
+            page: int = 1,
+    ):
+
+        query = db.query(Product).filter(Product.org_id == org_id)
+
+        if name:
+            query = query.filter(Product.name.ilike(f"%{name}%"))
+        if category:
+            query = query.filter(Product.category.ilike(f"%{category}%"))
+
+        if min_price is not None:
+            query = query.filter(Product.price >= min_price)
+        if max_price is not None:
+            query = query.filter(Product.price <= max_price)
+
+        offset = (page - 1) * limit
+        products = query.offset(offset).limit(limit).all()
+
+        return products
 
 
 class ProductCategoryService(Service):
