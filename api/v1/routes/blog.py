@@ -311,7 +311,7 @@ async def update_blog_comment(
 
 @blog.delete("/likes/{blog_like_id}", 
              status_code=status.HTTP_204_NO_CONTENT)
-def delete_blog_like(
+async def delete_blog_like(
     blog_like_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
@@ -326,4 +326,4 @@ def delete_blog_like(
     blog_like_service = BlogLikeService(db)
 
     # delete blog like
-    blog_like_service.delete(blog_like_id, current_user.id)
+    return blog_like_service.delete(blog_like_id, current_user.id)
