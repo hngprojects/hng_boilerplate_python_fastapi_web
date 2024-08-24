@@ -149,7 +149,7 @@ class BlogService:
                 # delete, but do not commit yet. Allow everything 
                 # to be commited when operation like created
                 self.db.delete(existing_dislike)
-        if creating == "dislike":
+        elif creating == "dislike":
             existing_like = self.fetch_blog_like(blog.id, user.id)
             if existing_like:
                 # delete, but do not commit yet. Allow everything 
