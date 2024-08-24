@@ -22,7 +22,7 @@ class APIStatusPost(BaseModel):
     api_group: str
     status: str
     response_time: Optional[Decimal] = None
-    details: Optional[str] = None
+    details: str
 
     class Config:
         from_attributes = True
