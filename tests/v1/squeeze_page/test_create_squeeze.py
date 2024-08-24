@@ -78,6 +78,7 @@ def test_create_squeeze_page(mock_db_session, data):
     tok = client.post(
         LOGIN_URI, json={"email": "user1@gmail.com", "password": "P@ssw0rd"}
     ).json()
+    print(tok)
     assert tok["status_code"] == status.HTTP_200_OK
     token = tok["access_token"]
     res = client.post(URI, json=data, headers=theader(token))
