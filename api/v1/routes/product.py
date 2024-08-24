@@ -3,7 +3,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import Annotated
-from typing import List
+from typing import List, Optional
 
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
@@ -33,8 +33,10 @@ non_organisation_product = APIRouter(prefix="/products", tags=["Products"])
 @non_organisation_product.get("", response_model=success_response, status_code=200)
 async def get_all_products(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    skip: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    skip: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 0,
     db: Session = Depends(get_db),
 ):
     """Endpoint to get all products. Only accessible to superadmin"""
@@ -62,7 +64,8 @@ def create_product_category(
         HTTPException: 401 FORBIDDEN (Current user is not a authenticated)
     """
 
-    new_category = ProductCategoryService.create(db, category_schema, current_user)
+    new_category = ProductCategoryService.create(
+        db, category_schema, current_user)
 
     return success_response(
         status_code=status.HTTP_201_CREATED,
@@ -98,7 +101,8 @@ def retrieve_categories(
     )
 
 
-product = APIRouter(prefix="/organisations/{org_id}/products", tags=["Products"])
+product = APIRouter(
+    prefix="/organisations/{org_id}/products", tags=["Products"])
 
 
 # create
@@ -249,8 +253,10 @@ def delete_product(
 def get_organisation_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
-    limit: Annotated[int, Query(ge=1, description="Number of products per page")] = 10,
-    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 1,
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 1,
     db: Session = Depends(get_db),
 ):
     """
@@ -326,7 +332,8 @@ async def get_products_by_filter_status(
             message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve products")
 
 
 @product.get(
@@ -342,9 +349,58 @@ async def get_products_by_status(
 ):
     """Endpoint to get products by status"""
     try:
-        products = product_service.fetch_by_status(db=db, org_id=org_id, status=status)
+        products = product_service.fetch_by_status(
+            db=db, org_id=org_id, status=status)
         return SuccessResponse(
             message="Products retrieved successfully", status_code=200, data=products
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to retrieve products")
+        raise HTTPException(
+            status_code=500, detail="Failed to retrieve products")
+
+
+@product.get("/search", status_code=status.HTTP_200_OK, response_model=ProductList)
+def search_products(
+    org_id: str,
+    name: Optional[str] = Query(None, description="Search by product name"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    min_price: Optional[float] = Query(
+        None, description="Filter by minimum price"),
+    max_price: Optional[float] = Query(
+        None, description="Filter by maximum price"),
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    page: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 1,
+    current_user: Annotated[User, Depends(
+        user_service.get_current_user)] = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Endpoint to search for products with optional filters and pagination.
+
+    Query parameters:
+        - name: Search by product name
+        - category: Filter by category
+        - min_price: Filter by minimum price
+        - max_price: Filter by maximum price
+        - limit: Number of products per page (default: 10, minimum: 1)
+        - page: Page number (starts from 1)
+    """
+
+    products = product_service.search_products(
+        db=db,
+        org_id=org_id,
+        name=name,
+        category=category,
+        min_price=min_price,
+        max_price=max_price,
+        limit=limit,
+        page=page,
+    )
+
+    return success_response(
+        status_code=200,
+        message="Products searched successfully",
+        data=[jsonable_encoder(product) for product in products],
+    )
