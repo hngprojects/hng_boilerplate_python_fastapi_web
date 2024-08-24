@@ -120,7 +120,26 @@ class UserService(Service):
 
         user = check_model_existence(db, User, id)
         return user
+    
+    
+    def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
+        """
+        Fetches a user by their email address.
 
+        Args:
+            db: The database session.
+            email: The email address of the user.
+
+        Returns:
+            The user object if found, otherwise None.
+        """
+        user = db.query(User).filter(User.email == email).first()
+
+        if not user:
+            return None
+
+        return user
+    
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
