@@ -43,9 +43,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           script: |
             cd hng_boilerplate_python_fastapi_web/staging
-            git add .
-            git stash
-            git pull origin staging
             python3 update_api_status.py
           
 
