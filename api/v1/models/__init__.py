@@ -1,4 +1,5 @@
 from api.v1.models.activity_logs import ActivityLog
+from api.v1.models.api_status import APIStatus
 from api.v1.models.billing_plan import BillingPlan
 from api.v1.models.comment import Comment, CommentLike, CommentDislike
 from api.v1.models.contact_us import ContactUs

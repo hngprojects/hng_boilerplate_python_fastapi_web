@@ -74,7 +74,7 @@ def test_get_payments_successfully(
     # Make request
     params = {'page': 1, 'limit': 10}
     headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/transactions/current-user", params=params, headers=headers)
 
     resp_d = response.json()
 
@@ -107,7 +107,7 @@ def test_get_payments_successfully(
     # Make request, with limit set to 2, to get 3 pages
     params = {'page': 1, 'limit': 2}
     headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/transactions/current-user", params=params, headers=headers)
 
     resp_d = response.json()
 
@@ -139,14 +139,14 @@ def test_for_unauthenticated_get_payments(
 
     # Make request || WRONG Authorization
     headers = {'Authorization': f'Bearer {random_access_token}'}
-    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/transactions/current-user", params=params, headers=headers)
 
     assert response.status_code == 401
     assert response.json()['message'] == "Could not validate credentials"
     assert not response.json().get('data')
 
     # Make request || NO Authorization
-    response = client.get("/api/v1/payments/current-user", params=params)
+    response = client.get("/api/v1/transactions/current-user", params=params)
 
     assert response.status_code == 401
     assert response.json()['message'] == "Not authenticated"
@@ -170,7 +170,7 @@ def test_for_no_payments_for_user(
     # Make request
     params = {'page': 1, 'limit': 10}
     headers = {'Authorization': f'Bearer {access_token_user}'}
-    response = client.get("/api/v1/payments/current-user", params=params, headers=headers)
+    response = client.get("/api/v1/transactions/current-user", params=params, headers=headers)
 
     assert response.status_code == 404
     assert response.json()['message'] == "Payments not found for user"

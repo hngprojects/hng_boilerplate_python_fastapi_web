@@ -1,11 +1,11 @@
-from typing import Any, Optional
+from typing import Any, Optional, List
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.v1.models.regions import Region
 from api.v1.schemas.regions import RegionUpdate, RegionCreate
 from api.utils.db_validators import check_model_existence
-
-
+from sqlalchemy import distinct
+from fastapi import HTTPException
 class RegionService(Service):
     """Region Services"""
 
@@ -64,6 +64,15 @@ class RegionService(Service):
         region = self.fetch(db=db, region_id=region_id)
         db.delete(region)
         db.commit()
+        
+        
+    def fetch_unique_timezones(self, db: Session):
+        '''Fetch unique time zones without duplicates'''
+        timezones = db.query(distinct(Region.timezone)).filter(Region.timezone.isnot(None)).all()
+        """Extract unique time zones as a list"""
+        unique_timezones = sorted([tz[0] for tz in timezones if tz[0]])
+        """Return unique timezones"""
+        return unique_timezones
 
 
 region_service = RegionService()
