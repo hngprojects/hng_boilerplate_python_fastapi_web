@@ -126,15 +126,24 @@ class ProductService(Service):
         db.commit()
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
-        """Fetch all products with option tto search using query parameters"""
+        """Fetch all products with option to search using query parameters"""
 
         query = db.query(Product)
 
-        # Enable filter by query parameter
         if query_params:
-            for column, value in query_params.items():
-                if hasattr(Product, column) and value:
-                    query = query.filter(getattr(Product, column).ilike(f"%{value}%"))
+            filters = []
+            if query_params.get('name'):
+                filters.append(Product.name.ilike(f"%{query_params['name']}%"))
+            if query_params.get('category'):
+                filters.append(Product.category.has(
+                    ProductCategory.name.ilike(f"%{query_params['category']}%")))
+            if query_params.get('min_price'):
+                filters.append(Product.price >= query_params['min_price'])
+            if query_params.get('max_price'):
+                filters.append(Product.price <= query_params['max_price'])
+
+            if filters:
+                query = query.filter(and_(*filters))
 
         return query.all()
 
@@ -252,7 +261,6 @@ class ProductCategoryService(Service):
                     )
 
         return query.all()
-    
-    
-    
+
+
 product_service = ProductService()

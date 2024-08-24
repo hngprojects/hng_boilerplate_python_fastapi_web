@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 
@@ -45,12 +45,24 @@ async def get_products_count(
 
 @dashboard.get("/products", response_model=DashboardProductListResponse)
 async def get_products(
+    name: Optional[str] = Query(None, description="Search by product name"),
+    category: Optional[str] = Query(None, description="Filter by category"),
+    min_price: Optional[float] = Query(
+        None, description="Filter by minimum price"),
+    max_price: Optional[float] = Query(
+        None, description="Filter by maximum price"),
     current_user: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db)
 ):
-    products = product_service.fetch_all(db)
+    products = product_service.fetch_all(
+        db,
+        name=name,
+        category=category,
+        min_price=min_price,
+        max_price=max_price
+    )
 
-    payment_data = [
+    product_data = [
         {
             "name": prod.name,
             "description": prod.description,
@@ -67,7 +79,7 @@ async def get_products(
     return success_response(
         status_code=200,
         message="Products fetched successfully",
-        data=payment_data
+        data=product_data
     )
 
 
