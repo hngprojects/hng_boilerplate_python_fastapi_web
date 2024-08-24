@@ -22,6 +22,19 @@ from api.v1.services.waitlist import waitlist_service
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
 
 def process_waitlist_signup(user: WaitlistAddUserSchema, db: Session):
+    """
+    Process a waitlist signup request.
+
+    Args:
+    - user (WaitlistAddUserSchema): The user details to be added to the waitlist.
+    - db (Session): The database session.
+
+    Returns:
+    - db_user: The added user object.
+
+    Raises:
+    - HTTPException: If the full name is not provided or if the email is already registered.
+    """
     if not user.full_name:
         logger.error("Full name is required")
         raise HTTPException(
@@ -55,6 +68,24 @@ async def waitlist_signup(
     user: WaitlistAddUserSchema,
     db: Session = Depends(get_db)
 ):
+    """
+    Add a user to the waitlist.
+
+    Args:
+    - user (WaitlistAddUserSchema): The user details to be added to the waitlist.
+
+    Returns:
+    - success_response: A success response with a message and status code.
+
+    Example:
+    ```
+    curl -X POST \
+      http://localhost:8000/waitlist/ \
+      -H 'Content-Type: application/json' \
+      -d '{"email": "user@example.com", "full_name": "John Doe"}'
+    ```
+    """
+     
     db_user = process_waitlist_signup(user, db)
     if db_user:
         cta_link = 'https://anchor-python.teams.hng.tech/about-us'
@@ -62,7 +93,7 @@ async def waitlist_signup(
         background_tasks.add_task(
             send_email, 
             recipient=user.email,
-            template_name='waitlist.html',
+            template_name='waitlists.html',
             subject='Welcome to HNG Waitlist',
             context={
                 'name': user.full_name,
@@ -82,19 +113,25 @@ def admin_add_user_to_waitlist(
     db: Session = Depends(get_db),
 ):
     """
-    Manually adds a user to the waitlist.
-    This endpoint allows an admin to add a user to the waitlist.
+    Manually add a user to the waitlist as an admin.
 
-    Parameters:
-    - item: WaitlistAddUserSchema
-        The details of the user to be added to the waitlist.
-    - admin: User (Depends on get_super_admin)
-        The current admin making the request. This is a dependency that provides the current admin context.
+    Args:
+    - item (WaitlistAddUserSchema): The user details to be added to the waitlist.
+    - admin (User): The current admin making the request.
 
     Returns:
-    - 201: User added successfully
-    - 400: Validation error
-    - 403: Forbidden
+    - success_response: A success response with a message and status code.
+
+    Raises:
+    - HTTPException: If the full name is not provided or if the email is already registered.
+
+    Example:
+    ```
+    curl -X POST \
+      http://localhost:8000/waitlist/admin \
+      -H 'Content-Type: application/json' \
+      -d '{"email": "user@example.com", "full_name": "John Doe"}'
+    ```
     """
 
     try:

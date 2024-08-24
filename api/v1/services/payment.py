@@ -1,7 +1,5 @@
 from typing import Any, Optional
 from sqlalchemy.orm import Session
-from api.v1.models.payment import Payment
-
 from fastapi import HTTPException
 from api.v1.models import User
 from api.v1.models.payment import Payment

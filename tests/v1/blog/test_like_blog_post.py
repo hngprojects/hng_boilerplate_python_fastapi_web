@@ -74,7 +74,9 @@ def make_request(blog_id, token):
     )
 
 # Test for successful like
+@patch("api.v1.services.blog.BlogService.create_blog_like")
 def test_successful_like(
+    mock_create_blog_like,
     mock_db_session, 
     test_user, 
     test_blog,
@@ -84,8 +86,14 @@ def test_successful_like(
     # mock current-user AND blog-post
     mock_db_session.query().filter().first.side_effect = [test_user, test_blog]
 
-    # mock existing-blog-like AND new-blog-like
-    mock_db_session.query().filter_by().first.side_effect = [None, test_blog_like]
+    # mock existing-blog-like
+    mock_db_session.query().filter_by().first.return_value = None
+
+    # mock created-blog-like
+    mock_create_blog_like.return_value = test_blog_like
+
+    # mock like-count
+    mock_db_session.query().filter_by().count.return_value = 1
 
     resp = make_request(test_blog.id, access_token_user)
     resp_d = resp.json()
@@ -94,12 +102,13 @@ def test_successful_like(
     assert resp_d['success'] == True
     assert resp_d['message'] == "Like recorded successfully."
 
-    like_data = resp_d['data']
+    like_data = resp_d['data']['object']
     assert like_data['id'] == test_blog_like.id
     assert like_data['blog_id'] == test_blog.id
     assert like_data['user_id'] == test_user.id
     assert like_data['ip_address'] == test_blog_like.ip_address
     assert datetime.fromisoformat(like_data['created_at']) == test_blog_like.created_at
+    assert resp_d['data']['objects_count'] == 1
 
 
 # Test for double like
@@ -121,12 +130,13 @@ def test_double_like(
 
 # Test for wrong blog id
 def test_wrong_blog_id(
+    # mock_fetch_blog,
     mock_db_session, 
     test_user,
     access_token_user,
 ):
     mock_user_service.get_current_user = test_user
-    mock_blog_service.fetch = None
+    mock_db_session.query().filter().first.return_value = None
 
     ### TEST REQUEST WITH WRONG blog_id ###
     ### using random uuid instead of blog1.id  ###

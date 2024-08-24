@@ -64,13 +64,20 @@ class BlogLikeDislikeCreate(BaseModel):
     created_at: datetime
 
 
+class BlogLikeDislikeCreateData(BaseModel):
+    object: BlogLikeDislikeCreate
+    objects_count: int  # number of likes/dislikes
+
+
 class BlogLikeDislikeResponse(BaseModel):
     status_code: str
     message: str
-    data: BlogLikeDislikeCreate
+    data: BlogLikeDislikeCreateData
+
 
 class CommentRequest(BaseModel):
     content: str
+
 
 class CommentUpdateResponseModel(BaseModel):
     status: str

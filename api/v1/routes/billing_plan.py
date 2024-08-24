@@ -10,12 +10,15 @@ from api.v1.models.user import User
 from api.v1.services.billing_plan import billing_plan_service
 from api.db.database import get_db
 from api.v1.services.user import user_service
-from api.v1.schemas.plans import CreateSubscriptionPlan
+from api.v1.schemas.plans import (
+    CreateBillingPlanSchema, CreateBillingPlanResponse, GetBillingPlanListResponse
+)
+
 
 bill_plan = APIRouter(prefix="/organisations", tags=["Billing-Plan"])
 
 
-@bill_plan.get("/{organisation_id}/billing-plans", response_model=success_response)
+@bill_plan.get("/{organisation_id}/billing-plans", response_model=GetBillingPlanListResponse)
 async def retrieve_all_billing_plans(
     organisation_id: str, db: Session = Depends(get_db)
 ):
@@ -34,10 +37,10 @@ async def retrieve_all_billing_plans(
     )
 
 
-@bill_plan.post("/billing-plans", response_model=success_response)
+@bill_plan.post("/billing-plans", response_model=CreateBillingPlanResponse)
 async def create_new_billing_plan(
-    request: CreateSubscriptionPlan,
-    current_user: User = Depends(user_service.get_current_super_admin),
+    request: CreateBillingPlanSchema,
+    _: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db),
 ):
     """
@@ -53,11 +56,11 @@ async def create_new_billing_plan(
     )
 
 
-@bill_plan.patch("/billing-plans/{billing_plan_id}", response_model=success_response)
+@bill_plan.patch("/billing-plans/{billing_plan_id}", response_model=CreateBillingPlanResponse)
 async def update_a_billing_plan(
     billing_plan_id: str,
-    request: CreateSubscriptionPlan,
-    current_user: User = Depends(user_service.get_current_super_admin),
+    request: CreateBillingPlanSchema,
+    _: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db),
 ):
     """
@@ -76,7 +79,7 @@ async def update_a_billing_plan(
 @bill_plan.delete("/billing-plans/{billing_plan_id}", response_model=success_response)
 async def delete_a_billing_plan(
     billing_plan_id: str,
-    current_user: User = Depends(user_service.get_current_super_admin),
+    _: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db),
 ):
     """
@@ -91,11 +94,11 @@ async def delete_a_billing_plan(
     )
 
 
-@bill_plan.get('/billing-plans/{billing_plan_id}', response_model=success_response)
+@bill_plan.get('/billing-plans/{billing_plan_id}', response_model=CreateBillingPlanResponse)
 async def retrieve_single_billing_plans(
     billing_plan_id: str,
     db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_user)
+    _: User = Depends(user_service.get_current_user)
 ):
     """
     Endpoint to get single billing plan by id
