@@ -1,9 +1,8 @@
 import pytest
 from fastapi.testclient import TestClient
 from main import app
-from api.db.database import get_db
 from unittest.mock import MagicMock, patch
-from api.v1.models import *
+from api.v1.models import User
 from api.v1.services.user import user_service
 from uuid_extensions import uuid7
 from fastapi import status
@@ -47,14 +46,13 @@ squeeze3 = {
     "status_code": 201,
 }
 
-# Mock the BackgroundTasks to call the task function directly
+# Mock the BackgroundTasks and email sending function
 @pytest.fixture(scope='module')
 def mock_send_email():
-    with patch("api.core.dependencies.email_sender.send_email") as mock_email_sending:
+    with patch("api.core.dependencies.email_sender.send_email", return_value=None) as mock_email_sending:
         with patch("fastapi.BackgroundTasks.add_task") as add_task_mock:
-            # Override the add_task method to call the function directly
+            # Override the add_task method to simulate direct function call
             add_task_mock.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
-            
             yield mock_email_sending
 
 @pytest.fixture
@@ -80,7 +78,7 @@ theader = lambda _: {"Authorization": f"Bearer {_}"}
 
 
 @pytest.mark.parametrize("data", [squeeze1, squeeze2, squeeze3])
-@pytest.mark.usefixtures("mock_db_session")
+@pytest.mark.usefixtures("mock_db_session", "mock_send_email")
 def test_create_squeeze_page(mock_db_session, data, mock_send_email):
     """Test create squeeze page."""
     create_mock_super_admin(mock_db_session)
