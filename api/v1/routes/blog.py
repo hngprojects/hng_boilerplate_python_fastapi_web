@@ -20,7 +20,7 @@ from api.v1.schemas.blog import (
     CommentRequest,
     CommentUpdateResponseModel
 )
-from api.v1.services.blog import BlogService, BlogDislikeService
+from api.v1.services.blog import BlogService, BlogDislikeService, BlogLikeService
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
 from api.v1.services.comment import comment_service
@@ -307,6 +307,26 @@ async def update_blog_comment(
         status_code=200,
         data=jsonable_encoder(updated_blog_comment)
     )
+
+
+@blog.delete("/likes/{blog_like_id}", 
+             status_code=status.HTTP_204_NO_CONTENT)
+async def delete_blog_like(
+    blog_like_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to delete `BlogLike`
+
+    args:
+        blog_like_id: `str` The ID of the BlogLike object.
+        request: `default` Request.
+        db: `default` Session.
+    """
+    blog_like_service = BlogLikeService(db)
+
+    # delete blog like
+    return blog_like_service.delete(blog_like_id, current_user.id)
 
 
 @blog.delete("/dislikes/{blog_dislike_id}", 
