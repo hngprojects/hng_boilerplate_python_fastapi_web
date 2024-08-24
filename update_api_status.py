@@ -3,7 +3,7 @@ import json
 
 # Define the API endpoint
 # BASE_URL = "https://staging.api-python.boilerplate.hng.tech"
-BASE_URL = "http://127.0.0.1:7001"
+BASE_URL = "https://staging.api-python.boilerplate.hng.tech"
 API_ENDPOINT = f"{BASE_URL}/api/v1/api-status"
 
 
