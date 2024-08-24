@@ -147,13 +147,13 @@ class BlogService:
             existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
             if existing_dislike:
                 # delete, but do not commit yet. Allow everything 
-                # to be commited when operation like created
+                # to be commited after the actual like is created
                 self.db.delete(existing_dislike)
-        if creating == "dislike":
+        elif creating == "dislike":
             existing_like = self.fetch_blog_like(blog.id, user.id)
             if existing_like:
                 # delete, but do not commit yet. Allow everything 
-                # to be commited when operation dislike created
+                # to be commited after the actual dislike is created
                 self.db.delete(existing_like)
         else:
             raise HTTPException(
@@ -262,29 +262,4 @@ class BlogLikeService:
             )
 
         self.db.delete(blog_like)
-        self.db.commit()
-
-
-class BlogDislikeService:
-    """BlogDislike service functionality"""
-
-    def __init__(self, db: Session):
-        self.db = db
-
-    def fetch(self, blog_dislike_id: str):
-        """Fetch a blog dislike by its ID"""
-        return check_model_existence(self.db, BlogLike, blog_dislike_id)
-
-    def delete(self, blog_dislike_id: str, user_id: str):
-        """Delete blog dislike"""
-        blog_dislike = self.fetch(blog_dislike_id)
-
-        # check that current user owns the blog like
-        if blog_dislike.user_id != user_id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Insufficient permission"
-            )
-
-        self.db.delete(blog_dislike)
         self.db.commit()

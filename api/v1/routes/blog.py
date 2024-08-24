@@ -10,7 +10,7 @@ from api.db.database import get_db
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.models.blog import Blog, BlogDislike, BlogLike
+from api.v1.models.blog import Blog
 from api.v1.schemas.blog import (
     BlogCreate,
     BlogPostResponse,
@@ -20,7 +20,7 @@ from api.v1.schemas.blog import (
     CommentRequest,
     CommentUpdateResponseModel
 )
-from api.v1.services.blog import BlogService, BlogLikeService, BlogDislikeService
+from api.v1.services.blog import BlogService, BlogLikeService
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
 from api.v1.services.comment import comment_service
