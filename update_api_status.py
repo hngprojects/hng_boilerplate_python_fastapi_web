@@ -20,7 +20,7 @@ def parse_and_post_results():
         status_code = item.get('response', {}).get('code')
         response_time = item.get('item', {}).get('responseTime')
 
-        if status_code >= 500:
+        if isinstance(status_code, int) and status_code >= 500:
             status = 'Down'
             details = item.get('response', {}).get('status', 'No status available')
         else:
