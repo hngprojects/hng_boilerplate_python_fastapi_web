@@ -37,20 +37,23 @@ async def sub_newsletter(
         # Save user to the database
         NewsletterService.create(db, request)
 
-    link = "https://anchor-python.teams.hng.tech/"
+        link = "https://anchor-python.teams.hng.tech/"
 
-    # Send email in the background
-    background_tasks.add_task(
-        send_email,
-        recipient=request.email,
-        template_name="newsletter-subscription.html",
-        subject="Thank You for Subscribing to HNG Boilerplate Newsletters",
-        context={"link": link},
-    )
+        # Send email in the background
+        background_tasks.add_task(
+            send_email,
+            recipient=request.email,
+            template_name="newsletter-subscription.html",
+            subject="Thank You for Subscribing to HNG Boilerplate Newsletters",
+            context={"link": link},
+        )
+        message = "Thank you for subscribing to our newsletter."
+    else:
+        message = "You have already subscribed to our newsletter. Thank you."
 
     return success_response(
-        message="Thank you for subscribing to our newsletter.",
-        status_code=status.HTTP_201_CREATED,
+        message=message,
+        status_code=status.HTTP_200_OK,
     )
 
 
