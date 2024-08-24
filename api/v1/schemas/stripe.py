@@ -24,7 +24,8 @@ class PaymentInfo(BaseModel):
 
 class PlanUpgradeRequest(BaseModel):
     user_id: str
-    plan_name: str
-    payment_info: Optional[PaymentInfo] = None
+    plan_id: str
+    is_downgrade: bool
+    #payment_info: Optional[PaymentInfo] = None
 
 
