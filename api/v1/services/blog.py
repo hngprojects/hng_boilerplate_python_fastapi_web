@@ -118,7 +118,7 @@ class BlogService:
         )
         return blog_dislike
     
-    def check_user_already_liked_blog(self, blog: Blog, user: Blog):
+    def check_user_already_liked_blog(self, blog: Blog, user: User):
         existing_like = self.fetch_blog_like(blog.id, user.id)
         if isinstance(existing_like, BlogLike):
             raise HTTPException(
@@ -126,12 +126,39 @@ class BlogService:
                 status_code=status.HTTP_403_FORBIDDEN,
             )
     
-    def check_user_already_disliked_blog(self, blog: Blog, user: Blog):
+    def check_user_already_disliked_blog(self, blog: Blog, user: User):
         existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
         if isinstance(existing_dislike, BlogDislike):
             raise HTTPException(
                 detail="You have already disliked this blog post",
                 status_code=status.HTTP_403_FORBIDDEN,
+            )
+    
+    def delete_opposite_blog_like_or_dislike(self, blog: Blog, user: User, creating: str):
+        """
+        This method checks if there's a BlogLike by `user` on `blog` when a BlogDislike 
+        is being created and deletes the BlogLike. The same for BlogLike creation. \n
+
+        :param blog: `Blog` The blog being liked or disliked
+        :param user: `User` The user liking or disliking the blog
+        :param creating: `str` The operation being performed by the user. One of "like", "dislike"
+        """
+        if creating == "like":
+            existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
+            if existing_dislike:
+                # delete, but do not commit yet. Allow everything 
+                # to be commited after the actual like is created
+                self.db.delete(existing_dislike)
+        elif creating == "dislike":
+            existing_like = self.fetch_blog_like(blog.id, user.id)
+            if existing_like:
+                # delete, but do not commit yet. Allow everything 
+                # to be commited after the actual dislike is created
+                self.db.delete(existing_like)
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid `creating` value for blog like/dislike"
             )
 
     def num_of_likes(self, blog_id: str) -> int:
@@ -211,3 +238,28 @@ class BlogService:
             )
 
         return comment
+
+
+class BlogDislikeService:
+    """BlogDislike service functionality"""
+
+    def __init__(self, db: Session):
+        self.db = db
+
+    def fetch(self, blog_dislike_id: str):
+        """Fetch a blog dislike by its ID"""
+        return check_model_existence(self.db, BlogDislike, blog_dislike_id)
+
+    def delete(self, blog_dislike_id: str, user_id: str):
+        """Delete blog dislike"""
+        blog_dislike = self.fetch(blog_dislike_id)
+
+        # check that current user owns the blog like
+        if blog_dislike.user_id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Insufficient permission"
+            )
+
+        self.db.delete(blog_dislike)
+        self.db.commit()
