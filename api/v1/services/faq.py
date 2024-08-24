@@ -19,7 +19,7 @@ class FAQService(Service):
 
         return new_faq
 
-    def fetch_all_grouped_by_category(self, db: Session):
+    def fetch_all_grouped_by_category(self, db: Session, **query_params: Optional[Any]):
         """Fetch all FAQs grouped by category"""
         query = db.query(FAQ.category, FAQ.question, FAQ.answer)
 
