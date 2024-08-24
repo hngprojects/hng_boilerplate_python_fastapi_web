@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from api.db.database import get_db
 from api.utils.pagination import paginated_response
@@ -15,15 +16,24 @@ faq = APIRouter(prefix="/faqs", tags=["Frequently Asked Questions"])
 
 
 @faq.get("", response_model=success_response, status_code=200)
-async def get_all_faqs(db: Session = Depends(get_db),):
-    """Endpoint to get all FAQs"""
+async def get_all_faqs(
+    db: Session = Depends(get_db),
+    keyword: Optional[str] = Query(None, min_length=1)
+):
+    """Endpoint to get all FAQs or search by keyword in both question and answer"""
 
-    faqs = faq_service.fetch_all(db=db)
+    query_params = {}
+    if keyword:
+        query_params["question"] = keyword
+        query_params["answer"] = keyword
+
+    grouped_faqs = faq_service.fetch_all_grouped_by_category(
+        db=db, **query_params)
 
     return success_response(
         status_code=200,
         message="FAQs retrieved successfully",
-        data=jsonable_encoder(faqs),
+        data=jsonable_encoder(grouped_faqs),
     )
 
 
