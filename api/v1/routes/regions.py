@@ -28,15 +28,33 @@ def create_region(region: RegionCreate, db: Session = Depends(get_db),
     )
 
 @regions.get("", response_model=List[RegionOut])
-def get_regions(db: Session = Depends(get_db)):
-    """Get All Regions"""
-    regions = region_service.fetch_all(db)
-    
-    return success_response(
-        status_code=200,
-        message='Regions retrieved successfully',
-        data=jsonable_encoder(regions)
-    )
+def get_regions_or_timezones(
+    db: Session = Depends(get_db),
+    timezones: Optional[bool] = Query(False, description="Set to true to fetch unique time zones")
+):
+    """
+    Fetch all regions or unique time zones based on the timezones query parameter.
+    """
+    if timezones:
+        unique_timezones = region_service.fetch_unique_timezones(db)
+        if not unique_timezones:
+            raise HTTPException(
+                status_code=404,
+                detail="No time zones found."
+            )
+        return success_response(
+            status_code=200,
+            message='Time zones retrieved successfully',
+            data=unique_timezones
+        )
+    else:
+        regions = region_service.fetch_all(db)
+        return success_response(
+            status_code=200,
+            message='Regions retrieved successfully',
+            data=regions
+        )
+
 
 @regions.get("/{region_id}", response_model=RegionOut)
 def get_region_by_user(region_id: str, db: Session = Depends(get_db)):
@@ -61,16 +79,3 @@ def update_region(region_id: str, region: RegionUpdate, db: Session = Depends(ge
 def delete_region(region_id: str, db: Session = Depends(get_db)):
     region = region_service.delete(db, region_id)
     return
-
-
-@regions.get(
-    '/', response_model=List[str])
-def get_unique_timezones(db: Session = Depends(get_db)):
-    
-    '''Get unique time zones'''
-    timezones = region_service.fetch_unique_timezones(db)
-    return success_response(
-        status_code=200,
-        message='Timezones retrieved successfully',
-        data=jsonable_encoder(timezones)
-    )
