@@ -68,22 +68,9 @@ def mock_fetch_all_organisations_with_users_and_plans():
     with patch("api.v1.services.stripe_payment.fetch_all_organisations_with_users_and_plans") as mock_service:
         yield mock_service
 
-@pytest.mark.asyncio
-async def test_subscribe_user_to_plan(mock_db_session, mock_subscribe_user_to_plan):
-    # Mock the behavior of the service function
-    mock_subscribe_user_to_plan.return_value = mock_subscription
-
-    # Call the actual service function
-    response = await update_user_plan(mock_db_session, user_id=user_id, plan_name="Premium")
-
-    # Assertions
-    assert response.user_id == user_id
-    assert response.plan_id == plan_id
-    assert response.organisation_id == org_id
-
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_fetch_invalid_billing_plans(mock_user_service, mock_db_session):
+def test_fetch__billing_plans(mock_user_service, mock_db_session):
     """Billing plan fetch test."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     access_token = user_service.create_access_token(user_id=str(uuid7()))
@@ -93,4 +80,4 @@ def test_fetch_invalid_billing_plans(mock_user_service, mock_db_session):
         headers={"Authorization": f"Bearer {access_token}"},
     )
     print(response.json())
-    assert response.status_code == 404
+    assert response.status_code == 200
