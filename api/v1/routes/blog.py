@@ -10,7 +10,7 @@ from api.db.database import get_db
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.v1.models.user import User
-from api.v1.models.blog import Blog, BlogDislike, BlogLike
+from api.v1.models.blog import Blog
 from api.v1.schemas.blog import (
     BlogCreate,
     BlogPostResponse,
@@ -20,7 +20,7 @@ from api.v1.schemas.blog import (
     CommentRequest,
     CommentUpdateResponseModel
 )
-from api.v1.services.blog import BlogService
+from api.v1.services.blog import BlogService, BlogDislikeService, BlogLikeService
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import CommentCreate, CommentSuccessResponse
 from api.v1.services.comment import comment_service
@@ -118,6 +118,7 @@ def like_blog_post(
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to add `like` to a blog post.
+    Existing `dislike` by the `current_user` is automatically deleted.
 
     args:
         blog_id: `str` The ID of the blog post.
@@ -136,6 +137,9 @@ def like_blog_post(
 
     # confirm current user has NOT liked before
     blog_service.check_user_already_liked_blog(blog_p, current_user)
+
+    # check for BlogDislike by current user and delete it
+    blog_service.delete_opposite_blog_like_or_dislike(blog_p, current_user, "like")
 
     # update likes
     new_like = blog_service.create_blog_like(
@@ -160,6 +164,7 @@ def dislike_blog_post(
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to add `dislike` to a blog post.
+    Existing `like` by the `current_user` is automatically deleted.
 
     args:
         blog_id: `str` The ID of the blog post.
@@ -178,6 +183,9 @@ def dislike_blog_post(
 
     # confirm current user has NOT disliked before
     blog_service.check_user_already_disliked_blog(blog_p, current_user)
+
+    # check for BlogLike by current user and delete it
+    blog_service.delete_opposite_blog_like_or_dislike(blog_p, current_user, "dislike")
 
     # update disikes
     new_dislike = blog_service.create_blog_dislike(
@@ -299,3 +307,43 @@ async def update_blog_comment(
         status_code=200,
         data=jsonable_encoder(updated_blog_comment)
     )
+
+
+@blog.delete("/likes/{blog_like_id}", 
+             status_code=status.HTTP_204_NO_CONTENT)
+async def delete_blog_like(
+    blog_like_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to delete `BlogLike`
+
+    args:
+        blog_like_id: `str` The ID of the BlogLike object.
+        request: `default` Request.
+        db: `default` Session.
+    """
+    blog_like_service = BlogLikeService(db)
+
+    # delete blog like
+    return blog_like_service.delete(blog_like_id, current_user.id)
+
+
+@blog.delete("/dislikes/{blog_dislike_id}", 
+             status_code=status.HTTP_204_NO_CONTENT)
+def delete_blog_dislike(
+    blog_dislike_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to delete `BlogDislike`
+
+    args:
+        blog_dislike_id: `str` The ID of the BlogDislike object.
+        request: `default` Request.
+        db: `default` Session.
+    """
+    blog_dislike_service = BlogDislikeService(db)
+
+    # delete blog dislike
+    return blog_dislike_service.delete(blog_dislike_id, current_user.id)

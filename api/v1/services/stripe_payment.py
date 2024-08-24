@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from api.v1.models.user import User
 from api.v1.models.billing_plan import BillingPlan, UserSubscription
 from api.v1.models.organisation import Organisation
+from api.v1.models.payment import Payment
 import stripe
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
@@ -9,10 +10,68 @@ from sqlalchemy import select, join
 from fastapi.encoders import jsonable_encoder
 from api.utils.success_response import success_response, fail_response
 import os
+from sqlalchemy import cast, DateTime
 from fastapi import HTTPException, status, Request
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+
+
+
+def get_plan_by_id(db: Session, plan_id: str):
+    return db.query(BillingPlan).filter(BillingPlan.id == plan_id).first()
+
+
+def convert_duration_to_timedelta(duration: str) -> timedelta:
+    if duration == "monthly":
+        return timedelta(days=30)  # Approximate month length
+    elif duration == "yearly":
+        return timedelta(days=365)  # Approximate year length
+    else:
+        raise ValueError("Invalid duration")
+    
+def is_eligible_for_plan(db: Session, user_id: str, plan_id: str):
+    # Fetch the user's current subscription
+    user_subscription = db.query(UserSubscription).filter(
+        UserSubscription.user_id == user_id
+    ).first()
+
+    # If the user has no subscription, they are eligible for the plan
+    if not user_subscription:
+        return True
+
+    # Check if the user's current subscription has ended
+    if user_subscription.end_date < datetime.utcnow():
+        return True
+
+    # If the user is trying to upgrade or downgrade, they are eligible
+    if user_subscription.plan_id != plan_id:
+        return True
+
+    # If none of the above conditions are met, the user is not eligible
+    return False
+
+
+def calculate_prorated_amount(db: Session, user_id: str, plan_id: str):
+    # Fetch the user's current subscription
+    user_subscription = db.query(UserSubscription).filter(
+        UserSubscription.user_id == user_id
+    ).first()
+
+    # Fetch the plan the user is trying to upgrade or downgrade to
+    plan = get_plan_by_id(db, plan_id)
+
+    # Calculate the number of days remaining in the current subscription
+    days_remaining = (user_subscription.end_date - datetime.utcnow()).days
+
+    # Calculate the total number of days in the current subscription
+    total_days = (user_subscription.end_date - user_subscription.start_date).days
+
+    # Calculate the prorated amount
+    prorated_amount = (plan.price / total_days) * days_remaining
+
+    return prorated_amount
 
 
 def get_all_plans(db: Session):
@@ -28,28 +87,77 @@ def get_all_plans(db: Session):
         raise HTTPException(status_code=500, detail="An error occurred while fetching billing plans")
 
 
-def get_plan_by_name(db: Session, plan_name: str):
-    return db.query(BillingPlan).filter(BillingPlan.name == plan_name).first()
+async def update_user_plan(db: Session, user_id: str, plan_id: str, is_downgrade: bool = False):
+    user = db.query(User).filter(User.id == user_id).first()
+    plan = get_plan_by_id(db, plan_id)
+
+    try:
+        duration = convert_duration_to_timedelta(plan.duration)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    user_subscription = db.query(UserSubscription).filter(
+        UserSubscription.user_id == user_id
+    ).first()
+
+    if user_subscription:
+        old_plan = user_subscription.billing_plan
+        old_duration = convert_duration_to_timedelta(user_subscription.billing_plan.duration)
+        days_remaining = (datetime.strptime(user_subscription.end_date, "%Y-%m-%d %H:%M:%S.%f") - datetime.utcnow()).days
+        total_days = (datetime.strptime(user_subscription.end_date, "%Y-%m-%d %H:%M:%S.%f") - datetime.strptime(user_subscription.start_date, "%Y-%m-%d %H:%M:%S.%f")).days
+
+        prorated_amount = 0  # Initialize prorated_amount to 0
+        if is_downgrade:
+            prorated_amount = (old_plan.price / total_days) * days_remaining
+            #TODO Refund or credit the user's account (implement based on  payment logic)
+        else:
+            prorated_amount = (plan.price - prorated_amount)
+            #TODO Charge the user's payment method (implement based on  payment logic)
+
+        user_subscription.plan_id = plan.id
+        user_subscription.start_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")
+        user_subscription.end_date = (datetime.utcnow() + duration).strftime("%Y-%m-%d %H:%M:%S.%f")
+        user_subscription.billing_cycle = datetime.utcnow() + duration
+        
+    else:
+        user_subscription = UserSubscription(
+            user_id=user_id,
+            plan_id=plan.id,
+            organisation_id=plan.organisation_id,
+            start_date=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
+            end_date=(datetime.utcnow() + duration).strftime("%Y-%m-%d %H:%M:%S.%f"),
+            billing_cycle=datetime.utcnow() + duration
+        )
+        db.add(user_subscription)
+
+    db.commit()
+    db.refresh(user_subscription)
+    return user_subscription
 
 
-def stripe_payment_request(db: Session, user_id: str, request: Request, plan_name: str):
+def stripe_payment_request(db: Session, user_id: str, request: Request, plan_id: str):
 
-    # base_url = request.base_url
+    # base_urls = request.base_url
     # base_urls = str(request.url.scheme) + "://" + str(request.url.netloc)
-
+    
     base_urls = "https://anchor-python.teams.hng.tech/"
     success_url = f"{base_urls}payment" + "/success?session_id={CHECKOUT_SESSION_ID}"
     cancel_url = f"{base_urls}payment/pricing"
+
+    # success_url = f"{base_urls}api/v1/payment/stripe" + "/success?session_id={CHECKOUT_SESSION_ID}"
+    # cancel_url = f"{base_urls}api/v1/payment/stripe/cancel"
+
 
     user = db.query(User).filter(User.id == user_id).first()
 
     if not user:
         return fail_response(status_code=404, message="User not found")
 
-    plan = get_plan_by_name(db, plan_name)
+    plan = get_plan_by_id(db, plan_id)
 
     if not plan:
         return fail_response(status_code=404, message="Plan not found")
+    
 
     if plan.name != "Free":
         try:
@@ -72,7 +180,7 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
                 cancel_url=cancel_url,
                 metadata={
                     'user_id': user_id,
-                    'plan_name': plan_name,
+                    'plan_id': plan.id,
                 },
             )
 
@@ -103,66 +211,6 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_nam
     else:
         return fail_response(status_code=400, message="No payment is required for the Free plan")
 
-
-def convert_duration_to_timedelta(duration: str) -> timedelta:
-    if duration == "monthly":
-        return timedelta(days=30)  # Approximate month length
-    elif duration == "yearly":
-        return timedelta(days=365)  # Approximate year length
-    else:
-        raise ValueError("Invalid duration")
-
-
-async def update_user_plan(db: Session, user_id: str, plan_name: str):
-    # Fetch the user by ID
-    user = db.query(User).filter(User.id == user_id).first()
-
-    # Fetch the plan by name
-    plan = get_plan_by_name(db, plan_name)
-
-    # Check if the user exists
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    # Check if the plan exists
-    if not plan:
-        raise HTTPException(status_code=404, detail="Plan not found")
-
-    # Convert duration from string to timedelta
-    try:
-        duration = convert_duration_to_timedelta(plan.duration)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    # Fetch the organisation ID from the plan
-    organisation_id = plan.organisation_id
-
-    # Update the user's subscription in the database
-    user_subscription = db.query(UserSubscription).filter(
-        UserSubscription.user_id == user_id,
-        UserSubscription.organisation_id == organisation_id
-    ).first()
-
-    if user_subscription:
-        user_subscription.plan_id = plan.id
-        user_subscription.start_date = datetime.utcnow()
-        user_subscription.end_date = datetime.utcnow() + duration
-    else:
-        user_subscription = UserSubscription(
-            user_id=user_id,
-            plan_id=plan.id,
-            organisation_id=organisation_id,
-            start_date=datetime.utcnow(),
-            end_date=datetime.utcnow() + duration
-        )
-        db.add(user_subscription)
-
-    # Commit the transaction
-    db.commit()
-    db.refresh(user_subscription)  # Refresh the session to get the updated data
-
-    # Return the updated or newly created subscription
-    return user_subscription
 
 
 def fetch_all_organisations_with_users_and_plans(db: Session):

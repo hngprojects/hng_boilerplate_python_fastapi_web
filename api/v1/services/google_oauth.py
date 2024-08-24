@@ -206,26 +206,45 @@ class GoogleOauthServices(Service):
 
             profile = Profile(user_id=new_user.id,
                               avatar_url=google_response.get("picture"))
+            db.add(profile)
+            db.commit()
+            db.refresh(profile)
+
             oauth_data = OAuth(
                 provider="google",
                 user_id=new_user.id,
                 sub=google_response.get("sub")
             )
+            db.add(oauth_data)
+            db.commit()
+            db.refresh(oauth_data)
+
             organisation = Organisation(
                 name = f'{new_user.email} {new_user.last_name} Organisation'
             )
+
+            db.add(organisation)
+            db.commit()
+            db.refresh(organisation)
             
             region = Region(
                 user_id=new_user.id,
                 region='Empty'
             )
+            db.add(region)
+            db.commit()
+            db.refresh(region)
+
             # Create notification settings directly for the user
             notification_setting_service.create(db=db, user=new_user)
             
+            
             # create data privacy setting
             data_privacy = DataPrivacySetting(user_id=new_user.id)
-
-            db.add_all([profile, oauth_data, organisation, region, data_privacy])
+            db.add(data_privacy)
+            db.commit()
+            db.refresh(data_privacy)
+            #db.add_all([profile, oauth_data, organisation, region, data_privacy])
 
             news_letter = db.query(NewsletterSubscriber).filter_by(email=new_user.email)
             if not news_letter:
@@ -236,8 +255,8 @@ class GoogleOauthServices(Service):
                 user_id=new_user.id, organisation_id=organisation.id, role="owner"
             )
             db.execute(stmt)
-
             db.commit()         
             return new_user
+        
         except Exception as e:
             raise HTTPException(status_code=500, detail=f'Error {e}')
