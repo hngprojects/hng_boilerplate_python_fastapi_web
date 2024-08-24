@@ -72,7 +72,7 @@ def test_google_login_existing_user(mock_user_service, mock_google_oauth_service
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service", "mock_google_oauth_service")
 def test_google_login_new_user(mock_user_service, mock_google_oauth_service, mock_db_session):
     """Test Google login for a new user."""
-    email = "newuser@example.com"
+    email = "newuser@gmail.com"
     mock_id_token = "mocked_id_token"
 
     # Mock Google OAuth token info response
