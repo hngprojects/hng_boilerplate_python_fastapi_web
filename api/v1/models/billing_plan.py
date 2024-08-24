@@ -1,6 +1,7 @@
 # app/models/billing_plan.py
 from sqlalchemy import Column, String, ARRAY, ForeignKey, Numeric, Boolean
 from sqlalchemy.orm import relationship
+from sqlalchemy import DateTime
 from api.v1.models.base_model import BaseTableModel
 
 
@@ -34,3 +35,4 @@ class UserSubscription(BaseTableModel):
     user = relationship("User", back_populates="subscriptions")
     billing_plan = relationship("BillingPlan", back_populates="user_subscriptions")
     organisation = relationship("Organisation", back_populates="user_subscriptions")
+    billing_cycle = Column(DateTime, nullable=True)

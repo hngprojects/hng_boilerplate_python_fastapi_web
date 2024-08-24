@@ -47,7 +47,7 @@ class BillingPlanService(Service):
 
         # Adjust the price if the duration is 'yearly'
         if request.duration == "yearly":
-            request.price = request.price * 12 * 0.8  # Apply yearly discount
+            request.price = request.price * 12 * 0.8  # Apply yearly discount of 20%
 
         # Create a BillingPlan instance using the modified request
         plan = BillingPlan(**request.dict())
