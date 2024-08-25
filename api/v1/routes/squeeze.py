@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, BackgroundTasks
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from api.core.responses import SUCCESS
@@ -13,6 +13,7 @@ squeeze = APIRouter(prefix="/squeeze", tags=["Squeeze Page"])
 
 @squeeze.post("", response_model=success_response, status_code=201)
 def create_squeeze(
+    background_tasks: BackgroundTasks,
     data: CreateSqueeze,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
@@ -23,7 +24,7 @@ def create_squeeze(
         return success_response(status.HTTP_404_NOT_FOUND, "User not found!")
     data.user_id = user.id
     data.full_name = f"{user.first_name} {user.last_name}"
-    new_squeeze = squeeze_service.create(db, data)
+    new_squeeze = squeeze_service.create(background_tasks, db, data)
     return success_response(status.HTTP_201_CREATED, SUCCESS, new_squeeze.to_dict())
 
 

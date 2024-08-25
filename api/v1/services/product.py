@@ -134,7 +134,8 @@ class ProductService(Service):
         if query_params:
             for column, value in query_params.items():
                 if hasattr(Product, column) and value:
-                    query = query.filter(getattr(Product, column).ilike(f"%{value}%"))
+                    query = query.filter(
+                        getattr(Product, column).ilike(f"%{value}%"))
 
         return query.all()
 
@@ -214,6 +215,34 @@ class ProductService(Service):
             "last_updated": product.updated_at,
         }
 
+    def search_products(
+            db: Session,
+            org_id: str,
+            name: Optional[str] = None,
+            category: Optional[str] = None,
+            min_price: Optional[float] = None,
+            max_price: Optional[float] = None,
+            limit: int = 10,
+            page: int = 1,
+    ):
+
+        query = db.query(Product).filter(Product.org_id == org_id)
+
+        if name:
+            query = query.filter(Product.name.ilike(f"%{name}%"))
+        if category:
+            query = query.filter(Product.category.ilike(f"%{category}%"))
+
+        if min_price is not None:
+            query = query.filter(Product.price >= min_price)
+        if max_price is not None:
+            query = query.filter(Product.price <= max_price)
+
+        offset = (page - 1) * limit
+        products = query.offset(offset).limit(limit).all()
+
+        return products
+
 
 class ProductCategoryService(Service):
     """Product categories service functionality"""
@@ -252,7 +281,6 @@ class ProductCategoryService(Service):
                     )
 
         return query.all()
-    
-    
-    
+
+
 product_service = ProductService()

@@ -8,10 +8,10 @@ db = next(get_db())
 
 
 admin_user = User(
-    email="freeman@example.com",
-    password=user_service.hash_password("supersecret"),
-    first_name="Habeeb",
-    last_name="Habeeb",
+    email="Isaacj@gmail.com",
+    password=user_service.hash_password("45@&tuTU"),
+    first_name="Isaac",
+    last_name="John",
     is_active=True,
     is_superadmin=True,
     is_deleted=False,
