@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
@@ -92,3 +92,24 @@ async def delete_email_template(
     """Endpoint to delete a single template"""
 
     email_template_service.delete(db, template_id=template_id)
+
+
+@email_template.post("/{template_id}/send", response_model=success_response, status_code=200)
+async def send_email_template(
+    template_id: str,
+    recipient_email: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Endpoint to send an email template to a recipient"""
+
+    send_result = email_template_service.send(db=db, template_id=template_id, recipient_email=recipient_email)
+
+    if send_result["status"] == "failure":
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=send_result["message"])
+
+    return success_response(
+        data=send_result,
+        message=f"Email sent successfully to {recipient_email}",
+        status_code=status.HTTP_200_OK,
+    )

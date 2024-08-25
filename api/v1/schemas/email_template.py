@@ -1,5 +1,6 @@
 from pydantic import BaseModel, field_validator
 import bleach
+from enum import Enum
 
 ALLOWED_TAGS = [
     'a', 'abbr', 'acronym', 'b', 'blockquote', 'code', 'em', 'i', 'li', 
@@ -30,12 +31,15 @@ def sanitize_html(template: str) -> str:
     )
     return cleaned_html
 
-class EmailTemplateSchema(BaseModel):
+class TemplateStatusEnum(str, Enum):
+    online = 'online'
+    offline = 'offline'
 
+class EmailTemplateSchema(BaseModel):
     title: str
     template: str
     type: str
-    status: str = 'online'
+    template_status: TemplateStatusEnum | None = TemplateStatusEnum.online  # Default to 'online'
 
     @field_validator("template")
     @classmethod
