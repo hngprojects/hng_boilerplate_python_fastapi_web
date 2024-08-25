@@ -4,19 +4,20 @@ from api.core.base.services import Service
 from api.v1.models.email_template import EmailTemplate
 from api.v1.schemas.email_template import EmailTemplateSchema
 from api.utils.db_validators import check_model_existence
+import logging
+import time
+
 
 
 class EmailTemplateService(Service):
     '''Email template service functionality'''
 
     def create(self, db: Session, schema: EmailTemplateSchema):
-        """Create a new FAQ"""
-
+        """Create a new Email Template"""
         new_template = EmailTemplate(**schema.model_dump())
         db.add(new_template)
         db.commit()
         db.refresh(new_template)
-
         return new_template
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
@@ -58,6 +59,30 @@ class EmailTemplateService(Service):
         template = self.fetch(db=db, template_id=template_id)
         db.delete(template)
         db.commit()
+        
+    
+    def send(self, db: Session, template_id: str, recipient_email: str, max_retries: int = 3):
+        """Send an email template to a recipient with error handling and retries"""
+        
+        template = self.fetch(db=db, template_id=template_id)
 
+        for attempt in range(max_retries):
+            try:
+                self._send_email(recipient_email, template)
+                logging.info(f"Template {template_id} sent successfully to {recipient_email}")
+                return {"status": "success", "message": f"Email sent to {recipient_email}"}
+            
+            except Exception as e:
+                logging.error(f"Attempt {attempt + 1} failed to send template {template_id}: {e}")
+                time.sleep(2 ** attempt)
+
+        logging.error(f"All attempts to send template {template_id} to {recipient_email} failed.")
+        return {"status": "failure", "message": "Failed to send email after multiple attempts"}
+
+    def _send_email(self, recipient_email: str, template: EmailTemplate):
+        """Mock email sending function"""
+        if not recipient_email or not template:
+            raise ValueError("Invalid recipient email or template.")
+        pass
 
 email_template_service = EmailTemplateService()
