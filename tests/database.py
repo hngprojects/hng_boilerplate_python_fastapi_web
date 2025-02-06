@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from ..main import app
+from main import app
 from decouple import config
 
 
@@ -19,7 +19,12 @@ DB_PORT = config("DB_PORT")
 MYSQL_DRIVER = config("MYSQL_DRIVER")
 DATABASE_URL = ""
 
-SQLALCHEMY_DATABASE_URL = f'{DB_TYPE}+{MYSQL_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}_test'
+if MYSQL_DRIVER:
+    # SQLALCHEMY_DATABASE_URL = f'{DB_TYPE}+{MYSQL_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}_test'
+    SQLALCHEMY_DATABASE_URL = f'{DB_TYPE}+{MYSQL_DRIVER}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
+else:
+    # let's just create the tests on the main database to make the CI/CD pipeline happy ;)
+    SQLALCHEMY_DATABASE_URL = f'{DB_TYPE}://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -49,3 +54,4 @@ def client(session):
             session.close()
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
+    

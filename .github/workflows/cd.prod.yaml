@@ -1,0 +1,40 @@
+name: Prod Branch Deployment
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "README.md"
+      - ".github/workflows/**"
+  workflow_dispatch:
+
+jobs:
+  on-success:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Archive application build
+        run: |
+          tar -czf python.tar.gz .
+
+      - name: Copy Artifacts to server
+        run: |
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no python.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/python
+          rm -f python.tar.gz
+
+      - name: Use SSH Action
+        uses: appleboy/ssh-action@v0.1.8
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd backend/python
+            tar -xzf /tmp/python/python.tar.gz -C .
+            rm -f /tmp/python/python.tar.gz
+            source venv/bin/activate
+            pip install -r requirements.txt
+            alembic revision --autogenerate
+            alembic upgrade head

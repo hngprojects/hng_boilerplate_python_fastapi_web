@@ -1,0 +1,46 @@
+name: Run Regression Tests
+
+on:
+  workflow_dispatch: 
+
+
+jobs:
+  run-newman-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" 
+
+      - name: Install Newman
+        run: |
+          npm install -g newman
+
+      - name: Run Newman Tests
+        run: |
+          newman run qa_tests/Boilerplate-status-page.postman_collection.json -r json --reporter-json-export=result.json --suppress-exit-code
+
+      - name: Copy result.json to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          source: "result.json"
+          target: "/home/${{ secrets.USERNAME }}/backend/python"
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd backend/python
+            python3 update_api_status.py
+          
+

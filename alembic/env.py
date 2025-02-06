@@ -3,14 +3,12 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from decouple import config as decouple_config
-from api.v1.models.user import User, WaitlistUser
-from api.v1.models.org import Organization
-from api.v1.models.profile import Profile
-from api.v1.models.product import Product
-from api.v1.models.base import Base
-from api.v1.models.subscription import Subscription
-from api.v1.models.blog import Blog
-from api.v1.models.job import Job
+from api.v1.models import *
+from api.v1.models.permissions.permissions import Permission
+from api.v1.models.permissions.role_permissions import role_permissions
+from api.v1.models.permissions.user_org_role import user_organisation_roles
+from api.v1.models.permissions.role import Role
+from api.v1.models.associations import Base
 
 
 # this is the Alembic Config object, which provides
@@ -77,7 +75,7 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection, target_metadata=target_metadata,
         )
 
         with context.begin_transaction():
