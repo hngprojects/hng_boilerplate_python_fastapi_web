@@ -31,7 +31,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           source: "result.json"
-          target: "/home/${{ secrets.USERNAME }}/hng_boilerplate_python_fastapi_web/staging"
+          target: "/home/${{ secrets.USERNAME }}/backend/python"
 
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd hng_boilerplate_python_fastapi_web/staging
+            cd backend/python
             python3 update_api_status.py
           
 
