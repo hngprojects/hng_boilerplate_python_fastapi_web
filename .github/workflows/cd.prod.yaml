@@ -15,6 +15,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Archive application build
+        run: |
+          tar -czf python.tar.gz .
+
+      - name: Copy Artifacts to server
+        run: |
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no python.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/python
+          rm -f python.tar.gz
+
       - name: Use SSH Action
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -22,10 +31,9 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd hng_boilerplate_python_fastapi_web/prod
-            git add .
-            git stash
-            git pull origin main
+            cd backend/python
+            tar -xzf /tmp/python/python.tar.gz -C .
+            rm -f /tmp/python/python.tar.gz
             source venv/bin/activate
             pip install -r requirements.txt
             alembic revision --autogenerate
