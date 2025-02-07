@@ -17,7 +17,7 @@ jobs:
 
       - name: Archive application build
         run: |
-          tar --exclude='./.git' -czf python.tar.gz .
+          tar --exclude='./.git' --exclude='./python.tar.gz' -czf python.tar.gz .
 
       - name: Copy Artifacts to server
         run: |
