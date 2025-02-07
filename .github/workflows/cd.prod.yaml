@@ -17,7 +17,9 @@ jobs:
 
       - name: Archive application build
         run: |
-          tar --exclude='./.git' --exclude='./python.tar.gz' -czf python.tar.gz .
+          mkdir app
+          cp alembic api qa_tests script tests requirements.txt *.py alembic.ini app
+          tar -czf python.tar.gz app
 
       - name: Copy Artifacts to server
         run: |
@@ -34,6 +36,7 @@ jobs:
             cd backend/python
             tar -xzf /tmp/python/python.tar.gz -C .
             rm -f /tmp/python/python.tar.gz
+            cd app
             source venv/bin/activate
             pip install -r requirements.txt
             alembic revision --autogenerate
