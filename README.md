@@ -30,7 +30,7 @@ To set up the database, follow the following steps:
 - switch branch using `git checkout backend`
 
 **Environment Setup**
-- run `pip install -r requrements.txt` to install dependencies
+- run `pip install -r requirements.txt` to install dependencies
 - create a `.env` file in the root directory and copy the content of `.env.sample` and update it accordingly
 
 **Create your local database**
