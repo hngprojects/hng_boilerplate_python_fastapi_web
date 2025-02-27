@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+import plugin
 import uvicorn
 from fastapi.staticfiles import StaticFiles
 import uvicorn, os
