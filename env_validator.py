@@ -15,7 +15,7 @@ class EnvValidator:
     CATEGORIES = {
         "Core Settings": [
             "SECRET_KEY", "ALGORITHM", "ACCESS_TOKEN_EXPIRE_MINUTES", "JWT_REFRESH_EXPIRY",
-            "APP_URL", "PYTHON_ENV"
+            "APP_URL", "PYTHON_ENV", "MY_NEW_VARIABLE"
         ],
         "Database Settings": [
             "DB_TYPE", "DB_NAME", "DB_USER", "DB_PASSWORD", "DB_HOST", "DB_PORT",
@@ -48,6 +48,16 @@ class EnvValidator:
                                             "description": "Access token expiry time in minutes"},
             "JWT_REFRESH_EXPIRY": {"required": True, "type": "int", "default": "7",
                                    "description": "Refresh token expiry time in days"},
+            "MY_NEW_VARIABLE": {
+                "required": True,  # or False
+                "description": "Description of what this variable does",
+                # Optional: add any other validation rules
+                "default": "12345678",  # if applicable
+                "type": "int",  # if applicable
+                "min_length": 8,  # if applicable
+                "allowed_values": ["12345678", "87654321"]
+            },
+
 
             # Database settings
             "DB_TYPE": {"required": True, "allowed_values": ["postgresql", "mysql", "sqlite"], "default": "postgresql",
