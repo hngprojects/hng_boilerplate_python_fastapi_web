@@ -1,10 +1,12 @@
 import time
-from fastapi import Depends, APIRouter, status, HTTPException
+import logging
+from fastapi import Depends, APIRouter, status, HTTPException,Query
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models.user import User
+from api.v1.models.invitation import Invitation
 from api.v1.schemas.organisation import (
     CreateUpdateOrganisation,
     PaginatedOrgUsers,
@@ -112,6 +114,36 @@ def get_all_organisations(
         data=jsonable_encoder(orgs),
     )
 
+# Ger all organisation invites
+@organisation.get("/invites", status_code=status.HTTP_200_OK)
+async def get_organisation_invitations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+    page: int = Query(1, alias="page", description="Page number"),
+    page_size: int = Query(10, alias="page_size", description="Number of invites per page"),
+):
+    """
+    Endpoint to fetch all organisation invitations with pagination.
+    """
+    try:
+
+        invitations, total_count = organisation_service.fetch_all_invitations(db, page, page_size)
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            message="Invites fetched successfully",
+            data={
+                "invitations": jsonable_encoder(invitations),
+                "total_count": total_count,
+                "page": page,
+                "page_size": page_size,
+            }
+        )
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unable to retrieve organisation invites: {str(e)}"
+        )
 
 @organisation.delete("/{org_id}")
 async def delete_organisation(
