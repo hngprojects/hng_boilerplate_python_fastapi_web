@@ -70,7 +70,7 @@ class TestUpdateProductCategory:
             json=update_payload,
         )
         assert response.status_code == 404
-        assert response.json()["detail"] == "Category not found."
+        assert response.json()["message"] == "Category not found."
 
     # Test update when the user is unauthenticated
     def test_update_product_category_unauthorized(self, mocker):
