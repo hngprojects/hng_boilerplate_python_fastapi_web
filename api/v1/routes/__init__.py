@@ -4,6 +4,7 @@ from api.v1.routes.team import team
 from fastapi import APIRouter
 from api.v1.routes.api_status import api_status
 from api.v1.routes.auth import auth
+<<<<<<< HEAD
 from api.v1.routes.faq_inquiries import faq_inquiries
 from api.v1.routes.newsletter import newsletter, news_sub
 from api.v1.routes.user import user_router
@@ -46,6 +47,15 @@ from api.v1.routes.privacy import privacies
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
 from api.v1.routes.stripe import subscription_
+=======
+from api.v1.routes.roles import role
+from api.v1.routes.plans import plans
+from api.v1.routes.newsletter_router import newsletter
+from api.v1.routes.permission import permission
+from api.v1.routes.token import token
+from api.v1.routes.orgs import org
+from api.v1.routes.super_admin import super_admin
+>>>>>>> upstream/backend
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -77,6 +87,7 @@ api_version_one.include_router(topic)
 api_version_one.include_router(contact_us)
 api_version_one.include_router(waitlist_router)
 api_version_one.include_router(newsletter)
+<<<<<<< HEAD
 api_version_one.include_router(news_sub)
 api_version_one.include_router(testimonial)
 api_version_one.include_router(test_rout)
@@ -96,3 +107,11 @@ api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
 api_version_one.include_router(product_comment)
 api_version_one.include_router(subscription_)
+=======
+api_version_one.include_router(plans)
+api_version_one.include_router(permission)
+api_version_one.include_router(token)
+api_version_one.include_router(org)
+
+
+>>>>>>> upstream/backend

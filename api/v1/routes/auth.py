@@ -7,6 +7,7 @@ from fastapi import (BackgroundTasks, Depends,
                      Response, Request)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+<<<<<<< HEAD
 from typing import Annotated
 
 from api.core.dependencies.email_sender import send_email
@@ -23,6 +24,14 @@ from api.v1.schemas.user import (UserCreate,
                                  AuthMeResponse)
 from api.v1.services.organisation import organisation_service
 from api.v1.schemas.organisation import CreateUpdateOrganisation
+=======
+from pydantic import BaseModel
+from typing import Optional, Annotated
+from api.v1.models import *
+from datetime import datetime, timedelta
+from api.v1.schemas.token import Token, LoginRequest
+from api.v1.schemas.auth import UserBase, SuccessResponse, SuccessResponseData, UserCreate
+>>>>>>> upstream/backend
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
@@ -66,6 +75,7 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
             'cta_link': cta_link
         }
     )
+<<<<<<< HEAD
 
     response = auth_response(
         status_code=201,
@@ -78,6 +88,17 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
             ),
             'organisations': user_organizations
         }
+=======
+    
+    db_user = User(
+        username=user.username,
+        email=user.email,
+        password = password_hashed,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        is_active=True,
+        is_admin = user.is_admin
+>>>>>>> upstream/backend
     )
 
     # Add refresh token to cookies

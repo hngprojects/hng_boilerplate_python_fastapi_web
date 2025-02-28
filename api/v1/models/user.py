@@ -11,6 +11,7 @@ from api.v1.models.base_model import BaseTableModel
 class User(BaseTableModel):
     __tablename__ = "users"
 
+<<<<<<< HEAD
     email = Column(String, unique=True, nullable=False)
     password = Column(String, nullable=True)
     first_name = Column(String, nullable=True)
@@ -20,6 +21,17 @@ class User(BaseTableModel):
     is_superadmin = Column(Boolean, server_default=text("false"))
     is_deleted = Column(Boolean, server_default=text("false"))
     is_verified = Column(Boolean, server_default=text("false"))
+=======
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(100), unique=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    first_name = Column(String(50))
+    last_name = Column(String(50))
+    is_active = Column(Boolean, server_default=text('true'))
+    is_admin = Column(Boolean, server_default=text('false'))
+    id_deleted = Column(Boolean, server_default=text('false'))
+    is_super_admin = Column(Boolean, server_default=text('false'))
+>>>>>>> upstream/backend
 
     profile = relationship(
         "Profile", uselist=False, back_populates="user", cascade="all, delete-orphan"

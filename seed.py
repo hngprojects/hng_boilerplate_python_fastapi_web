@@ -2,10 +2,26 @@ from api.v1.models import *
 from api.v1.models.associations import Base
 from api.v1.services.user import user_service
 from api.db.database import create_database, get_db
+<<<<<<< HEAD
+=======
+from api.v1.models.user import User, WaitlistUser
+from api.v1.models.org import Organization
+from api.v1.models.profile import Profile
+from api.v1.models.product import Product
+from api.v1.models.base import Base
+from api.v1.models.subscription import Subscription
+from api.v1.models.blog import Blog
+from api.v1.models.job import Job
+from api.v1.models.invitation import Invitation
+from api.v1.models.role import Role
+from api.v1.models.permission import Permission
+from api.utils.auth import hash_password
+>>>>>>> upstream/backend
 
 # create_database()
 db = next(get_db())
 
+<<<<<<< HEAD
 
 admin_user = User(
     email="Isaacj@gmail.com",
@@ -18,6 +34,67 @@ admin_user = User(
     is_verified=True,
 )
 db.add(admin_user)
+=======
+<<<<<<< HEAD
+user_1 = User(
+    email="test@mail",
+    username="testuser",
+    password="testpass",
+    first_name="John",
+    last_name="Doe",
+)
+user_2 = User(
+    email="test1@mail",
+    username="testuser1",
+    password="testpass1",
+    first_name="Jane",
+    last_name="Boyle",
+)
+user_3 = User(
+    email="test2@mail",
+    username="testuser2",
+    password="testpass2",
+    first_name="Bob",
+    last_name="Dwayne",
+)
+admin = User(
+    email="admin@mail",
+    username="admin",
+    password=hash_password("admin12345"),
+    first_name="mba",
+    last_name="kama",
+    is_admin = True,
+    is_active = True
+)
+=======
+user_1 = User(email="test@mail", username="testuser", password="testpass", first_name="John", last_name="Doe")
+user_2 = User(email="test1@mail", username="testuser1", password="testpass1", first_name="Jane", last_name="Boyle")
+user_3 = User(email="test2@mail", username="testuser2", password="testpass2", first_name="Bob", last_name="Dwayne")
+>>>>>>> 343a290ec289fcc324c0810f6ba1ea25a333af81
+
+db.add_all([user_1, user_2, user_3, admin])
+
+org_1 = Organization(name= "Python Org", description="An organization for python develoers")
+org_2 = Organization(name="Django Org", description="An organization of django devs")
+org_3 = Organization(name="FastAPI Devs", description="An organization of Fast API devs")
+
+# user_role = Role()
+
+db.add_all([org_1, org_2, org_3])
+
+
+org_1.users.extend([user_1, user_2, user_3])
+org_2.users.extend([user_1, user_3])
+org_3.users.extend([user_2, user_1])
+
+product_1 = Product(name="bed", price=400000)
+product_2 = Product(name="shoe", price=150000)
+
+profile_1 = Profile(bio='My name is John Doe', phone_number='09022112233')
+user_1.profile = profile_1
+
+db.add_all([product_1, product_2])
+>>>>>>> upstream/backend
 db.commit()
 
 print("Seed data succesfully")
