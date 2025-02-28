@@ -4,7 +4,7 @@ from slowapi.util import get_remote_address
 
 from fastapi import (BackgroundTasks, Depends,
                      status, APIRouter,
-                     Response, Request)
+                     Response, Request,HTTPException)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -16,7 +16,7 @@ from api.v1.models import User
 from api.v1.schemas.user import Token
 from api.v1.schemas.user import (LoginRequest, UserCreate, EmailRequest,
                                  ProfileData, UserData2)
-from api.v1.schemas.token import TokenRequest
+from api.v1.schemas.token import TokenRequest,PasswordResetSchema
 from api.v1.schemas.user import (UserCreate,
                                  MagicLinkRequest,
                                  ChangePasswordSchema,
@@ -407,3 +407,40 @@ def get_current_user_details(
             'profile': ProfileData.model_validate(profile, from_attributes=True)
         }
     )
+
+
+
+
+@auth.post("/request-password-reset", status_code=status.HTTP_200_OK)
+@limiter.limit("1000/minute")
+async def request_password_reset(request: Request, background_tasks: BackgroundTasks, email_schema: EmailRequest, db: Session = Depends(get_db)):
+    """Generates a password reset token and sends it via email"""
+    user = user_service.fetch_by_email(db, email_schema.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    reset_token, token_expiry = user_service.generate_token()
+    user_service.save_reset_token(db, user, reset_token, token_expiry)
+
+    reset_link = f'https://yourfrontend.com/reset-password?token={reset_token}'
+    
+    background_tasks.add_task(
+        send_email, 
+        recipient=user.email,
+        template_name='password_reset.html',
+        subject='Password Reset Request',
+        context={'first_name': user.first_name, 'last_name': user.last_name, 'reset_link': reset_link}
+    )
+
+    return success_response(status_code=200, message=f"Password reset link sent to {user.email}")
+
+@auth.post("/reset-password", status_code=status.HTTP_200_OK)
+@limiter.limit("1000/minute")
+async def reset_password(request: Request, reset_schema: PasswordResetSchema, db: Session = Depends(get_db)):
+    """Resets the user's password using the provided token"""
+    user = user_service.verify_reset_token(db, reset_schema.token)
+    if not user:
+        raise HTTPException(status_code=400, detail="Invalid or expired token")
+    
+    user_service.change_password(new_password=reset_schema.new_password, user=user, db=db)
+    return success_response(status_code=200, message="Password reset successfully")

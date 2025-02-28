@@ -64,3 +64,8 @@ class TokenRequest(BaseModel):
 
 class OAuthToken(BaseModel):
     access_token: str
+
+class PasswordResetSchema(BaseModel):
+    email: EmailStr
+    new_password: str
+    confirm_password: str
