@@ -34,6 +34,29 @@ def get_testimonials(
         skip=max(page,0),
     )
 
+@testimonial.get("/top-rated", status_code=200)
+def get_top_rated_testimonials(
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(10, ge=1, description="Number of testimonials per page"),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to fetch top-rated testimonials"""
+    testimonials = testimonial_service.top_rated_testimonials(db, page, per_page)
+
+    if not testimonials:
+        return success_response(status_code=200, message="No testimonials found.", data=[])
+    
+    return success_response(
+        status_code=200,
+        message="Top-rated testimonials retrieved successfully.",
+        data=[{
+            "id": testimonial.id,
+            "content": testimonial.content,
+            "ratings": testimonial.ratings,
+            "author_id": testimonial.author_id,
+            "created_at": testimonial.created_at.isoformat()
+        } for testimonial in testimonials]
+    )
 
 @testimonial.get("/{testimonial_id}", status_code=status.HTTP_200_OK)
 def get_testimonial(

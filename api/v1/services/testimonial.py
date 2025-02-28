@@ -4,6 +4,8 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
 from api.v1.schemas.testimonial import CreateTestimonial
+from fastapi import HTTPException, status
+from sqlalchemy import desc
 
 
 class TestimonialService(Service):
@@ -54,6 +56,25 @@ class TestimonialService(Service):
         except Exception as e:
             db.rollback()
             raise e
+    
+    def top_rated_testimonials(self, db: Session, page: int = 1, per_page: int = 10):
+        """
+        Fetch testimonials with the highest ratings and paginates the results.
+        """
+        if page < 1 or per_page < 1:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid pagination parameters")
+
+        offset = (page - 1) * per_page
+    
+        testimonials = (
+            db.query(Testimonial)
+            .order_by(desc(Testimonial.ratings))
+            .offset(offset)
+            .limit(per_page)
+            .all()
+        )
+
+        return testimonials
 
 
 testimonial_service = TestimonialService()
