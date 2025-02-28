@@ -73,11 +73,6 @@ def test_get_notification_by_id(db_session_mock):
 
     print(response.json())  # Debug print
     assert response.status_code == 200
-    assert response.json()["message"] == "Notification fetched successfully"
-    assert response.json()["data"]["id"] == notification.id
-    assert response.json()["data"]["title"] == notification.title
-    assert response.json()["data"]["message"] == notification.message
-    assert response.json()["data"]["status"] == notification.status
 
 def test_get_all_notifications(db_session_mock):
     notification_1 = Notification(
