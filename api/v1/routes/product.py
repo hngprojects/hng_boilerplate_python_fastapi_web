@@ -117,6 +117,24 @@ def update_product_category(
     )
 
 
+@non_organisation_product.delete(
+    "/categories/{category}", status_code=status.HTTP_204_NO_CONTENT
+)
+def delete_product_category(
+    category: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """
+    Endpoint to delete a product category using its unique name.
+    """
+    ProductCategoryService.delete(db, category)
+    return success_response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        message="Category deleted successfully",
+    )
+
+
 @non_organisation_product.get(
     "/categories", response_model=success_response, status_code=200
 )
