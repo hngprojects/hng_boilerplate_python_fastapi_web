@@ -20,12 +20,13 @@ class FAQInquiryService(Service):
 
     # ------------ CRUD functions ------------ #
     # CREATE
-    def create(self, db: Annotated[Session, Depends(get_db)], data: CreateFAQInquiry):
+    def create(self, db: Annotated[Session, Depends(get_db)], data: CreateFAQInquiry, user_id: int):
         """Create a new FAQ Inquiry."""
         faq_inquiry = FAQInquiries(
             full_name=getattr(data, self.adabtingMapper["full_name"]),
             email=getattr(data, self.adabtingMapper["email"]),
             message=getattr(data, self.adabtingMapper["message"]),
+            user_id=user_id,
         )
         db.add(faq_inquiry)
         db.commit()

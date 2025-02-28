@@ -25,9 +25,10 @@ faq_inquiries = APIRouter(prefix="/faq-inquiries", tags=["FAQ-Inquiries"])
 async def create_faq_inquiry(
     data: CreateFAQInquiry, db: Annotated[Session, Depends(get_db)],
     background_tasks: BackgroundTasks,
+    current_user: User = Depends(user_service.get_current_user),  # Add current_user dependency
 ):
     """Add a new FAQ Inquiry."""
-    new_faq_inquiry = faq_inquiries_service.create(db, data)
+    new_faq_inquiry = faq_inquiries_service.create(db, data, current_user.id)  # Pass user_id
 
     # Send email to admin
     background_tasks.add_task(
@@ -64,3 +65,60 @@ async def get_all_faq_inquiries(
         status_code=status.HTTP_200_OK,
     )
     return response
+
+# DELETE
+@faq_inquiries.delete(
+    "/{id}",
+    response_model=dict,
+    status_code=status.HTTP_200_OK,
+    responses={
+        200: {"description": "FAQ inquiry deleted successfully."},
+        401: {"description": "Not authorized."},
+        404: {"description": "FAQ inquiry does not exist."},
+        500: {"description": "Internal server error."},
+    },
+)
+async def delete_faq_inquiry(
+    id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: User = Depends(user_service.get_current_user),  
+):
+    """Delete a FAQ inquiry. Only the owner or an admin can delete it."""
+    # Retrieve the FAQ inquiry by id
+    inquiry = faq_inquiries_service.fetch(db, id)
+    if not inquiry:
+        return {
+            "status": "error",
+            "status_code": status.HTTP_404_NOT_FOUND,
+            "message": "FAQ Inquiry does not exist.",
+            "data": {},
+        }
+
+    # Check if the current user is the owner of the inquiry or an admin
+    if inquiry.user_id != current_user.id and not current_user.is_superadmin:
+        return {
+            "status": "error",
+            "status_code": status.HTTP_401_UNAUTHORIZED,
+            "message": "Not authorized.",
+            "data": {},
+        }
+
+    try:
+        # Delete the inquiry and commit the transaction
+        faq_inquiries_service.delete(db, id)
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        return {
+            "status": "error",
+            "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "message": "Internal server error. Please try again later.",
+            "data": {},
+        }
+
+    return {
+        "status": "success",
+        "status_code": status.HTTP_200_OK,
+        "message": "FAQ inquiry deleted successfully.",
+        "data": {},
+    }

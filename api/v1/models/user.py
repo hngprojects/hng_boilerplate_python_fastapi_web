@@ -68,6 +68,9 @@ class User(BaseTableModel):
     comment_dislikes = relationship(
         "CommentDislike", back_populates="user", cascade="all, delete-orphan"
     )
+    faq_inquiries = relationship(
+        "FAQInquiries", back_populates="user", cascade="all, delete-orphan"
+    )
     notification_setting = relationship(
         "NotificationSetting",
         back_populates="user",
