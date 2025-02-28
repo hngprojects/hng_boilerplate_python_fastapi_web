@@ -5,6 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, Request
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from fastapi.templating import Jinja2Templates
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -93,6 +94,18 @@ async def http_exception(request: Request, exc: HTTPException):
             "status": False,
             "status_code": exc.status_code,
             "message": exc.detail,
+        },
+    )
+    
+@app.exception_handler(RateLimitExceeded)
+async def custom_rate_limit_handler(request: Request, exc: RateLimitExceeded):
+    """Rate limit exceeded exception handler"""
+    return JSONResponse(
+        status_code=429,
+        content={
+            "status": False,
+            "status_code": exc.status_code,
+            "message": "Too many requests. Please try again in 60 seconds.",
         },
     )
 
