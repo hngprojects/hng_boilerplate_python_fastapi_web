@@ -124,8 +124,7 @@ def get_roles_for_organisation(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin),
 ):
-    
-    roles = (role_service.get_roles_by_organisation(db, org_id),)
+    roles = role_service.get_roles_by_organisation(db, org_id)
     if not roles:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
