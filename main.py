@@ -14,16 +14,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
-
-<<<<<<< HEAD
 from api.utils.json_response import JsonResponseDict
 from api.utils.logger import logger
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 from scripts.populate_db import populate_roles_and_permissions
-
-=======
-
 from api.v1.routes.newsletter_router import (
     CustomException,
     custom_exception_handler
@@ -32,7 +27,6 @@ from api.v1.routes.newsletter_router import (
 from api.v1.routes import api_version_one
 
 Base.metadata.create_all(bind=engine)
->>>>>>> upstream/backend
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -80,15 +74,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-<<<<<<< HEAD
 app.include_router(api_version_one)
-=======
 app.add_exception_handler(CustomException, custom_exception_handler) # Newsletter custom exception registration
 
 app.include_router(api_version_one)
-
-
->>>>>>> upstream/backend
 
 @app.get("/", tags=["Home"])
 async def get_root(request: Request) -> dict:

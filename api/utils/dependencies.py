@@ -33,14 +33,11 @@ def get_current_user(
         if user_id is None:
             logger.error("User ID not found in token")
             raise credentials_exception
-<<<<<<< HEAD
         logger.debug(f"Token decoded successfully, user ID: {user_id}")
     except PyJWTError as e:
         logger.error(f"JWT error: {e}")
-=======
         token_data = TokenData(username=username)
     except Exception:
->>>>>>> upstream/backend
         raise credentials_exception
 
     user = db.query(User).filter(User.id == user_id).first()

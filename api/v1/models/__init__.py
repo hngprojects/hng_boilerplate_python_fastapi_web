@@ -17,7 +17,6 @@ from api.v1.models.testimonial import Testimonial
 from api.v1.models.token_login import TokenLogin
 from api.v1.models.oauth import OAuth
 from api.v1.models.invitation import Invitation
-<<<<<<< HEAD
 from api.v1.models.faq import FAQ
 from api.v1.models.newsletter import Newsletter, NewsletterSubscriber
 from api.v1.models.topic import Topic
@@ -31,10 +30,8 @@ from api.v1.models.privacy import PrivacyPolicy
 from api.v1.models.terms import TermsAndConditions
 from api.v1.models.reset_password_token import ResetPasswordToken
 from api.v1.models.faq_inquiries import FAQInquiries
-=======
 from api.v1.models.role import Role
 from api.v1.models.permission import Permission
 from api.v1.models.newsletter import NEWSLETTER
 from api.v1.models.super_admin import SuperAdmin
 from api.v1.models.plans import SubscriptionPlan
->>>>>>> upstream/backend

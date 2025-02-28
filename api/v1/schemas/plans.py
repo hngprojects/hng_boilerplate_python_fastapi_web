@@ -35,7 +35,6 @@ class CreateBillingPlanReturnData(CreateBillingPlanSchema):
     updated_at: datetime
 
     class Config:
-<<<<<<< HEAD
         from_attributes = True
 
 
@@ -49,6 +48,4 @@ class GetBillingPlanData(BaseModel):
 
 class GetBillingPlanListResponse(ResponseBase):
     data: GetBillingPlanData
-=======
-        from_attributes = True
->>>>>>> upstream/backend
+    from_attributes = True
