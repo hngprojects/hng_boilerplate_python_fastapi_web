@@ -54,16 +54,16 @@ def generate_token(user_id, expired=False):
     exp_time = datetime.now() + (timedelta(minutes=-1) if expired else timedelta(minutes=30))
     return jwt.encode({"sub": user_id, "exp": exp_time}, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-# @patch("api.core.dependencies.email_sender.send_email")
-# def test_resend_verification_email(mock_send_email, client:TestClient, db_session):
-#     """Test resending verification email."""
-#     user = create_test_user(db_session)
-#     response = client.post("/api/v1/auth/resend_verification_email", json={"email": user.email})
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert data["status"] == "success"
-#     assert data["message"] == "Verification email sent successfully"
-#     print(mock_send_email.call_args_list)
+@patch("api.core.dependencies.email_sender.send_email")
+def test_resend_verification_email(mock_send_email, client:TestClient, db_session):
+    """Test resending verification email."""
+    user = create_test_user(db_session)
+    response = client.post("/api/v1/auth/resend_verification_email", json={"email": user.email})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "success"
+    assert data["message"] == "Verification email sent successfully"
+    # print(mock_send_email.call_args_list)
 #     mock_send_email.assert_called_once()
 
 
