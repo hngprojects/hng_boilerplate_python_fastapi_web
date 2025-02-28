@@ -19,7 +19,7 @@ from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from api.v1.schemas.user import Token
 from api.v1.schemas.user import (LoginRequest, UserCreate, EmailRequest,
-                                 ProfileData, UserData2)
+                                 UserEmailSender, ProfileData, UserData2)
 from api.v1.schemas.token import TokenRequest
 from api.v1.schemas.user import (UserCreate,
                                  MagicLinkRequest,
@@ -96,29 +96,23 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     try:
         return user_service.verify_user_email(token, db)
     except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail={
-                "status": "error",
-                "status_code": 400,
-                "message": "Verification link expired"
-            }
-        )
-    
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification link expired"
+            )
+        
     except JWTError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail={
-                "status": "error",
-                "status_code": 400,
-                "message": "Invalid token"
-            }
-        )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token"
+            )
+
     
-@auth.post("/resend-verification_email")
-def resend_verification_email(request: Request, email: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+@auth.post("/resend_verification_email")
+def resend_verification_email(request: Request, data: UserEmailSender, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Resends the email verification link"""
-    
+    email = data.email
+    print(email)
     user = user_service.user_to_verify(email, db)
     verification_token = user_service.create_verification_token(user.id)
     base_url = str(request.base_url).strip("/")
@@ -143,7 +137,7 @@ def resend_verification_email(request: Request, email: str, background_tasks: Ba
         "status_code": 200,
         "message": "Verification email sent successfully"
     }
-
+ 
 
 
 @auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED, response_model=auth_response)
