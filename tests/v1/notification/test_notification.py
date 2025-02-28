@@ -63,6 +63,22 @@ notification = Notification(
     updated_at=updated_at,
 )
 
+def test_mark_notifications_as_read(client, db_session_mock):
+    db_session_mock.query().filter(Notification.status == "unread").all.return_value = [user, notification]
+    headers = {"authorization": f"Bearer {access_token}"}
+    response = client.delete("/api/v1/notifications/clear", headers=headers)
+
+    assert response.status_code == 200
+    assert response.json()["success"] == True
+    assert response.json()["status_code"] == 200
+    assert response.json()["message"] == "All notifications marked as read successfully."
+
+
+def test_mark_notifications_as_read_unauthenticated_user(client, db_session_mock):
+    db_session_mock.query().filter(Notification.status == "unread").all.return_value = [notification]
+    response = client.delete("/api/v1/notifications/clear")
+    assert response.status_code == 401
+
 
 def test_mark_notification_as_read(client, db_session_mock):
 
