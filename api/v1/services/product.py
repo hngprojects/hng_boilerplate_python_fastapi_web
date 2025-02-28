@@ -318,6 +318,19 @@ class ProductCategoryService(Service):
         return category
 
     @staticmethod
+    def delete(db: Session, category: str):
+        category = db.query(ProductCategory).filter_by(name=category).first()
+
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found.",
+            )
+
+        db.delete(category)
+        db.commit()
+
+    @staticmethod
     def fetch_all(db: Session, **query_params: Optional[Any]):
         """Fetch all newsletter subscriptions with option to search using query parameters"""
 
