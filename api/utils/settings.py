@@ -1,12 +1,23 @@
 from pydantic_settings import BaseSettings
 from decouple import config
 from pathlib import Path
-
+import os
 
 # Use this to build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent
 
 
+os.environ.pop("DB_HOST", None)
+os.environ.pop("DB_PORT", None)
+os.environ.pop("DB_USER", None)
+os.environ.pop("DB_NAME", None)
+os.environ.pop("DB_TYPE", None)
+os.environ.pop("DB_PASSWORD", None)
+os.environ.pop("MAIL_USERNAME", None)
+os.environ.pop("MAIL_PASSWORD", None)
+os.environ.pop("MAIL_FROM", None)
+os.environ.pop("MAIL_PORT", None)
+os.environ.pop("MAIL_SERVER", None)
 class Settings(BaseSettings):
     """ Class to hold application's config values."""
     
@@ -34,6 +45,5 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
     TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
-
 
 settings = Settings()
