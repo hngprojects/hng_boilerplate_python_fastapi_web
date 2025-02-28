@@ -72,8 +72,8 @@
 #     if user_response.status_code != 201:
 #         raise Exception(f"Setup failed: {user_response.json()}")
 
-#     global auth_token
-#     auth_token = user_response.json()["access_token"]
+    global auth_token
+    auth_token = user_response.json()['data']["access_token"]
 
 # def test_create_testimonial(client_with_mocks):
 #     client, mock_db = client_with_mocks

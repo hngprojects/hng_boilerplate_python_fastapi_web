@@ -97,7 +97,7 @@ def test_successful_dislike(
     resp = make_request(test_blog.id, access_token_user)
     resp_d = resp.json()
     assert resp.status_code == 200
-    assert resp_d['success'] == True
+    assert resp_d['status'] == "success"
     assert resp_d['message'] == "Dislike recorded successfully."
 
     dislike_data = resp_d['data']['object']

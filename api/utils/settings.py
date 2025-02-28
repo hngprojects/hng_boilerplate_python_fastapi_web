@@ -45,5 +45,7 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
     TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
+    
+    APP_NAME: str = config("APP_NAME")
 
 settings = Settings()
