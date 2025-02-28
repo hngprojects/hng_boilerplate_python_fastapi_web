@@ -104,16 +104,13 @@ def update_testimonial(
 ):
     """Endpoint to update a testimonial"""
 
-    # Ensure testimonial exists before updating
     existing_testimonial = testimonial_service.fetch(db, testimonial_id)
     if not existing_testimonial:
         raise HTTPException(status_code=404, detail="Testimonial not found")
 
-    # Ensure the user is authorized to update
     if existing_testimonial.author_id != current_user.id:
         raise HTTPException(status_code=403, detail="Not authorized to update this testimonial")
 
-    # Perform update (fixed call)
     updated_testimonial = testimonial_service.update(db, testimonial_id, testimonial_data)
 
     if not updated_testimonial:
