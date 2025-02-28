@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import desc
+from sqlalchemy import desc, or_, func
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 
@@ -33,66 +33,93 @@ class UserService(Service):
     """User service"""
 
     def fetch_all(
-        self, db: Session, page: int, per_page: int, **query_params: Optional[Any]
+        self,
+        db: Session,
+        page: int = 1,
+        limit: int = 20,
+        search: Optional[str] = None,
+        is_active: Optional[bool] = None,
     ):
         """
-        Fetch all users
+        Fetch all users with search, filtering, and pagination
         Args:
             db: database Session object
-            page: page number
-            per_page: max number of users in a page
-            query_params: params to filter by
+            page: page number (default: 1)
+            limit: max number of users per page (default: 20, max: 50)
+            search: search term for first_name, last_name, or email
+            is_active: filter by active status
         """
-        per_page = min(per_page, 10)
+        # Enforce pagination limits
+        limit = min(max(limit, 1), 50)  # Ensure limit is between 1 and 50
+        page = max(page, 1)  # Ensure page is at least 1
 
-        # Enable filter by query parameter
-        filters = []
-        if all(query_params):
-            # Validate boolean query parameters
-            for param, value in query_params.items():
-                if value is not None and not isinstance(value, bool):
-                    raise HTTPException(
-                        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                        detail=f"Invalid value for '{param}'. Must be a boolean.",
-                    )
-                if value == None:
-                    continue
-                if hasattr(User, param):
-                    filters.append(getattr(User, param) == value)
+        # Base query
         query = db.query(User)
-        total_users = query.count()
-        if filters:
-            query = query.filter(*filters)
-            total_users = query.count()
 
-        all_users: list = (
+        # Apply search filter (case-insensitive partial matching)
+        if search:
+            search_term = f"%{search.strip().lower()}%"
+            query = query.filter(
+                or_(
+                    func.lower(User.first_name).like(search_term),
+                    func.lower(User.last_name).like(search_term),
+                    func.lower(User.email).like(search_term),
+                )
+            )
+
+        # Apply is_active filter
+        if is_active is not None:
+            if not isinstance(is_active, bool):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="is_active must be a boolean",
+                )
+            query = query.filter(User.is_active == is_active)
+
+        # Calculate total users before pagination
+        total_users = query.count()
+
+        # Apply pagination
+        users = (
             query.order_by(desc(User.created_at))
-            .limit(per_page)
-            .offset((page - 1) * per_page)
+            .limit(limit)
+            .offset((page - 1) * limit)
             .all()
         )
 
-        return self.all_users_response(all_users, total_users, page, per_page)
+        # Calculate total pages
+        total_pages = (total_users + limit - 1) // limit
+
+        return self.all_users_response(users, total_users, page, limit, total_pages)
 
     def all_users_response(
-        self, users: list, total_users: int, page: int, per_page: int
+        self, users: list, total_users: int, page: int, limit: int, total_pages: int
     ):
         """
         Generates a response for all users
         Args:
-            users: a list containing user objects
+            users: list of user objects
             total_users: total number of users
+            page: current page
+            limit: users per page
+            total_pages: total number of pages
         """
         if not users or len(users) == 0:
             return user.AllUsersResponse(
-                message="No User(s) for this query",
+                message="No User(s) found for this query",
                 status="success",
                 status_code=200,
-                page=page,
-                per_page=per_page,
-                total=0,
-                data=[],
+                data={
+                    "users": [],
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total_pages": total_pages,
+                        "total_users": total_users,
+                    },
+                },
             )
+
         all_users = [
             user.UserData.model_validate(usr, from_attributes=True) for usr in users
         ]
@@ -100,10 +127,15 @@ class UserService(Service):
             message="Users successfully retrieved",
             status="success",
             status_code=200,
-            page=page,
-            per_page=per_page,
-            total=total_users,
-            data=all_users,
+            data={
+                "users": all_users,
+                "pagination": {
+                    "page": page,
+                    "limit": limit,
+                    "total_pages": total_pages,
+                    "total_users": total_users,
+                },
+            },
         )
 
     def fetch(self, db: Session, id):
