@@ -1,4 +1,11 @@
-from pydantic import BaseModel, EmailStr, Field, PositiveFloat, ConfigDict, StringConstraints
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    PositiveFloat,
+    ConfigDict,
+    StringConstraints,
+)
 from typing import List, Optional, Any, Dict, TypeVar, Generic, Annotated, List
 from datetime import datetime
 
@@ -160,22 +167,31 @@ class ProductCreate(BaseModel):
     quantity: int = 0
     image_url: str = "placeholder-image"
 
+
 class ProductCategoryRetrieve(BaseModel):
     name: str
     id: str
+
     class Config:
         from_attributes = True
 
+
 class ProductCategoryCreate(BaseModel):
     name: str
+
 
 class ProductCategoryData(BaseModel):
     name: str
 
 
-class ProductCommentCreate(BaseModel):
-    content: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+class ProductCategoryUpdate(BaseModel):
+    name: Optional[str] = None
 
+
+class ProductCommentCreate(BaseModel):
+    content: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1)
+    ]
 
 
 class ProductCommentsSchema(BaseModel):
