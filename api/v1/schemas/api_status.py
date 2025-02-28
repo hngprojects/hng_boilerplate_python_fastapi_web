@@ -1,6 +1,5 @@
 from decimal import Decimal
 from pydantic import BaseModel, Field, PositiveInt, PositiveFloat, ConfigDict, StringConstraints
-
 from typing import List, Optional
 from datetime import datetime
 
@@ -22,7 +21,7 @@ class APIStatusPost(BaseModel):
     api_group: str
     status: str
     response_time: Optional[Decimal] = None
-    details: str
+    details: str | None = None
 
     class Config:
         from_attributes = True
@@ -44,7 +43,7 @@ class APIStatusUpdate(BaseModel):
         created_at (datetime): The date and time when the API status was created.
     """
 
-    api_group: str = Field(..., alias="apiGroup")
+    api_group: Optional[str] = Field(None, alias="apiGroup")
     status: str
     last_checked: Optional[datetime] = None
     response_time: Optional[Decimal] = None
