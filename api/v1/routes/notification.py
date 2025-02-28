@@ -70,9 +70,8 @@ def get_notification_by_id(
     notification_id: str,
     db: Session = Depends(get_db),
 ):
-    notification = notification_service.fetch_notification_by_id(
-        notification_id=notification_id, db=db
-    )
+    notification = notification_service.fetch(db=db, notification_id=notification_id)  # Use fetch method
+
     return success_response(
         status_code=200, message="Notification fetched successfully", data=notification
     )
