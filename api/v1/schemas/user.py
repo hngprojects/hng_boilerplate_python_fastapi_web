@@ -174,18 +174,7 @@ class AuthMeResponse(BaseModel):
     data: Dict[Literal["user", "organisations", "profile"],
                Union[UserData2, List[OrganisationData], ProfileData]]
 
-
-class AllUsersResponse(BaseModel):
-    """
-    Schema for all users
-    """
-    message: str
-    status_code: int
-    status: str
-    page: int
-    per_page: int
-    total: int
-    data: Union[List[UserData], List[None]]    
+    
 
 class AdminCreateUser(BaseModel):
     """
@@ -405,3 +394,34 @@ class UserRoleSchema(BaseModel):
         if value not in ["admin", "user", "guest", "owner"]:
             raise ValueError("Role has to be one of admin, guest, user, or owner")
         return value
+
+class Pagination(BaseModel):
+    """Schema for pagination details"""
+    page: int
+    limit: int
+    total_pages: int
+    total_users: int
+
+class AllUsersResponse(BaseModel):
+    """
+    Schema for all users
+    """
+    message: str
+    status_code: int
+    status: str
+    data: Dict[str, Union[List[UserData], Pagination]]
+
+    model_config = ConfigDict(from_attributes=True)
+    
+# class AllUsersResponse(BaseModel):
+#     """
+#     Schema for all users
+#     """
+#     message: str
+#     status_code: int
+#     status: str
+#     page: int
+#     per_page: int
+#     total: int
+#     data: Union[List[UserData], List[None]]
+    
