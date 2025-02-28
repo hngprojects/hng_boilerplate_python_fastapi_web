@@ -188,7 +188,7 @@ def logout(
 ):
     """Endpoint to log a user out of their account"""
 
-    response = success_response(status_code=200, message="User logged put successfully")
+    response = success_response(status_code=200, message="User logged out successfully")
 
     # Delete refresh token from cookies
     response.delete_cookie(key="refresh_token")
@@ -396,14 +396,14 @@ def get_current_user_details(
 ):
     """Endpoint to get current user details.
     """
-    profile = profile_service.fetch_by_user_id(db, current_user.id)
-    organisation = organisation_service.retrieve_user_organizations(current_user, db)
+    #profile = profile_service.fetch_by_user_id(db, current_user.id)
+    #organisation = organisation_service.retrieve_user_organizations(current_user, db)
     return AuthMeResponse(
         message='User details retrieved successfully',
         status_code=200,
         data={
-            'user': UserData2.model_validate(current_user, from_attributes=True),
-            'organisations': organisation,
-            'profile': ProfileData.model_validate(profile, from_attributes=True)
+            'user': UserData2.model_validate(current_user, from_attributes=True)
+            #'organisations': organisation,
+            #'profile': ProfileData.model_validate(profile, from_attributes=True)
         }
     )
