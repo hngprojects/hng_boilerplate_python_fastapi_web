@@ -215,6 +215,7 @@ class AdminCreateUserResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    totp_code: str | None = None
     
     @model_validator(mode='before')
     @classmethod
@@ -224,6 +225,7 @@ class LoginRequest(BaseModel):
         """
         password = values.get('password')
         email = values.get("email")
+        totp_code = values.get("totp_code")
 
         # constraints for password
         if not any(c.islower() for c in password):
@@ -245,6 +247,12 @@ class LoginRequest(BaseModel):
             raise ValueError(exc) from exc
         except Exception as exc:
             raise ValueError(exc) from exc
+        
+        if totp_code:
+            from api.v1.schemas.totp_device import TOTPTokenSchema
+            
+            if not TOTPTokenSchema.validate_totp_code(totp_code):
+                raise ValueError("totp code must be a 6-digit number")
         
         return values
 

@@ -79,7 +79,7 @@ def test_get_payments_successfully(
     resp_d = response.json()
 
     assert response.status_code == 200
-    assert resp_d['success'] is True
+    assert resp_d['status'] == "success"
     assert resp_d['message'] == "Payments fetched successfully"
 
     pagination = resp_d['data']['pagination']
@@ -112,7 +112,7 @@ def test_get_payments_successfully(
     resp_d = response.json()
 
     assert response.status_code == 200
-    assert resp_d['success'] is True
+    assert resp_d['status'] == 'success'
     assert resp_d['message'] == "Payments fetched successfully"
     assert resp_d['data']['user_id'] == test_user.id
 
