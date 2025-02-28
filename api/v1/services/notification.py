@@ -8,10 +8,9 @@ from api.v1.models.user import User
 
 
 class NotificationService(Service):
+    model = Notification  # Assign the model to Service
 
-    def send_notification(
-        self, title: str, message: str, db: Session = Depends(get_db)
-    ):
+    def send_notification(self, title: str, message: str, db: Session = Depends(get_db)):
         """Function to send a notification"""
         new_notification = Notification(title=title, message=message, status="unread")
         db.add(new_notification)
@@ -74,27 +73,33 @@ class NotificationService(Service):
 
         return {"notifications": user.notifications}
 
-    def fetch_notification_by_id(
-        self, notification_id: str, db: Session = Depends(get_db)
-    ):
-        """Function to fetch any notification by ID"""
-        notification = (
-            db.query(Notification).filter(Notification.id == notification_id).first()
-        )
-        if not notification:
-            raise HTTPException(status_code=404, detail="Notification not found")
-        return notification
-    
+    def fetch_notification(self, notification_id: str, db: Session = Depends(get_db)):
+        """Wrapper function to fetch a notification using the fetch method"""
+        return self.fetch(db, notification_id)
+
     def fetch_all_notifications(self, db: Session):
         """Function to fetch all notifications"""
         notifications = db.query(Notification).all()
-        return [notification.to_dict() for notification in notifications]
+        #  Debugging: Print notifications count
+        print(f"🔍 Found {len(notifications)} notifications in the database")
+        # Print each notification
+        for notif in notifications:
+            print(f"🔍 Notification: {notif.__dict__}")
+
+        if not notifications:
+            raise HTTPException(status_code=404, detail="No notifications found")
+
+        return [{"id": n.id, "title": n.title, "message": n.message, "status": n.status} for n in notifications]
 
     def create(self):
         super().create()
 
-    def fetch(self, db: Session):
-        super().fetch()
+    def fetch(self, db: Session, notification_id: str):
+        """Fetch a single notification by ID."""
+        notification = db.query(Notification).all()
+        if not notification:
+            raise HTTPException(status_code=404, detail="Notification not found")
+        return notification
 
     def fetch_all(self):
         super().fetch_all()
