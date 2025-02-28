@@ -1,8 +1,14 @@
 from datetime import timedelta
+from fastapi.responses import JSONResponse
+from jose import ExpiredSignatureError, JWTError
 from slowapi import Limiter
 from slowapi.util import get_remote_address
+from fastapi import (BackgroundTasks, 
+                     Depends, 
+                     HTTPException,
+                     status, APIRouter,
+                     Response, Request)
 
-from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Request, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -12,13 +18,9 @@ from api.utils.success_response import auth_response, success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
 from api.v1.schemas.user import Token
-from api.v1.schemas.user import (
-    LoginRequest,
-    UserCreate,
-    EmailRequest,
-    ProfileData,
-    UserData2,
-)
+from api.v1.schemas.user import (LoginRequest, UserCreate, EmailRequest,
+                                 UserEmailSender, ProfileData, UserData2)
+
 from api.v1.schemas.token import TokenRequest
 from api.v1.schemas.user import (MagicLinkRequest,
                                  ChangePasswordSchema,
@@ -37,14 +39,18 @@ auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
-  
-@auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
-def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
+@auth.post("/register", status_code=status.HTTP_201_CREATED)
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
+def register(request: Request, background_tasks: BackgroundTasks, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
 
     # Create user account
+    base_url = str(request.base_url).strip("/")
     user = user_service.create(db=db, schema=user_schema)
+
+
+    verification_token = user_service.create_verification_token(user.id)
+    verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
 
     # create an organization for the user
     org = CreateUpdateOrganisation(
@@ -52,48 +58,87 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
     )
     organisation_service.create(db=db, schema=org, user=user)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
-
-    # Create access and refresh tokens
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
-    cta_link = "https://anchor-python.teams.hng.tech/about-us"
+    cta_link = 'https://anchor-python.teams.hng.tech/about-us'
 
     # Send email in the background
     background_tasks.add_task(
         send_email,
         recipient=user.email,
-        template_name="welcome.html",
-        subject="Welcome to HNG Boilerplate",
+<<<<<<< feat/email_verification
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate, Verify Your Email below',
         context={
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "cta_link": cta_link,
-        },
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'verification_link': verification_link,
+            'cta_link': cta_link
+        }
+    )
+    print(verification_link)
+    response_data = JSONResponse(
+        status_code=status.HTTP_201_CREATED,
+        content={
+            "status": "success",
+            "status_code": 201,
+            "message": 'User created successfully. Please verify your email.',
+            "data": {
+                'user': jsonable_encoder(user,exclude=['password', 'is_deleted', 'is_verified', 'updated_at']),
+                'organisations': [jsonable_encoder(org) for org in user_organizations]
+            }
+        }
     )
 
-    response = auth_response(
-        status_code=201,
-        message="User created successfully",
-        access_token=access_token,
-        data={
-            "user": jsonable_encoder(
-                user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
-            ),
-            "organisations": user_organizations,
-        },
+    print(user.is_verified)
+    return response_data
+
+@auth.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    '''Endpoint to verify email'''
+    try:
+        return user_service.verify_user_email(token, db)
+    except ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification link expired"
+            )
+        
+    except JWTError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token"
+            )
+
+    
+@auth.post("/resend_verification_email")
+def resend_verification_email(request: Request, data: UserEmailSender, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Resends the email verification link"""
+    email = data.email
+    print(email)
+    user = user_service.user_to_verify(email, db)
+    verification_token = user_service.create_verification_token(user.id)
+    base_url = str(request.base_url).strip("/")
+    verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
+    cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+
+    background_tasks.add_task(
+        send_email,
+        recipient=email,
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate, Verify Your Email below',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'verification_link': verification_link,
+            'cta_link': cta_link
+        }
     )
 
-    # Add refresh token to cookies
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        expires=timedelta(days=60),
-        httponly=True,
-        secure=True,
-        samesite="none",
-    )
-
-    return response
+    return {
+        "status": "success",
+        "status_code": 200,
+        "message": "Verification email sent successfully"
+    }
+ 
 
 
 @auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED, response_model=auth_response)

@@ -4,12 +4,14 @@ from typing import Any, Optional, Annotated
 import datetime as dt
 from fastapi import status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from fastapi.responses import JSONResponse
+from jose import ExpiredSignatureError, JWTError, jwt
+import jwt as email_jwt
 from fastapi import Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from api.core.base.services import Service
 from api.core.dependencies.email_sender import send_email
@@ -568,7 +570,7 @@ class UserService(Service):
         """Generate a 6-digit token"""
         return "".join(
             random.choices(string.digits, k=6)
-        ), datetime.utcnow() + timedelta(minutes=1)
+        ), datetime.now() + timedelta(minutes=1)
 
 
     def get_users_by_role(self, db: Session, role_id: str, current_user: User):
@@ -596,5 +598,71 @@ class UserService(Service):
             )
 
         return users
+
+    def create_verification_token(self, user_id: int):
+        expiration = datetime.now() + timedelta(seconds=5)
+        data = {"sub": user_id, "exp": expiration}
+        return jwt.encode(data, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
+    def verify_user_email(self, token: str, db: Session):
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM], options={"verify_exp": True})
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Invalid token"
+            )
+        user: User = user_service.get_user_by_id(db, user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="User not found"
+            )
+        if user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, 
+                detail="User already verified"
+            )
+        user.is_verified = True
+        db.commit()
+        print(user.is_verified)
+        access_token = self.create_access_token(user_id=user.id)
+        refresh_token = self.create_refresh_token(user_id=user.id)
+        response = JSONResponse(
+                        status_code=status.HTTP_200_OK,
+                        content={
+                            "status": "success",
+                            "status_code": 200,
+                            "message": "Email verified successfully. You can now log in.",
+                            "data": { "access_token": access_token}
+                        }
+                    )
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            expires=timedelta(days=60),
+            httponly=True,
+            secure=True,
+            samesite="none",
+        )
+        return response
+    
+    def user_to_verify(self, email: str, db: Session):
+        user = db.query(User).filter(User.email == email).first()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+
+        if user.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User is already verified"
+            )
+        return user
+
 
 user_service = UserService()
