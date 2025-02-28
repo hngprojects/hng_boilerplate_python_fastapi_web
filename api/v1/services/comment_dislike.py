@@ -12,25 +12,37 @@ class CommentDislikeService(Service):
     """Comment dislike service functionality"""
 
     def create(self, db: Session, user_id, comment_id, client_ip: Optional[str] = None):
-        """Function to dislike a comment"""
-        # check if the user_id has disliked the comment, return error is so
-        dislike_data = db.query(CommentDislike).filter_by(user_id=user_id, comment_id=comment_id).first()
-        if dislike_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="You can only dislike once",
-            )
-        # check if comment exists
+        """
+            Function to dislike a comment
+            Toggles dislike on a comment (adds or removes dislike).
+        """
+        # Ensure the comment exists before proceeding
         comment = check_model_existence(db, Comment, comment_id)
+        if not comment:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
 
-        # create and add the new commentDislike to the database
-        new_dislike = CommentDislike(
-            comment_id=comment_id, user_id=user_id, ip_address=client_ip
-        )
-        db.add(new_dislike)
-        db.commit()
-        db.refresh(new_dislike)
-        return new_dislike
+        # Check if the user has already disliked the comment
+        existing_dislike = db.query(CommentDislike).filter_by(user_id=user_id, comment_id=comment_id).first()
+
+        try:
+            if existing_dislike:
+                db.delete(existing_dislike)
+                db.commit()
+                return {"message": "Dislike removed successfully"}
+            else:
+                new_dislike = CommentDislike(
+                    comment_id=comment_id,
+                    user_id=user_id,
+                    ip_address=client_ip
+                )
+                db.add(new_dislike)
+                db.commit()
+                db.refresh(new_dislike)
+                return {"message": "Dislike added successfully"}
+
+        except Exception:
+            db.rollback()
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Database operation failed.")
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all comment_dislike with option tto search using query parameters"""
