@@ -7,8 +7,6 @@ import uuid
 
 client = TestClient(app)
 
-global_access_token = None
-
 data = [
     {
         "client_name": "firsttestclientname",
@@ -25,12 +23,15 @@ data = [
 
 
 """Mocking the database"""
-
-
 @pytest.fixture
 def mock_db():
     db_session = MagicMock()
     yield db_session
+
+
+@pytest.fixture
+def mock_id(mock_db):
+    return mock_db
 
 
 @pytest.fixture(autouse=True)
@@ -55,18 +56,16 @@ def setup_access_token():
             "email": email,
         },
     )
-    print("USER RESPONSE", user_response.json())
 
     if user_response.status_code != 201:
         raise Exception(f"Setup failed: {user_response.json()}")
 
-    global global_access_token
-    global_access_token = user_response.json()["data"]["access_token"]
+    return user_response.json()["data"]["access_token"]
 
 
-def test_update_testimonial_success(mock_id):
+def test_update_testimonial_success(mock_id, setup_access_token):
     mock_id.query().filter().first.return_value = data[0]
-    mock_id.commit.return_value = None
+    mock_id.commit = MagicMock()
 
     update_data = {
         "content": "I love python (updated)",
@@ -75,22 +74,20 @@ def test_update_testimonial_success(mock_id):
     response = client.put(
         f"/api/v1/testimonials/{data[0]['id']}",
         json=update_data,
-        headers={"Authorization": f"Bearer {global_access_token}"},
+        headers={"Authorization": f"Bearer {setup_access_token}"},
     )
 
     assert response.status_code == 200
     assert response.json()["message"] == "Your testimonial has been updated successfully."
 
 
-def test_update_testimonial_not_found(mock_id):
+def test_update_testimonial_not_found(mock_id, setup_access_token):
     mock_id.query().filter().first.return_value = None
-
-    update_data = {"content": "This is an updated testimonial."}
 
     response = client.put(
         "/api/v1/testimonials/non_existent_id",
-        json=update_data,
-        headers={"Authorization": f"Bearer {global_access_token}"},
+        json={"content": "This is an updated testimonial."},
+        headers={"Authorization": f"Bearer {setup_access_token}"},
     )
 
     assert response.status_code == 404
@@ -98,14 +95,10 @@ def test_update_testimonial_not_found(mock_id):
 
 
 def test_update_testimonial_unauthorized(mock_id):
-    mock_id.query().filter().first.return_value = data[0]
-
-    update_data = {"content": "This is an updated testimonial."}
-
     response = client.put(
         f"/api/v1/testimonials/{data[0]['id']}",
-        json=update_data,
-        headers={"Authorization": f"Bearer {global_access_token}"},
+        json={"content": "This is an updated testimonial."},
+        headers={"Authorization": "Bearer invalid_token"},
     )
 
     assert response.status_code == 403
