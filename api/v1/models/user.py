@@ -20,6 +20,7 @@ class User(BaseTableModel):
     is_superadmin = Column(Boolean, server_default=text("false"))
     is_deleted = Column(Boolean, server_default=text("false"))
     is_verified = Column(Boolean, server_default=text("false"))
+    username = Column(String, nullable=True)
 
     profile = relationship(
         "Profile", uselist=False, back_populates="user", cascade="all, delete-orphan"
