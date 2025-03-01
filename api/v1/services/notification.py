@@ -19,6 +19,24 @@ class NotificationService(Service):
         db.refresh(new_notification)
         return new_notification
 
+
+    def mark_notifications_as_read(
+        self,
+        user: User,
+        db: Session = Depends(get_db),
+    ):
+        unread_notifications = (
+            db.query(Notification).filter(Notification.status == "unread").all()
+        )
+
+        if not unread_notifications:
+            raise HTTPException(status_code=404, detail="No unread notifications found.")
+
+        for unread_notification in unread_notifications:
+            unread_notification.status = "read"
+
+        db.commit()
+
     def mark_notification_as_read(
         self,
         notification_id: str,

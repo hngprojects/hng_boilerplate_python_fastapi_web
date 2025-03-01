@@ -10,8 +10,6 @@ from pydantic import (BaseModel, EmailStr,
                       StringConstraints,
                       model_validator)
 
-from api.v1.schemas.totp_device import TOTPTokenSchema
-
 def validate_mx_record(domain: str):
     """
     Validate mx records for email
@@ -251,6 +249,8 @@ class LoginRequest(BaseModel):
             raise ValueError(exc) from exc
         
         if totp_code:
+            from api.v1.schemas.totp_device import TOTPTokenSchema
+            
             if not TOTPTokenSchema.validate_totp_code(totp_code):
                 raise ValueError("totp code must be a 6-digit number")
         

@@ -18,4 +18,6 @@ class TOTPDevice(BaseTableModel):
     user = relationship("User", back_populates="totp_device")
     
     def __str__(self):
-        return f"{self.user.email}'s TOTP device"
+        if self.user:
+            return f"{self.user.email}'s TOTP device"
+        return f"TOTP device for user_id: {self.user_id}"

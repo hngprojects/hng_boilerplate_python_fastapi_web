@@ -95,6 +95,20 @@ def get_all_notifications(
     )
 
 
+@notification.delete("/clear", 
+    summary="Mark current user notifications as read",
+    status_code=status.HTTP_200_OK
+)
+async def mark_notifications_as_read(
+    current_user=Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    notification_service.mark_notifications_as_read(current_user, db)
+    return success_response(
+        status_code=200, message="All notifications marked as read successfully.", data={}
+    )
+
+
 @notification.delete("/{notification_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_notification(
     notification_id: str,
