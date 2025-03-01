@@ -21,12 +21,12 @@ data = [
 ]
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture(scope='module')
 def mock_send_mail():
     with patch("api.core.dependencies.email_sender.send_email") as mock_email_sending:
         with patch("fastapi.BackgroundTasks.add_task") as add_task_mock:
             add_task_mock.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
-        yield mock_email_sending
+            yield mock_email_sending
 
 
 @pytest.fixture(scope="function")
