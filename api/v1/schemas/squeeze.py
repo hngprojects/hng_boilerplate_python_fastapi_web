@@ -1,5 +1,8 @@
-from pydantic import BaseModel, EmailStr
 from enum import Enum
+from typing import Optional
+
+from pydantic import BaseModel, EmailStr
+
 
 class SqueezeStatusEnum(str, Enum):
     online = "online"
@@ -21,3 +24,13 @@ class CreateSqueeze(BaseModel):
 
 class FilterSqueeze(BaseModel):
     status: SqueezeStatusEnum = None
+
+
+class UpdateSqueeze(BaseModel):
+    title: Optional[str] = None
+    headline: Optional[str] = None
+    sub_headline: Optional[str] = None
+    body: Optional[str] = None
+    type: Optional[str] = None
+    status: Optional[SqueezeStatusEnum] = None
+    full_name: Optional[str] = None
