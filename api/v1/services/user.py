@@ -304,20 +304,21 @@ class UserService(Service):
         db.refresh(user)
         return user
 
-    def delete(self, db: Session, id=None, access_token: str = Depends(oauth2_scheme)):
+    def delete(self, db: Session, id: Optional[str] = None, access_token: Optional[str] = None): 
         """Function to soft delete a user"""
 
-        # Get user from access token if provided, otherwise fetch user by id
-        user = (
-            self.get_current_user(access_token, db)
-            if id is None
-            else check_model_existence(db, User, id)
-        )
+        # Get user by id if provided, otherwise fetch user access token
+        if id:
+            user = check_model_existence(db, User, id)
+        elif access_token:
+            user = self.get_current_user(access_token, db)
+        else:
+            raise HTTPException(status_code=400, detail="User ID or access token required")
 
         user.is_deleted = True
         db.commit()
 
-        return super().delete()
+        #return super().delete()
 
     def authenticate_user(self, db: Session, email: str, password: str):
         """Function to authenticate a user"""

@@ -16,16 +16,26 @@ from api.v1.services.user import user_service
 user_router = APIRouter(prefix="/users", tags=["Users"])
 
 
-@user_router.get('/delete', status_code=200)
-async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user)):
+@user_router.delete('/delete', status_code=200)
+async def delete_account(request: Request, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_user), user_id: Optional[str] = Query(None),):
     '''Endpoint to delete a user account'''
 
+    auth_header = request.headers.get("Authorization")
+    access_token = (
+        auth_header.replace("Bearer ", "") if auth_header and auth_header.startswith("Bearer ") else None # this extracts access token from header but or returns None if header is missing or not in the right format
+    )
+
+    if user_id:
+        if not current_user.is_superadmin:  # Check if the logged-in user is an admin
+            raise HTTPException(status_code=401, detail="Only admins can delete users by ID.")
+        access_token = None # basically ignore the access token if user_id is provided (but it still has to be provided by an auth admin)
+
     # Delete current user
-    user_service.delete(db=db)
+    user_service.delete(db=db, id=user_id, access_token=access_token)
 
     return success_response(
         status_code=200,
-        message='User deleted successfully',
+        message='User successfully deleted',
     )
 
 @user_router.patch("",status_code=status.HTTP_200_OK)
