@@ -6,8 +6,8 @@ from fastapi.encoders import jsonable_encoder
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
-from fastapi import Depends, APIRouter, status,Query
-from api.utils.success_response import success_response
+from fastapi import Depends, APIRouter, status,Query, HTTPException
+from api.utils.success_response import success_response, fail_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
 from api.v1.schemas.testimonial import CreateTestimonial
@@ -76,6 +76,7 @@ async def delete_all_testimonials(
 
     testimonial_service.delete_all(db)
 
+
 @testimonial.post('/', response_model=success_response)
 def create_testimonial(
     testimonial_data: CreateTestimonial,
@@ -90,3 +91,32 @@ def create_testimonial(
         data={"id": testimonial.id}
     )
     return response
+
+
+@testimonial.put('/{testimonial_id}', response_model=success_response)
+def update_testimonial(
+    testimonial_id: str,
+    testimonial_data: CreateTestimonial,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: User = Depends(user_service.get_current_user)
+):
+    '''Endpoint to update testimonial'''
+    testimonial = testimonial_service.fetch(db, testimonial_id)
+    if not testimonial:
+        return fail_response(
+            status_code=404,
+            message="Testimonial not found."
+        )
+
+    if testimonial.id != current_user.id:
+        return fail_response(
+            status_code=403,
+            message="Forbidden. unauthorized user access"
+        )
+
+    update_testimonial = testimonial_service.update(db, testimonial_id, testimonial_data)
+    return success_response(
+        status_code=200,
+        message="Your testimonial has been updated successfully.",
+        data={"id": update_testimonial.id}
+    )
