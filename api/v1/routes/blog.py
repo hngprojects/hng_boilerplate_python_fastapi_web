@@ -57,6 +57,7 @@ def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0)
         model=Blog,
         limit=limit,
         skip=skip,
+        filters={"is_deleted": False} #filter out soft-deleted blogs
     )
 
 
@@ -239,6 +240,34 @@ async def delete_blog_post(
 
     blog_service = BlogService(db=db)
     blog_service.delete(blog_id=id)
+
+@blog.put("/{blog_id}/soft_delete")
+async def archive_blog_post(
+    blog_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    
+    """Endpoint to archive/soft-delete a blog post"""
+
+    blog_service = BlogService(db=db)
+    blog_post = blog_service.fetch(blog_id=id)
+    if not blog_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    #check if admin/ authorized user
+    if not (blog_post.author_id != current_user.id or current_user.is_superadmin):
+        raise HTTPException(status_code=403, detail="You don't have permission to perform this action")
+    
+    blog_post.is_deleted = True
+    db.commit()
+    db.refresh(blog_post)
+
+    return success_response(
+        message="Blog post archived successfully!",
+        status_code=200,
+        data=jsonable_encoder(blog_post),
+    )
+
 
 
 # Post a comment to a blog
