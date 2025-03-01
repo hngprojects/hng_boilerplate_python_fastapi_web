@@ -64,15 +64,15 @@ def setup_access_token():
         },
     )
 
-	assert user_response.status_code == 201, f"Setup failed {user_response.json()}"
-        
+    assert user_response.status_code == 201, f"Setup failed {user_response.json()}"
+
     login_response = client.post(
-    	"/api/v1/auth/login",
-    	jso={"email": email, "password": "@Testpassword2"},
+        "/api/v1/auth/login",
+        json={"email": email, "password": "@Testpassword2"},
     )
-    
+
     assert login_response.status_code == 200, f"Login failed: {login_response.json()}"
-    
+
     return login_response.json()["data"]["access_token"]
 
 
