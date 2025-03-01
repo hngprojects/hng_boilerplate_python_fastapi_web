@@ -43,6 +43,12 @@ app = FastAPI(
 limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 
+
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Get absolute path
+TEMPLATE_DIR = os.path.join(BASE_DIR, "api/core/dependencies/email/templates")
+
 # Set up email templates and css static files
 email_templates = Jinja2Templates(directory="api/core/dependencies/email/templates")
 
