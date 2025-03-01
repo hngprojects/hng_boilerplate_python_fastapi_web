@@ -40,3 +40,5 @@ jobs:
             pip install -r requirements.txt
             alembic revision --autogenerate
             alembic upgrade head
+            cd ..
+            pm2 restart dev-ecosystem.config.js || pm2 start dev-ecosystem.config.js

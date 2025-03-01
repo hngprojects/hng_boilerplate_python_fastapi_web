@@ -57,6 +57,7 @@ def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0)
         model=Blog,
         limit=limit,
         skip=skip,
+        filters={"is_deleted": False} #filter out soft-deleted blogs
     )
 
 
@@ -77,7 +78,8 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     """
     blog_service = BlogService(db)
 
-    blog_post = blog_service.fetch(id)
+    # Fetch blog and increment view count
+    blog_post = blog_service.fetch_and_increment_view(id)
 
     return success_response(
         message="Blog post retrieved successfully!",
@@ -202,6 +204,32 @@ def dislike_blog_post(
     )
 
 
+@blog.get("/{post_id}/likes-dislikes")
+def get_likes_dislikes_count(
+    post_id: str,
+    db: Session = Depends(get_db),
+):
+    """Fetch total number of likes and dislikes for a blog post."""
+    blog_service = BlogService(db)
+    
+    # Validate if blog post exists
+    blog_service.fetch(post_id)
+    
+    # Fetch like and dislike counts
+    likes_count = blog_service.num_of_likes(post_id)
+    dislikes_count = blog_service.num_of_dislikes(post_id)
+    
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Likes and dislikes retrieved successfully",
+        data={
+            "post_id": post_id,
+            "likes": likes_count,
+            "dislikes": dislikes_count,
+        }
+    )
+
+
 @blog.delete("/{id}", status_code=204)
 async def delete_blog_post(
     id: str,
@@ -212,6 +240,34 @@ async def delete_blog_post(
 
     blog_service = BlogService(db=db)
     blog_service.delete(blog_id=id)
+
+@blog.put("/{blog_id}/soft_delete")
+async def archive_blog_post(
+    blog_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    
+    """Endpoint to archive/soft-delete a blog post"""
+
+    blog_service = BlogService(db=db)
+    blog_post = blog_service.fetch(blog_id=id)
+    if not blog_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    #check if admin/ authorized user
+    if not (blog_post.author_id != current_user.id or current_user.is_superadmin):
+        raise HTTPException(status_code=403, detail="You don't have permission to perform this action")
+    
+    blog_post.is_deleted = True
+    db.commit()
+    db.refresh(blog_post)
+
+    return success_response(
+        message="Blog post archived successfully!",
+        status_code=200,
+        data=jsonable_encoder(blog_post),
+    )
+
 
 
 # Post a comment to a blog
@@ -323,11 +379,35 @@ async def delete_blog_like(
         request: `default` Request.
         db: `default` Session.
     """
+    
+    # Validate User
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    
     blog_like_service = BlogLikeService(db)
-
-    # delete blog like
-    return blog_like_service.delete(blog_like_id, current_user.id)
-
+    
+    blog_like = blog_like_service.fetch(blog_like_id)
+    
+    # Check if blogLike exist
+    if not blog_like:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BlogLike does not exist"
+        )
+    
+    # Check if current user is the owner of blogLike
+    if blog_like.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Insufficient permission"
+        )
+    
+    db.delete(blog_like)
+    db.commit()
+    
+    return Response(
+        status_code=204
+    )
 
 @blog.delete("/dislikes/{blog_dislike_id}", 
              status_code=status.HTTP_204_NO_CONTENT)
