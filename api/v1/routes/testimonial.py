@@ -106,7 +106,7 @@ def update_testimonial(
     if not testimonial:
         return fail_response(
             status_code=404,
-            message="Testimonial does not exists."
+            message="Testimonial does not exist"
         )
 
     if testimonial.author_id != current_user.id:

@@ -66,7 +66,13 @@ def test_update_testimonial_success(client_with_mocks, setup_access_token):
     client, mock_db = client_with_mocks
 
     mock_testimonial = MagicMock()
-    mock_testimonial.content = "I love python"
+    mock_testimonial.id = data[0]["id"]
+    mock_testimonial.content = data[0]["content"]
+    mock_testimonial.client_name = data[0]["client_name"]
+    mock_testimonial.client_designation = data[0]["client_designation"]
+    mock_testimonial.comments = data[0]["comments"]
+    mock_testimonial.ratings = data[0]["ratings"]
+
     mock_db.query.return_value.filter.return_value.first.return_value = mock_testimonial
 
     update_data = {"content": "I love python (updated)"}
@@ -93,7 +99,7 @@ def test_update_testimonial_not_found(client_with_mocks, setup_access_token):
     )
 
     assert response.status_code == 404
-    assert response.json()["message"] == "Testimonial does not exists."
+    assert response.json()["message"] == "TTestimonial does not exist"
 
 
 def test_update_testimonial_unauthorized(client_with_mocks):
