@@ -91,11 +91,19 @@ def test_successful_delete_bloglike(
     test_blog_like,
     access_token_user
 ):
-    # mock current-user AND blog-like
+    # Mock current-user AND blog-like
     mock_db_session.query().filter().first.return_value = test_user
     mock_fetch_blog_like.return_value = test_blog_like
 
+    # Debug logs
+    print(f"Mocked user: {test_user}")
+    print(f"Mocked blog like: {test_blog_like}")
+    print(f"Access token: {access_token_user}")
+
     resp = make_request(test_blog_like.id, access_token_user)
+    print(f"Response status code: {resp.status_code}")
+    print(f"Response content: {resp.content}")
+
     assert resp.status_code == 204
 
 
