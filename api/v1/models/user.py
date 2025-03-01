@@ -94,6 +94,8 @@ class User(BaseTableModel):
                                         back_populates="user",
                                         cascade="all, delete-orphan")
     
+    totp_device = relationship("TOTPDevice", back_populates="user", cascade="all, delete-orphan")
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")

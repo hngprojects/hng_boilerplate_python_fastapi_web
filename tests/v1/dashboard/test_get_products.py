@@ -83,7 +83,7 @@ def test_get_products_successful(
     response = client.get("/api/v1/dashboard/products", headers=headers)
     resp_d = response.json()
     assert response.status_code == 200
-    assert resp_d['success'] is True
+    assert resp_d['status'] == "success"
     assert resp_d['message'] == "Products fetched successfully"
 
 
@@ -103,7 +103,7 @@ def test_get_product_successful(
     response = client.get(f"/api/v1/dashboard/products/{test_product.id}", headers=headers)
     resp_d = response.json()
     assert response.status_code == 200
-    assert resp_d['success'] is True
+    assert resp_d['status'] == "success"
     assert resp_d['message'] == "Product fetched successfully"
 
 
@@ -126,7 +126,7 @@ def test_get_products_count_successful(
     response = client.get("/api/v1/dashboard/products/count", headers=headers)
     resp_d = response.json()
     assert response.status_code == 200
-    assert resp_d['success'] is True
+    assert resp_d['status'] == "success"
     assert resp_d['message'] == "Products count fetched successfully"
 
 
