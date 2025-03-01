@@ -107,16 +107,7 @@ class APIStatusService(Service):
             if schema.status is not None:
                 existing_status.status = schema.status
             if schema.response_time is not None:
-                try:
-                    if isinstance(schema.response_time, str):
-                        existing_status.response_time = Decimal(schema.response_time)
-                    else:
-                        existing_status.response_time = schema.response_time
-                except (ValueError, TypeError):
-                    raise HTTException(
-                        status_code=status.HTTP_400_BAD_REQUEST,
-                        detail="Invalid response_time format"
-                    )
+                existing_status.response_time = Decimal(schema.response_time)
             if schema.details is not None:
                 existing_status.details = schema.details
             if schema.last_checked is not None:
