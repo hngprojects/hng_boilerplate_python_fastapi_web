@@ -64,7 +64,7 @@ class TestCodeUnderTest:
                     'message'] == "Team Member added successfully"
 
                 assert response.json()['data']['name'] == test_member['name']
-                assert response.json()['success'] == True
+                assert response.json()['status'] == "success"
 
     # Handling empty description field and raising appropriate exception
     def test_add_members_empty_desc(self, client):

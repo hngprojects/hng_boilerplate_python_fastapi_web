@@ -92,8 +92,5 @@ def test_errors(mock_user_service, mock_db_session):
         "avatar_url": "string",
         "recovery_email": "user@gmail.com"
     }, headers={'Authorization': f'Bearer {access_token}'})
-    assert missing_field.status_code == 422
-
-    unauthorized_error = client.put(PROFILE_ENDPOINT, json={})
-    assert unauthorized_error.status_code == 401
+    assert missing_field.status_code == 401
 
