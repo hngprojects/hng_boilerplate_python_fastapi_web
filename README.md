@@ -45,7 +45,7 @@ GRANT ALL PRIVILEGES ON DATABASE hng_fast_api TO user;
 
 **Starting the database**
 after cloning the database, dont run 
-`alembic revision --autogenerate -m 'initial migration'`
+`embic revision --autogenerate -m al'initial migration'`
 but run
 `alembic upgrade head`
 

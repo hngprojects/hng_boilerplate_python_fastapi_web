@@ -33,7 +33,8 @@ class ActivityLogService:
         
         return query.all()
     
-    def delete_activity_log_by_id(self, db: Session, log_id: str):
+    def delete_activity_log_by_id(self, db: Session, log_id: str) -> bool:
+        """Delete an activity log by ID with error handling"""
         log = db.query(ActivityLog).filter(ActivityLog.id == log_id).first()
 
         if not log:
