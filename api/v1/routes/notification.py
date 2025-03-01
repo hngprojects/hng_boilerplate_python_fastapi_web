@@ -20,11 +20,14 @@ notification = APIRouter(prefix="/notifications", tags=["Notifications"])
     status_code=status.HTTP_201_CREATED,
 )
 def send_notification(
-    notification_data: NotificationCreate, db: Session = Depends(get_db)
+    notification_data: NotificationCreate,
+    user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
 ):
     notification = notification_service.send_notification(
         title=notification_data.title,
         message=notification_data.message,
+        user=user,
         db=db,
     )
     return success_response(

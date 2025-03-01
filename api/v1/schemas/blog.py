@@ -24,36 +24,60 @@ class BlogUpdateResponseModel(BaseModel):
     data: dict
 
 
-class BlogResponse(BaseModel):
+# class BlogResponse(BaseModel):
+#     id: str
+#     author_id: str
+#     title: str
+#     content: str
+#     image_url: Optional[str]
+#     tags: Optional[List[str]]
+#     is_deleted: bool
+#     excerpt: Optional[str]
+#     created_at: datetime
+#     updated_at: datetime
+
+#     class Config:
+#         from_attributes = True
+
+
+# class BlogPostResponse(BaseModel):
+
+#     author_id: str
+#     title: str
+#     content: str
+#     image_url: Optional[str]
+#     is_deleted: bool
+#     excerpt: Optional[str]
+#     tags: Optional[str]
+#     created_at: datetime
+#     updated_at: datetime
+
+#     class Config:
+#         from_attributes = True
+
+
+# Created BlogBaseResponse parent class to reduce duplication and add views field
+class BlogBaseResponse(BaseModel):
+    author_id: str
+    title: str
+    content: str
+    image_url: Optional[str]
+    is_deleted: bool
+    excerpt: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+    views: int
+
+    class Config:
+        from_attributes = True
+
+class BlogResponse(BlogBaseResponse):
     id: str
-    author_id: str
-    title: str
-    content: str
-    image_url: Optional[str]
     tags: Optional[List[str]]
-    is_deleted: bool
-    excerpt: Optional[str]
-    created_at: datetime
-    updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
-
-class BlogPostResponse(BaseModel):
-
-    author_id: str
-    title: str
-    content: str
-    image_url: Optional[str]
-    is_deleted: bool
-    excerpt: Optional[str]
+class BlogPostResponse(BlogBaseResponse):
     tags: Optional[str]
-    created_at: datetime
-    updated_at: datetime
 
-    class Config:
-        from_attributes = True
 
 
 class BlogLikeDislikeCreate(BaseModel):
@@ -83,3 +107,4 @@ class CommentUpdateResponseModel(BaseModel):
     status: str
     message: str
     data: CommentData
+

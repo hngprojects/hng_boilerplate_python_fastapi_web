@@ -6,10 +6,9 @@ from pathlib import Path
 # Use this to build paths inside the project
 BASE_DIR = Path(__file__).resolve().parent
 
-
 class Settings(BaseSettings):
-    """ Class to hold application's config values."""
-    
+    """Class to hold application's config values."""
+
     SECRET_KEY: str = config("SECRET_KEY")
     ALGORITHM: str = config("ALGORITHM")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
@@ -34,8 +33,15 @@ class Settings(BaseSettings):
     TWILIO_ACCOUNT_SID: str = config("TWILIO_ACCOUNT_SID")
     TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
     TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
-    
+
     APP_NAME: str = config("APP_NAME")
 
+    # Base URLs
+    ANCHOR_PYTHON_BASE_URL: str = config(
+        "ANCHOR_PYTHON_BASE_URL", default="https://anchor-python.teams.hng.tech"
+    )
+
+    # telex webhook url
+    TELEX_WEBHOOK_URL: str = config("TELEX_WEBHOOK_URL")
 
 settings = Settings()
