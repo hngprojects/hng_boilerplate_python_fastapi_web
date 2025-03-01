@@ -4,7 +4,7 @@ from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from datetime import datetime, timezone
-from api.v1.models import User, BlogLike
+from api.v1.models import User, BlogLike, BlogLikeService
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from api.v1.services.user import user_service
@@ -26,9 +26,10 @@ def mock_user_service():
 
 
 @pytest.fixture
-def mock_blog_service():
-    with patch("api.v1.services.blog.BlogService", autospec=True) as blog_service_mock:
-        yield blog_service_mock
+def mock_blog_service(mocker):
+    mock_db = mocker.MagicMock(spec=Session)  # Mock DB session
+    blog_service_mock = mocker.MagicMock(spec=BlogLikeService)
+    return blog_service_mock
 
 
 # Test User
@@ -83,28 +84,21 @@ def make_request(blog_like_id, token):
 
 
 # test for successful delete
-@patch("api.v1.services.blog.BlogLikeService.fetch")
 def test_successful_delete_bloglike(
-    mock_fetch_blog_like,
+    mock_blog_service,  # Use fixture instead of patching
     mock_db_session, 
     test_user,
     test_blog_like,
     access_token_user
 ):
-    # Mock current-user AND blog-like
+    # Mock behavior
+    mock_blog_service.fetch.return_value = test_blog_like
     mock_db_session.query().filter().first.return_value = test_user
-    mock_fetch_blog_like.return_value = test_blog_like
-
-    # Debug logs
-    print(f"Mocked user: {test_user}")
-    print(f"Mocked blog like: {test_blog_like}")
-    print(f"Access token: {access_token_user}")
 
     resp = make_request(test_blog_like.id, access_token_user)
-    print(f"Response status code: {resp.status_code}")
-    print(f"Response content: {resp.content}")
-
+    
     assert resp.status_code == 204
+
 
 
 # Test for wrong blog like id
@@ -138,15 +132,16 @@ def test_wrong_auth_token(
 
 # Test for wrong owner request
 def test_wrong_owner_request(
+    mock_user_service,
     mock_db_session,
     test_blog_like,
     another_user,
     access_token_another
 ):
-    mock_user_service.get_current_user = another_user
+    mock_user_service.get_current_user.return_value = another_user
     mock_db_session.get.return_value = test_blog_like
 
-    ### TEST ATTEMPT BY NON OWNER ###
     resp = make_request(test_blog_like.id, access_token_another)
+    
     assert resp.status_code == 401
     assert resp.json()['message'] == 'Insufficient permission'
