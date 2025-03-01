@@ -1,5 +1,7 @@
 import logging
 from datetime import timedelta
+from fastapi.responses import JSONResponse
+from jose import ExpiredSignatureError, JWTError
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
@@ -12,7 +14,7 @@ from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import auth_response, success_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
-from api.v1.schemas.user import Token
+from api.v1.schemas.user import Token, UserEmailSender
 from api.v1.schemas.user import (
     LoginRequest,
     UserCreate,
@@ -49,8 +51,17 @@ logger = logging.getLogger(__name__)
 def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
     '''Endpoint for a user to register their account'''
 
+    base_url = str(request.base_url).strip("/")
     # Create user account
     user = user_service.create(db=db, schema=user_schema)
+
+
+    verification_token = user_service.create_verification_token(user.id)
+    verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
+
+    access_token = user_service.create_access_token(user_id=user.id)
+    refresh_token = user_service.create_refresh_token(user_id=user.id)
+    cta_link = "https://anchor-python.teams.hng.tech/about-us"
 
     # create an organization for the user
     org = CreateUpdateOrganisation(
@@ -58,12 +69,8 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
     )
     organisation_service.create(db=db, schema=org, user=user)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
-
-    # Create access and refresh tokens
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
-    cta_link = "https://anchor-python.teams.hng.tech/about-us"
-
+    
+    
     # Send email in the background
     background_tasks.add_task(
         send_email,
@@ -73,6 +80,7 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
         context={
             "first_name": user.first_name,
             "last_name": user.last_name,
+            'verification_link': verification_link,
             "cta_link": cta_link,
         },
     )
@@ -98,8 +106,57 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
         secure=True,
         samesite="none",
     )
-
     return response
+
+
+@auth.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    '''Endpoint to verify email'''
+    try:
+        return user_service.verify_user_email(token, db)
+    except ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification link expired"
+            )
+        
+    except JWTError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token"
+            )
+
+@auth.post("/resend_verification_email")
+def resend_verification_email(request: Request, data: UserEmailSender, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Resends the email verification link"""
+    email = data.email
+    print(email)
+    user = user_service.user_to_verify(email, db)
+    verification_token = user_service.create_verification_token(user.id)
+    base_url = str(request.base_url).strip("/")
+    verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
+    cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+
+    background_tasks.add_task(
+        send_email,
+        recipient=email,
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate, Verify Your Email below',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'verification_link': verification_link,
+            'cta_link': cta_link
+        }
+    )
+
+    return {
+        "status": "success",
+        "status_code": 200,
+        "message": "Verification email sent successfully"
+    }
+ 
+
 
 
 @auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED, response_model=auth_response)
