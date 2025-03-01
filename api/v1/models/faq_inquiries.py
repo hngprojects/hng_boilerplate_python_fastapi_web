@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 class FAQInquiries(BaseTableModel):
     __tablename__ = "faq_inquiries"
 
-    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     email = Column(String, nullable=False)
     full_name = Column(String, nullable=False)
     message = Column(Text, nullable=False)

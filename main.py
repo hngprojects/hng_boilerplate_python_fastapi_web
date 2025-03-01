@@ -21,7 +21,9 @@ from api.utils.logger import logger
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 from scripts.populate_db import populate_roles_and_permissions
-
+from starlette.middleware.base import BaseHTTPMiddleware
+from api.v1.services.user import user_service
+from api.db.database import get_db
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -168,3 +170,14 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)
+
+
+class UserMiddleware(BaseHTTPMiddleware):
+    def dispatch(self, request: Request, call_next):
+        db = next(get_db())
+        access_token = request.headers.get("Authorization")
+        request.state.current_user = user_service.get_current_user_or_none(access_token, db)
+        response = call_next(request)
+        return response
+
+app.add_middleware(UserMiddleware)

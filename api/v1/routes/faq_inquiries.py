@@ -9,6 +9,7 @@ from api.v1.services.faq_inquiries import faq_inquiries_service
 from api.v1.services.user import user_service
 from sqlalchemy.orm import Session
 from typing import Annotated
+from fastapi import Request
 
 faq_inquiries = APIRouter(prefix="/faq-inquiries", tags=["FAQ-Inquiries"])
 
@@ -23,12 +24,16 @@ faq_inquiries = APIRouter(prefix="/faq-inquiries", tags=["FAQ-Inquiries"])
     },
 )
 async def create_faq_inquiry(
-    data: CreateFAQInquiry, db: Annotated[Session, Depends(get_db)],
+    data: CreateFAQInquiry,
+    request: Request,
     background_tasks: BackgroundTasks,
-    current_user: User = Depends(user_service.get_current_user),  # Add current_user dependency
+    db: Session = Depends(get_db)
 ):
-    """Add a new FAQ Inquiry."""
-    new_faq_inquiry = faq_inquiries_service.create(db, data, current_user.id)  # Pass user_id
+    """Add a new FAQ Inquiry for both visitors and authenticated users."""
+    current_user = request.state.current_user
+    user_id = current_user.id if current_user else None  # Set user_id only if authenticated
+
+    new_faq_inquiry = faq_inquiries_service.create(db, data, user_id)  # Pass user_id (None for visitors)
 
     # Send email to admin
     background_tasks.add_task(

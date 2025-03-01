@@ -447,6 +447,21 @@ class UserService(Service):
 
         return user
 
+    def get_current_user_or_none(self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+        credentials_exception = HTTPException(
+            status_code=201,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        try:
+            token = self.verify_access_token(access_token, credentials_exception)
+            user = db.query(User).filter(User.id == token.id).first()
+        except Exception as e:
+            user = None
+
+        return user
+
+
     def deactivate_user(
         self,
         request: Request,
