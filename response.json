@@ -1,4 +1,0 @@
-{"status_code":200,"message":"Login successful","access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMDY3YzEzOTMtYTdkMi03OGM0LTgwMDAtY2VmNDgyNjBlNDBhIiwiZXhwIjoxNzQwODk2Mzk3LCJ0eXBlIjoiYWNjZXNzIn0.er8pFkDsnQ_chnXNx-hjrL8JkQACo5CyEtGx6BBMeGU","data":{"user":{"email":"Isaacj@gmail.com","avatar_url":null,"id":"067c1393-a7d2-78c4-8000-cef48260e40a","is_active":true,"created_at":"2025-02-28T05:19:06.494417+01:00","last_name":"John","is_superadmin":true,"first_name":"Isaac"},"organisations":null}}
-
-
-"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMDY3YzIyN2QtZDkwNi03NDAzLTgwMDAtNDUxM2ZlN2YyN2EwIiwiZXhwIjoxNzQwOTU4NTk0LCJ0eXBlIjoiYWNjZXNzIn0.xVILBmv8-sS_tVEdG9Fl9TcWAOEW4NZKF5q8XimIORg"
