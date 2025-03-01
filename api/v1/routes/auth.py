@@ -101,8 +101,12 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
         status_code=201, 
         message=f"Verification email sent. Please check your inbox at {user_schema.email}",
         data={
-            'first_name': user_schema.first_name,
-            'last_name': user_schema.last_name
+            'user': {
+                "email": user_schema.email,
+                'first_name': user_schema.first_name,
+                'last_name': user_schema.last_name
+            }
+            
         }
     )
 
@@ -119,9 +123,11 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
             status_code=400,
             message="User with this email already exists",
             data={
-            'user_email': user_schema.email,
-            'first_name': user_schema.first_name,
-            'last_name': user_schema.last_name,
+                'user': {
+                    'email': user_schema.email,
+                    'first_name': user_schema.first_name,
+                    'last_name': user_schema.last_name
+                }
             }
         )
 
@@ -166,11 +172,14 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
         status_code=201, 
         message=f"Verification email sent. Please check your inbox at {user_schema.email}",
         data={
-            'first_name': user_schema.first_name,
-            'last_name': user_schema.last_name
+            'user': {
+                "email": user_schema.email,
+                'first_name': user_schema.first_name,
+                'last_name': user_schema.last_name
+            }
         }
     )
-    
+
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=auth_response)
 @limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def login(request: Request, login_request: LoginRequest, db: Session = Depends(get_db)):
@@ -299,7 +308,7 @@ async def request_signin_token(request: Request, background_tasks: BackgroundTas
 
 
 @auth.post("/verify-token", status_code=status.HTTP_200_OK, response_model=auth_response)
-@limiter.limit("1000/minute")
+@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 async def verify_token(
     request: Request,
     token_schema: TokenRequest,
@@ -308,83 +317,110 @@ async def verify_token(
 ):
     """Verify email token and complete user or admin registration"""
 
-    redis_key = f"pending_user:{token_schema.email}"
-    cached_user = redis_client.hgetall(redis_key)
+    # Check if user already exists
+    existing_user = user_service.get_user_by_email(db, email=token_schema.email)
+    if existing_user:
+        user = user_service.verify_login_token(db, schema=token_schema)
+        user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
-    if not cached_user:
+        # Generate JWT token
+        access_token = user_service.create_access_token(user_id=user.id)
+        refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-        return fail_response(
-            status_code=status.HTTP_404_NOT_FOUND,
-            message="Verification token expired or invalid",
+        response = auth_response(
+            status_code=200,
+            message="Login successful",
+            access_token=access_token,
             data={
-            'user_email': token_schema.email,
-            'token_schema': token_schema.token
-            }
+                "user": jsonable_encoder(
+                    user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
+                ),
+                "organisations": user_organizations,
+            },
         )
 
-    token_from_redis = cached_user.get('token')
-
-    # Ensure the token matches
-    if cached_user.get('token') != token_schema.token:
-
-
-        return fail_response(
-            status_code=401,
-            message="Invalid verification token",
-            data={
-            'user_email': token_schema.email,
-            'token_schema': token_schema.token
-            }
-        )
-
-    # Determine user type (default: regular user)
-    is_admin = cached_user.get('is_superadmin')
-
-    user_data = {
-        "email": cached_user["email"],
-        "password": cached_user["password"],
-        "first_name": cached_user["first_name"],
-        "last_name": cached_user["last_name"]
-    }
-
-    # Register user or admin in the database
-    if is_admin:
-        user = user_service.create_admin(db=db, schema=UserCreate(**user_data))
     else:
-        user = user_service.create(db=db, schema=UserCreate(**user_data))
 
-    # Create organization for the user
-    org = CreateUpdateOrganisation(
-        name=f"{user.email}'s Organisation",
-        email=user.email
-    )
-    organisation_service.create(db=db, schema=org, user=user)
-    user_organizations = organisation_service.retrieve_user_organizations(user, db)
+        redis_key = f"pending_user:{token_schema.email}"
+        cached_user = redis_client.hgetall(redis_key)
 
-    # Generate tokens
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
+        if not cached_user:
+            return fail_response(
+                status_code=status.HTTP_404_NOT_FOUND,
+                message="Verification token expired or invalid",
+                data={
+                    'user': {
+                        'email': token_schema.email,
+                        'token': token_schema.token
+                    }
+                }
+            )
 
-    cta_link = f'{settings.FRONTEND_URL}/about-us'
+        token_from_redis = cached_user.get('token')
 
-    # Send email in the background
-    background_tasks.add_task(
-        send_email, 
-        recipient=user.email,
-        template_name='welcome.html',
-        subject='Welcome to Boilerplate',
-        context={
-            'first_name': cached_user["first_name"],
-            'last_name': cached_user["last_name"],
-            'cta_link': cta_link
+        #Ensure the token matches
+        if cached_user.get('token') != token_schema.token:
+
+
+            return fail_response(
+                status_code=401,
+                message="Invalid verification token",
+                data={
+                    'user': {
+                        'email': token_schema.email,
+                        'token': token_schema.Token
+                    }
+                }
+            )
+
+        # Determine user type (default: regular user)
+        is_admin = cached_user.get('is_superadmin')
+
+        user_data = {
+            "email": cached_user["email"],
+            "password": cached_user["password"],
+            "first_name": cached_user["first_name"],
+            "last_name": cached_user["last_name"]
         }
-    )
 
-    # Remove from Redis after successful registration
-    redis_client.delete(redis_key)
+        # Register user or admin in the database
+        if is_admin:
+            user = user_service.create_admin(db=db, schema=UserCreate(**user_data))
+        else:
+            user = user_service.create(db=db, schema=UserCreate(**user_data))
+
+        # Create organization for the user
+        org = CreateUpdateOrganisation(
+            name=f"{user.email}'s Organisation",
+            email=user.email
+        )
+        organisation_service.create(db=db, schema=org, user=user)
+        user_organizations = organisation_service.retrieve_user_organizations(user, db)
+
+        # Generate tokens
+        access_token = user_service.create_access_token(user_id=user.id)
+        refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+        cta_link = f'{settings.FRONTEND_URL}/about-us'
+
+        # Send email in the background
+        background_tasks.add_task(
+            send_email, 
+            recipient=user.email,
+            template_name='welcome.html',
+            subject='Welcome to Boilerplate',
+            context={
+                'first_name': cached_user["first_name"],
+                'last_name': cached_user["last_name"],
+                'cta_link': cta_link
+            }
+        )
+
+        # Remove from Redis after successful registration
+        redis_client.delete(redis_key)
 
     response = auth_response(
-        status_code=201,
+        status_code=200,
         message='Account verified successfully',
         access_token=access_token,
         data={
