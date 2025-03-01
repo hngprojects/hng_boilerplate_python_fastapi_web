@@ -9,6 +9,8 @@ from pydantic import (BaseModel, EmailStr,
                       field_validator, ConfigDict,
                       StringConstraints,
                       model_validator)
+                      
+from pydantic import Field  # Added this import
 
 def validate_mx_record(domain: str):
     """
@@ -46,6 +48,16 @@ class UserCreate(BaseModel):
             strip_whitespace=True
         )
     ]
+    """Added the confirm_password field to UserCreate Model"""
+    confirm_password: Annotated[
+        str, 
+        StringConstraints(
+            min_length=8,
+            max_length=64,
+            strip_whitespace=True
+        ),
+        Field(exclude=True)  # exclude confirm_password field
+    ]
     first_name: Annotated[
         str, StringConstraints(
             min_length=3,
@@ -68,6 +80,7 @@ class UserCreate(BaseModel):
         Validates passwords
         """
         password = values.get('password')
+        confirm_password = values.get('confirm_password') # gets the confirm password
         email = values.get("email")
 
         # constraints for password
@@ -79,6 +92,13 @@ class UserCreate(BaseModel):
             raise ValueError("password must include at least one digit")
         if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in password):
             raise ValueError("password must include at least one special character")
+
+        """Confirm Password Validation"""
+
+        if not confirm_password:
+            raise ValueError("Confirm password field is required")
+        elif password != confirm_password:
+            raise ValueError("Passwords do not match")
         
         try:
             email = validate_email(email, check_deliverability=True)

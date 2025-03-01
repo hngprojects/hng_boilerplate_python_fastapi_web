@@ -62,6 +62,7 @@ def before_all(client_with_mocks):
         "/api/v1/auth/register",
         json={
             "password": "strin8Hsg263@",
+            "confirm_password": "strin8Hsg263@",
             "first_name": "string",
             "last_name": "string",
             "email": email,

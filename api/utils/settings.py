@@ -37,5 +37,7 @@ class Settings(BaseSettings):
     
     APP_NAME: str = config("APP_NAME")
 
+    # telex webhook url
+    TELEX_WEBHOOK_URL: str = config("TELEX_WEBHOOK_URL")
 
 settings = Settings()
