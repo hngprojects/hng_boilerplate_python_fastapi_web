@@ -10,9 +10,13 @@ from api.v1.models.user import User
 class NotificationService(Service):
     model = Notification  # Assign the model to Service
 
-    def send_notification(self, title: str, message: str, db: Session = Depends(get_db)):
+    def send_notification(
+        self, title: str, message: str, user: User, db: Session = Depends(get_db)
+    ):
         """Function to send a notification"""
-        new_notification = Notification(title=title, message=message, status="unread")
+        new_notification = Notification(
+            user_id=user.id, title=title, message=message, status="unread"
+        )
         db.add(new_notification)
         db.commit()
         db.refresh(new_notification)
