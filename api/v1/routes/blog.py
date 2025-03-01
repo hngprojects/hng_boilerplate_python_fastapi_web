@@ -77,7 +77,8 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     """
     blog_service = BlogService(db)
 
-    blog_post = blog_service.fetch(id)
+    # Fetch blog and increment view count
+    blog_post = blog_service.fetch_and_increment_view(id)
 
     return success_response(
         message="Blog post retrieved successfully!",
@@ -323,11 +324,35 @@ async def delete_blog_like(
         request: `default` Request.
         db: `default` Session.
     """
+    
+    # Validate User
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    
     blog_like_service = BlogLikeService(db)
-
-    # delete blog like
-    return blog_like_service.delete(blog_like_id, current_user.id)
-
+    
+    blog_like = blog_like_service.fetch(blog_like_id)
+    
+    # Check if blogLike exist
+    if not blog_like:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BlogLike does not exist"
+        )
+    
+    # Check if current user is the owner of blogLike
+    if blog_like.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Insufficient permission"
+        )
+    
+    db.delete(blog_like)
+    db.commit()
+    
+    return Response(
+        status_code=204
+    )
 
 @blog.delete("/dislikes/{blog_dislike_id}", 
              status_code=status.HTTP_204_NO_CONTENT)

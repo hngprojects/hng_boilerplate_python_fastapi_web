@@ -221,3 +221,21 @@ class TestUserLogin:
         assert response_json.get("status_code") == status.HTTP_200_OK
         assert response_json.get("message") == "Login successful"
         assert not response_json.get("data").get("user").get("is_active")
+
+    def test_swagger_ui_auth_form_handling(self):
+      """Test that the Swagger UI authentication form handling works correctly."""
+    
+      # This test simulates how Swagger UI sends authentication data
+      # It uses form data instead of JSON
+      response = self.client.post(
+          "/api/v1/auth/login",
+          data={"username": "testuser1@gmail.com", "password": "Testpassword@123"},
+          headers={"Content-Type": "application/x-www-form-urlencoded"}
+      )
+    
+      # We expect a 422 error (not 500) with clear validation message
+      assert response.status_code == 422
+      response_json = response.json()
+      assert "detail" in response_json or "errors" in response_json
+      assert response_json.get("status_code") == 422
+      assert response_json.get("message") == "Invalid input" or "Invalid" in response_json.get("message", "")
