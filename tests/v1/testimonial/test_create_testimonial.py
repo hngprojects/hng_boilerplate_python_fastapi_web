@@ -28,6 +28,11 @@ payload = [
         "content": "Testimonial 2",
         "status_code": 201,
     },
+    {
+        "content": "I love python",
+        "ratings": 5.02,
+        "status_code": 201,
+    },
 ]
 
 @pytest.fixture(scope='module')

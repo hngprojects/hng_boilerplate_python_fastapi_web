@@ -34,19 +34,19 @@ def client_with_mocks(mock_send_mail):
     with patch('api.db.database.get_db') as mock_get_db:
         mock_db = MagicMock()
         mock_get_db.return_value = mock_db
-        
+
         mock_db.query.return_value.filter.return_value.first.return_value = None
         mock_db.add.reset_mock()
         mock_db.commit.reset_mock()
         mock_db.refresh.reset_mock()
-        
+
         yield client, mock_db
 
 @pytest.fixture(autouse=True)
 def setup_access_token(client_with_mocks):
     client, mock_db = client_with_mocks
     mock_db.query.return_value.filter.return_value.first.return_value = None
-    
+
     email = f"test{uuid.uuid4()}@gmail.com"
     user_response = client.post(
         "/api/v1/auth/register",
@@ -93,12 +93,12 @@ def test_update_testimonial_not_found(client_with_mocks, setup_access_token):
     )
 
     assert response.status_code == 404
-    assert response.json()["message"] == "Testimonial not found."
+    assert response.json()["message"] == "Testimonial does not exists."
 
 
 def test_update_testimonial_unauthorized(client_with_mocks):
     client, _ = client_with_mocks
-    
+
     response = client.put(
         f"/api/v1/testimonials/{data[0]['id']}",
         json={"content": "This is an updated testimonial."},
@@ -106,4 +106,4 @@ def test_update_testimonial_unauthorized(client_with_mocks):
     )
 
     assert response.status_code == 401
-    assert response.json()["message"] == "Forbidden. unauthorized user access"
+    assert response.json()["message"] == "Could not validate credentials"

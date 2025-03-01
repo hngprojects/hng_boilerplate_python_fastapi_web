@@ -106,13 +106,13 @@ def update_testimonial(
     if not testimonial:
         return fail_response(
             status_code=404,
-            message="Testimonial not found."
+            message="Testimonial does not exists."
         )
 
     if testimonial.author_id != current_user.id:
         return fail_response(
             status_code=403,
-            message="Forbidden. unauthorized user access"
+            message="Could not validate credentials"
         )
 
     update_testimonial = testimonial_service.update(db, testimonial_id, testimonial_data)
