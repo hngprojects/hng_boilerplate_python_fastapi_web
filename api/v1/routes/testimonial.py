@@ -93,7 +93,7 @@ def create_testimonial(
     return response
 
 
-@testimonial.put('/{testimonial_id}/edit', response_model=success_response)
+@testimonial.put('/{testimonial_id}', response_model=success_response)
 def update_testimonial(
     testimonial_id: str,
     testimonial_data: CreateTestimonial,
