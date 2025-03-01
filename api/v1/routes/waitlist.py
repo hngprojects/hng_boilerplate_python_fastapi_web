@@ -18,8 +18,10 @@ from api.v1.services.waitlist_email import (
 from api.utils.logger import logger
 from api.db.database import get_db
 from api.v1.services.waitlist import waitlist_service
+from api.utils.settings import settings
 
 waitlist = APIRouter(prefix="/waitlist", tags=["Waitlist"])
+
 
 def process_waitlist_signup(user: WaitlistAddUserSchema, db: Session):
     """
@@ -61,12 +63,13 @@ def process_waitlist_signup(user: WaitlistAddUserSchema, db: Session):
     db_user = add_user_to_waitlist(db, user.email, user.full_name)
     return db_user
 
+
 @waitlist.post("/", response_model=success_response, status_code=201)
 async def waitlist_signup(
     background_tasks: BackgroundTasks,
     request: Request,
     user: WaitlistAddUserSchema,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Add a user to the waitlist.
@@ -85,20 +88,17 @@ async def waitlist_signup(
       -d '{"email": "user@example.com", "full_name": "John Doe"}'
     ```
     """
-     
+
     db_user = process_waitlist_signup(user, db)
     if db_user:
-        cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+        cta_link = f"{settings.ANCHOR_PYTHON_BASE_URL}/about-us"
         # Send email in the background
         background_tasks.add_task(
-            send_email, 
+            send_email,
             recipient=user.email,
-            template_name='waitlists.html',
-            subject='Welcome to HNG Waitlist',
-            context={
-                'name': user.full_name,
-                'cta_link': cta_link
-            }
+            template_name="waitlists.html",
+            subject="Welcome to HNG Waitlist",
+            context={"name": user.full_name, "cta_link": cta_link},
         )
     return success_response(message="You are all signed up!", status_code=201)
 
