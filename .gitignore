@@ -164,6 +164,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 .vscode/
+jeff.py
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can

@@ -203,6 +203,32 @@ def dislike_blog_post(
     )
 
 
+@blog.get("/{post_id}/likes-dislikes")
+def get_likes_dislikes_count(
+    post_id: str,
+    db: Session = Depends(get_db),
+):
+    """Fetch total number of likes and dislikes for a blog post."""
+    blog_service = BlogService(db)
+    
+    # Validate if blog post exists
+    blog_service.fetch(post_id)
+    
+    # Fetch like and dislike counts
+    likes_count = blog_service.num_of_likes(post_id)
+    dislikes_count = blog_service.num_of_dislikes(post_id)
+    
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Likes and dislikes retrieved successfully",
+        data={
+            "post_id": post_id,
+            "likes": likes_count,
+            "dislikes": dislikes_count,
+        }
+    )
+
+
 @blog.delete("/{id}", status_code=204)
 async def delete_blog_post(
     id: str,

@@ -30,6 +30,9 @@ class UserBase(BaseModel):
     email: EmailStr
     created_at: datetime
 
+class UserEmailSender(BaseModel):
+    email: EmailStr
+
 class UserCreate(BaseModel):
     """Schema to create a user"""
     email: EmailStr
@@ -214,6 +217,8 @@ class LoginRequest(BaseModel):
         """
         Validates passwords
         """
+        if not isinstance(values, dict):
+            return values
         password = values.get('password')
         email = values.get("email")
         totp_code = values.get("totp_code")
@@ -397,3 +402,4 @@ class AllUsersResponse(BaseModel):
     data: Dict[str, Union[List[UserData], Pagination]]
 
     model_config = ConfigDict(from_attributes=True)
+
