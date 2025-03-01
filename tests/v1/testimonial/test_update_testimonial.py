@@ -64,9 +64,9 @@ def setup_access_token():
     global_access_token = user_response.json()["data"]["access_token"]
 
 
-def test_update_testimonial_success(db_session_mock):
-    db_session_mock.query().filter().first.return_value = data[0]
-    db_session_mock.commit.return_value = None
+def test_update_testimonial_success(mock_id):
+    mock_id.query().filter().first.return_value = data[0]
+    mock_id.commit.return_value = None
 
     update_data = {
         "content": "I love python (updated)",
@@ -79,11 +79,11 @@ def test_update_testimonial_success(db_session_mock):
     )
 
     assert response.status_code == 200
-    assert response.json()["messgae"] == "Your testimonial has been updated successfully."
+    assert response.json()["message"] == "Your testimonial has been updated successfully."
 
 
-def test_update_testimonial_not_found(db_session_mock):
-    db_session_mock.query().filter().first.return_value = None
+def test_update_testimonial_not_found(mock_id):
+    mock_id.query().filter().first.return_value = None
 
     update_data = {"content": "This is an updated testimonial."}
 
@@ -97,8 +97,8 @@ def test_update_testimonial_not_found(db_session_mock):
     assert response.json()["message"] == "Testimonial not found."
 
 
-def test_update_testimonial_unauthorized(db_session_mock):
-    db_session_mock.query().filter().first.return_value = data[0]
+def test_update_testimonial_unauthorized(mock_id):
+    mock_id.query().filter().first.return_value = data[0]
 
     update_data = {"content": "This is an updated testimonial."}
 
