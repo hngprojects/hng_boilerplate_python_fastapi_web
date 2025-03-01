@@ -273,6 +273,7 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
     user = user_service.authenticate_user(
         db=db, email=login_request.email, password=login_request.password
     )
+    totp_service.check_2fa_status_and_verify(db, user.id, login_request.totp_code)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Generate access and refresh tokens
@@ -285,15 +286,14 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
 
     response = auth_response(
         status_code=200,
-        message='Login successful',
+        message="Login successful",
         access_token=access_token,
         data={
-            'user': jsonable_encoder(
-                user,
-                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
+            "user": jsonable_encoder(
+                user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
             ),
-            'organisations': user_organizations
-        }
+            "organisations": user_organizations,
+        },
     )
 
     # Add refresh token to cookies
@@ -307,7 +307,6 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
     )
 
     return response
-
 
 @auth.post("/logout", status_code=status.HTTP_200_OK)
 @limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
