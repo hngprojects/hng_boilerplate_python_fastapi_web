@@ -93,7 +93,8 @@ class User(BaseTableModel):
     reset_password_token = relationship("ResetPasswordToken",
                                         back_populates="user",
                                         cascade="all, delete-orphan")
-    
+    questions = relationship("CommunityQuestion", back_populates="user", cascade="all, delete-orphan")
+    answers = relationship("CommunityAnswer", back_populates="user", cascade="all, delete-orphan")
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
