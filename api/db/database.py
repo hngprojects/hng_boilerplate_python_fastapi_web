@@ -50,7 +50,7 @@ def create_database():
 
 
 def get_db():
-    db = db_session() if DB_TYPE != "mongo" else db = engine[DB_NAME]
+    db = db_session() if DB_TYPE != "mongo" else engine[DB_NAME]
     try:
         yield db
     finally:
