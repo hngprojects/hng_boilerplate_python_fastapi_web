@@ -176,3 +176,4 @@ jeff.py
 alembic/versions
 
 **/.DS_Store.idea/
+create_superadmin.py
