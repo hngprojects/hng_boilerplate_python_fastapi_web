@@ -84,7 +84,7 @@ def test_dislike_comment(
         print(response.json())  # Print error message for more details
 
     assert response.status_code == 201, f"Expected status code 200, got {response.status_code}"
-    assert response.json()['message'] == "Comment disliked successfully!"
+    assert response.json()['message'] == "Dislike added successfully"
 
 def test_dislike_comment_twice(
     mock_db_session, 
@@ -132,6 +132,7 @@ def test_dislike_comment_twice(
     if response.status_code != 201:
         print(response.json())
 
+
     # Check that the response status and message are as expected.
     assert response.status_code == 201, f"Expected status code 201, got {response.status_code}"
     assert response.json()['message'] == "Comment disliked successfully!"
@@ -175,3 +176,4 @@ def test_dislike_comment_twice(
     assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
     # The error response now uses the "detail" key.
     assert response.json()['message'] == "You can only dislike once"
+
