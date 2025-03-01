@@ -52,4 +52,4 @@ def test_get_job_valid_id(db_session_mock):
     
     assert response.status_code == 200
     assert response.json()['message'] == "Retrieved Job successfully"
-    assert response.json()['success'] == True
+    assert response.json()['status'] == "success"
