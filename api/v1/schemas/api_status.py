@@ -1,6 +1,6 @@
 from decimal import Decimal
 from pydantic import BaseModel, Field, PositiveInt, PositiveFloat, ConfigDict, StringConstraints
-from typing import List, Optional
+from typing import List, Optional, Union
 from datetime import datetime
 
 class APIStatusPost(BaseModel):
@@ -20,7 +20,7 @@ class APIStatusPost(BaseModel):
 
     api_group: str
     status: str
-    response_time: Optional[Decimal] = None
+    response_time: Optional[Union[Decimal, str]] = None
     details: str | None = None
 
     class Config:
