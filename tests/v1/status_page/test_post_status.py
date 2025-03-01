@@ -39,50 +39,6 @@ def mock_post_api_status():
     )
 
 
-@patch("api.v1.services.api_status.APIStatusService.upsert")
-def test_post_api_status(mock_create, db_session_mock, client):
-    """Tests the POST /api/v1/api-status endpoint to ensure successful posting of API status"""
-
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
-
-    mock_create.return_value = mock_post_api_status()
-
-    response = client.post('/api-status', json={
-        "api_group": "Blog API",
-        "status": "Down",
-        "response_time": None,
-        "details": "API not responding (HTTP 503)"
-    })
-
-    assert response.status_code == 201
-    json_response = response.json()
-    assert json_response["status"] == "success"
-    assert json_response["status_code"] == 201
-    assert json_response["message"] == "API Status created successfully"
-
-
-@patch("api.v1.services.api_status.APIStatusService.fetch_all")
-def test_get_api_status(mock_fetch, db_session_mock, client):
-    """Tests the GET /api-status endpoint to ensure retrieval of API status"""
-
-    db_session_mock.add.return_value = None
-    db_session_mock.commit.return_value = None
-    db_session_mock.refresh.return_value = None
-
-    mock_fetch.return_value = [mock_post_api_status()]  # Return a list for fetch_all
-
-    response = client.get('/api-status')
-
-    assert response.status_code == 200
-    json_response = response.json()
-    assert json_response["status"] == "success"
-    assert json_response["status_code"] == 200
-    assert json_response["message"] == "All API Status fetched successfully"
-
-
-# New tests for PUT endpoint
 def mock_updated_api_status():
     return APIStatus(
         id=str(uuid7()),
@@ -94,6 +50,53 @@ def mock_updated_api_status():
     )
 
 
+@patch("api.v1.services.api_status.APIStatusService.upsert")
+def test_post_api_status(mock_create, db_session_mock, client):
+    """Tests the POST /api/v1/api-status endpoint to ensure successful posting of API status"""
+
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
+    mock_status = mock_post_api_status()
+    mock_create.return_value = mock_status
+
+    response = client.post('/api/v1/api-status', json={
+        "api_group": "Blog API",
+        "status": "Down",
+        "response_time": None,
+        "details": "API not responding (HTTP 503)"
+    })
+
+    assert response.status_code == 201, f"Expected 201, got {response.status_code}: {response.text}"
+    json_response = response.json()
+    assert json_response["status"] == "success"
+    assert json_response["status_code"] == 201
+    assert json_response["message"] == "API Status created successfully"
+    assert json_response["data"]["api_group"] == "Blog API"
+
+
+@patch("api.v1.services.api_status.APIStatusService.fetch_all")
+def test_get_api_status(mock_fetch, db_session_mock, client):
+    """Tests the GET /api/v1/api-status endpoint to ensure retrieval of API status"""
+
+    db_session_mock.add.return_value = None
+    db_session_mock.commit.return_value = None
+    db_session_mock.refresh.return_value = None
+
+    mock_status = mock_post_api_status()
+    mock_fetch.return_value = [mock_status]
+
+    response = client.get('/api/v1/api-status')
+
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+    json_response = response.json()
+    assert json_response["status"] == "success"
+    assert json_response["status_code"] == 200
+    assert json_response["message"] == "All API Status fetched successfully"
+    assert json_response["data"][0]["api_group"] == "Blog API"
+
+
 @patch("api.v1.services.api_status.APIStatusService.update")
 def test_put_api_status_success(mock_update, db_session_mock, client):
     """Tests the PUT /api/v1/api-status/{api_group} endpoint for successful update"""
@@ -101,17 +104,18 @@ def test_put_api_status_success(mock_update, db_session_mock, client):
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    mock_update.return_value = mock_updated_api_status()
+    mock_status = mock_updated_api_status()
+    mock_update.return_value = mock_status
 
     update_data = {
         "apiGroup": "Blog API",
         "status": "Up",
-        "response_time": "200",
+        "response_time": 200,
         "details": "API is running fine"
     }
-    response = client.put('/api-status/Blog API', json=update_data)
+    response = client.put('/api/v1/api-status/Blog API', json=update_data)
 
-    assert response.status_code == 200
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     json_response = response.json()
     assert json_response["status"] == "success"
     assert json_response["status_code"] == 200
@@ -125,9 +129,9 @@ def test_put_api_status_success(mock_update, db_session_mock, client):
 
 @patch("api.v1.services.api_status.APIStatusService.update")
 def test_put_api_status_not_found(mock_update, db_session_mock, client):
-    """Tests the PUT /api-status/{api_group} endpoint for a non-existent api_group"""
+    """Tests the PUT /api/v1/api-status/{api_group} endpoint for a non-existent api_group"""
 
-    mock_update.side_effect = APIStatusService.update.side_effect = HTTPException(
+    mock_update.side_effect = HTTPException(
         status_code=404, detail="API Status not found"
     )
 
@@ -135,24 +139,22 @@ def test_put_api_status_not_found(mock_update, db_session_mock, client):
         "apiGroup": "Nonexistent API",
         "status": "Up"
     }
-    response = client.put('/api-status/Nonexistent API', json=update_data)
+    response = client.put('/api/v1/api-status/Nonexistent API', json=update_data)
 
-    assert response.status_code == 404
+    assert response.status_code == 404, f"Expected 404, got {response.status_code}: {response.text}"
     json_response = response.json()
-    assert json_response["status"] == "error"
+    assert json_response["status"] is False
     assert json_response["status_code"] == 404
     assert json_response["message"] == "API Status not found"
-    assert json_response["data"] is None
 
 
 @patch("api.v1.services.api_status.APIStatusService.update")
 def test_put_api_status_partial_update(mock_update, db_session_mock, client):
-    """Tests the PUT /api-status/{api_group} endpoint for partial update"""
+    """Tests the PUT /api/v1/api-status/{api_group} endpoint for partial update"""
 
     db_session_mock.commit.return_value = None
     db_session_mock.refresh.return_value = None
 
-    # Mock an updated status with only the status changed
     partial_updated_status = APIStatus(
         id=str(uuid7()),
         api_group="Blog API",
@@ -166,9 +168,9 @@ def test_put_api_status_partial_update(mock_update, db_session_mock, client):
     update_data = {
         "status": "Inactive"
     }
-    response = client.put('/api-status/Blog API', json=update_data)
+    response = client.put('/api/v1/api-status/Blog API', json=update_data)
 
-    assert response.status_code == 200
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
     json_response = response.json()
     assert json_response["status"] == "success"
     assert json_response["status_code"] == 200
@@ -182,7 +184,7 @@ def test_put_api_status_partial_update(mock_update, db_session_mock, client):
 
 @patch("api.v1.services.api_status.APIStatusService.update")
 def test_put_api_status_invalid_response_time(mock_update, db_session_mock, client):
-    """Tests the PUT /api-status/{api_group} endpoint with invalid response_time"""
+    """Tests the PUT /api/v1/api-status/{api_group} endpoint with invalid response_time"""
 
     mock_update.side_effect = HTTPException(
         status_code=500, detail="A database error occurred."
@@ -193,8 +195,10 @@ def test_put_api_status_invalid_response_time(mock_update, db_session_mock, clie
         "status": "Up",
         "response_time": "invalid"
     }
-    response = client.put('/api-status/Blog API', json=update_data)
+    response = client.put('/api/v1/api-status/Blog API', json=update_data)
 
-    assert response.status_code == 500
+    assert response.status_code == 500, f"Expected 500, got {response.status_code}: {response.text}"
     json_response = response.json()
-    assert "A database error occurred" in json_response["detail"]
+    assert json_response["status"] is False
+    assert json_response["status_code"] == 500
+    assert json_response["message"] == "A database error occurred."
