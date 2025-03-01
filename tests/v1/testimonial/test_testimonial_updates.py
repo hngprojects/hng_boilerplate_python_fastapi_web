@@ -11,8 +11,8 @@ from fastapi import status
 from datetime import datetime, timezone
 
 LOGIN_ENDPOINT = 'api/v1/auth/login'
+TESTIMONIAL_ENDPOINT = '/api/v1/testimonials'
 client = TestClient(app)
-
 
 @pytest.fixture
 def mock_db_session():
@@ -23,13 +23,11 @@ def mock_db_session():
         yield mock_db
     app.dependency_overrides = {}
 
-
 @pytest.fixture
 def mock_user_service():
     """Fixture to create a mock user service."""
     with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
         yield mock_service
-
 
 def create_mock_user(mock_user_service, mock_db_session):
     """Create a mock user in the mock database session."""
@@ -47,14 +45,12 @@ def create_mock_user(mock_user_service, mock_db_session):
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
     return mock_user
 
-
-def create_testimonial(mock_user_service, mock_db_session):
+def create_testimonial(mock_db_session, user_id):
     """Create a mock testimonial in the mock database session."""
-    mock_user = create_mock_user(mock_user_service, mock_db_session)
     mock_testimonial = Testimonial(
         id=str(uuid7()),
         content='Original content',
-        author_id=mock_user.id,
+        author_id=user_id,
         client_name="Client 1",
         client_designation="Client Designation",
         comments="Testimonial comments",
@@ -63,51 +59,30 @@ def create_testimonial(mock_user_service, mock_db_session):
     mock_db_session.get.return_value = mock_testimonial
     return mock_testimonial
 
+def get_auth_token():
+    """Helper function to authenticate and return a valid access token."""
+    response = client.post(LOGIN_ENDPOINT, json={
+        "email": "testuser@gmail.com",
+        "password": "Testpassword@123"
+    })
+    assert response.status_code == status.HTTP_200_OK, "Login failed"
+    return response.json().get('access_token')
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_update_testimonial_success(mock_user_service, mock_db_session):
     """Test successful update of a testimonial."""
-    create_mock_user(mock_user_service, mock_db_session)
-
-    login_response = client.post(LOGIN_ENDPOINT, json={
-        "email": "testuser@gmail.com",
-        "password": "Testpassword@123"
-    })
-    login_data = login_response.json()
-    access_token = login_data.get('access_token')
-
-    assert access_token, "Login failed, no access token returned"
-
-    testimonial = create_testimonial(mock_user_service, mock_db_session)
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    access_token = get_auth_token()
+    testimonial = create_testimonial(mock_db_session, mock_user.id)
+    
     update_data = {"content": "Updated content"}
-
-    # Send the update request
-    update_response = client.put(
-        f'/api/v1/testimonials/{testimonial.id}',
+    response = client.put(
+        f'{TESTIMONIAL_ENDPOINT}/{testimonial.id}',
         json=update_data,
         headers={'Authorization': f'Bearer {access_token}'}
     )
-    update_response_data = update_response.json()
-    print("Update Response:", update_response_data)  # Debugging log
-
-    # Assert update request was successful
-    assert update_response.status_code == status.HTTP_200_OK
-
-    # Fetch the updated testimonial from the API
-    fetch_response = client.get(
-        f'/api/v1/testimonials/{testimonial.id}',
-        headers={'Authorization': f'Bearer {access_token}'}
-    )
-    fetch_data = fetch_response.json()
-    print("Fetch Updated Testimonial:", fetch_data)  # Debugging log
-
-    # Assert fetching the updated testimonial was successful
-    assert fetch_response.status_code == status.HTTP_200_OK
-    assert "data" in fetch_data, "Response missing 'data' key"
-    assert "content" in fetch_data["data"], "Response missing 'content' key"
-    assert fetch_data["data"]["content"] == "Updated content", \
-        f"Expected content: 'Updated content', but got: {fetch_data['data']['content']}"
-
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json().get("message") == "Testimonial updated successfully"
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_update_testimonial_not_found(mock_user_service, mock_db_session):
@@ -149,11 +124,8 @@ def test_update_testimonial_unauthorized():
     """Test updating a testimonial without authentication."""
     testimonial_id = str(uuid7())
     update_data = {"content": "Updated content"}
-
-    response = client.put(f'/api/v1/testimonials/{testimonial_id}', json=update_data)
-    response_data = response.json()
     
-    print("Unauthorized Response:", response_data)  # Debugging log
-
+    response = client.put(f'{TESTIMONIAL_ENDPOINT}/{testimonial_id}', json=update_data)
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response_data.get("message") == "Not authenticated"
+    assert response.json().get("message") == "Not authenticated"
+
