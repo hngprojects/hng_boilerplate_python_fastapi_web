@@ -26,11 +26,35 @@ class BlogService:
         db.refresh(new_blogpost)
         return new_blogpost
 
-    def fetch_all(self):
-        """Fetch all blog posts"""
+    def fetch_all(
+        self, 
+        sort_by: Optional[str] = "created_at",
+        sort_order: Optional[str] = "desc",
+        author_id: Optional[str] = None,
+        category: Optional[str] = None,
+        limit: int = 10,
+        offset: int = 0
+    ):
+        """Fetch all blog posts with sorting, filtering, and pagination"""
 
-        blogs = self.db.query(Blog).filter(Blog.is_deleted == False).all()
-        return blogs
+        query = self.db.query(Blog).filter(Blog.is_deleted.is_(False))
+
+        # Apply filters
+        if author_id:
+            query = query.filter(Blog.author_id == author_id)
+        if category:
+            query = query.filter(Blog.category == category)
+
+        # Apply sorting
+        if sort_order == "desc":
+            query = query.order_by(desc(getattr(Blog, sort_by, Blog.created_at)))
+        else:
+            query = query.order_by(asc(getattr(Blog, sort_by, Blog.created_at)))
+
+        # Apply pagination
+        blogs = query.offset(offset).limit(limit).all()
+
+        return blogs 
 
     def fetch(self, blog_id: str):
         """Fetch a blog post by its ID"""
