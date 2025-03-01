@@ -187,7 +187,7 @@ def test_put_api_status_invalid_response_time(mock_update, db_session_mock, clie
     """Tests the PUT /api/v1/api-status/{api_group} endpoint with invalid response_time"""
 
     mock_update.side_effect = HTTPException(
-        status_code=500, detail="A database error occurred."
+        status_code=400, detail="Invalid response_time format."
     )
 
     update_data = {
@@ -197,8 +197,8 @@ def test_put_api_status_invalid_response_time(mock_update, db_session_mock, clie
     }
     response = client.put('/api/v1/api-status/Blog API', json=update_data)
 
-    assert response.status_code == 500, f"Expected 500, got {response.status_code}: {response.text}"
+    assert response.status_code == 400, f"Expected 400, got {response.status_code}: {response.text}"
     json_response = response.json()
     assert json_response["status"] is False
-    assert json_response["status_code"] == 500
+    assert json_response["status_code"] == 400
     assert json_response["message"] == "A database error occurred."
