@@ -17,6 +17,7 @@ from api.v1.models.permissions.permissions import Permission
 from api.v1.models.associations import user_organisation_association
 from api.v1.models.permissions.user_org_role import user_organisation_roles
 from api.v1.models.organisation import Organisation
+from api.v1.models.invitation import Invitation
 from api.v1.models.user import User
 from api.v1.schemas.organisation import (
     CreateUpdateOrganisation,
@@ -118,6 +119,27 @@ class OrganisationService(Service):
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
+        
+
+
+    def fetch_all_invitations(self, db: Session, page: int, page_size: int):
+        """Fetch all invitations with pagination"""
+
+        logging.info(f"Fetching invitations: page={page}, page_size={page_size}")
+
+        try:
+            query = db.query(Invitation).offset((page - 1) * page_size).limit(page_size)
+            invitations = query.all()
+            total_count = db.query(Invitation).count()
+
+            logging.info(f"Fetched {len(invitations)} invitations, total count: {total_count}")
+            return invitations, total_count
+
+        except Exception as e:
+            logging.error(f"Error in fetch_all_invitations: {str(e)}")
+            raise HTTPException(status_code=500, detail="An error occurred while fetching invitations")
+
+
 
     def update(self, db: Session, id: str, schema, current_user: User):
         """Updates a product"""
@@ -275,6 +297,11 @@ class OrganisationService(Service):
 
         # Fetch all users associated with the organisation
         return user.organisations
+    
+    def get_organisation_by_id(self, db: Session, org_id: str):
+        """Fetches an organisation by id"""
+
+        return check_model_existence(db, Organisation, org_id)
 
     def check_by_email(self, db: Session, email):
         """Fetches a user by their email"""

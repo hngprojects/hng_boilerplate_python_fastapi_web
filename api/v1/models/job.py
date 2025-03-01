@@ -22,6 +22,7 @@ class Job(BaseTableModel):
 
     author = relationship("User", back_populates="jobs")
     applications = relationship('JobApplication', back_populates='job')
+    bookmarks = relationship("Bookmark", back_populates="job", cascade="delete")
 
 
 class JobApplication(BaseTableModel):

@@ -20,11 +20,14 @@ notification = APIRouter(prefix="/notifications", tags=["Notifications"])
     status_code=status.HTTP_201_CREATED,
 )
 def send_notification(
-    notification_data: NotificationCreate, db: Session = Depends(get_db)
+    notification_data: NotificationCreate,
+    user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db)
 ):
     notification = notification_service.send_notification(
         title=notification_data.title,
         message=notification_data.message,
+        user=user,
         db=db,
     )
     return success_response(
@@ -92,6 +95,20 @@ def get_all_notifications(
         status_code=200,
         message="All notifications fetched successfully",
         data=notifications,
+    )
+
+
+@notification.delete("/clear", 
+    summary="Mark current user notifications as read",
+    status_code=status.HTTP_200_OK
+)
+async def mark_notifications_as_read(
+    current_user=Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    notification_service.mark_notifications_as_read(current_user, db)
+    return success_response(
+        status_code=200, message="All notifications marked as read successfully.", data={}
     )
 
 
