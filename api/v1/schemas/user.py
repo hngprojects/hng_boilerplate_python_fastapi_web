@@ -1,21 +1,18 @@
 from email_validator import validate_email, EmailNotValidError
 import dns.resolver
 from datetime import datetime
-from typing import (Optional, Union,
-                    List, Annotated, Dict,
-                    Literal)
+from typing import Optional, Union, List, Annotated, Dict, Literal
 
-from pydantic import (BaseModel, EmailStr,
-                      field_validator, ConfigDict,
-                      StringConstraints,
-                      model_validator)
+from pydantic import (
+    BaseModel, EmailStr, field_validator, ConfigDict,
+    StringConstraints, model_validator, Field
+)
 
 def validate_mx_record(domain: str):
     """
     Validate mx records for email
     """
     try:
-        # Try to resolve the MX record for the domain
         mx_records = dns.resolver.resolve(domain, 'MX')
         return True if mx_records else False
     except dns.resolver.NoAnswer:
@@ -27,38 +24,27 @@ def validate_mx_record(domain: str):
 
 class UserBase(BaseModel):
     """Base user schema"""
-
     id: str
     first_name: str
     last_name: str
     email: EmailStr
     created_at: datetime
 
-
 class UserCreate(BaseModel):
     """Schema to create a user"""
-
     email: EmailStr
     password: Annotated[
-        str, StringConstraints(
-            min_length=8,
-            max_length=64,
-            strip_whitespace=True
-        )
+        str, StringConstraints(min_length=8, max_length=64, strip_whitespace=True)
+    ]
+    confirm_password: Annotated[
+        str, StringConstraints(min_length=8, max_length=64, strip_whitespace=True),
+        Field(exclude=True)
     ]
     first_name: Annotated[
-        str, StringConstraints(
-            min_length=3,
-            max_length=30,
-            strip_whitespace=True
-        )
+        str, StringConstraints(min_length=3, max_length=30, strip_whitespace=True)
     ]
     last_name: Annotated[
-        str, StringConstraints(
-            min_length=3,
-            max_length=30,
-            strip_whitespace=True
-        )
+        str, StringConstraints(min_length=3, max_length=30, strip_whitespace=True)
     ]
 
     @model_validator(mode='before')
@@ -68,9 +54,9 @@ class UserCreate(BaseModel):
         Validates passwords
         """
         password = values.get('password')
+        confirm_password = values.get('confirm_password')
         email = values.get("email")
 
-        # constraints for password
         if not any(c.islower() for c in password):
             raise ValueError("password must include at least one lowercase character")
         if not any(c.isupper() for c in password):
@@ -79,7 +65,12 @@ class UserCreate(BaseModel):
             raise ValueError("password must include at least one digit")
         if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in password):
             raise ValueError("password must include at least one special character")
-        
+
+        if not confirm_password:
+            raise ValueError("Confirm password field is required")
+        elif password != confirm_password:
+            raise ValueError("Passwords do not match")
+
         try:
             email = validate_email(email, check_deliverability=True)
             if email.domain.count(".com") > 1:
@@ -94,9 +85,8 @@ class UserCreate(BaseModel):
         return values
 
 class UserUpdate(BaseModel):
-    
-    first_name : Optional[str] = None
-    last_name : Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
 
 class UserData(BaseModel):
     """
@@ -144,7 +134,7 @@ class ProfileData(BaseModel):
     bio: Optional[str] = None
     phone_number: Optional[str] = None
     avatar_url: Optional[str] = None
-    recovery_email: Optional[EmailStr]
+    recovery_email: Optional[EmailStr] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -174,11 +164,9 @@ class AuthMeResponse(BaseModel):
     data: Dict[Literal["user", "organisations", "profile"],
                Union[UserData2, List[OrganisationData], ProfileData]]
 
-    
-
 class AdminCreateUser(BaseModel):
     """
-    Schema for admin to create a users
+    Schema for admin to create users
     """
     email: EmailStr
     first_name: str
@@ -190,7 +178,6 @@ class AdminCreateUser(BaseModel):
     is_superadmin: bool = False
 
     model_config = ConfigDict(from_attributes=True)
-
 
 class AdminCreateUserResponse(BaseModel):
     """
@@ -204,6 +191,7 @@ class AdminCreateUserResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    totp_code: Optional[str] = None
     
     @model_validator(mode='before')
     @classmethod
@@ -213,8 +201,8 @@ class LoginRequest(BaseModel):
         """
         password = values.get('password')
         email = values.get("email")
+        totp_code = values.get("totp_code")
 
-        # constraints for password
         if not any(c.islower() for c in password):
             raise ValueError("password must include at least one lowercase character")
         if not any(c.isupper() for c in password):
@@ -235,8 +223,12 @@ class LoginRequest(BaseModel):
         except Exception as exc:
             raise ValueError(exc) from exc
         
+        if totp_code:
+            from api.v1.schemas.totp_device import TOTPTokenSchema
+            if not TOTPTokenSchema.validate_totp_code(totp_code):
+                raise ValueError("totp code must be a 6-digit number")
+        
         return values
-
 
 class EmailRequest(BaseModel):
     email: EmailStr
@@ -260,46 +252,31 @@ class EmailRequest(BaseModel):
             raise ValueError(exc) from exc
         return values
 
-
 class Token(BaseModel):
     token: str
 
-
 class TokenData(BaseModel):
     """Schema to structure token data"""
-
     id: Optional[str]
-
 
 class DeactivateUserSchema(BaseModel):
     """Schema for deactivating a user"""
-
     reason: Optional[str] = None
     confirmation: bool
 
-
 class ChangePasswordSchema(BaseModel):
     """Schema for changing password of a user"""
-
     old_password: Annotated[
         Optional[str],
-        StringConstraints(min_length=8,
-                          max_length=64,
-                          strip_whitespace=True)
+        StringConstraints(min_length=8, max_length=64, strip_whitespace=True)
     ] = None
-
     new_password: Annotated[
         str,
-        StringConstraints(min_length=8,
-                          max_length=64,
-                          strip_whitespace=True)
+        StringConstraints(min_length=8, max_length=64, strip_whitespace=True)
     ]
-
     confirm_new_password: Annotated[
         str,
-        StringConstraints(min_length=8,
-                          max_length=64,
-                          strip_whitespace=True)
+        StringConstraints(min_length=8, max_length=64, strip_whitespace=True)
     ]
 
     @model_validator(mode='before')
@@ -314,7 +291,6 @@ class ChangePasswordSchema(BaseModel):
 
         if (old_password and old_password.strip() == '') or old_password == '':
             values['old_password'] = None
-        # constraints for old_password
         if old_password and old_password.strip():
             if not any(c.islower() for c in old_password):
                 raise ValueError("Old password must include at least one lowercase character")
@@ -325,7 +301,6 @@ class ChangePasswordSchema(BaseModel):
             if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in old_password):
                 raise ValueError("Old password must include at least one special character")
 
-        # constraints for new_password
         if not any(c.islower() for c in new_password):
             raise ValueError("New password must include at least one lowercase character")
         if not any(c.isupper() for c in new_password):
@@ -340,17 +315,13 @@ class ChangePasswordSchema(BaseModel):
         
         return values
 
-
 class ChangePwdRet(BaseModel):
-    """schema for returning change password response"""
-
+    """Schema for returning change password response"""
     status_code: int
     message: str
 
-
 class MagicLinkRequest(BaseModel):
     """Schema for magic link creation"""
-
     email: EmailStr
 
     @model_validator(mode='before')
@@ -372,15 +343,12 @@ class MagicLinkRequest(BaseModel):
             raise ValueError(exc) from exc
         return values
 
-
 class MagicLinkResponse(BaseModel):
-    """Schema for magic link respone"""
-
+    """Schema for magic link response"""
     message: str
 
 class UserRoleSchema(BaseModel):
     """Schema for user role"""
-
     role: str
     user_id: str
     org_id: str
@@ -412,16 +380,4 @@ class AllUsersResponse(BaseModel):
     data: Dict[str, Union[List[UserData], Pagination]]
 
     model_config = ConfigDict(from_attributes=True)
-    
-# class AllUsersResponse(BaseModel):
-#     """
-#     Schema for all users
-#     """
-#     message: str
-#     status_code: int
-#     status: str
-#     page: int
-#     per_page: int
-#     total: int
-#     data: Union[List[UserData], List[None]]
     
