@@ -186,10 +186,6 @@ def test_put_api_status_partial_update(mock_update, db_session_mock, client):
 def test_put_api_status_invalid_response_time(mock_update, db_session_mock, client):
     """Tests the PUT /api/v1/api-status/{api_group} endpoint with invalid response_time"""
 
-    mock_update.side_effect = HTTPException(
-        status_code=400, detail="Invalid response_time format."
-    )
-
     update_data = {
         "apiGroup": "Blog API",
         "status": "Up",
@@ -197,8 +193,12 @@ def test_put_api_status_invalid_response_time(mock_update, db_session_mock, clie
     }
     response = client.put('/api/v1/api-status/Blog API', json=update_data)
 
-    assert response.status_code == 400, f"Expected 400, got {response.status_code}: {response.text}"
+    assert response.status_code == 422, f"Expected 422, got {response.status_code}: {response.text}"
     json_response = response.json()
     assert json_response["status"] is False
-    assert json_response["status_code"] == 400
-    assert json_response["message"] == "A database error occurred."
+    assert json_response["status_code"] == 422
+    assert json_response["message"] == "Invalid input"
+    assert len(json_response["errors"]) == 1
+    assert json_response["errors"][0]["loc"] == ["body", "response_time"]
+    assert json_response["errors"][0]["msg"] == "Input should be a valid decimal"
+    assert json_response["errors"][0]["type"] == "decimal_parsing"
