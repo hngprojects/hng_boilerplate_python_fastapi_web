@@ -3,7 +3,7 @@
 from sqlalchemy.orm import sessionmaker, scoped_session, declarative_base
 from sqlalchemy import create_engine
 from api.utils.settings import settings, BASE_DIR
-
+from pymongo import MongoClient
 
 DB_HOST = settings.DB_HOST
 DB_PORT = settings.DB_PORT
@@ -31,7 +31,10 @@ def get_db_engine(test_mode: bool = False):
             f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
         )
 
-    return create_engine(DATABASE_URL)
+        return create_engine(DATABASE_URL)
+    elif DB_TYPE == "mongo":
+        DATABASE_URL = f"mongo://{DB_HOST}:{DB_PORT}"
+        return MongoClient(DATABASE_URL)
 
 
 engine = get_db_engine()
@@ -39,16 +42,15 @@ engine = get_db_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 db_session = scoped_session(SessionLocal)
-
 Base = declarative_base()
 
-
+# create all the database tables
 def create_database():
     return Base.metadata.create_all(bind=engine)
 
 
 def get_db():
-    db = db_session()
+    db = db_session() if DB_TYPE != "mongo" else db = engine[DB_NAME]
     try:
         yield db
     finally:

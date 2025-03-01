@@ -3,7 +3,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from api.v1.models.activity_logs import ActivityLog
 from typing import Optional, Any
+from api.utils.settings import settings
 
+COLLECTION_NAME = "activity_log"  # Name a collection if db type is mongo
+DB_TYPE = settings.DB_TYPE
 
 
 class ActivityLogService:
@@ -13,9 +16,13 @@ class ActivityLogService:
         """Creates a new activity log"""
 
         activity_log = ActivityLog(user_id=user_id, action=action)
-        db.add(activity_log)
-        db.commit()
-        db.refresh(activity_log)
+        if DB_TYPE == "mongo":
+            activity_log_dict = activity_log.to_dict()
+            db[COLLECTION_NAME].insert_one(activity_log_dict)
+        else:
+            db.add(activity_log)
+            db.commit()
+            db.refresh(activity_log)
         return activity_log
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
