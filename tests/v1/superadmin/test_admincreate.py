@@ -64,7 +64,7 @@ def test_super_user_creation(data, db_session_mock):
     response = client.post(url, json=data)
 
     
-    assert response.json()['message'] == 'User created successfully'
+    assert response.json()['message'] == f'Verification email sent. Please check your inbox at {data["email"]}'
     assert response.status_code == 201
     # Assert that create_user was called with the correct data
    

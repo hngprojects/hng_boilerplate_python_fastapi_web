@@ -52,15 +52,7 @@ def test_testimonial(test_user):
         ratings=2.5,
     )
 
-# @pytest.fixture()
-# def test_testimonial_like(test_user, test_testimonial):
-#     return BlogLike(
-#             id=str(uuid7()),
-#             user_id=test_user.id,
-#             blog_id=test_testimonial.id,
-#             ip_address="192.168.1.0",
-#             created_at=datetime.now(tz=timezone.utc)
-#         )
+
 
 @pytest.fixture
 def access_token_user(test_user):

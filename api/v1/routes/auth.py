@@ -8,6 +8,7 @@ from api.core.dependencies.redis_cache import redis_client
 from slowapi.util import get_remote_address
 from api.utils.settings import settings
 
+<<<<<<< HEAD
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -17,6 +18,11 @@ from fastapi import (
     Request,
     HTTPException,
 )
+=======
+from fastapi import (BackgroundTasks, Depends,
+                     status, APIRouter,
+                     Response, Request)
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -25,6 +31,7 @@ from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import auth_response, success_response, fail_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
+<<<<<<< HEAD
 from api.v1.schemas.user import Token, UserEmailSender
 from api.v1.schemas.user import (
     LoginRequest,
@@ -36,6 +43,14 @@ from api.v1.schemas.user import (
 from api.v1.schemas.token import TokenRequest
 
 from api.v1.schemas.user import (MagicLinkRequest,
+=======
+from api.v1.schemas.user import Token
+from api.v1.schemas.user import (LoginRequest, UserCreate, EmailRequest,
+                                 ProfileData, UserData2)
+from api.v1.schemas.token import TokenRequest
+from api.v1.schemas.user import (UserCreate,
+                                 MagicLinkRequest,
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
                                  ChangePasswordSchema,
                                  AuthMeResponse)
 from api.v1.services.login_notification import send_login_notification
@@ -45,6 +60,7 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
 from api.v1.services.profile import profile_service
+<<<<<<< HEAD
 from api.v1.schemas.totp_device import (
     TOTPDeviceRequestSchema,
     TOTPDeviceResponseSchema,
@@ -53,6 +69,8 @@ from api.v1.schemas.totp_device import (
 )
 from api.v1.services.totp import totp_service
 from api.utils.settings import settings
+=======
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -65,6 +83,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
+<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 def register(
     request: Request,
@@ -74,6 +93,11 @@ def register(
     db: Session = Depends(get_db),
 ):
     """Endpoint for a user to register their account"""
+=======
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
+def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
+    '''Endpoint for a user to register their account'''
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 
     # Check if user already exists
     existing_user = user_service.get_user_by_email(db, email=user_schema.email)
@@ -91,9 +115,7 @@ def register(
 
     # Generate verification token
     verification_token = AuthService.generate_verification_token()
-    # print(f"Generated Token: {verification_token}")
-
-    access_token = user_service.create_registration_access_token(user_email=user_schema.email)
+    print(f"Generated Token: {verification_token}")
 
     # Check if the user email is already cached in Redis
     redis_key = f"pending_user:{user_schema.email}"
@@ -106,6 +128,7 @@ def register(
     else:
         # Generate a new token and cache user details (15 mins expiry)
         verification_token = AuthService.generate_verification_token()
+        print(f"Generated Token Two: {verification_token}")
         redis_client.hmset(redis_key, {
             "email": user_schema.email,
             "password": user_schema.password,
@@ -134,7 +157,6 @@ def register(
         status_code=201, 
         message=f"Verification email sent. Please check your inbox at {user_schema.email}",
         data={
-            'access_token': access_token,
             'user': {
                 "email": user_schema.email,
                 'first_name': user_schema.first_name,
@@ -205,73 +227,21 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
     # Check if user already exists
     existing_user = user_service.get_user_by_email(db, email=user_schema.email)
     if existing_user:
-        if existing_user.is_verified == False:
-            return fail_response(
-                status_code=400,
-                message="User with this email already exists",
-                data={
-                    'user': {
-                        'email': user_schema.email,
-                        'first_name': user_schema.first_name,
-                        'last_name': user_schema.last_name
-                    }
-                }
-            )
-        
-        else:
-            # Generate verification token
-            verification_token = AuthService.generate_verification_token()
-
-            # Check if the user email is already cached in Redis
-            redis_key = f"pending_user:{user_schema.email}"
-            cached_user = redis_client.hgetall(redis_key)
-
-            if cached_user:
-                # Use the existing token if the cache hasn't expired
-                verification_token = cached_user.get('token')
-            else:
-                # Generate a new token and cache user details (15 mins expiry)
-                verification_token = AuthService.generate_verification_token()
-                redis_client.hmset(redis_key, {
-                    "email": user_schema.email,
-                    "password": user_schema.password,
-                    "first_name": user_schema.first_name,
-                    "last_name": user_schema.last_name,
-                    "token": verification_token,
-                    "is_superadmin": "true"
-                })
-                redis_client.expire(redis_key, 900)
-
-            # Send email verification link (reuse existing token or use new one)
-            cta_link = f'{settings.FRONTEND_URL}/verify?email={user_schema.email}&token={verification_token}'
-            background_tasks.add_task(
-                send_email,
-                recipient=user_schema.email,
-                template_name='email-verification.html',
-                subject='Verify Your Email Address',
-                context={
+        return fail_response(
+            status_code=400,
+            message="User with this email already exists",
+            data={
+                'user': {
+                    'email': user_schema.email,
                     'first_name': user_schema.first_name,
-                    'last_name': user_schema.first_name,
-                    'cta_link': cta_link
+                    'last_name': user_schema.last_name
                 }
-
-            )
-            return success_response(
-                status_code=201, 
-                message=f"Verification email sent. Please check your inbox at {user_schema.email}",
-                data={
-                    'user': {
-                        "email": user_schema.email,
-                        'first_name': user_schema.first_name,
-                        'last_name': user_schema.first_name,
-                        'is_superadmin': 'true'
-                    }
-                }
-            )
-
+            }
+        )
 
     # Generate verification token
     verification_token = AuthService.generate_verification_token()
+    print(f"Generated Token: {verification_token}")
 
     # Check if the user email is already cached in Redis
     redis_key = f"pending_user:{user_schema.email}"
@@ -305,7 +275,6 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
             'last_name': user_schema.first_name,
             'cta_link': cta_link
         }
-
     )
     return success_response(
         status_code=201, 
@@ -321,16 +290,20 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
     )
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=auth_response)
+<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 def login(request: Request, login_request: LoginRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
 
+=======
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
+def login(request: Request, login_request: LoginRequest, db: Session = Depends(get_db)):
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
     """Endpoint to log in a user"""
 
     # Authenticate the user
     user = user_service.authenticate_user(
         db=db, email=login_request.email, password=login_request.password
     )
-    totp_service.check_2fa_status_and_verify(db, user.id, login_request.totp_code)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
     # Generate access and refresh tokens
@@ -343,14 +316,15 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
 
     response = auth_response(
         status_code=200,
-        message="Login successful",
+        message='Login successful',
         access_token=access_token,
         data={
-            "user": jsonable_encoder(
-                user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
+            'user': jsonable_encoder(
+                user,
+                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
             ),
-            "organisations": user_organizations,
-        },
+            'organisations': user_organizations
+        }
     )
 
     # Add refresh token to cookies
@@ -367,9 +341,9 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
 
 
 @auth.post("/logout", status_code=status.HTTP_200_OK)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def logout(
-    request: Request,
+    request: Request, 
     response: Response,
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user),
@@ -385,7 +359,7 @@ def logout(
 
 
 @auth.post("/refresh-access-token", status_code=status.HTTP_200_OK)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def refresh_access_token(
     request: Request, response: Response, db: Session = Depends(get_db)
 ):
@@ -400,7 +374,9 @@ def refresh_access_token(
     )
 
     response = auth_response(
-        status_code=200, message="Login successful", access_token=access_token
+        status_code=200,
+        message='Login successful',
+        access_token=access_token
     )
 
     # Add refresh token to cookies
@@ -417,12 +393,18 @@ def refresh_access_token(
 
 
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
+<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 async def request_signin_token(
     request: Request,
     background_tasks: BackgroundTasks,
     email_schema: EmailRequest,
     db: Session = Depends(get_db),
+=======
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
+async def request_signin_token(request: Request, background_tasks: BackgroundTasks,
+    email_schema: EmailRequest, db: Session = Depends(get_db)
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 ):
     """Generate and send a 6-digit sign-in token to the user's email"""
 
@@ -433,19 +415,23 @@ async def request_signin_token(
     user_service.save_login_token(db, user, token, token_expiry)
 
     # Send mail notification
+<<<<<<< HEAD
     link = f"{settings.ANCHOR_PYTHON_BASE_URL}/login/verify-token?token={token}"
+=======
+    link = f'https://anchor-python.teams.hng.tech/login/verify-token?token={token}'
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 
     # Send email in the background
     background_tasks.add_task(
-        send_email,
+        send_email, 
         recipient=user.email,
-        template_name="request-token.html",
-        subject="Request Token Login",
+        template_name='request-token.html',
+        subject='Request Token Login',
         context={
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "link": link,
-        },
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'link': link
+        }
     )
 
     return success_response(
@@ -461,9 +447,7 @@ async def verify_token(
     request: Request,
     token_schema: TokenRequest,
     background_tasks: BackgroundTasks,
-    db: Session = Depends(get_db)
-
-):
+    db: Session = Depends(get_db)):
     """Verify email token and complete user or admin registration"""
 
     # Check if user already exists
@@ -532,7 +516,6 @@ async def verify_token(
             "last_name": cached_user["last_name"]
         }
 
-
         # Register user or admin in the database
         if is_admin:
             user = user_service.create_admin(db=db, schema=UserCreate(**user_data))
@@ -572,14 +555,14 @@ async def verify_token(
     response = auth_response(
         status_code=200,
         message='Account verified successfully',
-
         access_token=access_token,
         data={
-            "user": jsonable_encoder(
-                user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
+            'user': jsonable_encoder(
+                user,
+                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
             ),
-            "organisations": user_organizations,
-        },
+            'organisations': user_organizations
+        }
     )
 
     # Add refresh token to cookies
@@ -599,13 +582,11 @@ async def verify_token(
 
 # TODO: Fix magic link authentication
 @auth.post("/magic-link", status_code=status.HTTP_200_OK)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 def request_magic_link(
-    request: Request,
-    requests: MagicLinkRequest,
-    background_tasks: BackgroundTasks,
-    response: Response,
-    db: Session = Depends(get_db),
+    request: Request, 
+    requests: MagicLinkRequest, background_tasks: BackgroundTasks,
+    response: Response, db: Session = Depends(get_db)
 ):
     user = user_service.fetch_by_email(db=db, email=requests.email)
     magic_link_token = user_service.create_access_token(user_id=user.id)
@@ -616,11 +597,11 @@ def request_magic_link(
     background_tasks.add_task(
         send_magic_link,
         context={
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "link": magic_link,
-            "email": user.email,
-        },
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'link': magic_link,
+            'email': user.email
+        }
     )
 
     response = success_response(
@@ -630,10 +611,15 @@ def request_magic_link(
 
 
 @auth.post("/magic-link/verify")
+<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 async def verify_magic_link(
     request: Request, token_schema: Token, db: Session = Depends(get_db)
 ):
+=======
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
+async def verify_magic_link(request: Request, token_schema: Token, db: Session = Depends(get_db)):
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
     user, access_token = AuthService.verify_magic_token(token_schema.token, db)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
@@ -641,14 +627,15 @@ async def verify_magic_link(
 
     response = auth_response(
         status_code=200,
-        message="Login successful",
+        message='Login successful',
         access_token=access_token,
         data={
-            "user": jsonable_encoder(
-                user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
+            'user': jsonable_encoder(
+                user,
+                exclude=['password', 'is_deleted', 'is_verified', 'updated_at']
             ),
-            "organisations": user_organizations,
-        },
+            'organisations': user_organizations
+        }
     )
 
     # Add refresh token to cookies
@@ -665,38 +652,45 @@ async def verify_magic_link(
 
 
 @auth.put("/password", status_code=200)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 async def change_password(
-    request: Request,
+    request: Request, 
     schema: ChangePasswordSchema,
     db: Session = Depends(get_db),
     user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to change the user's password"""
-    user_service.change_password(
-        new_password=schema.new_password,
-        user=user,
-        db=db,
-        old_password=schema.old_password,
-    )
+    user_service.change_password(new_password=schema.new_password,
+                                 user=user,
+                                 db=db,
+                                 old_password=schema.old_password)
 
     return success_response(status_code=200, message="Password changed successfully")
 
 
+<<<<<<< HEAD
 @auth.get("/@me", status_code=status.HTTP_200_OK, response_model=AuthMeResponse)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
+=======
+@auth.get("/@me",
+          status_code=status.HTTP_200_OK,
+          response_model=AuthMeResponse)
+@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 def get_current_user_details(
-    request: Request,
+    request: Request, 
     db: Annotated[Session, Depends(get_db)],
     current_user: Annotated[User, Depends(user_service.get_current_user)],
 ):
-    """Endpoint to get current user details."""
+    """Endpoint to get current user details.
+    """
     profile = profile_service.fetch_by_user_id(db, current_user.id)
     organisation = organisation_service.retrieve_user_organizations(current_user, db)
     return AuthMeResponse(
-        message="User details retrieved successfully",
+        message='User details retrieved successfully',
         status_code=200,
         data={
+<<<<<<< HEAD
             "user": UserData2.model_validate(current_user, from_attributes=True),
             "organisations": organisation,
             "profile": ProfileData.model_validate(profile, from_attributes=True),
@@ -808,3 +802,10 @@ def disable_2fa(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error disabling totp device: {str(e)}",
         )
+=======
+            'user': UserData2.model_validate(current_user, from_attributes=True),
+            'organisations': organisation,
+            'profile': ProfileData.model_validate(profile, from_attributes=True)
+        }
+    )
+>>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)

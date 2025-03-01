@@ -35,6 +35,7 @@ def test_register_normal_user(db_session_mock):
 
     user = {
         "password": "NormalP@ss123",
+        "confirm_password": "NormalP@ss123",
         "first_name": "Normal",
         "last_name": "User",
         "email": "normal.user@gmail.com",
@@ -55,6 +56,7 @@ def test_register_admin_user(db_session_mock):
 
     admin = {
         "password": "AdminP@ss123",
+        "confirm_password": "AdminP@ss123",
         "first_name": "Admin",
         "last_name": "User",
         "email": "admin.user@gmail.com",
@@ -67,16 +69,35 @@ def test_register_admin_user(db_session_mock):
     assert response.json()['data']['user']['email'] == "admin.user@gmail.com"
     assert response.json()['data']['user']['is_superadmin'] == "true"
 
+# Test verify token - valid token
+def test_verify_signin_token_success(db_session_mock, redis_mock):
+    user = User(email="user@gmail.com", id="someid")
+    db_session_mock.query(User).filter().first.return_value = user
 
-def test_verify_signin_token_invalid(db_session_mock, redis_mock):
     redis_mock.hgetall.return_value = {
         "email": "user@gmail.com",
-        "token": "654321"  # Does not match "123456"
+        "token": "123456",
+        "first_name": "John",
+        "last_name": "Doe",
+        "password": "hashedpassword"
     }
 
     with patch("api.core.dependencies.redis_cache.redis_client", redis_mock):
         token_schema = {"email": "user@gmail.com", "token": "123456"}
         response = client.post("/api/v1/auth/verify-token", json=token_schema)
+
+    assert redis_mock.hgetall.return_value["token"] == token_schema["token"]
+
+# Test verify token - invalid token
+def test_verify_signin_token_invalid(db_session_mock, redis_mock):
+    redis_mock.hgetall.return_value = {
+        "email": "user@gmail.com",
+        "token": "654321"
+    }
+
+    with patch("api.core.dependencies.redis_cache.redis_client", redis_mock):
+        token_data = {"email": "user@gmail.com", "token": "123456"}
+        response = client.post("/api/v1/auth/verify-token", json=token_data)
 
     assert response.status_code == 401
     assert response.json()["message"] == "Invalid email or token"
