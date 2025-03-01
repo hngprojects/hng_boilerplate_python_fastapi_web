@@ -38,7 +38,9 @@ fastapi-mail==1.4.1
 filelock==3.15.4
 flake8==7.1.0
 frozenlist==1.4.1
+geoip2==5.0.1
 greenlet==3.0.3
+gunicorn==23.0.0
 h11==0.14.0
 httpcore==1.0.5
 httptools==0.6.1
@@ -55,6 +57,7 @@ lxml==5.2.2
 Mako==1.3.5
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
+maxminddb==2.6.3
 mccabe==0.7.0
 mdurl==0.1.2
 more-itertools==10.3.0
@@ -109,7 +112,10 @@ tomlkit==0.13.0
 twilio==9.2.3
 typer==0.12.3
 typing_extensions==4.12.2
+ua-parser==1.0.1
+ua-parser-builtins==0.18.0.post1
 urllib3==2.2.2
+user-agents==2.2.0
 uuid7==0.1.0
 uvicorn==0.30.3
 uvloop==0.19.0

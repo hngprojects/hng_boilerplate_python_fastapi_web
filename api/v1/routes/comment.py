@@ -9,9 +9,11 @@ from api.v1.services.comment_like import comment_like_service
 from api.v1.services.user import user_service
 from api.v1.schemas.comment import (
     DislikeSuccessResponse,
-    CommentDislike,
     LikeSuccessResponse,
+    ReplyCreate,
+    ReplyResponse,
 )
+from api.v1.services.blog_comment_reply import reply_service
 from api.v1.services.comment_dislike import comment_dislike_service
 from api.v1.services.comment import comment_service
 from api.utils.json_response import JsonResponseDict
@@ -139,3 +141,25 @@ async def delete_comment(
             error=str(e),
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+@comment.post("/{comment_id}/reply", response_model=ReplyResponse, status_code=status.HTTP_201_CREATED)
+def reply_comment(
+    schema: ReplyCreate,
+    comment_id: str,
+    db: Session = Depends(get_db),
+    current_user: str = Depends(user_service.get_current_user)
+):
+    """
+    Create a new reply to a comment.
+    """
+    new_reply = reply_service.create(
+        db=db,
+        schema=schema,
+        user_id=current_user.id,
+        comment_id=comment_id
+    )
+
+    return success_response(
+            status_code=status.HTTP_201_CREATED,
+            message="Reply to comment created successfully",
+            data=jsonable_encoder(new_reply)
+    )
