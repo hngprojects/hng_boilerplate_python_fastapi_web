@@ -2,10 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 from main import app
 from api.v1.services.user import user_service
+from api.v1.services.blog import BlogService
+from api.v1.services.comment import CommentService
 from sqlalchemy.orm import Session
 from api.db.database import get_db
-from api.v1.models import User, Blog, Comment, Engagement
+from api.v1.models import User, Blog
 from uuid_extensions import uuid7
+from unittest.mock import MagicMock
 
 client = TestClient(app)
 
@@ -36,17 +39,6 @@ def test_blog(test_user):
     )
 
 @pytest.fixture
-def test_engagement(test_user, test_blog):
-    return Engagement(
-        id=str(uuid7()),
-        user_id=test_user.id,
-        blog_id=test_blog.id,
-        likes=5,
-        shares=2,
-        comments=3
-    )
-
-@pytest.fixture
 def engagement_url(test_blog):
     return f"/api/v1/blogs/{test_blog.id}/engagement"
 
@@ -54,21 +46,23 @@ def engagement_url(test_blog):
 def test_user_access_token(test_user):
     return user_service.create_access_token(user_id=test_user.id)
 
-def test_get_blog_engagement(mock_db_session, test_blog, test_engagement, engagement_url, test_user_access_token):
-    def mock_get(model, ident):
-        if model == Blog and ident == test_blog.id:
-            return test_blog
-        elif model == Engagement and ident == test_engagement.id:
-            return test_engagement
-        return None
-
-    mock_db_session.get.side_effect = mock_get
-    mock_db_session.query.return_value.filter.return_value.first.return_value = test_engagement
-
+def test_get_blog_engagement(mock_db_session, test_blog, engagement_url, test_user_access_token, mocker):
+    # Mock BlogService methods
+    mock_blog_service = mocker.patch("api.v1.services.blog.BlogService", autospec=True)
+    blog_service_instance = mock_blog_service.return_value
+    blog_service_instance.fetch.return_value = test_blog
+    blog_service_instance.num_of_likes.return_value = 5
+    blog_service_instance.num_of_dislikes.return_value = 2
+    
+    # Mock CommentService method
+    mock_comment_service = mocker.patch("api.v1.services.comment.CommentService", autospec=True)
+    comment_service_instance = mock_comment_service.return_value
+    comment_service_instance.get_comment_count.return_value = 3
+    
     headers = {'Authorization': f'Bearer {test_user_access_token}'}
     response = client.get(engagement_url, headers=headers)
-
+    
     assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
-    assert response.json()['data']['likes'] == test_engagement.likes
-    assert response.json()['data']['shares'] == test_engagement.shares
-    assert response.json()['data']['comments'] == test_engagement.comments
+    assert response.json()['data']['likes'] == 5
+    assert response.json()['data']['dislikes'] == 2
+    assert response.json()['data']['comments'] == 3
