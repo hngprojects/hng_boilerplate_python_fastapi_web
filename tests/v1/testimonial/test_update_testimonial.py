@@ -99,7 +99,7 @@ def test_update_testimonial_not_found(client_with_mocks, setup_access_token):
     )
 
     assert response.status_code == 404
-    assert response.json()["message"] == "TTestimonial does not exist"
+    assert response.json()["message"] == "Testimonial does not exist"
 
 
 def test_update_testimonial_unauthorized(client_with_mocks):
