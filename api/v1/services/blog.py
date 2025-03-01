@@ -17,7 +17,7 @@ class BaseBlogInteractionService(Generic[ModelType]):
     """Base service for blog interactions (likes/dislikes)"""
     
     def __init__(self, db: Session, model: type[ModelType]):
-        self.db = db
+        super().__init__(db, BlogDislike)
         self.model = model
 
     def fetch(self, item_id: str) -> ModelType:
@@ -331,4 +331,3 @@ class BlogDislikeService(BaseBlogInteractionService[BlogDislike]):
         self.db.commit()
 
 blog_service = BlogService(db=None)
-        super().__init__(db, BlogDislike)
