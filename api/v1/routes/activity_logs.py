@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, Query
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
@@ -30,11 +30,17 @@ async def create_activity_log(
     )
 
 
+    
 @activity_logs.get("", response_model=list[ActivityLogResponse])
-async def get_all_activity_logs(current_user: User = Depends(user_service.get_current_super_admin), db: Session = Depends(get_db)):
-    '''Get all activity logs'''
+async def get_all_activity_logs(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, le=100),
+    current_user: User = Depends(user_service.get_current_super_admin), 
+    db: Session = Depends(get_db)
+    ):
 
-    activity_logs = activity_log_service.fetch_all(db=db)
+    """Get paginated activity logs"""
+    activity_logs = activity_log_service.fetch_all(db=db, page=page, limit=limit)
 
     return success_response(
         status_code=200,
