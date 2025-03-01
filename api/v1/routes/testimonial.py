@@ -77,7 +77,7 @@ async def delete_all_testimonials(
     testimonial_service.delete_all(db)
 
 
-@testimonial.post('/create/', response_model=success_response)
+@testimonial.post('/', response_model=success_response)
 def create_testimonial(
     testimonial_data: CreateTestimonial,
     db: Annotated[Session, Depends(get_db)],

@@ -52,6 +52,7 @@ def setup_access_token():
         "/api/v1/auth/register",
         json={
             "password": "@Testpassword2",
+            "confirm_password": "2Testpassword2",
             "first_name": "Test",
             "last_name": "User",
             "email": email,
