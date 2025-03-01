@@ -104,7 +104,7 @@ def register(
     session_schema: SessionCreate = get_session_schema_data(
         request,
         refresh_token=refresh_token,
-        expires_at=str(expires))
+        expires_at=expires)
     session_service = SessionService(db)
     session_service.create(db=db, schema=session_schema, user_id=user.id)
 
@@ -263,7 +263,7 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
     session_schema: SessionCreate = get_session_schema_data(
         request,
         refresh_token=refresh_token,
-        expires_at=str(expires))
+        expires_at=expires)
     session_service = SessionService(db)
     session_service.create(db=db, schema=session_schema, user_id=user.id)
 
