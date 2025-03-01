@@ -40,6 +40,16 @@ class UserCreate(BaseModel):
         str, StringConstraints(min_length=8, max_length=64, strip_whitespace=True),
         Field(exclude=True)
     ]
+    """Added the confirm_password field to UserCreate Model"""
+    confirm_password: Annotated[
+        str, 
+        StringConstraints(
+            min_length=8,
+            max_length=64,
+            strip_whitespace=True
+        ),
+        Field(exclude=True)  # exclude confirm_password field
+    ]
     first_name: Annotated[
         str, StringConstraints(min_length=3, max_length=30, strip_whitespace=True)
     ]
@@ -54,7 +64,8 @@ class UserCreate(BaseModel):
         Validates passwords
         """
         password = values.get('password')
-        confirm_password = values.get('confirm_password')
+
+        confirm_password = values.get('confirm_password') # gets the confirm password
         email = values.get("email")
 
         if not any(c.islower() for c in password):
@@ -65,6 +76,9 @@ class UserCreate(BaseModel):
             raise ValueError("password must include at least one digit")
         if not any(c in ['!','@','#','$','%','&','*','?','_','-'] for c in password):
             raise ValueError("password must include at least one special character")
+
+
+        """Confirm Password Validation"""
 
         if not confirm_password:
             raise ValueError("Confirm password field is required")
@@ -191,6 +205,7 @@ class AdminCreateUserResponse(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+      
     totp_code: Optional[str] = None
     
     @model_validator(mode='before')
@@ -225,6 +240,7 @@ class LoginRequest(BaseModel):
         
         if totp_code:
             from api.v1.schemas.totp_device import TOTPTokenSchema
+
             if not TOTPTokenSchema.validate_totp_code(totp_code):
                 raise ValueError("totp code must be a 6-digit number")
         
@@ -361,6 +377,7 @@ class UserRoleSchema(BaseModel):
         """
         if value not in ["admin", "user", "guest", "owner"]:
             raise ValueError("Role has to be one of admin, guest, user, or owner")
+
         return value
 
 class Pagination(BaseModel):
@@ -380,4 +397,3 @@ class AllUsersResponse(BaseModel):
     data: Dict[str, Union[List[UserData], Pagination]]
 
     model_config = ConfigDict(from_attributes=True)
-    
