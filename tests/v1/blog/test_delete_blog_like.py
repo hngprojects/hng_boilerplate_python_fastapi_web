@@ -4,7 +4,8 @@ from uuid_extensions import uuid7
 from sqlalchemy.orm import Session
 from api.db.database import get_db
 from datetime import datetime, timezone
-from api.v1.models import User, BlogLike, BlogLikeService
+from api.v1.models import User, BlogLike
+from api.v1.services.blog import BlogLikeService
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from api.v1.services.user import user_service
