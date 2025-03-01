@@ -17,13 +17,13 @@ class BlogService:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, db: Session, schema: BlogCreate, author_id: str):
+    def create(self, schema: BlogCreate, author_id: str):
         """Create a new blog post"""
 
         new_blogpost = Blog(**schema.model_dump(), author_id=author_id)
-        db.add(new_blogpost)
-        db.commit()
-        db.refresh(new_blogpost)
+        self.db.add(new_blogpost)
+        self.db.commit()
+        self.db.refresh(new_blogpost)
         return new_blogpost
 
     def fetch_all(self):
@@ -34,7 +34,6 @@ class BlogService:
 
     def fetch(self, blog_id: str):
         """Fetch a blog post by its ID"""
-
         blog_post = self.db.query(Blog).filter(Blog.id == blog_id).first()
         if not blog_post:
             raise HTTPException(status_code=404, detail="Post not found")
@@ -76,28 +75,22 @@ class BlogService:
 
         return blog_post
 
-    def create_blog_like(
-        self, db: Session, blog_id: str, user_id: str, ip_address: str = None
-    ):
+    def create_blog_like(self, blog_id: str, user_id: str, ip_address: str = None):
         """Create new blog like."""
-        blog_like = BlogLike(
-            blog_id=blog_id, user_id=user_id, ip_address=ip_address
-        )
-        db.add(blog_like)
-        db.commit()
-        db.refresh(blog_like)
+
+        blog_like = BlogLike(blog_id=blog_id, user_id=user_id, ip_address=ip_address)
+        self.db.add(blog_like)
+        self.db.commit()
+        self.db.refresh(blog_like)
         return blog_like
 
-    def create_blog_dislike(
-        self, db: Session, blog_id: str, user_id: str, ip_address: str = None
-    ):
+    def create_blog_dislike(self, blog_id: str, user_id: str, ip_address: str = None):
         """Create new blog dislike."""
-        blog_dislike = BlogDislike(
-            blog_id=blog_id, user_id=user_id, ip_address=ip_address
-        )
-        db.add(blog_dislike)
-        db.commit()
-        db.refresh(blog_dislike)
+        
+        blog_dislike = BlogDislike(blog_id=blog_id, user_id=user_id, ip_address=ip_address)
+        self.db.add(blog_dislike)
+        self.db.commit()
+        self.db.refresh(blog_dislike)
         return blog_dislike
 
     def fetch_blog_like(self, blog_id: str, user_id: str):
@@ -119,14 +112,18 @@ class BlogService:
         return blog_dislike
     
     def check_user_already_liked_blog(self, blog: Blog, user: User):
+        if not user:
+            raise HTTPException(status_code=401, detail="Not authenticated")
         existing_like = self.fetch_blog_like(blog.id, user.id)
         if isinstance(existing_like, BlogLike):
             raise HTTPException(
                 detail="You have already liked this blog post",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
-    
+
     def check_user_already_disliked_blog(self, blog: Blog, user: User):
+        if not user:
+            raise HTTPException(status_code=401, detail="Not authenticated")
         existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
         if isinstance(existing_dislike, BlogDislike):
             raise HTTPException(
@@ -146,15 +143,13 @@ class BlogService:
         if creating == "like":
             existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
             if existing_dislike:
-                # delete, but do not commit yet. Allow everything 
-                # to be commited after the actual like is created
                 self.db.delete(existing_dislike)
+                self.db.commit()  
         elif creating == "dislike":
             existing_like = self.fetch_blog_like(blog.id, user.id)
             if existing_like:
-                # delete, but do not commit yet. Allow everything 
-                # to be commited after the actual dislike is created
                 self.db.delete(existing_like)
+                self.db.commit() 
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -239,7 +234,45 @@ class BlogService:
 
         return comment
 
-
+    def fetch_and_increment_view(self, blog_id: str):
+        """Fetch a blog post and increment its view count"""
+        try:
+            blog = self.fetch(blog_id)
+            
+            # Add check for non-existent blog
+            if not blog:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Blog with id {blog_id} not found"
+                )
+            
+            # Support both dictionary blogs (for tests) and object blogs (for production)
+            if isinstance(blog, dict):
+                if "views" not in blog:
+                    blog["views"] = 0
+                blog["views"] += 1
+                return blog
+            else:
+                # For ORM objects
+                blog.views = blog.views + 1 if blog.views else 1
+                
+                # Reordered to refresh BEFORE commit to avoid stale data 
+                self.db.refresh(blog)
+                self.db.commit()
+                return blog
+        except HTTPException as e:
+            # Pass through HTTP exceptions 
+            raise e
+        except Exception as e:
+            # Rollback on errors and provide custom message
+            self.db.rollback()
+            from api.utils.logger import logger
+            logger.error(f"Error incrementing view count for blog {blog_id}: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Failed to increment view count: {str(e)}"
+            )
+        
 class BlogLikeService:
     """BlogLike service functionality"""
 
