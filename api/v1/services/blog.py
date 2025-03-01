@@ -238,8 +238,46 @@ class BlogService:
             )
 
         return comment
+    def get_blogs_by_author(self, author_id: str, limit: int = 10, skip: int = 0):
+        """
+        Retrieve all blog posts by a specific author.
+        
+        Args:
+            author_id (str): The ID of the author.
+            limit (int, optional): Maximum number of blog posts to return. Defaults to 10.
+            skip (int, optional): Number of blog posts to skip. Defaults to 0.
+            
+        Returns:
+            list: List of blog posts authored by the specified user.
+            """
+        blogs = (
+            self.db.query(Blog)
+            .filter(Blog.author_id == author_id, Blog.is_deleted == False)
+            .order_by(Blog.created_at.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+    
+        return blogs
 
+    def count_author_blogs(self, author_id: str):
+        """
+        Count the number of blog posts authored by a specific user.
+        
+        Args:
+            author_id (str): The ID of the author.
+            
+        Returns:
+            int: The number of blog posts authored by the specified user.
+        """
+        return (
+            self.db.query(Blog)
+            .filter(Blog.author_id == author_id, Blog.is_deleted == False)
+            .count()
+        )
 
+    
 class BlogLikeService:
     """BlogLike service functionality"""
 
