@@ -50,7 +50,7 @@ def setup_access_token():
     user_response = client.post(
         "/api/v1/auth/register",
         json={
-            "password": "Testpassword",
+            "password": "2Testpassword",
             "first_name": "Test",
             "last_name": "User",
             "email": email,
