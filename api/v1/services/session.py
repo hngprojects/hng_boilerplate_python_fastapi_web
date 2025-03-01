@@ -17,6 +17,8 @@ class SessionService:
         session = self.db.query(UserSession).filter(UserSession.refresh_token == refresh_token).first()
         if not session:
             return True
+        if isinstance(session.expires_at, str):
+            session.expires_at = datetime.fromisoformat(session.expires_at)
         current_time = datetime.now(timezone.utc)
         if session.is_revoked or (session.expires_at < current_time):
             return True
