@@ -108,7 +108,7 @@ def update_testimonial(
             message="Testimonial not found."
         )
 
-    if testimonial.id != current_user.id:
+    if testimonial.author_id != current_user.id:
         return fail_response(
             status_code=403,
             message="Forbidden. unauthorized user access"
