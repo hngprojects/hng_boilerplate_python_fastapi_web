@@ -14,30 +14,30 @@ from datetime import datetime, timezone
 LOGIN_ENDPOINT = 'api/v1/auth/login'
 client = TestClient(app)
 
+# Prevent Pytest from collecting Testimonial as a test class
+Testimonial.__test__ = False
+
 @pytest.fixture
 def mock_db_session():
     """Fixture to create a mock database session."""
-
-    with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
+    with patch("api.db.database.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
-    app.dependency_overrides = {}
+    del app.dependency_overrides[get_db]  # Remove only this override
 
 @pytest.fixture
 def mock_user_service():
     """Fixture to create a mock user service."""
-
     with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
         yield mock_service
 
 @pytest.fixture
 def mock_current_admin():
     """Fixture to mock the get_super_admin dependency."""
-
     with patch("api.utils.dependencies.get_super_admin", autospec=True) as mock_admin:
         mock_admin.return_value = User(
-            id=str(uuid7()),
+            id=str(uuid7()),  # Explicitly setting id
             email="testadmin@gmail.com",
             password=user_service.hash_password("Adminpassword@123"),
             first_name='Admin',
@@ -51,7 +51,6 @@ def mock_current_admin():
 
 def create_mock_user(mock_user_service, mock_db_session, is_superadmin=True):
     """Create a mock user in the mock database session."""
-
     mock_user = User(
         id=str(uuid7()),
         email="testuser@gmail.com",
@@ -68,7 +67,6 @@ def create_mock_user(mock_user_service, mock_db_session, is_superadmin=True):
 
 def create_testimonial(mock_user_service, mock_db_session):
     """Create a mock testimonial in the mock database session."""
-
     mock_user = create_mock_user(mock_user_service, mock_db_session, is_superadmin=True)
     mock_testimonial = Testimonial(
         id=str(uuid7()),
@@ -77,16 +75,25 @@ def create_testimonial(mock_user_service, mock_db_session):
         client_name="Client 1",
         client_designation="Client Designation",
         comments="Testimonial comments",
-        ratings=4.5
+        ratings=4.5,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc)
     )
-    mock_db_session.get.return_value = mock_testimonial
+    mock_db_session.get.return_value = None
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_testimonial
     return mock_testimonial
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_delete_testimonial_unauthorized(mock_user_service, mock_db_session):
     """Test deletion without valid credentials."""
-
-    app.dependency_overrides[user_service.get_current_user] = lambda: None
+    
+    def mock_invalid_user():
+        raise Exception("Unauthorized user")  # Simulating an authentication failure
+    
+    app.dependency_overrides[user_service.get_current_user] = mock_invalid_user  # Use a callable function
+    
     response = client.delete(f'/api/v1/testimonials/234')
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    
+    del app.dependency_overrides[user_service.get_current_user]  # Clean up override
+

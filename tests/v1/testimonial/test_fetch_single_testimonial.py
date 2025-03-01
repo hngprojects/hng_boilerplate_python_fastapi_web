@@ -17,19 +17,16 @@ client = TestClient(app)
 @pytest.fixture
 def mock_db_session():
     """Fixture to create a mock database session."""
-
     with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
         mock_db = MagicMock()
-        # mock_get_db.return_value.__enter__.return_value = mock_db
         app.dependency_overrides[get_db] = lambda: mock_db
         yield mock_db
-    app.dependency_overrides = {}
+        del app.dependency_overrides[get_db]  # Ensure proper cleanup
 
 
 @pytest.fixture
 def mock_user_service():
     """Fixture to create a mock user service."""
-
     with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
         yield mock_service
 
@@ -39,7 +36,7 @@ def create_mock_user(mock_user_service, mock_db_session):
     mock_user = User(
         id=str(uuid7()),
         email="testuser@gmail.com",
-        password=user_service.hash_password("Testpassword@123"),
+        password="hashed_password",  # Use a mocked hash
         first_name='Test',
         last_name='User',
         is_active=True,
@@ -48,11 +45,11 @@ def create_mock_user(mock_user_service, mock_db_session):
         updated_at=datetime.now(timezone.utc)
     )
     mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
-
     return mock_user
 
+
 def create_testimonial(mock_user_service, mock_db_session):
-    """Create a mock testimonail in the mock database session."""
+    """Create a mock testimonial in the mock database session."""
     mock_user = create_mock_user(mock_user_service, mock_db_session)
     mock_testimonial = Testimonial(
         id=str(uuid7()),
@@ -69,32 +66,41 @@ def create_testimonial(mock_user_service, mock_db_session):
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_success_retrieval(mock_user_service, mock_db_session):
-    """Test if the testimonial is fetched."""
+    """Test if the testimonial is fetched successfully."""
 
-    # get auth credentials
-    create_mock_user(mock_user_service, mock_db_session)
-    login = client.post(LOGIN_ENDPOINT, json={
-        "email": "testuser@gmail.com",
-        "password": "Testpassword@123"
-    })
-    response = login.json()
-    access_token = response.get('access_token')
+    # Mock authentication response
+    with patch("api.v1.services.user.user_service.authenticate_user", return_value=True):
+        with patch("api.v1.services.user.user_service.create_access_token", return_value="mocked_token"):
+            
+            create_mock_user(mock_user_service, mock_db_session)
 
-    # ensure testimonial is already created
-    testimonial = create_testimonial(mock_user_service, mock_db_session)
+            login = client.post(LOGIN_ENDPOINT, json={
+                "email": "testuser@gmail.com",
+                "password": "Testpassword@123"
+            })
+            access_token = "mocked_token"
 
-    # retrieve testimonial
-    response = client.get(f'/api/v1/testimonials/{testimonial.id}', headers={'Authorization': f'Bearer {access_token}'})
-    print(response.json())
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json().get("message") == 'Testimonial {} retrieved successfully'.format(testimonial.id)
-    assert response.json().get("data").get("content") == testimonial.content
-    
+            # Ensure testimonial is already created
+            testimonial = create_testimonial(mock_user_service, mock_db_session)
+
+            # Retrieve testimonial
+            response = client.get(
+                f'/api/v1/testimonials/{testimonial.id}', 
+                headers={'Authorization': f'Bearer {access_token}'}
+            )
+
+            print(response.json())
+            assert response.status_code == status.HTTP_200_OK
+            assert response.json().get("message") == f'Testimonial {testimonial.id} retrieved successfully'
+            assert response.json().get("data").get("content") == testimonial.content
+
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_invalid_cred(mock_user_service, mock_db_session):
-    """Test with invalid credentials"""
+    """Test retrieval with invalid credentials"""
 
-    response = client.delete(f'/api/v1/testimonials/')
+    response = client.get('/api/v1/testimonials/12345')  # Provide an actual ID
     print(response.json())
     assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+

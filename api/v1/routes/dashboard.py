@@ -22,7 +22,7 @@ dashboard = APIRouter(prefix="/dashboard", tags=['Dashboard'])
 
 
 def get_current_month_date_range():
-    now = datetime.utcnow()
+    datetime.now(timezone.utc)
     start_date = datetime(now.year, now.month, 1)
     end_date = (start_date + timedelta(days=32)
                 ).replace(day=1) - timedelta(seconds=1)

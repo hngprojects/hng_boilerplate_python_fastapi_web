@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
@@ -47,7 +47,7 @@ def mock_get_current_user(mocker):
 
 def create_test_token(user_id: str) -> str:
     """Function to create a test token"""
-    expires = datetime.utcnow() + timedelta(minutes=30)
+    expires = datetime.now(timezone.utc) + timedelta(minutes=30)
     data = {"user_id": user_id, "exp": expires}
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
