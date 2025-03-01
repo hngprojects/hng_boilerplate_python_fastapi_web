@@ -1,3 +1,4 @@
+import logging
 from datetime import timedelta
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -23,6 +24,7 @@ from api.v1.schemas.token import TokenRequest
 from api.v1.schemas.user import (MagicLinkRequest,
                                  ChangePasswordSchema,
                                  AuthMeResponse)
+from api.v1.services.login_notification import send_login_notification
 from api.v1.services.organisation import organisation_service
 from api.v1.schemas.organisation import CreateUpdateOrganisation
 from api.db.database import get_db
@@ -37,6 +39,10 @@ auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
@@ -140,7 +146,8 @@ def register_as_super_admin(request: Request, user: UserCreate, db: Session = De
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=auth_response)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
-def login(request: Request, login_request: LoginRequest, db: Session = Depends(get_db)):
+def login(request: Request, login_request: LoginRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+
     """Endpoint to log in a user"""
 
     # Authenticate the user
@@ -153,6 +160,10 @@ def login(request: Request, login_request: LoginRequest, db: Session = Depends(g
     # Generate access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    # Background task for email notification
+    logger.info(f"Queueing login notification for {user.email} in the background...")
+    background_tasks.add_task(send_login_notification, user, request)
 
     response = auth_response(
         status_code=200,
