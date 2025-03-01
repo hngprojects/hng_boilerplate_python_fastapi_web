@@ -31,15 +31,18 @@ def test_get_all_blogs_empty(client, db_session_mock):
     
     mock_query = MagicMock()
     mock_query.count.return_value = 0
-    db_session_mock.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_blog_data
-
+    mock_query.all.return_value = []
+    
     db_session_mock.query.return_value = mock_query
+    db_session_mock.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_blog_data
+    
 
     # Call the endpoint
     response = client.get("/api/v1/blogs")
 
     # Assert the response
     assert response.status_code == 200
+    assert response.json()["data"]["items"] == []
 
 def test_get_all_blogs_with_data(client, db_session_mock):
     blog_id = str(uuid7())
@@ -69,6 +72,7 @@ def test_get_all_blogs_with_data(client, db_session_mock):
     mock_query = MagicMock()
     mock_query.count.return_value = 1
     db_session_mock.query.return_value.filter.return_value.offset.return_value.limit.return_value.all.return_value = mock_blog_data
+    mock_query.all.return_value = mock_blog_data
 
     db_session_mock.query.return_value = mock_query
 
