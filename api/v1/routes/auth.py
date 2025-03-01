@@ -71,7 +71,6 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
     else:
         # Generate a new token and cache user details (15 mins expiry)
         verification_token = AuthService.generate_verification_token()
-        print(f"Generated Token Two: {verification_token}")
         redis_client.hmset(redis_key, {
             "email": user_schema.email,
             "password": user_schema.password,
@@ -104,7 +103,8 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
             'user': {
                 "email": user_schema.email,
                 'first_name': user_schema.first_name,
-                'last_name': user_schema.last_name
+                'last_name': user_schema.last_name,
+                'is_superadmin': 'false'
             }
             
         }
@@ -133,7 +133,6 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
 
     # Generate verification token
     verification_token = AuthService.generate_verification_token()
-    print(f"Generated Token: {verification_token}")
 
     # Check if the user email is already cached in Redis
     redis_key = f"pending_user:{user_schema.email}"
@@ -175,7 +174,8 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
             'user': {
                 "email": user_schema.email,
                 'first_name': user_schema.first_name,
-                'last_name': user_schema.last_name
+                'last_name': user_schema.last_name,
+                'is_superadmin': 'true'
             }
         }
     )
@@ -346,8 +346,8 @@ async def verify_token(
 
         if not cached_user:
             return fail_response(
-                status_code=status.HTTP_404_NOT_FOUND,
-                message="Verification token expired or invalid",
+                status_code=404,
+                message="Invalid email or token",
                 data={
                     'user': {
                         'email': token_schema.email,
@@ -364,11 +364,11 @@ async def verify_token(
 
             return fail_response(
                 status_code=401,
-                message="Invalid verification token",
+                message="Verification token expired or invalid",
                 data={
                     'user': {
                         'email': token_schema.email,
-                        'token': token_schema.Token
+                        'token': token_schema.token
                     }
                 }
             )
