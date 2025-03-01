@@ -78,7 +78,7 @@ def test_fetch_squeeze_page(mock_db_session, data, mock_send_email):
         LOGIN_URI, json={"email": "user1@gmail.com", "password": "P@ssw0rd"}
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["access_token"]
+    token = tok['data']["access_token"]
     res = client.post(URI, json=data, headers=theader(token))
     id = res.json()["data"]["id"]
     response = client.get(f"{URI}/{id}", headers=theader(token))
@@ -94,6 +94,6 @@ def test_fetch_all_squeeze_page(mock_db_session, data, mock_send_email):
         LOGIN_URI, json={"email": "user1@gmail.com", "password": "P@ssw0rd"}
     ).json()
     assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["access_token"]
+    token = tok['data']["access_token"]
     response = client.get(URI, headers=theader(token))
     assert response.status_code == status.HTTP_200_OK

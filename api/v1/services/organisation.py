@@ -297,6 +297,11 @@ class OrganisationService(Service):
 
         # Fetch all users associated with the organisation
         return user.organisations
+    
+    def get_organisation_by_id(self, db: Session, org_id: str):
+        """Fetches an organisation by id"""
+
+        return check_model_existence(db, Organisation, org_id)
 
     def check_by_email(self, db: Session, email):
         """Fetches a user by their email"""

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Blog Post Model."""
 
-from sqlalchemy import Column, String, Text, ForeignKey, Boolean, text
+from sqlalchemy import Column, String, Text, ForeignKey, Boolean, text, Index, Integer
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
 
@@ -31,7 +31,15 @@ class Blog(BaseTableModel):
     dislikes = relationship(
         "BlogDislike", back_populates="blog", cascade="all, delete-orphan"
     )
+    views = Column(Integer, nullable=False, server_default=text("0"))  # add views column to track views
 
+    # Indexes
+    __table_args__ = (
+        Index('ix_blogs_author_id', author_id),
+        Index('ix_blogs_title', title),
+        Index('ix_blogs_tags', tags),
+        Index('ix_blogs_is_deleted', is_deleted),
+    )
 
 class BlogDislike(BaseTableModel):
     __tablename__ = "blog_dislikes"
@@ -44,6 +52,14 @@ class BlogDislike(BaseTableModel):
     blog = relationship("Blog", back_populates="dislikes")
     user = relationship("User", back_populates="blog_dislikes")
 
+    # Indexes
+    __table_args__ = (
+        Index('ix_blog_dislikes_blog_id', blog_id),
+        Index('ix_blog_dislikes_user_id', user_id),
+        # Composite index for unique constraint and faster lookups
+        Index('ix_blog_dislikes_blog_user', blog_id, user_id, unique=True),
+    )
+
 
 class BlogLike(BaseTableModel):
     __tablename__ = "blog_likes"
@@ -54,3 +70,11 @@ class BlogLike(BaseTableModel):
 
     blog = relationship("Blog", back_populates="likes")
     user = relationship("User", back_populates="blog_likes")
+
+    # Indexes
+    __table_args__ = (
+        Index('ix_blog_likes_blog_id', blog_id),
+        Index('ix_blog_likes_user_id', user_id),
+        # Composite index for unique constraint and faster lookups
+        Index('ix_blog_likes_blog_user', blog_id, user_id, unique=True),
+    )

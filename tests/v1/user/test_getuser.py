@@ -48,7 +48,7 @@ def test_get_user(mock_db_session):
     '''First Login in'''
     url = 'api/v1/auth/login'
     login_response = client.post(url,json={'email':'dummyuser1@gmail.com', 'password': 'Testpassword@123'})
-    access_token = login_response.json()['access_token']
+    access_token = login_response.json()['data']['access_token']
     user_id = login_response.json()['data']['user']['id']
     
     """Testing the endpoint with an authorized user"""
