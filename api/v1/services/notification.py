@@ -10,14 +10,32 @@ from api.v1.models.user import User
 class NotificationService(Service):
 
     def send_notification(
-        self, title: str, message: str, db: Session = Depends(get_db)
+        self, title: str, message: str, user: User, db: Session = Depends(get_db)
     ):
         """Function to send a notification"""
-        new_notification = Notification(title=title, message=message, status="unread")
+        new_notification = Notification(user_id=user.id, title=title, message=message, status="unread")
         db.add(new_notification)
         db.commit()
         db.refresh(new_notification)
         return new_notification
+
+
+    def mark_notifications_as_read(
+        self,
+        user: User,
+        db: Session = Depends(get_db),
+    ):
+        unread_notifications = (
+            db.query(Notification).filter(Notification.status == "unread").all()
+        )
+
+        if not unread_notifications:
+            raise HTTPException(status_code=404, detail="No unread notifications found.")
+
+        for unread_notification in unread_notifications:
+            unread_notification.status = "read"
+
+        db.commit()
 
     def mark_notification_as_read(
         self,
