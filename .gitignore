@@ -173,3 +173,5 @@ cython_debug/
 #.idea/
 
 alembic/versions
+
+**/.DS_Store

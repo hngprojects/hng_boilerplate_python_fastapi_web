@@ -66,7 +66,7 @@ def update_user(
     )
 
 
-@user_router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@user_router.delete("/{user_id}", status_code=status.HTTP_200_OK)
 def delete_user(
     user_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
@@ -75,7 +75,6 @@ def delete_user(
     """Endpoint for user deletion (soft-delete)"""
 
     """
-
     Args:
         user_id (str): User ID
         current_user (User): Current logged in user
@@ -86,10 +85,23 @@ def delete_user(
         HTTPException: 404 NOT FOUND (User to be deleted cannot be found)
     """
 
+    # Check if user exists before attempting deletion
     user = user_service.fetch(db=db, id=user_id)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
     # soft-delete the user
     user_service.delete(db=db, id=user_id)
+
+    # Return a standardized success response
+    return success_response(
+        status_code=200,
+        message='User deleted successfully',
+    )
 
 @user_router.get('', status_code=status.HTTP_200_OK, response_model=AllUsersResponse)
 async def get_users(
