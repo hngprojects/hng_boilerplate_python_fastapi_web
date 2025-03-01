@@ -347,3 +347,44 @@ def delete_blog_dislike(
 
     # delete blog dislike
     return blog_dislike_service.delete(blog_dislike_id, current_user.id)
+
+
+@blog.get("/{blog_id}/engagement", response_model=success_response)
+def get_blog_engagement(
+    blog_id: str,
+    db: Session = Depends(get_db),
+):
+    """Endpoint to get engagement statistics for a blog post.
+
+    Args:
+        blog_id (str): The ID of the blog post.
+        db (Session): The database session.
+
+    Returns:
+        JSON response with engagement statistics including likes, dislikes, and comment count.
+    """
+    blog_service = BlogService(db)
+    comment_service = CommentService()
+
+    # Fetch blog post to ensure it exists
+    blog_post = blog_service.fetch(blog_id)
+    if not blog_post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Blog post not found"
+        )
+
+    # Get engagement stats
+    likes_count = blog_service.num_of_likes(blog_id)
+    dislikes_count = blog_service.num_of_dislikes(blog_id)
+    comments_count = comment_service.get_comment_count(blog_id, db)
+
+    return success_response(
+        message="Engagement statistics retrieved successfully",
+        status_code=status.HTTP_200_OK,
+        data={
+            "blog_id": blog_id,
+            "likes": likes_count,
+            "dislikes": dislikes_count,
+            "comments": comments_count,
+        },
+    )
