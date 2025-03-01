@@ -64,7 +64,9 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
 
     # Generate verification token
     verification_token = AuthService.generate_verification_token()
-    print(f"Generated Token: {verification_token}")
+    # print(f"Generated Token: {verification_token}")
+
+    access_token = user_service.create_registration_access_token(user_email=user_schema.email)
 
     # Check if the user email is already cached in Redis
     redis_key = f"pending_user:{user_schema.email}"
@@ -106,6 +108,7 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
         status_code=201, 
         message=f"Verification email sent. Please check your inbox at {user_schema.email}",
         data={
+            'access_token': access_token,
             'user': {
                 "email": user_schema.email,
                 'first_name': user_schema.first_name,
@@ -125,17 +128,70 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
     # Check if user already exists
     existing_user = user_service.get_user_by_email(db, email=user_schema.email)
     if existing_user:
-        return fail_response(
-            status_code=400,
-            message="User with this email already exists",
-            data={
-                'user': {
-                    'email': user_schema.email,
-                    'first_name': user_schema.first_name,
-                    'last_name': user_schema.last_name
+        if existing_user.is_verified == False:
+            return fail_response(
+                status_code=400,
+                message="User with this email already exists",
+                data={
+                    'user': {
+                        'email': user_schema.email,
+                        'first_name': user_schema.first_name,
+                        'last_name': user_schema.last_name
+                    }
                 }
-            }
-        )
+            )
+        
+        else:
+            # Generate verification token
+            verification_token = AuthService.generate_verification_token()
+
+            # Check if the user email is already cached in Redis
+            redis_key = f"pending_user:{user_schema.email}"
+            cached_user = redis_client.hgetall(redis_key)
+
+            if cached_user:
+                # Use the existing token if the cache hasn't expired
+                verification_token = cached_user.get('token')
+            else:
+                # Generate a new token and cache user details (15 mins expiry)
+                verification_token = AuthService.generate_verification_token()
+                redis_client.hmset(redis_key, {
+                    "email": user_schema.email,
+                    "password": user_schema.password,
+                    "first_name": user_schema.first_name,
+                    "last_name": user_schema.last_name,
+                    "token": verification_token,
+                    "is_superadmin": "true"
+                })
+                redis_client.expire(redis_key, 900)
+
+            # Send email verification link (reuse existing token or use new one)
+            cta_link = f'{settings.FRONTEND_URL}/verify?email={user_schema.email}&token={verification_token}'
+            background_tasks.add_task(
+                send_email,
+                recipient=user_schema.email,
+                template_name='email-verification.html',
+                subject='Verify Your Email Address',
+                context={
+                    'first_name': user_schema.first_name,
+                    'last_name': user_schema.first_name,
+                    'cta_link': cta_link
+                }
+
+            )
+            return success_response(
+                status_code=201, 
+                message=f"Verification email sent. Please check your inbox at {user_schema.email}",
+                data={
+                    'user': {
+                        "email": user_schema.email,
+                        'first_name': user_schema.first_name,
+                        'last_name': user_schema.first_name,
+                        'is_superadmin': 'true'
+                    }
+                }
+            )
+
 
     # Generate verification token
     verification_token = AuthService.generate_verification_token()
