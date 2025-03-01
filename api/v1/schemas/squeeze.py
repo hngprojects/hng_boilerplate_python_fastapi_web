@@ -1,12 +1,7 @@
 from enum import Enum
-<<<<<<< Updated upstream
-from typing import Optional
-
 from pydantic import BaseModel, EmailStr
-
-=======
+from enum import Enum
 from typing import Optional, Any, Dict
->>>>>>> Stashed changes
 
 class SqueezeStatusEnum(str, Enum):
     online = "online"
@@ -30,7 +25,6 @@ class FilterSqueeze(BaseModel):
     status: SqueezeStatusEnum = None
 
 
-<<<<<<< Updated upstream
 class UpdateSqueeze(BaseModel):
     title: Optional[str] = None
     headline: Optional[str] = None
@@ -39,10 +33,10 @@ class UpdateSqueeze(BaseModel):
     type: Optional[str] = None
     status: Optional[SqueezeStatusEnum] = None
     full_name: Optional[str] = None
-=======
+
+
 class SuccessResponseSchema(BaseModel):
     status_code: int
     success: bool = True
     message: str
     data: Optional[Dict[str, Any]] = None
->>>>>>> Stashed changes
