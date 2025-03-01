@@ -13,7 +13,7 @@ data = [
         "author_id": "066a16d8-cab5-7dd3-8000-3a167556bb49",
         "content": "I love python",
         "id": "066a6e8b-f008-7242-8000-8f090997097c",
-        "updated_at": "2025-01-01T01:56:31.002967+01:00",
+        "updated_at": "2025-03-01T01:56:31.002967+01:00",
         "client_designation": "testclient",
         "comments": "I love testimonies",
         "ratings": 5.02,
@@ -31,7 +31,12 @@ def mock_db():
 
 @pytest.fixture
 def mock_id(mock_db):
-    return mock_db
+    """Mock a database model."""
+    mock_model = MagicMock()
+    mock_model.query = MagicMock()
+    mock_model.commit = MagicMock()
+    mock_db.session = mock_model
+    return mock_model
 
 
 @pytest.fixture(autouse=True)
@@ -47,7 +52,7 @@ def override_get_db(mock_db):
 @pytest.fixture(scope="module")
 def setup_access_token():
     email = f"test{uuid.uuid4()}@gmail.com"
-    print(email)
+
     user_response = client.post(
         "/api/v1/auth/register",
         json={
@@ -59,10 +64,16 @@ def setup_access_token():
         },
     )
 
-    if user_response.status_code != 201:
-        raise Exception(f"Setup failed: {user_response.json()}")
-
-    return user_response.json()["data"]["access_token"]
+	assert user_response.status_code == 201, f"Setup failed {user_response.json()}"
+        
+    login_response = client.post(
+    	"/api/v1/auth/login",
+    	jso={"email": email, "password": "@Testpassword2"},
+    )
+    
+    assert login_response.status_code == 200, f"Login failed: {login_response.json()}"
+    
+    return login_response.json()["data"]["access_token"]
 
 
 def test_update_testimonial_success(mock_id, setup_access_token):
