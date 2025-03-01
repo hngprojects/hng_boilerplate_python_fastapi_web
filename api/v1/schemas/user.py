@@ -252,6 +252,9 @@ class LoginRequest(BaseModel):
         email = values.get("email")
         totp_code = values.get("totp_code")
 
+        if not password:
+            return values
+
         # constraints for password
         if not any(c.islower() for c in password):
             raise ValueError("password must include at least one lowercase character")
