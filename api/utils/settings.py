@@ -34,8 +34,8 @@ class Settings(BaseSettings):
     TWILIO_AUTH_TOKEN: str = config("TWILIO_AUTH_TOKEN")
     TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
 
-    APP_NAME: str = config("APP_NAME")
-
+    APP_NAME: str = config("APP_NAME", default="HNG Boilerplate")
+    
     # Base URLs
     ANCHOR_PYTHON_BASE_URL: str = config(
         "ANCHOR_PYTHON_BASE_URL", default="https://anchor-python.teams.hng.tech"
