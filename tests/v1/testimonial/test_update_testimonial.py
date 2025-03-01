@@ -1,9 +1,8 @@
+import uuid
 import pytest
 from main import app
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
-from api.db.database import get_db
-import uuid
 
 client = TestClient(app)
 
@@ -22,44 +21,33 @@ data = [
 ]
 
 
-"""Mocking the database"""
-@pytest.fixture
-def mock_db():
-    db_session = MagicMock()
-    yield db_session
+@pytest.fixture(autouse=True)
+def mock_send_mail():
+    with patch("api.core.dependencies.email_sender.send_email") as mock_email_sending:
+        with patch("fastapi.BackgroundTasks.add_task") as add_task_mock:
+            add_task_mock.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
+        yield mock_email_sending
 
 
-@pytest.fixture
-def mock_id(mock_db):
-    """Mock a database model."""
-    mock_model = MagicMock()
-    mock_model.query = MagicMock()
-    mock_model.commit = MagicMock()
-    mock_db.session = mock_model
-    return mock_model
-
+@pytest.fixture(scope="function")
+def client_with_mocks(mock_send_mail):
+    with patch('api.db.database.get_db') as mock_get_db:
+        mock_db = MagicMock()
+        mock_get_db.return_value = mock_db
+        
+        mock_db.query.return_value.filter.return_value.first.return_value = None
+        mock_db.add.reset_mock()
+        mock_db.commit.reset_mock()
+        mock_db.refresh.reset_mock()
+        
+        yield client, mock_db
 
 @pytest.fixture(autouse=True)
-def override_get_db(mock_db):
-    def get_db_override():
-        yield mock_db
-
-    app.dependency_overrides[get_db] = get_db_override
-    yield
-    app.dependency_overrides = {}
-
-
-@pytest.fixture(autouse=True)
-def mock_mail():
-    """Mock FastAPI-Mail to prevent actual email sending."""
-    with patch("fastapi_mail.FastMail.send_message", return_value=None):
-        yield
-
-
-@pytest.fixture(scope="module")
-def setup_access_token():
+def setup_access_token(client_with_mocks):
+    client, mock_db = client_with_mocks
+    mock_db.query.return_value.filter.return_value.first.return_value = None
+    
     email = f"test{uuid.uuid4()}@gmail.com"
-
     user_response = client.post(
         "/api/v1/auth/register",
         json={
@@ -70,26 +58,18 @@ def setup_access_token():
             "email": email,
         },
     )
-
-    assert user_response.status_code == 201, f"Setup failed {user_response.json()}"
-
-    login_response = client.post(
-        "/api/v1/auth/login",
-        json={"email": email, "password": "@Testpassword2"},
-    )
-
-    assert login_response.status_code == 200, f"Login failed: {login_response.json()}"
-
-    return login_response.json()["data"]["access_token"]
+    assert user_response.status_code == 201, f"Setup failed: {user_response.json()}"
+    return user_response.json()["data"]["access_token"]
 
 
-def test_update_testimonial_success(mock_id, setup_access_token):
-    mock_id.query().filter().first.return_value = data[0]
-    mock_id.commit = MagicMock()
+def test_update_testimonial_success(client_with_mocks, setup_access_token):
+    client, mock_db = client_with_mocks
 
-    update_data = {
-        "content": "I love python (updated)",
-    }
+    mock_testimonial = MagicMock()
+    mock_testimonial.content = "I love python"
+    mock_db.query.return_value.filter.return_value.first.return_value = mock_testimonial
+
+    update_data = {"content": "I love python (updated)"}
 
     response = client.put(
         f"/api/v1/testimonials/{data[0]['id']}",
@@ -101,8 +81,10 @@ def test_update_testimonial_success(mock_id, setup_access_token):
     assert response.json()["message"] == "Your testimonial has been updated successfully."
 
 
-def test_update_testimonial_not_found(mock_id, setup_access_token):
-    mock_id.query().filter().first.return_value = None
+def test_update_testimonial_not_found(client_with_mocks, setup_access_token):
+    client, mock_db = client_with_mocks
+
+    mock_db.query.return_value.filter.return_value.first.return_value = None
 
     response = client.put(
         "/api/v1/testimonials/non_existent_id",
@@ -114,7 +96,9 @@ def test_update_testimonial_not_found(mock_id, setup_access_token):
     assert response.json()["message"] == "Testimonial not found."
 
 
-def test_update_testimonial_unauthorized(mock_id):
+def test_update_testimonial_unauthorized(client_with_mocks):
+    client, _ = client_with_mocks
+    
     response = client.put(
         f"/api/v1/testimonials/{data[0]['id']}",
         json={"content": "This is an updated testimonial."},
