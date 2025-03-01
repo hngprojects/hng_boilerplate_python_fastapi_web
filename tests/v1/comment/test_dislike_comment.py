@@ -4,7 +4,7 @@ from main import app
 from api.v1.services.user import user_service
 from sqlalchemy.orm import Session
 from api.db.database import get_db
-from api.v1.models import User, Blog, Comment
+from api.v1.models import User, Blog, Comment, CommentDislike
 from api.v1.services.user import user_service
 from uuid_extensions import uuid7
 from unittest.mock import MagicMock
@@ -92,6 +92,7 @@ def test_dislike_comment_twice(
     test_blog, 
     test_comment,
     access_token_user1,
+    mocker
 ):
     # Mock the GET method for Organisation
     def mock_get(model, ident):
@@ -101,19 +102,76 @@ def test_dislike_comment_twice(
 
     mock_db_session.get.side_effect = mock_get
 
-    # Mock the query to return test user
-    mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
+    # # Mock the query to return test user
+    # mock_db_session.query.return_value.filter.return_value.first.return_value = test_user
     
-    # Mock the query to return null for existing dislikes
-    mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_dislike_comment]
+    # # Mock the query to return null for existing dislikes
+    # mock_db_session.query.return_value.filter_by.return_value.first.return_value = [test_dislike_comment]
 
-    # Test user belonging to the organisation
+    # # Test user belonging to the organisation
+    # headers = {'Authorization': f'Bearer {access_token_user1}'}
+    # response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
+    
+    # # Debugging statement
+    # if response.status_code != 201:
+    #     print(response.json())  # Print error message for more details
+
+    # assert response.status_code == 400, f"Expected status code 200, got {response.status_code}"
+    # assert response.json()['message'] == "You can only dislike once"
+
+
+    # Simulate that the user has not disliked the comment yet.
+    mock_query = mocker.MagicMock()
+    mock_query.filter_by.return_value.first.return_value = None
+    mock_db_session.query.return_value = mock_query
+
     headers = {'Authorization': f'Bearer {access_token_user1}'}
     response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
     
-    # Debugging statement
+    # Print the error details if the status code is not as expected.
     if response.status_code != 201:
-        print(response.json())  # Print error message for more details
+        print(response.json())
 
-    assert response.status_code == 400, f"Expected status code 200, got {response.status_code}"
+    # Check that the response status and message are as expected.
+    assert response.status_code == 201, f"Expected status code 201, got {response.status_code}"
+    assert response.json()['message'] == "Comment disliked successfully!"
+
+# Duplicate dislike test
+def test_dislike_comment_twice(
+    mock_db_session, 
+    test_user, 
+    test_blog, 
+    test_comment,
+    access_token_user1,
+    mocker,
+):
+    # Simulate comment existence.
+    def mock_get(model, ident):
+        if model == Comment and ident == test_comment.id:
+            return test_comment
+        return None
+
+    mock_db_session.get.side_effect = mock_get
+
+    # Simulate that the user already disliked the comment.
+    existing_dislike = CommentDislike(
+        id=str(uuid7()),
+        comment_id=test_comment.id,
+        user_id=test_user.id,
+        ip_address="127.0.0.1"
+    )
+    mock_query = mocker.MagicMock()
+    mock_query.filter_by.return_value.first.return_value = existing_dislike
+    mock_db_session.query.return_value = mock_query
+
+    headers = {'Authorization': f'Bearer {access_token_user1}'}
+    response = client.post(f"/api/v1/comments/{test_comment.id}/dislike", headers=headers)
+    
+    # Print error details for debugging if needed.
+    if response.status_code != 400:
+        print(response.json())
+    
+    # Check that duplicate dislike attempts return the correct error.
+    assert response.status_code == 400, f"Expected status code 400, got {response.status_code}"
+    # The error response now uses the "detail" key.
     assert response.json()['message'] == "You can only dislike once"
