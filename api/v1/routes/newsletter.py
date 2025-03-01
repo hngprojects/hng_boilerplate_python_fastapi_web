@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, status, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, status, Query, BackgroundTasks, HTTPException
 from typing import Annotated
 from sqlalchemy.orm import Session
+from api.utils.settings import settings
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import (
     EmailSchema,
     EmailRetrieveSchema,
     SingleNewsletterResponse,
     UpdateNewsletter,
+    PaginatedNewsletterResponse,
 )
 from api.db.database import get_db
 from api.v1.services.newsletter import NewsletterService, Newsletter
@@ -37,7 +39,7 @@ async def sub_newsletter(
         # Save user to the database
         NewsletterService.create(db, request)
 
-        link = "https://anchor-python.teams.hng.tech/"
+        link = f"{settings.ANCHOR_PYTHON_BASE_URL}/"
 
         # Send email in the background
         background_tasks.add_task(
@@ -56,7 +58,6 @@ async def sub_newsletter(
         status_code=status.HTTP_200_OK,
     )
 
-
 @newsletter.get(
     "/subscribers",
     response_model=success_response,
@@ -65,23 +66,33 @@ async def sub_newsletter(
 def retrieve_subscribers(
     db: Session = Depends(get_db),
     admin: User = Depends(user_service.get_current_super_admin),
+    page: int = Query(default=1, gt=0),
+    per_page: int = Query(default=10, gt=0, le=100)
 ):
     """
-    Retrieve all newsletter subscription from database
+    Retrieve all newsletter subscription from database with pagination
     """
-
-    subscriptions = NewsletterService.fetch_all(db)
-    subs_filtered = list(
-        map(lambda x: EmailRetrieveSchema.model_validate(x), subscriptions)
+    paginated_result = NewsletterService.get_paginated_subscribers(db, page, per_page)
+    
+    subscribers_filtered = list(
+        map(lambda x: EmailRetrieveSchema.model_validate(x), paginated_result["subscribers"])
     )
 
-    if len(subs_filtered) == 0:
-        subs_filtered = [{}]
+    if len(subscribers_filtered) == 0:
+        subscribers_filtered = [{}]
+
+    response_data = {
+        "page": paginated_result["page"],
+        "per_page": paginated_result["per_page"], 
+        "total_subscribers": paginated_result["total_subscribers"],
+        "total_pages": paginated_result["total_pages"],
+        "subscribers": jsonable_encoder(subscribers_filtered)
+    }
 
     return success_response(
         message="Subscriptions retrieved successfully",
         status_code=200,
-        data=jsonable_encoder(subs_filtered),
+        data=response_data
     )
 
 

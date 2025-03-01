@@ -78,7 +78,7 @@ def test_success_retrieval(mock_user_service, mock_db_session):
         "password": "Testpassword@123"
     })
     response = login.json()
-    access_token = response.get('access_token')
+    access_token = response['data'].get('access_token')
 
     # ensure testimonial is already created
     testimonial = create_testimonial(mock_user_service, mock_db_session)

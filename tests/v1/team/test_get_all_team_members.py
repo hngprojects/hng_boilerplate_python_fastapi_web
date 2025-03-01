@@ -71,7 +71,7 @@ class TestGetAllTeamMembers:
             assert response.json()[
                 'message'] == "Team members retrieved successfully"
             assert response.json()['data'] == test_members
-            assert response.json()['success'] == True
+            assert response.json()['status'] == "success"
 
     # Handling case where no team members are found
     def test_get_all_team_members_empty(self, client):

@@ -18,7 +18,8 @@ faq = APIRouter(prefix="/faqs", tags=["Frequently Asked Questions"])
 @faq.get("", response_model=success_response, status_code=200)
 async def get_all_faqs(
     db: Session = Depends(get_db),
-    keyword: Optional[str] = Query(None, min_length=1)
+    keyword: Optional[str] = Query(None, min_length=1),
+    category: Optional[str] = Query(None, min_length=1)
 ):
     """Endpoint to get all FAQs or search by keyword in both question and answer"""
 
@@ -26,16 +27,18 @@ async def get_all_faqs(
     if keyword:
         query_params["question"] = keyword
         query_params["answer"] = keyword
+    if category:
+        query_params["category"] = category
 
     grouped_faqs = faq_service.fetch_all_grouped_by_category(
-        db=db, **query_params)
+        db=db, **query_params
+    )
 
     return success_response(
         status_code=200,
         message="FAQs retrieved successfully",
         data=jsonable_encoder(grouped_faqs),
     )
-
 
 @faq.post("", response_model=success_response, status_code=201)
 async def create_faq(

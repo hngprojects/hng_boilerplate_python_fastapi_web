@@ -5,6 +5,7 @@ from api.v1.schemas.newsletter import EmailSchema
 from api.core.base.services import Service
 from api.v1.models.newsletter import NewsletterSubscriber, Newsletter
 from typing import Optional, Any, Annotated
+from math import ceil
 from api.utils.db_validators import check_model_existence
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import SingleNewsletterResponse
@@ -91,3 +92,25 @@ class NewsletterService(Service):
         db.refresh(newsletter)
         return newsletter
         db.commit()
+
+    @staticmethod
+    def get_paginated_subscribers(db: Session, page: int = 1, per_page: int = 10):
+        # Calculate offset
+        offset = (page - 1) * per_page
+        
+        # Get total count
+        total_subscribers = db.query(NewsletterSubscriber).count()
+        
+        # Calculate total pages
+        total_pages = ceil(total_subscribers / per_page)
+        
+        # Get paginated subscribers
+        subscribers = db.query(NewsletterSubscriber).order_by(NewsletterSubscriber.subscribed_at.desc()).offset(offset).limit(per_page).all()
+            
+        return {
+            "page": page,
+            "per_page": per_page,
+            "total_subscribers": total_subscribers,
+            "total_pages": total_pages,
+            "subscribers": subscribers
+        }

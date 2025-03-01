@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from uuid_extensions import uuid7
 from datetime import datetime, timezone, timedelta
 
@@ -51,7 +51,6 @@ user = User(
     updated_at=updated_at,
 )
 
-# Create test notification
 
 notification = Notification(
     id=notification_id,
@@ -63,26 +62,31 @@ notification = Notification(
     updated_at=updated_at,
 )
 
-
-def test_mark_notification_as_read(client, db_session_mock):
-
-    db_session_mock.query().filter().all.return_value = [user, notification]
-
+def test_mark_notifications_as_read(client, db_session_mock):
+    db_session_mock.query().filter(Notification.status == "unread").all.return_value = [user, notification]
     headers = {"authorization": f"Bearer {access_token}"}
-
-    response = client.patch(f"/api/v1/notifications/{notification.id}", headers=headers)
+    response = client.delete("/api/v1/notifications/clear", headers=headers)
 
     assert response.status_code == 200
     assert response.json()["success"] == True
     assert response.json()["status_code"] == 200
-    assert response.json()["message"] == "Notification marked as read"
+    assert response.json()["message"] == "All notifications marked as read successfully."
 
 
-def test_mark_notification_as_read_unauthenticated_user(client, db_session_mock):
-    # Create test notification
+def test_mark_notifications_as_read_unauthenticated_user(client, db_session_mock):
+    db_session_mock.query().filter(Notification.status == "unread").all.return_value = [notification]
+    response = client.delete("/api/v1/notifications/clear")
+    assert response.status_code == 401
 
+
+def test_mark_notifications_as_read(client, db_session_mock):
+    db_session_mock.query().filter().all.return_value = [user, notification]
+    headers = {"authorization": f"Bearer {access_token}"}
+    response = client.patch(f"/api/v1/notifications/{notification.id}", headers=headers)
+    assert response.status_code == 200
+
+
+def test_mark_notifications_as_read_unauthenticated_user(client, db_session_mock):
     db_session_mock.query().filter().all.return_value = [notification]
-
     response = client.patch(f"/api/v1/notifications/{notification.id}")
-
     assert response.status_code == 401
