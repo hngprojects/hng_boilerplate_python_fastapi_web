@@ -5,12 +5,15 @@ from typing import (Optional, Union,
                     List, Annotated, Dict,
                     Literal)
 
-from pydantic import (BaseModel, EmailStr,
-                      field_validator, ConfigDict,
-                      StringConstraints,
-                      model_validator)
-                      
-from pydantic import Field  # Added this import
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    field_validator,
+    ConfigDict,
+    StringConstraints,
+    model_validator,
+    Field
+)
 
 def validate_mx_record(domain: str):
     """
