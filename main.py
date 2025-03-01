@@ -15,6 +15,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.middleware.sessions import SessionMiddleware  # required by google oauth
 
+from api.v1.routes.blog import blog
 from api.utils.json_response import JsonResponseDict
 from api.utils.logger import logger
 from api.v1.routes import api_version_one
@@ -36,6 +37,8 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Include the blog routes
+app.include_router(blog)
 
 # Initialize the rate limiter
 limiter = Limiter(key_func=get_remote_address)

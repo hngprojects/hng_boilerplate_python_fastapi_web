@@ -347,3 +347,31 @@ def delete_blog_dislike(
 
     # delete blog dislike
     return blog_dislike_service.delete(blog_dislike_id, current_user.id)
+
+@blog.get("/authors/{author_id}/likes-dislikes", tags=["Fetch Likes and Dislikes"])
+def get_likes_dislikes_for_author(
+    author_id: str,  # This is the ID of the author
+    db: Session = Depends(get_db),  # This connects to our database
+    current_user: User = Depends(user_service.get_current_user),  # This checks who is asking
+):
+    # Call the service to get the likes and dislikes
+    blog_service = BlogService(db)
+    total_likes, total_dislikes = blog_service.get_likes_dislikes_by_author(db, author_id)
+
+    # If we don't find the author, return an error
+    if total_likes is None or total_dislikes is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Author not found",
+        )
+
+    # Return the total likes and dislikes
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Likes and dislikes for the author retrieved successfully",
+        data={
+            "author_id": author_id,
+            "total_likes": total_likes,
+            "total_dislikes": total_dislikes
+        }
+    )

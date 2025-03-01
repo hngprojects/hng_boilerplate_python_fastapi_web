@@ -2,6 +2,7 @@ from typing import Optional
 
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
@@ -160,6 +161,16 @@ class BlogService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid `creating` value for blog like/dislike"
             )
+        
+     # This function counts the likes and dislikes
+    def get_likes_dislikes_by_author(self, db: Session, author_id: str):
+        total_likes = db.query(func.count(BlogLike.id)).join(Blog).filter(Blog.author_id == author_id).scalar()
+        total_dislikes = db.query(func.count(BlogDislike.id)).join(Blog).filter(Blog.author_id == author_id).scalar()
+
+        if total_likes is None or total_dislikes is None:
+            return None, None
+
+        return total_likes, total_dislikes   
 
     def num_of_likes(self, blog_id: str) -> int:
         """Get the number of likes a blog post has"""
@@ -288,3 +299,5 @@ class BlogDislikeService:
 
         self.db.delete(blog_dislike)
         self.db.commit()
+
+blog_service = BlogService(db=None)
