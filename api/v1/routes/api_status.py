@@ -40,7 +40,7 @@ async def update_api_status(
 ):
     updated_status = APIStatusService.update(db, api_group, schema)
     return success_response(
-        message='AP Status updated successfully',
+        message='API Status updated successfully',
         data=updated_status,
         status_code=status.HTTP_200_OK
     )
