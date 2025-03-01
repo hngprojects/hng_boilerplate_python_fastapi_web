@@ -2,6 +2,8 @@ from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy.orm import Session
 
 from api.core.base.services import Service
+from api.utils.settings import settings
+from api.v1.models.squeeze import Squeeze
 from api.core.dependencies.email_sender import send_email
 from api.v1.models.squeeze import Squeeze
 from api.v1.schemas.squeeze import CreateSqueeze, FilterSqueeze, UpdateSqueeze
@@ -29,7 +31,7 @@ class SqueezeService(Service):
         db.add(new_squeeze)
         db.commit()
         db.refresh(new_squeeze)
-        cta_link = "https://anchor-python.teams.hng.tech/about-us"
+        cta_link = f"{settings.ANCHOR_PYTHON_BASE_URL}/about-us"
         background_tasks.add_task(
             send_email,
             recipient=data.email,

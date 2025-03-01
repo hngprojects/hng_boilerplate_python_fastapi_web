@@ -36,7 +36,10 @@ class UserBase(BaseModel):
     email: EmailStr
     created_at: datetime
 
+class UserEmailSender(BaseModel):
+    email: EmailStr
 
+    
 class UserCreate(BaseModel):
     """Schema to create a user"""
 

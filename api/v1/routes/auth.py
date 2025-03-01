@@ -1,12 +1,22 @@
 import logging
 from datetime import timedelta
+from fastapi.responses import JSONResponse
+from jose import ExpiredSignatureError, JWTError
 from slowapi import Limiter
 from redis import Redis
 from api.core.dependencies.redis_cache import redis_client
 from slowapi.util import get_remote_address
 from api.utils.settings import settings
 
-from fastapi import BackgroundTasks, Depends, status, APIRouter, Response, Request, HTTPException
+from fastapi import (
+    BackgroundTasks,
+    Depends,
+    status,
+    APIRouter,
+    Response,
+    Request,
+    HTTPException,
+)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -15,7 +25,7 @@ from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import auth_response, success_response, fail_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
-from api.v1.schemas.user import Token
+from api.v1.schemas.user import Token, UserEmailSender
 from api.v1.schemas.user import (
     LoginRequest,
     UserCreate,
@@ -24,6 +34,7 @@ from api.v1.schemas.user import (
     UserData2,
 )
 from api.v1.schemas.token import TokenRequest
+
 from api.v1.schemas.user import (MagicLinkRequest,
                                  ChangePasswordSchema,
                                  AuthMeResponse)
@@ -34,7 +45,12 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
 from api.v1.services.profile import profile_service
-from api.v1.schemas.totp_device import TOTPDeviceRequestSchema, TOTPDeviceResponseSchema, TOTPTokenSchema, TOTPDeviceDataSchema
+from api.v1.schemas.totp_device import (
+    TOTPDeviceRequestSchema,
+    TOTPDeviceResponseSchema,
+    TOTPTokenSchema,
+    TOTPDeviceDataSchema,
+)
 from api.v1.services.totp import totp_service
 from api.utils.settings import settings
 
@@ -50,9 +66,14 @@ logger = logging.getLogger(__name__)
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
-def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
-    '''Endpoint for a user to register their account'''
-
+def register(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    response: Response,
+    user_schema: UserCreate,
+    db: Session = Depends(get_db),
+):
+    """Endpoint for a user to register their account"""
 
     # Check if user already exists
     existing_user = user_service.get_user_by_email(db, email=user_schema.email)
@@ -109,7 +130,6 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
     )
 
 
-
     return success_response(
         status_code=201, 
         message=f"Verification email sent. Please check your inbox at {user_schema.email}",
@@ -124,6 +144,57 @@ def register(request: Request, background_tasks: BackgroundTasks, response: Resp
             
         }
     )
+
+
+@auth.get("/verify-email")
+def verify_email(token: str, db: Session = Depends(get_db)):
+    '''Endpoint to verify email'''
+    try:
+        return user_service.verify_user_email(token, db)
+    except ExpiredSignatureError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Verification link expired"
+            )
+        
+    except JWTError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid token"
+            )
+
+@auth.post("/resend_verification_email")
+def resend_verification_email(request: Request, data: UserEmailSender, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Resends the email verification link"""
+    email = data.email
+    print(email)
+    user = user_service.user_to_verify(email, db)
+    verification_token = user_service.create_verification_token(user.id)
+    base_url = str(request.base_url).strip("/")
+    verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
+    cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+
+    background_tasks.add_task(
+        send_email,
+        recipient=email,
+        template_name='welcome.html',
+        subject='Welcome to HNG Boilerplate, Verify Your Email below',
+        context={
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'verification_link': verification_link,
+            'cta_link': cta_link
+        }
+    )
+
+    return {
+        "status": "success",
+        "status_code": 200,
+        "message": "Verification email sent successfully"
+    }
+ 
+
+
 
 @auth.post(path="/register-super-admin", status_code=status.HTTP_201_CREATED, response_model=auth_response)
 @limiter.limit("1000/minute")  # Limit to 5 requests per minute per IP
@@ -347,8 +418,11 @@ def refresh_access_token(
 
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
-async def request_signin_token(request: Request, background_tasks: BackgroundTasks,
-    email_schema: EmailRequest, db: Session = Depends(get_db)
+async def request_signin_token(
+    request: Request,
+    background_tasks: BackgroundTasks,
+    email_schema: EmailRequest,
+    db: Session = Depends(get_db),
 ):
     """Generate and send a 6-digit sign-in token to the user's email"""
 
@@ -359,7 +433,7 @@ async def request_signin_token(request: Request, background_tasks: BackgroundTas
     user_service.save_login_token(db, user, token, token_expiry)
 
     # Send mail notification
-    link = f"https://anchor-python.teams.hng.tech/login/verify-token?token={token}"
+    link = f"{settings.ANCHOR_PYTHON_BASE_URL}/login/verify-token?token={token}"
 
     # Send email in the background
     background_tasks.add_task(
@@ -379,7 +453,9 @@ async def request_signin_token(request: Request, background_tasks: BackgroundTas
     )
 
 
-@auth.post("/verify-token", status_code=status.HTTP_200_OK, response_model=auth_response)
+@auth.post(
+    "/verify-token", status_code=status.HTTP_200_OK, response_model=auth_response
+)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 async def verify_token(
     request: Request,
@@ -533,7 +609,9 @@ def request_magic_link(
 ):
     user = user_service.fetch_by_email(db=db, email=requests.email)
     magic_link_token = user_service.create_access_token(user_id=user.id)
-    magic_link = f"https://anchor-python.teams.hng.tech/login/magic-link?token={magic_link_token}"
+    magic_link = (
+        f"{settings.ANCHOR_PYTHON_BASE_URL}/login/magic-link?token={magic_link_token}"
+    )
 
     background_tasks.add_task(
         send_magic_link,
@@ -553,7 +631,9 @@ def request_magic_link(
 
 @auth.post("/magic-link/verify")
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
-async def verify_magic_link(request: Request, token_schema: Token, db: Session = Depends(get_db)):
+async def verify_magic_link(
+    request: Request, token_schema: Token, db: Session = Depends(get_db)
+):
     user, access_token = AuthService.verify_magic_token(token_schema.token, db)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
@@ -603,9 +683,7 @@ async def change_password(
     return success_response(status_code=200, message="Password changed successfully")
 
 
-@auth.get("/@me",
-          status_code=status.HTTP_200_OK,
-          response_model=AuthMeResponse)
+@auth.get("/@me", status_code=status.HTTP_200_OK, response_model=AuthMeResponse)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 def get_current_user_details(
     request: Request,
@@ -645,11 +723,9 @@ def setup_2fa(
         qrcode_base64 = totp_service.generate_qrcode(otpauth_url)
 
         response_data = TOTPDeviceResponseSchema(
-            secret=secret, 
-            otpauth_url=otpauth_url, 
-            qrcode_base64=qrcode_base64
+            secret=secret, otpauth_url=otpauth_url, qrcode_base64=qrcode_base64
         )
-        
+
         return success_response(
             status_code=status.HTTP_201_CREATED,
             message="TOTP device created successfully.",
@@ -676,13 +752,15 @@ def enable_2fa(
 
     try:
         totp_device = totp_service.verify_token(
-            db=db, 
-            user_id=current_user.id, 
-            schema=token_schema.totp_token, 
-            extra_action="enable"
+            db=db,
+            user_id=current_user.id,
+            schema=token_schema.totp_token,
+            extra_action="enable",
         )
-        response_data = TOTPDeviceDataSchema(user_id=totp_device.user_id, confirmed=totp_device.confirmed)
-        
+        response_data = TOTPDeviceDataSchema(
+            user_id=totp_device.user_id, confirmed=totp_device.confirmed
+        )
+
         return success_response(
             status_code=status.HTTP_202_ACCEPTED,
             message="TOTP device enabled successfully.",
@@ -695,7 +773,7 @@ def enable_2fa(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error enabling totp device: {str(e)}",
         )
-        
+
 
 @auth.put("/disable-2fa")
 @limiter.limit("20/minute")
@@ -709,13 +787,15 @@ def disable_2fa(
 
     try:
         totp_device = totp_service.verify_token(
-            db=db, 
-            user_id=current_user.id, 
-            schema=token_schema.totp_token, 
-            extra_action="disable"
+            db=db,
+            user_id=current_user.id,
+            schema=token_schema.totp_token,
+            extra_action="disable",
         )
-        response_data = TOTPDeviceDataSchema(user_id=totp_device.user_id, confirmed=totp_device.confirmed)
-        
+        response_data = TOTPDeviceDataSchema(
+            user_id=totp_device.user_id, confirmed=totp_device.confirmed
+        )
+
         return success_response(
             status_code=status.HTTP_202_ACCEPTED,
             message="TOTP device disabled successfully.",

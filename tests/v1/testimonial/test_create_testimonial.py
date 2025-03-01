@@ -19,11 +19,11 @@ def mock_db_session(mocker):
     app.dependency_overrides[get_db] = lambda: db_session_mock
     return db_session_mock
 
-
 @pytest.fixture
 def mock_user_service():
     with patch("api.v1.services.user.user_service", autospec=True) as user_service_mock:
         yield user_service_mock
+
 
 
 @pytest.fixture
