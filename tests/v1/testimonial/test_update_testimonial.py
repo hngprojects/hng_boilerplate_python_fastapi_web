@@ -66,23 +66,27 @@ def test_update_testimonial_success(client_with_mocks, setup_access_token):
     client, mock_db = client_with_mocks
 
     mock_testimonial = MagicMock()
-    mock_testimonial.id = data[0]["id"]
+    mock_testimonial.id = uuid.UUID(data[0]["id"])
     mock_testimonial.content = data[0]["content"]
     mock_testimonial.client_name = data[0]["client_name"]
     mock_testimonial.client_designation = data[0]["client_designation"]
     mock_testimonial.comments = data[0]["comments"]
     mock_testimonial.ratings = data[0]["ratings"]
 
-    mock_db.query.return_value.filter.return_value.first.return_value = mock_testimonial
+    mock_query = mock_db.query.return_value
+    mock_filter = mock_query.filter.return_value
+    mock_first = mock_filter.first
+    mock_first.return_value = mock_testimonial
 
-    print(mock_db.query.return_value.filter.return_value.first.return_value) 
+    print("Mock Testimonial: ", mock_first.return_value)
+    print("Access Token:", setup_access_token)
 
     update_data = {"content": "I love python (updated)"}
 
     response = client.put(
         f"/api/v1/testimonials/{data[0]['id']}",
         json=update_data,
-        headers={"Authorization": f"Bearer {setup_access_token}"},
+        headers={"Authorization": setup_access_token},
     )
 
     assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.json()}"
