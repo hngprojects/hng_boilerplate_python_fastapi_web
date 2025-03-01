@@ -14,9 +14,9 @@ from sqlalchemy import cast, DateTime
 from fastapi import HTTPException, status, Request
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from api.utils.settings import settings
 
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 
 def get_plan_by_id(db: Session, plan_id: str):
@@ -30,12 +30,13 @@ def convert_duration_to_timedelta(duration: str) -> timedelta:
         return timedelta(days=365)  # Approximate year length
     else:
         raise ValueError("Invalid duration")
-    
+
+
 def is_eligible_for_plan(db: Session, user_id: str, plan_id: str):
     # Fetch the user's current subscription
-    user_subscription = db.query(UserSubscription).filter(
-        UserSubscription.user_id == user_id
-    ).first()
+    user_subscription = (
+        db.query(UserSubscription).filter(UserSubscription.user_id == user_id).first()
+    )
 
     # If the user has no subscription, they are eligible for the plan
     if not user_subscription:
@@ -55,9 +56,9 @@ def is_eligible_for_plan(db: Session, user_id: str, plan_id: str):
 
 def calculate_prorated_amount(db: Session, user_id: str, plan_id: str):
     # Fetch the user's current subscription
-    user_subscription = db.query(UserSubscription).filter(
-        UserSubscription.user_id == user_id
-    ).first()
+    user_subscription = (
+        db.query(UserSubscription).filter(UserSubscription.user_id == user_id).first()
+    )
 
     # Fetch the plan the user is trying to upgrade or downgrade to
     plan = get_plan_by_id(db, plan_id)
@@ -82,12 +83,20 @@ def get_all_plans(db: Session):
         data = db.query(BillingPlan).all()
         if not data:
             raise HTTPException(status_code=404, detail="No billing plans found")
-        return success_response(status_code=status.HTTP_200_OK, message="Plans successfully retrieved", data=data)
+        return success_response(
+            status_code=status.HTTP_200_OK,
+            message="Plans successfully retrieved",
+            data=data,
+        )
     except SQLAlchemyError as e:
-        raise HTTPException(status_code=500, detail="An error occurred while fetching billing plans")
+        raise HTTPException(
+            status_code=500, detail="An error occurred while fetching billing plans"
+        )
 
 
-async def update_user_plan(db: Session, user_id: str, plan_id: str, is_downgrade: bool = False):
+async def update_user_plan(
+    db: Session, user_id: str, plan_id: str, is_downgrade: bool = False
+):
     user = db.query(User).filter(User.id == user_id).first()
     plan = get_plan_by_id(db, plan_id)
 
@@ -96,29 +105,41 @@ async def update_user_plan(db: Session, user_id: str, plan_id: str, is_downgrade
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-    user_subscription = db.query(UserSubscription).filter(
-        UserSubscription.user_id == user_id
-    ).first()
+    user_subscription = (
+        db.query(UserSubscription).filter(UserSubscription.user_id == user_id).first()
+    )
 
     if user_subscription:
         old_plan = user_subscription.billing_plan
-        old_duration = convert_duration_to_timedelta(user_subscription.billing_plan.duration)
-        days_remaining = (datetime.strptime(user_subscription.end_date, "%Y-%m-%d %H:%M:%S.%f") - datetime.utcnow()).days
-        total_days = (datetime.strptime(user_subscription.end_date, "%Y-%m-%d %H:%M:%S.%f") - datetime.strptime(user_subscription.start_date, "%Y-%m-%d %H:%M:%S.%f")).days
+        old_duration = convert_duration_to_timedelta(
+            user_subscription.billing_plan.duration
+        )
+        days_remaining = (
+            datetime.strptime(user_subscription.end_date, "%Y-%m-%d %H:%M:%S.%f")
+            - datetime.utcnow()
+        ).days
+        total_days = (
+            datetime.strptime(user_subscription.end_date, "%Y-%m-%d %H:%M:%S.%f")
+            - datetime.strptime(user_subscription.start_date, "%Y-%m-%d %H:%M:%S.%f")
+        ).days
 
         prorated_amount = 0  # Initialize prorated_amount to 0
         if is_downgrade:
             prorated_amount = (old_plan.price / total_days) * days_remaining
-            #TODO Refund or credit the user's account (implement based on  payment logic)
+            # TODO Refund or credit the user's account (implement based on  payment logic)
         else:
-            prorated_amount = (plan.price - prorated_amount)
-            #TODO Charge the user's payment method (implement based on  payment logic)
+            prorated_amount = plan.price - prorated_amount
+            # TODO Charge the user's payment method (implement based on  payment logic)
 
         user_subscription.plan_id = plan.id
-        user_subscription.start_date = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f")
-        user_subscription.end_date = (datetime.utcnow() + duration).strftime("%Y-%m-%d %H:%M:%S.%f")
+        user_subscription.start_date = datetime.utcnow().strftime(
+            "%Y-%m-%d %H:%M:%S.%f"
+        )
+        user_subscription.end_date = (datetime.utcnow() + duration).strftime(
+            "%Y-%m-%d %H:%M:%S.%f"
+        )
         user_subscription.billing_cycle = datetime.utcnow() + duration
-        
+
     else:
         user_subscription = UserSubscription(
             user_id=user_id,
@@ -126,7 +147,7 @@ async def update_user_plan(db: Session, user_id: str, plan_id: str, is_downgrade
             organisation_id=plan.organisation_id,
             start_date=datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S.%f"),
             end_date=(datetime.utcnow() + duration).strftime("%Y-%m-%d %H:%M:%S.%f"),
-            billing_cycle=datetime.utcnow() + duration
+            billing_cycle=datetime.utcnow() + duration,
         )
         db.add(user_subscription)
 
@@ -139,14 +160,13 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_id:
 
     # base_urls = request.base_url
     # base_urls = str(request.url.scheme) + "://" + str(request.url.netloc)
-    
-    base_urls = "https://anchor-python.teams.hng.tech/"
+
+    base_urls = f"{settings.ANCHOR_PYTHON_BASE_URL}/"
     success_url = f"{base_urls}payment" + "/success?session_id={CHECKOUT_SESSION_ID}"
     cancel_url = f"{base_urls}payment/pricing"
 
     # success_url = f"{base_urls}api/v1/payment/stripe" + "/success?session_id={CHECKOUT_SESSION_ID}"
     # cancel_url = f"{base_urls}api/v1/payment/stripe/cancel"
-
 
     user = db.query(User).filter(User.id == user_id).first()
 
@@ -157,30 +177,33 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_id:
 
     if not plan:
         return fail_response(status_code=404, message="Plan not found")
-    
 
     if plan.name != "Free":
         try:
             # Create a checkout session
             checkout_session = stripe.checkout.Session.create(
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': {
-                        'currency': plan.currency,
-                        'product_data': {
-                            'name': plan.name,
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": plan.currency,
+                            "product_data": {
+                                "name": plan.name,
+                            },
+                            "unit_amount": int(
+                                plan.price * 100
+                            ),  # Convert to the smallest unit
                         },
-                        'unit_amount': int(plan.price * 100),  # Convert to the smallest unit
-                    },
-                    'quantity': 1,
-                }],
-                mode='payment',
+                        "quantity": 1,
+                    }
+                ],
+                mode="payment",
                 customer_email=user.email,  # Automatically fill in the user's email in the checkout
                 success_url=success_url,
                 cancel_url=cancel_url,
                 metadata={
-                    'user_id': user_id,
-                    'plan_id': plan.id,
+                    "user_id": user_id,
+                    "plan_id": plan.id,
                 },
             )
 
@@ -195,12 +218,12 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_id:
                     "metadata": checkout_session["metadata"],
                     "payment_method_types": checkout_session["payment_method_types"],
                     "checkout_url": checkout_session["url"],
-                    "amount_total": checkout_session["amount_total"]
+                    "amount_total": checkout_session["amount_total"],
                 }
 
                 return success_response(
                     status_code=status.HTTP_200_OK,
-                    message='payment in progress',
+                    message="payment in progress",
                     data=data,
                 )
 
@@ -209,8 +232,9 @@ def stripe_payment_request(db: Session, user_id: str, request: Request, plan_id:
             raise HTTPException(status_code=500, detail=f"Payment failed: {str(e)}")
 
     else:
-        return fail_response(status_code=400, message="No payment is required for the Free plan")
-
+        return fail_response(
+            status_code=400, message="No payment is required for the Free plan"
+        )
 
 
 def fetch_all_organisations_with_users_and_plans(db: Session):
@@ -226,7 +250,7 @@ def fetch_all_organisations_with_users_and_plans(db: Session):
             BillingPlan.currency,
             BillingPlan.duration,
             UserSubscription.start_date,
-            UserSubscription.end_date
+            UserSubscription.end_date,
         )
         .join(UserSubscription, Organisation.id == UserSubscription.organisation_id)
         .join(User, User.id == UserSubscription.user_id)
@@ -240,10 +264,7 @@ def fetch_all_organisations_with_users_and_plans(db: Session):
     for row in result:
         org_id = row.id
         if org_id not in organizations_data:
-            organizations_data[org_id] = {
-                "organisation_name": row.name,
-                "users": []
-            }
+            organizations_data[org_id] = {"organisation_name": row.name, "users": []}
 
         user_info = {
             "user_id": row.user_id,
@@ -253,7 +274,27 @@ def fetch_all_organisations_with_users_and_plans(db: Session):
             "currency": row.currency,
             "duration": row.duration,
             "start_date": row.start_date,
-            "end_date": row.end_date
+            "end_date": row.end_date,
+        }
+
+        organizations_data[org_id]["users"].append(user_info)
+
+    return list(organizations_data.values())
+    organizations_data = {}
+    for row in result:
+        org_id = row.id
+        if org_id not in organizations_data:
+            organizations_data[org_id] = {"organisation_name": row.name, "users": []}
+
+        user_info = {
+            "user_id": row.user_id,
+            "user_name": row.user_name,
+            "plan_name": row.plan_name,
+            "price": row.price,
+            "currency": row.currency,
+            "duration": row.duration,
+            "start_date": row.start_date,
+            "end_date": row.end_date,
         }
 
         organizations_data[org_id]["users"].append(user_info)

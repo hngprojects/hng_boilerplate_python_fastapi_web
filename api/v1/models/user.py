@@ -89,6 +89,9 @@ class User(BaseTableModel):
     subscriptions = relationship(
         "UserSubscription", back_populates="user", cascade="all, delete-orphan"
     )
+    comment_replies = relationship(
+        "Reply", back_populates="user", cascade="all, delete-orphan"
+    )
 
     reset_password_token = relationship("ResetPasswordToken",
                                         back_populates="user",
