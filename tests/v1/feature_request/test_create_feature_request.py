@@ -58,10 +58,10 @@ def feature_request_response():
 
 
 class TestCreateFeatureRequest:
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_create_feature_request_success(self, mock_service, db_session, sample_user, feature_request_data):
+    @patch("api.v1.services.feature_request.FeatureRequestService.create_feature_request")
+    def test_create_feature_request_success(self, mock_create, db_session, sample_user, feature_request_data):
         # Arrange
-        mock_service.create_feature_request.return_value = FeatureRequestResponse(
+        mock_create.return_value = FeatureRequestResponse(
             id=str(uuid.uuid4()),
             title=feature_request_data.title,
             description=feature_request_data.description,
@@ -76,7 +76,7 @@ class TestCreateFeatureRequest:
         result = create_feature_request(feature_request_data, db_session, sample_user)
         
         # Assert
-        mock_service.create_feature_request.assert_called_once_with(
+        mock_create.assert_called_once_with(
             db_session, feature_request_data, sample_user.id
         )
         assert result.title == feature_request_data.title
@@ -86,10 +86,10 @@ class TestCreateFeatureRequest:
 
 
 class TestGetFeatureRequests:
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_get_feature_requests_as_admin(self, mock_service, db_session, admin_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_requests")
+    def test_get_feature_requests_as_admin(self, mock_get, db_session, admin_user):
         # Arrange
-        mock_service.get_feature_requests.return_value = [
+        mock_get.return_value = [
             FeatureRequestResponse(
                 id=str(uuid.uuid4()),
                 title="Feature 1",
@@ -116,13 +116,13 @@ class TestGetFeatureRequests:
         result = get_feature_requests(0, 10, db_session, admin_user)
         
         # Assert
-        mock_service.get_feature_requests.assert_called_once_with(db_session, 0, 10)
+        mock_get.assert_called_once_with(db_session, 0, 10)
         assert len(result) == 2
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_get_feature_requests_as_regular_user(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_user_feature_requests")
+    def test_get_feature_requests_as_regular_user(self, mock_get_user, db_session, sample_user):
         # Arrange
-        mock_service.get_user_feature_requests.return_value = [
+        mock_get_user.return_value = [
             FeatureRequestResponse(
                 id=str(uuid.uuid4()),
                 title="User Feature",
@@ -139,17 +139,17 @@ class TestGetFeatureRequests:
         result = get_feature_requests(0, 10, db_session, sample_user)
         
         # Assert
-        mock_service.get_user_feature_requests.assert_called_once_with(db_session, sample_user.id, 0, 10)
+        mock_get_user.assert_called_once_with(db_session, sample_user.id, 0, 10)
         assert len(result) == 1
         assert result[0].user_id == sample_user.id
 
 
 class TestGetFeatureRequest:
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_get_feature_request_not_found(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_get_feature_request_not_found(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
-        mock_service.get_feature_request_by_id.return_value = None
+        mock_get_by_id.return_value = None
         
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -158,8 +158,8 @@ class TestGetFeatureRequest:
         assert exc_info.value.status_code == 404
         assert exc_info.value.detail == "Feature request not found"
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_get_feature_request_forbidden(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_get_feature_request_forbidden(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         other_user_id = str(uuid.uuid4())
@@ -167,7 +167,7 @@ class TestGetFeatureRequest:
         mock_feature_request = MagicMock()
         mock_feature_request.user_id = other_user_id
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
+        mock_get_by_id.return_value = mock_feature_request
         
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -176,15 +176,15 @@ class TestGetFeatureRequest:
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to access this feature request"
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_get_feature_request_success_owner(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_get_feature_request_success_owner(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         
         mock_feature_request = MagicMock()
         mock_feature_request.user_id = sample_user.id
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
+        mock_get_by_id.return_value = mock_feature_request
         
         # Act
         result = get_feature_request(feature_request_id, db_session, sample_user)
@@ -192,8 +192,8 @@ class TestGetFeatureRequest:
         # Assert
         assert result == mock_feature_request
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_get_feature_request_success_admin(self, mock_service, db_session, admin_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_get_feature_request_success_admin(self, mock_get_by_id, db_session, admin_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         other_user_id = str(uuid.uuid4())
@@ -201,7 +201,7 @@ class TestGetFeatureRequest:
         mock_feature_request = MagicMock()
         mock_feature_request.user_id = other_user_id
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
+        mock_get_by_id.return_value = mock_feature_request
         
         # Act
         result = get_feature_request(feature_request_id, db_session, admin_user)
@@ -211,12 +211,12 @@ class TestGetFeatureRequest:
 
 
 class TestUpdateFeatureRequest:
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_update_feature_request_not_found(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_update_feature_request_not_found(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         update_data = FeatureRequestUpdate(title="Updated Title")
-        mock_service.get_feature_request_by_id.return_value = None
+        mock_get_by_id.return_value = None
         
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -225,8 +225,8 @@ class TestUpdateFeatureRequest:
         assert exc_info.value.status_code == 404
         assert exc_info.value.detail == "Feature request not found"
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_update_feature_request_forbidden(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_update_feature_request_forbidden(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         update_data = FeatureRequestUpdate(title="Updated Title")
@@ -235,7 +235,7 @@ class TestUpdateFeatureRequest:
         mock_feature_request = MagicMock()
         mock_feature_request.user_id = other_user_id
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
+        mock_get_by_id.return_value = mock_feature_request
         
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -244,8 +244,9 @@ class TestUpdateFeatureRequest:
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to update this feature request"
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_update_feature_request_success(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    @patch("api.v1.services.feature_request.FeatureRequestService.update_feature_request")
+    def test_update_feature_request_success(self, mock_update, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         update_data = FeatureRequestUpdate(title="Updated Title")
@@ -264,14 +265,14 @@ class TestUpdateFeatureRequest:
             updated_at="2025-03-01T12:30:00"
         )
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
-        mock_service.update_feature_request.return_value = updated_feature_request
+        mock_get_by_id.return_value = mock_feature_request
+        mock_update.return_value = updated_feature_request
         
         # Act
         result = update_feature_request(feature_request_id, update_data, db_session, sample_user)
         
         # Assert
-        mock_service.update_feature_request.assert_called_once_with(
+        mock_update.assert_called_once_with(
             db_session, feature_request_id, update_data
         )
         assert result.title == "Updated Title"
@@ -279,11 +280,11 @@ class TestUpdateFeatureRequest:
 
 
 class TestDeleteFeatureRequest:
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_delete_feature_request_not_found(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_delete_feature_request_not_found(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
-        mock_service.get_feature_request_by_id.return_value = None
+        mock_get_by_id.return_value = None
         
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -292,8 +293,8 @@ class TestDeleteFeatureRequest:
         assert exc_info.value.status_code == 404
         assert exc_info.value.detail == "Feature request not found"
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_delete_feature_request_forbidden(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_delete_feature_request_forbidden(self, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         other_user_id = str(uuid.uuid4())
@@ -301,7 +302,7 @@ class TestDeleteFeatureRequest:
         mock_feature_request = MagicMock()
         mock_feature_request.user_id = other_user_id
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
+        mock_get_by_id.return_value = mock_feature_request
         
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
@@ -310,19 +311,20 @@ class TestDeleteFeatureRequest:
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to delete this feature request"
         
-    @patch("api.v1.services.feature_request.FeatureRequestService")
-    def test_delete_feature_request_success(self, mock_service, db_session, sample_user):
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    @patch("api.v1.services.feature_request.FeatureRequestService.delete_feature_request")
+    def test_delete_feature_request_success(self, mock_delete, mock_get_by_id, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
         
         mock_feature_request = MagicMock()
         mock_feature_request.user_id = sample_user.id
         
-        mock_service.get_feature_request_by_id.return_value = mock_feature_request
+        mock_get_by_id.return_value = mock_feature_request
         
         # Act
         result = delete_feature_request(feature_request_id, db_session, sample_user)
         
         # Assert
-        mock_service.delete_feature_request.assert_called_once_with(db_session, feature_request_id)
+        mock_delete.assert_called_once_with(db_session, feature_request_id)
         assert result is None
