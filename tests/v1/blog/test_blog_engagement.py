@@ -1,11 +1,15 @@
 import pytest
-from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
+from uuid_extensions import uuid7
+from sqlalchemy.orm import Session
+from unittest.mock import MagicMock
 
 from main import app
-from app.services.blog_service import BlogService
-from app.services.comment_service import CommentService
-
+from api.db.database import get_db
+from api.v1.models.user import User
+from api.v1.models.blog import Blog
+from api.v1.schemas.blog import BlogRequest
+from api.v1.services.user import user_service
 # Initialize TestClient
 client = TestClient(app)
 
