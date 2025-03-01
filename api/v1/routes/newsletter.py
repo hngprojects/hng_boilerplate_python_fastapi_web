@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status, Query, BackgroundTasks, HTTPException
 from typing import Annotated
 from sqlalchemy.orm import Session
+from api.utils.settings import settings
 from api.utils.success_response import success_response
 from api.v1.schemas.newsletter import (
     EmailSchema,
@@ -38,7 +39,7 @@ async def sub_newsletter(
         # Save user to the database
         NewsletterService.create(db, request)
 
-        link = "https://anchor-python.teams.hng.tech/"
+        link = f"{settings.ANCHOR_PYTHON_BASE_URL}/"
 
         # Send email in the background
         background_tasks.add_task(

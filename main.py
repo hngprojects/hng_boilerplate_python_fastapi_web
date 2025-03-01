@@ -63,7 +63,7 @@ app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 origins = [
     "http://localhost:3000",
     "http://localhost:3001",
-    "https://anchor-python.teams.hng.tech",
+    settings.ANCHOR_PYTHON_BASE_URL,
 ]
 
 
