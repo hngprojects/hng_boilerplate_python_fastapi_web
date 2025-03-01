@@ -347,3 +347,43 @@ def delete_blog_dislike(
 
     # delete blog dislike
     return blog_dislike_service.delete(blog_dislike_id, current_user.id)
+
+@blog.get("/author/{author_id}", response_model=success_response)
+def get_blogs_by_author(
+    author_id: str, 
+    db: Session = Depends(get_db), 
+    limit: int = 10, 
+    skip: int = 0
+):
+    """
+    Retrieve all blog posts authored by a specific user.
+
+    Args:
+        author_id (str): The ID of the author.
+        db (Session): The database session.
+        limit (int, optional): Maximum number of blog posts to return. Defaults to 10.
+        skip (int, optional): Number of blog posts to skip. Defaults to 0.
+
+    Returns:
+        success_response: The paginated list of the author's blog posts.
+    """
+    blog_service = BlogService(db)
+    
+    # Get all blogs by the author
+    blogs = blog_service.get_blogs_by_author(author_id, limit, skip)
+    
+    # Get total count for pagination
+    total_count = blog_service.count_author_blogs(author_id)
+    
+    return success_response(
+        message="Author's blog posts retrieved successfully!",
+        status_code=200,
+        data={
+            "items": jsonable_encoder(blogs),
+            "total": total_count,
+            "page": skip // limit + 1 if limit > 0 else 1,
+            "size": limit,
+            "pages": (total_count + limit - 1) // limit if limit > 0 else 1
+        }
+    )
+
