@@ -1,3 +1,4 @@
+from datetime import datetime
 from pydantic import BaseModel, Field
 
 class SessionCreate(BaseModel):
@@ -6,4 +7,4 @@ class SessionCreate(BaseModel):
     device: str = None
     is_revoked: bool = False
     refresh_token: str
-    expires_at: str
+    expires_at: datetime
