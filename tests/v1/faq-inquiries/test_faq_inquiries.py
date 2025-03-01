@@ -11,8 +11,11 @@ from api.utils.send_mail import send_faq_inquiry_mail
 from api.v1.models.faq_inquiries import FAQInquiries
 from main import app
 
-# Bearer token to simulate an authenticated request (replace with a valid token if necessary)
-AUTH_HEADERS = {"Authorization": "Bearer test_token"}
+# Mock Bearer Token for authentication
+MOCK_ACCESS_TOKEN = "mocked-jwt-token"
+
+# Headers with mock token for authentication
+AUTH_HEADERS = {"Authorization": f"Bearer {MOCK_ACCESS_TOKEN}"}
 
 @pytest.fixture
 def db_session_mock():
@@ -26,7 +29,6 @@ def client(db_session_mock):
     yield client
     app.dependency_overrides = {}
 
-
 def mock_post_inquiry():
     return FAQInquiries(
         id=str(uuid7()), 
@@ -34,7 +36,6 @@ def mock_post_inquiry():
         email="john.doe@gmail.com",
         message="I have a question about the product.",
     )
-
 
 @patch('fastapi.BackgroundTasks.add_task')
 @patch("api.v1.services.faq_inquiries.faq_inquiries_service.create")
@@ -54,20 +55,20 @@ def test_submit_faq_inquiries(mock_post_inquiry_form, mock_add_task, db_session_
             "email": "johndoe@gmail.com",
             "message": "I have a question about the product."
         },
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS  # Using the mock token here
     )
 
     assert response.status_code == 201
 
     mock_add_task.assert_called_once()
     mock_add_task.assert_called_with(
-            send_faq_inquiry_mail,
-            context={
-                "full_name": "John Doe",
-                "email": "john.doe@gmail.com",
-                "message": "I have a question about the product.",
-            }
-        )
+        send_faq_inquiry_mail,
+        context={
+            "full_name": "John Doe",
+            "email": "john.doe@gmail.com",
+            "message": "I have a question about the product.",
+        }
+    )
 
 @patch("api.v1.services.faq_inquiries.faq_inquiries_service.fetch")
 @patch("api.v1.services.faq_inquiries.faq_inquiries_service.delete")
@@ -87,7 +88,7 @@ def test_delete_faq_inquiry(mock_delete_inquiry, mock_fetch_inquiry, db_session_
 
     response = client.delete(
         f'/api/v1/faq-inquiries/{inquiry_id}',
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS  # Using the mock token here
     )
 
     assert response.status_code == 200
