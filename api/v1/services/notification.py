@@ -14,6 +14,7 @@ class NotificationService(Service):
         self, title: str, message: str, user: User, db: Session = Depends(get_db)
     ):
         """Function to send a notification"""
+    fix/duplicate_notification_service
         new_notification = Notification(
             user_id=user.id, title=title, message=message, status="unread"
         )
@@ -21,6 +22,24 @@ class NotificationService(Service):
         db.commit()
         db.refresh(new_notification)
         return new_notification
+
+
+    def mark_notifications_as_read(
+        self,
+        user: User,
+        db: Session = Depends(get_db),
+    ):
+        unread_notifications = (
+            db.query(Notification).filter(Notification.status == "unread").all()
+        )
+
+        if not unread_notifications:
+            raise HTTPException(status_code=404, detail="No unread notifications found.")
+
+        for unread_notification in unread_notifications:
+            unread_notification.status = "read"
+
+        db.commit()
 
     def mark_notification_as_read(
         self,

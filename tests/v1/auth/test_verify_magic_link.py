@@ -51,5 +51,5 @@ def test_verify_magic_link(client, db_session_mock):
     data = response.json()
     print(data)
     assert data['message'] == 'Login successful'
-    assert data['access_token'] == token
+    assert data['data']['access_token'] == token
 

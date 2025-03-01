@@ -89,10 +89,23 @@ class User(BaseTableModel):
     subscriptions = relationship(
         "UserSubscription", back_populates="user", cascade="all, delete-orphan"
     )
+    comment_replies = relationship(
+        "Reply", back_populates="user", cascade="all, delete-orphan"
+    )
 
     reset_password_token = relationship("ResetPasswordToken",
                                         back_populates="user",
                                         cascade="all, delete-orphan")
+
+    wishlist = relationship("Wishlist", 
+                        back_populates="user", 
+                        cascade="all, delete-orphan")
+    
+    totp_device = relationship("TOTPDevice", back_populates="user", cascade="all, delete-orphan")
+
+    bookmarks = relationship(
+        "Bookmark", back_populates="user", cascade="delete"
+    )
     
     def to_dict(self):
         obj_dict = super().to_dict()

@@ -98,7 +98,7 @@ def test_create_role_success(mock_db_session):
 def test_delete_role_success(mock_db_session, access_token):
     role_id = "test-role-id"
     response_data = {
-        "success": True,
+        "status": "success",
         "status_code": 200,
         "message": "Role successfully deleted.",
         "data": {"id": role_id}
