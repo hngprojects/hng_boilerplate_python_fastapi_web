@@ -95,19 +95,28 @@ class APIStatusService(Service):
             APIStatus: The updated API status record.
 
         Raises:
-            HTTException: 404 if the api_group doesn't exist, 500 for db errors.
+            HTTPException: 404 if the api_group doesn't exist, 500 for db errors.
         """
         try:
             existing_status = db.query(APIStatus).filter(APIStatus.api_group == api_group).first()
             if not existing_status:
-                raise HTTException(
+                raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail="API Status not found"
                 )
             if schema.status is not None:
                 existing_status.status = schema.status
             if schema.response_time is not None:
-                existing_status.response_time = schema.response_time
+                try:
+                    if isinstance(schema.response_time, str):
+                        existing_status.response_time = Decimal(schema.response_time)
+                    else:
+                        existing_status.response_time = schema.response_time
+                except (ValueError, TypeError):
+                    raise HTTException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Invalid response_time format"
+                    )
             if schema.details is not None:
                 existing_status.details = schema.details
             if schema.last_checked is not None:
