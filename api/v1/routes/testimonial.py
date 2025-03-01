@@ -6,7 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
-from fastapi import Depends, APIRouter, status,Query, HTTPException
+from fastapi import Depends, APIRouter, status,Query
 from api.utils.success_response import success_response, fail_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
@@ -77,7 +77,7 @@ async def delete_all_testimonials(
     testimonial_service.delete_all(db)
 
 
-@testimonial.post('/', response_model=success_response)
+@testimonial.post('/create/', response_model=success_response)
 def create_testimonial(
     testimonial_data: CreateTestimonial,
     db: Annotated[Session, Depends(get_db)],
@@ -93,7 +93,7 @@ def create_testimonial(
     return response
 
 
-@testimonial.put('/{testimonial_id}', response_model=success_response)
+@testimonial.put('/{testimonial_id}/edit', response_model=success_response)
 def update_testimonial(
     testimonial_id: str,
     testimonial_data: CreateTestimonial,
@@ -102,6 +102,7 @@ def update_testimonial(
 ):
     '''Endpoint to update testimonial'''
     testimonial = testimonial_service.fetch(db, testimonial_id)
+
     if not testimonial:
         return fail_response(
             status_code=404,

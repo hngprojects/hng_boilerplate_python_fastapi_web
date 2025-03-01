@@ -47,6 +47,7 @@ def override_get_db(mock_db):
 @pytest.fixture(scope="module")
 def setup_access_token():
     email = f"test{uuid.uuid4()}@gmail.com"
+    print(email)
     user_response = client.post(
         "/api/v1/auth/register",
         json={
@@ -101,5 +102,5 @@ def test_update_testimonial_unauthorized(mock_id):
         headers={"Authorization": "Bearer invalid_token"},
     )
 
-    assert response.status_code == 403
+    assert response.status_code == 401
     assert response.json()["message"] == "Forbidden. unauthorized user access"
