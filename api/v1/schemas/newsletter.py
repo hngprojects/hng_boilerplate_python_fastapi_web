@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 
@@ -27,7 +27,7 @@ class UpdateNewsletter(BaseModel):
 class NewsletterBase(BaseModel):
     title: str
     description: str
-    content: str 
+    content: str
     created_at: datetime
     updated_at: datetime
 
@@ -39,3 +39,18 @@ class SingleNewsletterResponse(BaseModel):
     success: bool = True
     data: NewsletterBase
 
+class NewsletterSubscriber(BaseModel):
+    id: str
+    email: str
+    subscribed_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class PaginatedNewsletterResponse(BaseModel):
+    status_code: int = 200
+    page: int
+    per_page: int
+    total_subscribers: int
+    total_pages: int
+    subscribers: List[NewsletterSubscriber]
