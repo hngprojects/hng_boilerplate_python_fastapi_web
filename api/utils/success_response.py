@@ -43,3 +43,7 @@ def fail_response(status_code: int, message: str, data: Optional[dict] = None):
     }
 
     return JSONResponse(status_code=status_code, content=jsonable_encoder(response_data))
+
+
+
+

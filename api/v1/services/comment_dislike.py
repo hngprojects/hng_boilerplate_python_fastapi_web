@@ -34,7 +34,7 @@ class CommentDislikeService(Service):
         db.commit()
         db.refresh(new_dislike)
         # Return a consistent response structure.
-        return {"message": "Comment disliked successfully!", "data": new_dislik
+        return {"message": "Comment disliked successfully!", "data": new_dislike}
 
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):

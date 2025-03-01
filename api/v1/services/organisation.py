@@ -67,7 +67,7 @@ class OrganisationService(Service):
         if not admin_role:
             admin_role = Role(
                 name="admin",
-                description="Organization Admin",
+                description="Organisation Admin",
                 is_builtin=True
                 )
             db.add(admin_role)
