@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     REDIS_PASSWORD: str = config("REDIS_PASSWORD")
 
     FRONTEND_URL: str = config("FRONTEND_URL")
+    SERVER_PORT_NUMBER: int = config("SERVER_PORT_NUMBER", cast=int)
 
 
     # Database configurations
