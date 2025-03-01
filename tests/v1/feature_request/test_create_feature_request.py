@@ -58,7 +58,7 @@ def feature_request_response():
 
 
 class TestCreateFeatureRequest:
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_create_feature_request_success(self, mock_service, db_session, sample_user, feature_request_data):
         # Arrange
         mock_service.create_feature_request.return_value = FeatureRequestResponse(
@@ -86,7 +86,7 @@ class TestCreateFeatureRequest:
 
 
 class TestGetFeatureRequests:
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_get_feature_requests_as_admin(self, mock_service, db_session, admin_user):
         # Arrange
         mock_service.get_feature_requests.return_value = [
@@ -119,7 +119,7 @@ class TestGetFeatureRequests:
         mock_service.get_feature_requests.assert_called_once_with(db_session, 0, 10)
         assert len(result) == 2
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_get_feature_requests_as_regular_user(self, mock_service, db_session, sample_user):
         # Arrange
         mock_service.get_user_feature_requests.return_value = [
@@ -145,7 +145,7 @@ class TestGetFeatureRequests:
 
 
 class TestGetFeatureRequest:
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_get_feature_request_not_found(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -158,7 +158,7 @@ class TestGetFeatureRequest:
         assert exc_info.value.status_code == 404
         assert exc_info.value.detail == "Feature request not found"
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_get_feature_request_forbidden(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -176,7 +176,7 @@ class TestGetFeatureRequest:
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to access this feature request"
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_get_feature_request_success_owner(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -192,7 +192,7 @@ class TestGetFeatureRequest:
         # Assert
         assert result == mock_feature_request
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_get_feature_request_success_admin(self, mock_service, db_session, admin_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -211,7 +211,7 @@ class TestGetFeatureRequest:
 
 
 class TestUpdateFeatureRequest:
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_update_feature_request_not_found(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -225,7 +225,7 @@ class TestUpdateFeatureRequest:
         assert exc_info.value.status_code == 404
         assert exc_info.value.detail == "Feature request not found"
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_update_feature_request_forbidden(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -244,7 +244,7 @@ class TestUpdateFeatureRequest:
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to update this feature request"
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_update_feature_request_success(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -279,7 +279,7 @@ class TestUpdateFeatureRequest:
 
 
 class TestDeleteFeatureRequest:
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_delete_feature_request_not_found(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -292,7 +292,7 @@ class TestDeleteFeatureRequest:
         assert exc_info.value.status_code == 404
         assert exc_info.value.detail == "Feature request not found"
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_delete_feature_request_forbidden(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
@@ -310,7 +310,7 @@ class TestDeleteFeatureRequest:
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to delete this feature request"
         
-    @patch("api.v1.routes.feature_request.FeatureRequestService")
+    @patch("api.v1.services.feature_request.FeatureRequestService")
     def test_delete_feature_request_success(self, mock_service, db_session, sample_user):
         # Arrange
         feature_request_id = str(uuid.uuid4())
