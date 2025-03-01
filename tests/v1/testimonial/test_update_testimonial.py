@@ -75,6 +75,8 @@ def test_update_testimonial_success(client_with_mocks, setup_access_token):
 
     mock_db.query.return_value.filter.return_value.first.return_value = mock_testimonial
 
+    print(mock_db.query.return_value.filter.return_value.first.return_value) 
+
     update_data = {"content": "I love python (updated)"}
 
     response = client.put(
@@ -83,7 +85,7 @@ def test_update_testimonial_success(client_with_mocks, setup_access_token):
         headers={"Authorization": f"Bearer {setup_access_token}"},
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.json()}"
     assert response.json()["message"] == "Your testimonial has been updated successfully."
 
 
