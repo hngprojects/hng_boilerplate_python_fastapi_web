@@ -1,7 +1,7 @@
 import pytest
 from main import app
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from api.db.database import get_db
 import uuid
 
@@ -47,6 +47,13 @@ def override_get_db(mock_db):
     app.dependency_overrides[get_db] = get_db_override
     yield
     app.dependency_overrides = {}
+
+
+@pytest.fixture(autouse=True)
+def mock_mail():
+    """Mock FastAPI-Mail to prevent actual email sending."""
+    with patch("fastapi_mail.FastMail.send_message", return_value=None):
+        yield
 
 
 @pytest.fixture(scope="module")
