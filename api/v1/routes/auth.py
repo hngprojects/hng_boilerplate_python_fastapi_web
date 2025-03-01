@@ -8,7 +8,6 @@ from api.core.dependencies.redis_cache import redis_client
 from slowapi.util import get_remote_address
 from api.utils.settings import settings
 
-<<<<<<< HEAD
 from fastapi import (
     BackgroundTasks,
     Depends,
@@ -18,11 +17,6 @@ from fastapi import (
     Request,
     HTTPException,
 )
-=======
-from fastapi import (BackgroundTasks, Depends,
-                     status, APIRouter,
-                     Response, Request)
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 from typing import Annotated
@@ -31,7 +25,6 @@ from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import auth_response, success_response, fail_response
 from api.utils.send_mail import send_magic_link
 from api.v1.models import User
-<<<<<<< HEAD
 from api.v1.schemas.user import Token, UserEmailSender
 from api.v1.schemas.user import (
     LoginRequest,
@@ -41,16 +34,7 @@ from api.v1.schemas.user import (
     UserData2,
 )
 from api.v1.schemas.token import TokenRequest
-
 from api.v1.schemas.user import (MagicLinkRequest,
-=======
-from api.v1.schemas.user import Token
-from api.v1.schemas.user import (LoginRequest, UserCreate, EmailRequest,
-                                 ProfileData, UserData2)
-from api.v1.schemas.token import TokenRequest
-from api.v1.schemas.user import (UserCreate,
-                                 MagicLinkRequest,
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
                                  ChangePasswordSchema,
                                  AuthMeResponse)
 from api.v1.services.login_notification import send_login_notification
@@ -60,7 +44,6 @@ from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.services.auth import AuthService
 from api.v1.services.profile import profile_service
-<<<<<<< HEAD
 from api.v1.schemas.totp_device import (
     TOTPDeviceRequestSchema,
     TOTPDeviceResponseSchema,
@@ -68,9 +51,6 @@ from api.v1.schemas.totp_device import (
     TOTPDeviceDataSchema,
 )
 from api.v1.services.totp import totp_service
-from api.utils.settings import settings
-=======
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -83,7 +63,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
   
 @auth.post("/register", status_code=status.HTTP_201_CREATED, response_model=auth_response)
-<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 def register(
     request: Request,
@@ -93,11 +72,6 @@ def register(
     db: Session = Depends(get_db),
 ):
     """Endpoint for a user to register their account"""
-=======
-@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
-def register(request: Request, background_tasks: BackgroundTasks, response: Response, user_schema: UserCreate, db: Session = Depends(get_db)):
-    '''Endpoint for a user to register their account'''
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 
     # Check if user already exists
     existing_user = user_service.get_user_by_email(db, email=user_schema.email)
@@ -290,14 +264,9 @@ def register_as_super_admin(request: Request, background_tasks: BackgroundTasks,
     )
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=auth_response)
-<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 def login(request: Request, login_request: LoginRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
 
-=======
-@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
-def login(request: Request, login_request: LoginRequest, db: Session = Depends(get_db)):
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
     """Endpoint to log in a user"""
 
     # Authenticate the user
@@ -393,18 +362,12 @@ def refresh_access_token(
 
 
 @auth.post("/request-token", status_code=status.HTTP_200_OK)
-<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 async def request_signin_token(
     request: Request,
     background_tasks: BackgroundTasks,
     email_schema: EmailRequest,
     db: Session = Depends(get_db),
-=======
-@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
-async def request_signin_token(request: Request, background_tasks: BackgroundTasks,
-    email_schema: EmailRequest, db: Session = Depends(get_db)
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 ):
     """Generate and send a 6-digit sign-in token to the user's email"""
 
@@ -415,11 +378,7 @@ async def request_signin_token(request: Request, background_tasks: BackgroundTas
     user_service.save_login_token(db, user, token, token_expiry)
 
     # Send mail notification
-<<<<<<< HEAD
     link = f"{settings.ANCHOR_PYTHON_BASE_URL}/login/verify-token?token={token}"
-=======
-    link = f'https://anchor-python.teams.hng.tech/login/verify-token?token={token}'
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 
     # Send email in the background
     background_tasks.add_task(
@@ -611,15 +570,10 @@ def request_magic_link(
 
 
 @auth.post("/magic-link/verify")
-<<<<<<< HEAD
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
 async def verify_magic_link(
     request: Request, token_schema: Token, db: Session = Depends(get_db)
 ):
-=======
-@limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
-async def verify_magic_link(request: Request, token_schema: Token, db: Session = Depends(get_db)):
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
     user, access_token = AuthService.verify_magic_token(token_schema.token, db)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
@@ -668,15 +622,10 @@ async def change_password(
     return success_response(status_code=200, message="Password changed successfully")
 
 
-<<<<<<< HEAD
-@auth.get("/@me", status_code=status.HTTP_200_OK, response_model=AuthMeResponse)
-@limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
-=======
 @auth.get("/@me",
           status_code=status.HTTP_200_OK,
           response_model=AuthMeResponse)
 @limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
 def get_current_user_details(
     request: Request, 
     db: Annotated[Session, Depends(get_db)],
@@ -690,122 +639,8 @@ def get_current_user_details(
         message='User details retrieved successfully',
         status_code=200,
         data={
-<<<<<<< HEAD
-            "user": UserData2.model_validate(current_user, from_attributes=True),
-            "organisations": organisation,
-            "profile": ProfileData.model_validate(profile, from_attributes=True),
-        },
-    )
-
-
-@auth.post("/setup-2fa")
-@limiter.limit("20/minute")
-def setup_2fa(
-    request: Request,
-    db: Annotated[Session, Depends(get_db)],
-    current_user: Annotated[User, Depends(user_service.get_current_user)],
-):
-    """Endpoint to create a new TOTP device"""
-
-    try:
-        secret = totp_service.generate_secret()
-        schema = TOTPDeviceRequestSchema(user_id=current_user.id, secret=secret)
-        totp_service.create(db=db, schema=schema)
-        otpauth_url = totp_service.generate_otpauth_url(
-            secret=secret, user_email=current_user.email, app_name=settings.APP_NAME
-        )
-        qrcode_base64 = totp_service.generate_qrcode(otpauth_url)
-
-        response_data = TOTPDeviceResponseSchema(
-            secret=secret, otpauth_url=otpauth_url, qrcode_base64=qrcode_base64
-        )
-
-        return success_response(
-            status_code=status.HTTP_201_CREATED,
-            message="TOTP device created successfully.",
-            data=response_data.model_dump(),
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error setting up 2FA: {str(e)}",
-        )
-
-
-@auth.put("/enable-2fa")
-@limiter.limit("20/minute")
-def enable_2fa(
-    request: Request,
-    db: Annotated[Session, Depends(get_db)],
-    token_schema: TOTPTokenSchema,
-    current_user: Annotated[User, Depends(user_service.get_current_user)],
-):
-    """Endpoint to enable a TOTP device"""
-
-    try:
-        totp_device = totp_service.verify_token(
-            db=db,
-            user_id=current_user.id,
-            schema=token_schema.totp_token,
-            extra_action="enable",
-        )
-        response_data = TOTPDeviceDataSchema(
-            user_id=totp_device.user_id, confirmed=totp_device.confirmed
-        )
-
-        return success_response(
-            status_code=status.HTTP_202_ACCEPTED,
-            message="TOTP device enabled successfully.",
-            data=response_data.model_dump(),
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error enabling totp device: {str(e)}",
-        )
-
-
-@auth.put("/disable-2fa")
-@limiter.limit("20/minute")
-def disable_2fa(
-    request: Request,
-    db: Annotated[Session, Depends(get_db)],
-    token_schema: TOTPTokenSchema,
-    current_user: Annotated[User, Depends(user_service.get_current_user)],
-):
-    """Endpoint to disable a TOTP device"""
-
-    try:
-        totp_device = totp_service.verify_token(
-            db=db,
-            user_id=current_user.id,
-            schema=token_schema.totp_token,
-            extra_action="disable",
-        )
-        response_data = TOTPDeviceDataSchema(
-            user_id=totp_device.user_id, confirmed=totp_device.confirmed
-        )
-
-        return success_response(
-            status_code=status.HTTP_202_ACCEPTED,
-            message="TOTP device disabled successfully.",
-            data=response_data.model_dump(),
-        )
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error disabling totp device: {str(e)}",
-        )
-=======
             'user': UserData2.model_validate(current_user, from_attributes=True),
             'organisations': organisation,
             'profile': ProfileData.model_validate(profile, from_attributes=True)
         }
     )
->>>>>>> f2c88288 (test: update user creation message and add password confirmation in registration tests)
