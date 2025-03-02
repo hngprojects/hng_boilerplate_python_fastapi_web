@@ -361,16 +361,6 @@ class UserService(Service):
         encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
         return encoded_jwt
 
-    def create_registration_access_token(self, user_email: str) -> str:
-        """Function to create access token"""
-
-        expires = dt.datetime.now(dt.timezone.utc) + dt.timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-        data = {"user_email": user_email, "exp": expires, "type": "access"}
-        encoded_jwt = jwt.encode(data, settings.SECRET_KEY, settings.ALGORITHM)
-        return encoded_jwt
-
     def create_refresh_token(self, user_id: str) -> str:
         """Function to create access token"""
 
