@@ -278,7 +278,7 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
     totp_service.check_2fa_status_and_verify(db, user.id, login_request.totp_code)
     user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
-    # Generate access and refresh tokens
+    # Generate access and refresh tokens for the user
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
 
