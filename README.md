@@ -245,7 +245,8 @@ Then retry:
 ```sh
 alembic revision --autogenerate -m 'your migration message'
 ```
-
+if running this boiler_plate on a test server confirm that the dev type is test
+this would enable the database to have populated datas for you to use
 ---
 
 ## **Contribution Guidelines**  
