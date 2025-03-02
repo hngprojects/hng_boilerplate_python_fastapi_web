@@ -36,30 +36,37 @@ class UserService(Service):
     def fetch_all(
         self,
         db: Session,
-
-
-        page: int,
-        per_page: int,
+        page: int = 1,
+        limit: int = 20,
+        search: Optional[str] = None,
+        is_active: Optional[bool] = None,
         **query_params: Optional[Any],
-
     ):
         """
-        Fetch all users with search, filtering, and pagination
-        Args:
-            db: database Session object
-            page: page number (default: 1)
-            limit: max number of users per page (default: 20, max: 50)
-            search: search term for first_name, last_name, or email
-            is_active: filter by active status
-        """
-        # Enforce pagination limits
-        limit = min(max(limit, 1), 50)  # Ensure limit is between 1 and 50
-        page = max(page, 1)  # Ensure page is at least 1
+        Retrieves all users with optional search, filtering, and pagination.
 
-        # Base query
+        Args:
+            db: SQLAlchemy database session.
+            page: Page number to retrieve (default: 1, minimum: 1).
+            limit: Number of users per page (default: 20, range: 1-50).
+            search: Term to filter users by first_name, last_name, or email (case-insensitive).
+            is_active: Boolean to filter users by active status.
+            **query_params: Additional query parameters (currently unused).
+
+        Returns:
+            AllUsersResponse: Object containing filtered users and pagination metadata.
+
+        Raises:
+            HTTPException: If is_active is not a boolean value (422 Unprocessable Entity).
+        """
+        # Restrict pagination parameters to valid ranges
+        limit = min(max(limit, 1), 50)  # Caps limit between 1 and 50
+        page = max(page, 1)  # Ensures page is at least 1
+
+        # Initialize base query for User table
         query = db.query(User)
 
-        # Apply search filter (case-insensitive partial matching)
+        # Filter by search term across first_name, last_name, and email
         if search:
             search_term = f"%{search.strip().lower()}%"
             query = query.filter(
@@ -70,7 +77,7 @@ class UserService(Service):
                 )
             )
 
-        # Apply is_active filter
+        # Filter by is_active status if provided
         if is_active is not None:
             if not isinstance(is_active, bool):
                 raise HTTPException(
@@ -79,10 +86,10 @@ class UserService(Service):
                 )
             query = query.filter(User.is_active == is_active)
 
-        # Calculate total users before pagination
+        # Get total user count before applying pagination
         total_users = query.count()
 
-        # Apply pagination
+        # Apply pagination and order by creation date (descending)
         users = (
             query.order_by(desc(User.created_at))
             .limit(limit)
@@ -90,11 +97,12 @@ class UserService(Service):
             .all()
         )
 
-        # Calculate total pages
+        # Compute total pages based on user count and limit
         total_pages = (total_users + limit - 1) // limit
 
+        # Return structured response with users and pagination details
         return self.all_users_response(users, total_users, page, limit, total_pages)
-
+    
     def all_users_response(
         self, users: list, total_users: int, page: int, limit: int, total_pages: int
     ):
