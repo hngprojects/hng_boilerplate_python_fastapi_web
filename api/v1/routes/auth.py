@@ -368,7 +368,7 @@ async def verify_magic_link(request: Request, token_schema: Token, db: Session =
     return response
 
 
-@auth.put("/password", status_code=200)
+@auth.post("/password", status_code=200)
 @limiter.limit("1000/minute")  # Limit to 1000 requests per minute per IP
 async def change_password(
     request: Request, 
