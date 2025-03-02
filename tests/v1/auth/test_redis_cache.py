@@ -42,7 +42,9 @@ def test_register_normal_user(db_session_mock):
         "is_superadmin": "false"
     }
 
-    response = client.post("/api/v1/auth/register", json=user)
+    with patch("api.core.dependencies.redis_cache.get_redis_client", redis_mock):
+
+        response = client.post("/api/v1/auth/register", json=user)
     
     assert response.status_code == 201
     assert response.json()['data']['user']['email'] == "normal.user@gmail.com"
@@ -63,7 +65,9 @@ def test_register_admin_user(db_session_mock):
         "is_superadmin": "true"
     }
 
-    response = client.post("/api/v1/auth/register-super-admin", json=admin)
+    with patch("api.core.dependencies.redis_cache.get_redis_client", redis_mock):
+
+        response = client.post("/api/v1/auth/register-super-admin", json=admin)
     
     assert response.status_code == 201
     assert response.json()['data']['user']['email'] == "admin.user@gmail.com"
