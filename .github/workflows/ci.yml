@@ -20,15 +20,6 @@ jobs:
           POSTGRES_DB: "test"
         ports:
           - 5432:5432
-      redis:
-        image: redis:latest
-        env:
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          REDIS_DB: ${{ secrets.REDIS_DB }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-        ports:
-          - 11305:11305
 
     steps:
       - name: Checkout code
@@ -53,6 +44,12 @@ jobs:
 
       - name: Copy env file
         run: cp .env.sample .env
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+
 
       - name: Run app
         run: |
