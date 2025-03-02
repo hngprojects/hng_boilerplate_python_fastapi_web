@@ -181,3 +181,27 @@ alembic/versions
 .venv
 env
 alembic/env.py
+
+# Ignore environment and virtual environment files
+.env
+.env.*
+.ven
+.venv
+env
+alembic/env.py
+
+# Ignore environment and virtual environment files
+.env
+.env.*
+.ven
+.venv
+env
+alembic/env.py
+
+# Ignore environment and virtual environment files
+.env
+.env.*
+.ven
+.venv
+env
+alembic/env.py
