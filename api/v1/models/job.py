@@ -4,7 +4,20 @@
 from sqlalchemy import Column, String, Text, ForeignKey, Enum
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
+import enum
 
+
+class JobStatus(enum.Enum):
+    PENDING = "Pending"
+    APPLIED = "Applied"
+    UNDER_REVIEW = "Under Review"
+    INTERVIEW_SCHEDULED = "Interview Scheduled"
+    INTERVIEW_COMPLETED = "Interview Completed"
+    OFFER_EXTENDED = "Offer Extended"
+    OFFER_ACCEPTED = "Offer Accepted"
+    HIRED = "Hired"
+    REJECTED = "Rejected"
+    WITHDRAWN = "Withdrawn"
 
 class Job(BaseTableModel):
     __tablename__ = "jobs"
@@ -36,6 +49,6 @@ class JobApplication(BaseTableModel):
     cover_letter = Column(Text, nullable=True)
     resume_link = Column(String, nullable=False)
     portfolio_link = Column(String, nullable=True)
-    application_status = Column(Enum('pending', 'accepted', 'rejected', name='application_status'), default="pending")
+    application_status = Column(Enum(JobStatus), default=JobStatus.APPLIED, nullable=False)
 
     job = relationship('Job', back_populates='applications')

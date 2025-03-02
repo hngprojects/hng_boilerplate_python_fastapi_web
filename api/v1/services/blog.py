@@ -366,3 +366,4 @@ class BlogDislikeService(BaseBlogInteractionService[BlogDislike]):
 
     def __init__(self, db: Session):
         super().__init__(db, BlogDislike)
+ 

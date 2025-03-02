@@ -31,3 +31,22 @@ async def get_single_application(job_id: str,
         SingleJobAppResponse: response on success
     """
     return job_application_service.fetch(job_id, application_id, db)
+
+@job_application.get("/{application_id}/status",status_code=status.HTTP_200_OK)
+async def get_job_application_status(job_id:str,
+                                     application_id:str,
+                                     db:Annotated[Session,Depends(get_db)]
+                                     ):
+    """
+        Retrieves the staus of a job application.
+
+        Ages:
+            job_id: The id of the job for the applicant
+            application_id: The of the application for the job
+            db: database  Session Object
+
+        Returns:
+            The status of the job appplication if the job exists.
+
+    """
+    return job_application_service.fetch(job_id,application_id,db).application_status

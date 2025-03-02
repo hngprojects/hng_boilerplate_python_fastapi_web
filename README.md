@@ -254,3 +254,4 @@ alembic revision --autogenerate -m 'your migration message'
 - **Push Alembic migrations** if database models are modified.  
 - Ensure your code **follows project standards** and **passes tests** before submitting a pull request.  
 
+💯 Happy coding!

@@ -83,3 +83,4 @@ def test_get_all_blogs_with_data(client, db_session_mock):
     assert response.status_code == 200
     assert len(response.json().get('data')) >= 1
 
+

@@ -8,7 +8,7 @@ from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.utils.db_validators import check_model_existence
 from api.utils.pagination import paginated_response
-from api.v1.models.job import Job, JobApplication
+from api.v1.models.job import Job, JobApplication,JobStatus
 from api.utils.success_response import success_response
 from api.v1.schemas.job_application import (SingleJobAppResponse,
                                             JobApplicationBase,
@@ -106,17 +106,19 @@ class JobApplicationService(Service):
             data=application_data
         )
 
-    def update(self, db: Session, job_id: str, application_id: str, schema: UpdateJobApplication):
+    def update(self, db: Session, job_id: str, status_update:JobStatus,application_id: str, schema: UpdateJobApplication):
         """Updates an application"""
 
         job_application = self.fetch(
             db=db, job_id=job_id, application_id=application_id)
-
+        if not job_application:
+            return None
         # Update the fields with the provided schema data
         update_data = schema.dict(exclude_unset=True, exclude={"id"})
         for key, value in update_data.items():
             setattr(job_application, key, value)
-
+        if status_update:
+            job_application.application_status = status_update
         db.commit()
         db.refresh(job_application)
         return job_application

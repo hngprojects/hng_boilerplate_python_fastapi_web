@@ -84,3 +84,4 @@ class BlogSearchResponse(BaseModel):
     total_results: int
     blogs: List[BlogSearchResult]
 
+
