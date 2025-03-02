@@ -42,8 +42,8 @@ def create_blog(
 ):
     if not current_user:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    blog_service = BlogService(db)
-    new_blogpost = blog_service.create(db=db, schema=blog, author_id=current_user.id)
+    blog_service = BlogService(db=db)
+    new_blogpost = blog_service.create(schema=blog, author_id=current_user.id)
     message = "Blog post scheduled successfully!" if blog.scheduled_at else "Blog created successfully!"
     
     return success_response(
@@ -65,7 +65,6 @@ def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0)
         message="Blogs retrieved successfully",
         status_code=200,
         data=jsonable_encoder(paginated_blogs),
-        filters={"is_deleted": False} #filter out soft-deleted blogs
     )
 
 # blog search endpoint
