@@ -23,12 +23,12 @@ jobs:
       redis:
         image: redis:latest
         env:
-          REDIS_PASSWORD: "REDIS_PASSWORD"
+          REDIS_PASSWORD: "password"
           REDIS_DB: "0"
-          REDIS_PORT: "11305"
-          REDIS_HOST: "REDIS_HOST"
+          REDIS_PORT: "6379"
+          REDIS_HOST: "localhost"
         ports:
-          - 11305:11305
+          - 6379:6379
 
     steps:
       - name: Checkout code
