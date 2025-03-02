@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Blog Post Model."""
 
-from sqlalchemy import Column, DateTime, Enum, String, Text, ForeignKey, Boolean, text
+from sqlalchemy import Column, DateTime, Enum, Index, Integer, String, Text, ForeignKey, Boolean, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ENUM
 from api.v1.models.base_model import BaseTableModel
