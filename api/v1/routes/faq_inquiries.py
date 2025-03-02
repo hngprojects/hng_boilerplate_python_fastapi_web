@@ -13,45 +13,47 @@ from fastapi import Request
 
 faq_inquiries = APIRouter(prefix="/faq-inquiries", tags=["FAQ-Inquiries"])
 
+
 # CREATE
- @faq_inquiries.post(
-     "",
-     response_model=success_response,
-     status_code=status.HTTP_201_CREATED,
-     responses={
-         201: {"description": "FAQ Inquiry created successfully"},
-         422: {"description": "Validation Error"},
-     },
- )
- async def create_faq_inquiry(
-     data: CreateFAQInquiry,
-     request: Request,
-     background_tasks: BackgroundTasks,
-     db: Session = Depends(get_db)
- ):
-     """Add a new FAQ Inquiry for both visitors and authenticated users."""
-     access_token = request.headers.get("Authorization")
-     current_user = user_service.get_current_user_or_none(access_token, db)
-     user_id = current_user.id if current_user else None  # Set user_id only if authenticated
- 
-     new_faq_inquiry = faq_inquiries_service.create(db, data, user_id)  # Pass user_id (None for visitors)
- 
-     # Send email to admin
-     background_tasks.add_task(
-         send_faq_inquiry_mail, 
-         context={
-             "full_name": new_faq_inquiry.full_name,
-             "email": new_faq_inquiry.email,
-             "message": new_faq_inquiry.message,
-         }
-     )
- 
-     response = success_response(
-         message=SUCCESS,
-         data={"id": new_faq_inquiry.id},
-         status_code=status.HTTP_201_CREATED,
-     )
-     return response
+@faq_inquiries.post(
+    "",
+    response_model=success_response,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        201: {"description": "FAQ Inquiry created successfully"},
+        422: {"description": "Validation Error"},
+    },
+)
+async def create_faq_inquiry(
+    data: CreateFAQInquiry,
+    request: Request,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """Add a new FAQ Inquiry for both visitors and authenticated users."""
+    access_token = request.headers.get("Authorization")
+    current_user = user_service.get_current_user_or_none(access_token, db)
+    user_id = current_user.id if current_user else None  # Set user_id only if authenticated
+
+    new_faq_inquiry = faq_inquiries_service.create(db, data, user_id)  # Pass user_id (None for visitors)
+
+    # Send email to admin
+    background_tasks.add_task(
+        send_faq_inquiry_mail,
+        context={
+            "full_name": new_faq_inquiry.full_name,
+            "email": new_faq_inquiry.email,
+            "message": new_faq_inquiry.message,
+        },
+    )
+
+    response = success_response(
+        message=SUCCESS,
+        data={"id": new_faq_inquiry.id},
+        status_code=status.HTTP_201_CREATED,
+    )
+    return response
+
 
 # READ
 @faq_inquiries.get(
@@ -72,6 +74,7 @@ async def get_all_faq_inquiries(
     )
     return response
 
+
 # DELETE
 @faq_inquiries.delete(
     "/{id}",
@@ -87,7 +90,7 @@ async def get_all_faq_inquiries(
 async def delete_faq_inquiry(
     id: str,
     db: Annotated[Session, Depends(get_db)],
-    current_user: User = Depends(user_service.get_current_user),  
+    current_user: User = Depends(user_service.get_current_user),
 ):
     """Delete a FAQ inquiry. Only the owner or an admin can delete it."""
     # Retrieve the FAQ inquiry by id
