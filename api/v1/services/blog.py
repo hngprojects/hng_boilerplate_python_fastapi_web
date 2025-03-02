@@ -27,7 +27,7 @@ class BlogService:
         return new_blogpost
 
     def fetch_all(
-        self, 
+        self,
         sort_by: Optional[str] = "created_at",
         sort_order: Optional[str] = "desc",
         author_id: Optional[str] = None,
@@ -45,6 +45,8 @@ class BlogService:
         if category:
             query = query.filter(Blog.category == category)
 
+        total_count = query.count()
+
         # Apply sorting
         if sort_order == "desc":
             query = query.order_by(desc(getattr(Blog, sort_by, Blog.created_at)))
@@ -54,7 +56,7 @@ class BlogService:
         # Apply pagination
         blogs = query.offset(offset).limit(limit).all()
 
-        return blogs 
+        return {"total_count": total_count, "blogs": blogs}
 
     def fetch(self, blog_id: str):
         """Fetch a blog post by its ID"""
