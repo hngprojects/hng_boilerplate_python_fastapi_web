@@ -58,6 +58,25 @@ class CommentService(Service):
         db.commit()
         db.refresh(comment)
         return comment
+    
+    def update_comments(self, db: Session, id: str, content: str):
+        """Updates a comment"""
+
+        comment = self.fetch(db=db, id=id)
+        # Update the fields with the provided schema data
+        if comment is None:
+            return None
+
+        # Update the comment's content field
+        comment.content = content
+
+        # Commit the changes to the database
+        db.commit()
+        db.refresh(comment)
+        
+        return comment
+
+
 
     def delete(self, db: Session, id: str):
         """Deletes a comment"""

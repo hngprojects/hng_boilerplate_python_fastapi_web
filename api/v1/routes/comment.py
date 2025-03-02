@@ -12,6 +12,9 @@ from api.v1.schemas.comment import (
     LikeSuccessResponse,
     ReplyCreate,
     ReplyResponse,
+    CommentEditResponse,
+    EditCommentRequest
+
 )
 from api.v1.services.blog_comment_reply import reply_service
 from api.v1.services.comment_dislike import comment_dislike_service
@@ -163,3 +166,75 @@ def reply_comment(
             message="Reply to comment created successfully",
             data=jsonable_encoder(new_reply)
     )
+
+
+
+
+@comment.patch("/{comment_id}", response_model=CommentEditResponse)
+async def update_comment(
+    comment_id: str,
+    request: EditCommentRequest,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_user)]
+) -> dict:
+    """
+    PATCH endpoint to allow authenticated users to update their comments.
+
+    Args:
+        comment_id (str): ID of the comment to be updated.
+        request_data (CommentUpdateSchema): The new comment content.
+        db (Session): Database session.
+        current_user (User): Authenticated user.
+
+    Returns:
+        dict: Success or error message.
+    """
+    try:
+        
+        try:
+            comment_uuid = UUID(comment_id)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid comment ID format."
+            )
+        
+        
+        comment = comment_service.fetch(db=db, id=str(comment_id))
+        if not comment:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Comment not found."
+            )
+        
+      
+        if comment.user_id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="You do not have permission to edit this comment."
+            )
+        
+        
+        updated_comment = comment_service.update_comments(
+            db=db, id=str(comment_id), content=request.content
+        )
+        
+        return success_response(
+            message="Comment updated successfully",
+            status_code=status.HTTP_200_OK,
+            data={
+                "comment_id": str(comment_id),
+                "content": updated_comment.content
+            }
+        )
+    except HTTPException as e:
+        return JsonResponseDict(
+            message=e.detail,
+            status_code=e.status_code
+        )
+    except Exception as e:
+        return JsonResponseDict(
+            message="Internal server error.",
+            error=str(e),
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 from typing import List, Optional
 from datetime import datetime
 
@@ -14,14 +14,14 @@ class CreateBillingPlanSchema(BaseModel):
     organisation_id: str
     features: List[str]
 
-    @validator("price")
+    @field_validator("price")
     def adjust_price(cls, value, values):
         duration = values.get("duration")
         if duration == "yearly":
             value = value * 12 * 0.8  # Multiply by 12 and apply a 20% discount
         return value
 
-    @validator("duration")
+    @field_validator("duration")
     def validate_duration(cls, value):
         v = value.lower()
         if v not in ["monthly", "yearly"]:
