@@ -38,7 +38,7 @@ def feature_request_data():
     return FeatureRequestCreate(
         title="Test Feature",
         description="This is a test feature request",
-        priority="low"  # Changed from int to string
+        priority="Low"  # Changed from int to string
     )
 
 
@@ -49,8 +49,8 @@ def feature_request_response():
         id=str(uuid.uuid4()),
         title="Test Feature",
         description="This is a test feature request",
-        priority="low",  # Changed from int to string
-        status="pending",
+        priority="Low",  # Changed from int to string
+        status="Pending",
         user_id=str(uuid.uuid4()),
         created_at="2025-03-01T12:00:00",
         updated_at="2025-03-01T12:00:00"
@@ -66,7 +66,7 @@ class TestCreateFeatureRequest:
             title=feature_request_data.title,
             description=feature_request_data.description,
             priority=feature_request_data.priority,
-            status="pending",
+            status="Pending",
             user_id=sample_user.id,
             created_at="2025-03-01T12:00:00",
             updated_at="2025-03-01T12:00:00"
@@ -82,6 +82,7 @@ class TestCreateFeatureRequest:
         assert result.title == feature_request_data.title
         assert result.description == feature_request_data.description
         assert result.priority == feature_request_data.priority
+        assert result.status == "Pending"  # Verify status is Pending
         assert result.user_id == sample_user.id
 
 
@@ -94,8 +95,8 @@ class TestGetFeatureRequests:
                 id=str(uuid.uuid4()),
                 title="Feature 1",
                 description="Description 1",
-                priority="high",  # Changed from int to string
-                status="pending",
+                priority="High",  # Changed from int to string
+                status="Pending",
                 user_id=str(uuid.uuid4()),
                 created_at="2025-03-01T12:00:00",
                 updated_at="2025-03-01T12:00:00"
@@ -104,8 +105,8 @@ class TestGetFeatureRequests:
                 id=str(uuid.uuid4()),
                 title="Feature 2",
                 description="Description 2",
-                priority="medium",  # Changed from int to string
-                status="in_progress",
+                priority="Medium",  # Changed from int to string
+                status="Approved",
                 user_id=str(uuid.uuid4()),
                 created_at="2025-03-01T12:00:00",
                 updated_at="2025-03-01T12:00:00"
@@ -127,8 +128,8 @@ class TestGetFeatureRequests:
                 id=str(uuid.uuid4()),
                 title="User Feature",
                 description="User Description",
-                priority="low",  # Changed from int to string
-                status="pending",
+                priority="Low",  # Changed from int to string
+                status="Pending",
                 user_id=sample_user.id,
                 created_at="2025-03-01T12:00:00",
                 updated_at="2025-03-01T12:00:00"
@@ -243,6 +244,57 @@ class TestUpdateFeatureRequest:
         
         assert exc_info.value.status_code == 403
         assert exc_info.value.detail == "Not authorized to update this feature request"
+
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    def test_update_status_forbidden_for_regular_user(self, mock_get_by_id, db_session, sample_user):
+        # Arrange
+        feature_request_id = str(uuid.uuid4())
+        update_data = FeatureRequestUpdate(status="Approved")  # Try to update status
+        
+        mock_feature_request = MagicMock()
+        mock_feature_request.user_id = sample_user.id
+        
+        mock_get_by_id.return_value = mock_feature_request
+        
+        # Act & Assert
+        with pytest.raises(HTTPException) as exc_info:
+            update_feature_request(feature_request_id, update_data, db_session, sample_user)
+        
+        assert exc_info.value.status_code == 403
+        assert exc_info.value.detail == "Only admins can update the status field"
+
+    @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
+    @patch("api.v1.services.feature_request.FeatureRequestService.update_feature_request")
+    def test_update_status_allowed_for_admin(self, mock_update, mock_get_by_id, db_session, admin_user):
+        # Arrange
+        feature_request_id = str(uuid.uuid4())
+        update_data = FeatureRequestUpdate(status="Approved")  # Admin updating status
+        
+        mock_feature_request = MagicMock()
+        mock_feature_request.user_id = str(uuid.uuid4())  # Different user's request
+        
+        updated_feature_request = FeatureRequestResponse(
+            id=feature_request_id,
+            title="Original Title",
+            description="Original Description",
+            priority="medium",
+            status="Approved",  # Status successfully updated
+            user_id=mock_feature_request.user_id,
+            created_at="2025-03-01T12:00:00",
+            updated_at="2025-03-01T12:30:00"
+        )
+        
+        mock_get_by_id.return_value = mock_feature_request
+        mock_update.return_value = updated_feature_request
+
+        # Act
+        result = update_feature_request(feature_request_id, update_data, db_session, admin_user)
+        
+        # Assert
+        mock_update.assert_called_once_with(
+            db_session, feature_request_id, update_data
+        )
+        assert result.status == "Approved"  # Status was updated
         
     @patch("api.v1.services.feature_request.FeatureRequestService.get_feature_request_by_id")
     @patch("api.v1.services.feature_request.FeatureRequestService.update_feature_request")
@@ -258,8 +310,8 @@ class TestUpdateFeatureRequest:
             id=feature_request_id,
             title="Updated Title",
             description="Original Description",
-            priority="medium",  # Changed from int to string
-            status="pending",
+            priority="Medium",  # Changed from int to string
+            status="Pending",  # Status unchanged
             user_id=sample_user.id,
             created_at="2025-03-01T12:00:00",
             updated_at="2025-03-01T12:30:00"
@@ -277,6 +329,7 @@ class TestUpdateFeatureRequest:
         )
         assert result.title == "Updated Title"
         assert result.user_id == sample_user.id
+        assert result.status == "Pending"  # Status remains unchanged
 
 
 class TestDeleteFeatureRequest:
