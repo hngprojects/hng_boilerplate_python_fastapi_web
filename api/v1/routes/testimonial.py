@@ -15,8 +15,13 @@ from api.core.responses import SUCCESS
 from typing import Annotated
 from api.utils.pagination import paginated_response
 from api.v1.models.testimonial import Testimonial
+import json
+import logging
+from api.utils.logger import logger
 
 testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
+
+logger = logging.getLogger(__name__)
 
 
 @testimonial.get("", status_code=status.HTTP_200_OK)
@@ -90,3 +95,36 @@ def create_testimonial(
         data={"id": testimonial.id}
     )
     return response
+
+@testimonial.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+def get_user_testimonials(
+    user_id: str,
+    page_size: Annotated[int, Query(ge=1, description="Number of testimonials per page")] = 10,
+    page: Annotated[int, Query(ge=1, description="Page number (starts from 1)")] = 0,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Endpoint to get all testimonials for a specific user with pagination"""
+    try:
+        # Only check if user is accessing their own testimonials
+        if user_id != str(current_user.id):
+            return {
+                "status_code": 403,
+                "message": "You can only view your own testimonials"
+            }
+
+        # Simply return the paginated response
+        return paginated_response(
+            db=db,
+            model=Testimonial,
+            limit=page_size,
+            skip=max(page, 0),
+            filters={"author_id": user_id}
+        )
+        
+    except Exception as e:
+        logger.exception(f"Error retrieving testimonials: {str(e)}")
+        return {
+            "status_code": 500,
+            "message": "An unexpected error occurred"
+        }

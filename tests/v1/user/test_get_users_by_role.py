@@ -60,7 +60,7 @@ def test_get_user_by_role(mock_db_session):
 
     assert login_response.status_code == 200
 
-    access_token = login_response.json()['access_token']
+    access_token = login_response.json()['data']['access_token']
     user_id = login_response.json()['data']['user']['id']
 
     role_id = "owner"    
