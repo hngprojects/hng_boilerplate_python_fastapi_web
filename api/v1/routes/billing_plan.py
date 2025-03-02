@@ -13,6 +13,7 @@ from api.v1.services.user import user_service
 from api.v1.schemas.plans import (
     CreateBillingPlanSchema, CreateBillingPlanResponse, GetBillingPlanListResponse
 )
+from api.utils.dependencies import get_authorized_user
 
 
 bill_plan = APIRouter(prefix="/organisations", tags=["Billing-Plan"])
@@ -40,7 +41,7 @@ async def retrieve_all_billing_plans(
 @bill_plan.post("/billing-plans", response_model=CreateBillingPlanResponse)
 async def create_new_billing_plan(
     request: CreateBillingPlanSchema,
-    _: User = Depends(user_service.get_current_super_admin),
+    _: User = Depends(get_authorized_user),
     db: Session = Depends(get_db),
 ):
     """
@@ -60,7 +61,8 @@ async def create_new_billing_plan(
 async def update_a_billing_plan(
     billing_plan_id: str,
     request: CreateBillingPlanSchema,
-    _: User = Depends(user_service.get_current_super_admin),
+    _: User = Depends(get_authorized_user),
+    # _: User = Depends(user_service.get_current_super_admin),
     db: Session = Depends(get_db),
 ):
     """
@@ -79,7 +81,7 @@ async def update_a_billing_plan(
 @bill_plan.delete("/billing-plans/{billing_plan_id}", response_model=success_response)
 async def delete_a_billing_plan(
     billing_plan_id: str,
-    _: User = Depends(user_service.get_current_super_admin),
+    _: User = Depends(get_authorized_user),
     db: Session = Depends(get_db),
 ):
     """
