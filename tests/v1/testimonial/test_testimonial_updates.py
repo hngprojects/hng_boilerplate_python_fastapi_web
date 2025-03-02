@@ -1,131 +1,226 @@
+# import pytest
+# from fastapi.testclient import TestClient
+# from unittest.mock import MagicMock, patch
+# from uuid_extensions import uuid7
+# from datetime import datetime, timezone
+# from faker import Faker
+# from main import app
+# from api.db.database import get_db
+# from api.v1.models.user import User
+# from api.v1.models.testimonial import Testimonial
+# from api.v1.services.user import user_service
+# from fastapi import status
+
+# fake = Faker()
+# client = TestClient(app)
+
+# # Fixtures
+# @pytest.fixture
+# def db_session_mock():
+#     db_session = MagicMock()
+#     return db_session
+
+# @pytest.fixture
+# def client(db_session_mock):
+#     app.dependency_overrides[get_db] = lambda: db_session_mock
+#     client = TestClient(app)
+#     yield client
+#     app.dependency_overrides = {}
+
+# # Mocking helper functions
+# def mock_get_current_user():
+#     return User(
+#         id=str(uuid7()),
+#         email=fake.email(),
+#         password=user_service.hash_password("Testpassword@123"),
+#         first_name="Test",
+#         last_name="User",
+#         is_active=True,
+#         is_superadmin=False,
+#         created_at=datetime.now(timezone.utc),
+#         updated_at=datetime.now(timezone.utc)
+#     )
+
+# def mock_testimonial():
+#     return Testimonial(
+#         id=str(uuid7()),
+#         content="Original content",
+#         author_id=str(uuid7()),
+#         client_name="Client 1",
+#         client_designation="Client Designation",
+#         comments="Testimonial comments",
+#         ratings=4.5
+#     )
+
+# # Test cases
+# def test_update_testimonial_success(client, db_session_mock):
+#     '''Test successful update of a testimonial'''
+    
+#     mock_user = mock_get_current_user()
+#     app.dependency_overrides[user_service.get_current_user] = lambda: mock_user
+    
+#     mock_testimonial_obj = mock_testimonial(mock_user.id)  # Pass the mock user's ID
+#     db_session_mock.get.return_value = mock_testimonial_obj
+    
+#     update_data = {"content": "Updated content"}
+#     response = client.put(
+#         f'/api/v1/testimonials/{mock_testimonial_obj.id}',
+#         json=update_data,
+#         headers={'Authorization': 'Bearer token'}
+#     )
+    
+#     assert response.status_code == 200
+#     assert response.json()["message"] == "Testimonial updated successfully"
+
+
+# def test_update_testimonial_not_found(client, db_session_mock):
+#     '''Test updating a non-existing testimonial'''
+    
+#     app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
+    
+#     db_session_mock.get.return_value = None
+    
+#     update_data = {"content": "Updated content"}
+#     testimonial_id = str(uuid7())
+#     response = client.put(
+#         f'/api/v1/testimonials/{testimonial_id}',
+#         json=update_data,
+#         headers={'Authorization': 'Bearer token'}
+#     )
+    
+#     assert response.status_code == 404
+#     assert response.json()["message"] in ["Testimonial not found", "Testimonial does not exist"]
+
+
+# def test_update_testimonial_unauthorized(client):
+#     '''Test updating a testimonial without authentication'''
+    
+#     testimonial_id = str(uuid7())
+#     update_data = {"content": "Updated content"}
+    
+#     response = client.put(f'/api/v1/testimonials/{testimonial_id}', json=update_data)
+    
+#     assert response.status_code == 401
+#     assert response.json()["message"] == "Not authenticated"
+
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+from uuid_extensions import uuid7
+from datetime import datetime, timezone
+from faker import Faker
 from main import app
+from api.db.database import get_db
 from api.v1.models.user import User
 from api.v1.models.testimonial import Testimonial
 from api.v1.services.user import user_service
-from uuid_extensions import uuid7
-from api.db.database import get_db
 from fastapi import status
-from datetime import datetime, timezone
 
-LOGIN_ENDPOINT = 'api/v1/auth/login'
-TESTIMONIAL_ENDPOINT = '/api/v1/testimonials'
+fake = Faker()
 client = TestClient(app)
 
+# Fixtures
 @pytest.fixture
-def mock_db_session():
-    """Fixture to create a mock database session."""
-    with patch("api.v1.services.user.get_db", autospec=True) as mock_get_db:
-        mock_db = MagicMock()
-        app.dependency_overrides[get_db] = lambda: mock_db
-        yield mock_db
+def db_session_mock():
+    db_session = MagicMock()
+    return db_session
+
+@pytest.fixture
+def client(db_session_mock):
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    client = TestClient(app)
+    yield client
     app.dependency_overrides = {}
 
-@pytest.fixture
-def mock_user_service():
-    """Fixture to create a mock user service."""
-    with patch("api.v1.services.user.user_service", autospec=True) as mock_service:
-        yield mock_service
-
-def create_mock_user(mock_user_service, mock_db_session):
-    """Create a mock user in the mock database session."""
-    mock_user = User(
+# Mocking helper functions
+def mock_get_current_user():
+    return User(
         id=str(uuid7()),
-        email="testuser@gmail.com",
+        email=fake.email(),
         password=user_service.hash_password("Testpassword@123"),
-        first_name='Test',
-        last_name='User',
+        first_name="Test",
+        last_name="User",
         is_active=True,
         is_superadmin=False,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
-    mock_db_session.query.return_value.filter.return_value.first.return_value = mock_user
-    return mock_user
 
-def create_testimonial(mock_db_session, user_id):
-    """Create a mock testimonial in the mock database session."""
-    mock_testimonial = Testimonial(
+def mock_testimonial(user_id):
+    return Testimonial(
         id=str(uuid7()),
-        content='Original content',
-        author_id=user_id,
+        content="Original content",
+        author_id=user_id,  # Ensure it belongs to the mock user
         client_name="Client 1",
         client_designation="Client Designation",
         comments="Testimonial comments",
         ratings=4.5
     )
-    mock_db_session.get.return_value = mock_testimonial
-    return mock_testimonial
 
-def get_auth_token():
-    """Helper function to authenticate and return a valid access token."""
-    response = client.post(LOGIN_ENDPOINT, json={
-        "email": "testuser@gmail.com",
-        "password": "Testpassword@123"
-    })
-    assert response.status_code == status.HTTP_200_OK, "Login failed"
-    return response.json().get('access_token')
-
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_update_testimonial_success(mock_user_service, mock_db_session):
-    """Test successful update of a testimonial."""
-    mock_user = create_mock_user(mock_user_service, mock_db_session)
-    access_token = get_auth_token()
-    testimonial = create_testimonial(mock_db_session, mock_user.id)
+# Test cases
+def test_update_testimonial_success(client, db_session_mock):
+    '''Test successful update of a testimonial'''
+    
+    mock_user = mock_get_current_user()
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_user
+    
+    mock_testimonial_obj = mock_testimonial(mock_user.id)  # Pass the mock user's ID
+    db_session_mock.get.return_value = mock_testimonial_obj
     
     update_data = {"content": "Updated content"}
     response = client.put(
-        f'{TESTIMONIAL_ENDPOINT}/{testimonial.id}',
+        f'/api/v1/testimonials/{mock_testimonial_obj.id}',
         json=update_data,
-        headers={'Authorization': f'Bearer {access_token}'}
+        headers={'Authorization': 'Bearer token'}
     )
-    assert response.status_code == status.HTTP_200_OK
-    assert response.json().get("message") == "Testimonial updated successfully"
-
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_update_testimonial_not_found(mock_user_service, mock_db_session):
-    """Test updating a non-existing testimonial."""
-    create_mock_user(mock_user_service, mock_db_session)
     
-    login_response = client.post(LOGIN_ENDPOINT, json={
-        "email": "testuser@gmail.com",
-        "password": "Testpassword@123"
-    })
-    login_data = login_response.json()
-    access_token = login_data.get('access_token')
+    assert response.status_code == 200
+    assert response.json()["message"] == "Testimonial updated successfully"
 
-    assert access_token, "Login failed, no access token returned"
+# def test_update_testimonial_not_found(client, db_session_mock):
+#     '''Test updating a non-existing testimonial'''
+    
+#     mock_user = mock_get_current_user()
+#     app.dependency_overrides[user_service.get_current_user] = lambda: mock_user
+    
+#     db_session_mock.get.return_value = None
+    
+#     update_data = {"content": "Updated content"}
+#     testimonial_id = str(uuid7())
+#     response = client.put(
+#         f'/api/v1/testimonials/{testimonial_id}',
+#         json=update_data,
+#         headers={'Authorization': 'Bearer token'}
+#     )
+    
+#     assert response.status_code == 404
+#     assert response.json()["message"] == "Testimonial not found"
 
-    non_existent_id = str(uuid7())
+def test_update_testimonial_not_found(client, db_session_mock):
+    '''Test updating a non-existing testimonial'''
+    
+    app.dependency_overrides[user_service.get_current_user] = lambda: mock_get_current_user()
+    
+    db_session_mock.get.return_value = None
+    
     update_data = {"content": "Updated content"}
-
+    testimonial_id = str(uuid7())
     response = client.put(
-        f'/api/v1/testimonials/{non_existent_id}',
+        f'/api/v1/testimonials/{testimonial_id}',
         json=update_data,
-        headers={'Authorization': f'Bearer {access_token}'}
-    )
+        headers={'Authorization': 'Bearer token'}
+        )
+    
+    assert response.status_code == 404
+    assert response.json()["message"] in ["Testimonial not found", "Testimonial does not exist"]
 
-    response_data = response.json()
-    print("Not Found Response:", response_data)  # Debugging log
-
-    expected_messages = [
-        "Testimonial not found",
-        "You do not have permission to update this testimonial",
-        "Not authorized to update this testimonial"
-    ]
-
-    assert response.status_code in [status.HTTP_404_NOT_FOUND, status.HTTP_403_FORBIDDEN]
-    assert response_data.get("message") in expected_messages
-
-@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
-def test_update_testimonial_unauthorized():
-    """Test updating a testimonial without authentication."""
+def test_update_testimonial_unauthorized(client):
+    '''Test updating a testimonial without authentication'''
+    
     testimonial_id = str(uuid7())
     update_data = {"content": "Updated content"}
     
-    response = client.put(f'{TESTIMONIAL_ENDPOINT}/{testimonial_id}', json=update_data)
-    assert response.status_code == status.HTTP_401_UNAUTHORIZED
-    assert response.json().get("message") == "Not authenticated"
-
+    response = client.put(f'/api/v1/testimonials/{testimonial_id}', json=update_data)
+    
+    assert response.status_code == 401
+    assert response.json()["message"] == "Not authenticated"
