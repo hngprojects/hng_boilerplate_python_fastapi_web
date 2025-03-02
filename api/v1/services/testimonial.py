@@ -40,14 +40,14 @@ class TestimonialService(Service):
         """Updates a testimonial"""
         testimonial = self.fetch(db, id)
         if not testimonial:
-            return None  # Or raise an HTTPException(status_code=404, detail="Testimonial not found")
-        # Update the fields 
+            return None
+         
         for key, value in schema.dict(exclude_unset=True).items():
             setattr(testimonial, key, value)
             
-            db.commit()
-            db.refresh(testimonial)
-            return testimonial
+        db.commit()
+        db.refresh(testimonial)
+        return testimonial
 
 
     def delete(self, db: Session, id: str):
