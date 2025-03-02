@@ -1,0 +1,225 @@
+[33m238a8609[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeat/soft_delete[m[33m, [m[1;31morigin/feat/soft_delete[m[33m)[m Merge branch 'feat/soft_delete' of https://github.com/Donchess1/hng_boilerplate_python_fastapi_web into feat/soft_delete
+[33m08393a48[m soft delete retested getblog adjusted with filter
+[33m2a48bec3[m Merge branch 'dev' into feat/soft_delete
+[33me15acc8e[m Merge pull request #1139 from Faith-K-commits/feature/add-database-indexing
+[33m8f91c67b[m Merge branch 'dev' into feat/soft_delete
+[33m2721e828[m Merge branch 'dev' into feature/add-database-indexing
+[33md21d556e[m Merge pull request #1164 from 0xNuru/refactor/urls
+[33mcb8f2cc0[m Merge branch 'dev' into feature/add-database-indexing
+[33m125d8731[m Merge branch 'dev' into refactor/urls
+[33m3ad1b4af[m Merge pull request #1178 from jeffmaine240/feat/email_verification
+[33ma93cb0d8[m Merge branch 'dev' into refactor/urls
+[33m7670fe5c[m Merge branch 'dev' into feat/email_verification
+[33md04685e9[m Merge pull request #1141 from DavidIfebueme/feat/delete-user-endpoint
+[33m136a42b2[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m9c295ff4[m Merge pull request #1155 from EmmyAnieDev/feature/login-email-notification
+[33mb24370ec[m Merge branch 'dev' into feat/email_verification
+[33mc46fa4ea[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m15ebc91d[m Merge branch 'dev' into feature/login-email-notification
+[33mf36b5127[m Merge pull request #1147 from codeWithGodstime/feat/filter_faq_by_category
+[33md242cd15[m Merge branch 'dev' into feat/filter_faq_by_category
+[33me07aa133[m Merge branch 'dev' into feature/login-email-notification
+[33mb27e3547[m Merge pull request #1192 from eniiku/feat/update_squeezepage_endpoint
+[33madf721d4[m Merge branch 'dev' into feat/update_squeezepage_endpoint
+[33m3d058e9f[m Merge branch 'dev' into feat/email_verification
+[33m4ec6e3fc[m Merge branch 'dev' into feature/login-email-notification
+[33m3407c894[m Merge pull request #1190 from ObiFaith/fix/send-notification
+[33m9da99a41[m Merge branch 'dev' into feat/update_squeezepage_endpoint
+[33me204407b[m Merge branch 'dev' into feat/email_verification
+[33mb3b78741[m Merge branch 'dev' into feature/login-email-notification
+[33me7dccd6b[m Merge branch 'dev' into fix/send-notification
+[33m4aaa3327[m Merge branch 'dev' into refactor/urls
+[33m07d2b5df[m Merge pull request #1185 from Staneering/chore/blog-service-refactor
+[33ma1084320[m chore: change all urls that are using settings.base urls to settings.anchor_base_url
+[33m264a4382[m Merge branch 'dev' into feature/login-email-notification
+[33m65ce298c[m Merge branch 'dev' into chore/blog-service-refactor
+[33m87785eb1[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m1d243050[m Merge branch 'dev' into fix/send-notification
+[33m3229c4f5[m Merge pull request #1174 from LmOpe/feat/reply-to-blog-comment
+[33mb9eec093[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m7a2d3b0d[m Merge branch 'dev' into fix/send-notification
+[33me25d2453[m chore: change all urls that are using settings.base urls to settings.anchor_base_url
+[33m0d4dc21b[m Merge branch 'dev' into feat/email_verification
+[33m2875dced[m Merge branch 'dev' into feat/reply-to-blog-comment
+[33m3ea9c534[m Merge branch 'dev' into feature/login-email-notification
+[33m450f4c59[m Merge pull request #1168 from Lamido-stack/Total-Blog-Reactions
+[33mb5dcab88[m fix(auth): resolve merge conflict in authentication tests
+[33m726581ed[m feat(auth): email verification test added
+[33m2af3491b[m Merge branch 'dev' into Total-Blog-Reactions
+[33m50e8ebb0[m feat(auth): email verification test added
+[33m0df52c09[m test: add authentication checks for send_notification
+[33m2ec8a683[m refactor: update send_notification service to attach user_id
+[33mf74140e3[m fix: enforce authentication on send_notification endpoint
+[33m48010aae[m Merge branch 'dev' into chore/blog-service-refactor
+[33me9f6b117[m Merge branch 'dev' into feat/email_verification
+[33m596b3647[m Merge branch 'dev' into feat/delete-user-endpoint
+[33mf61f847c[m Merge branch 'dev' into feat/reply-to-blog-comment
+[33me0ac8b98[m Merge pull request #1160 from PreciousEzeigbo/backend
+[33m845e1d75[m chore(blog): move fetch_and_increment_view to BlogService
+[33m16149d71[m Merge branch 'dev' into backend
+[33m3e2baab9[m fix: fix UTC import error in python 3.10 version to use datetime timezone module
+[33md8fabe26[m test(blog): add test cases for reply blog post comments endpoint
+[33m2ea02d0a[m feat(blog): add post endpoint for replying to blog post comments
+[33m359ec16b[m Merge branch 'dev' into refactor/urls
+[33m820ab9e6[m Merge branch 'dev' into feature/add-database-indexing
+[33m2a575429[m Merge pull request #1158 from Ayobamidele/chore/readme_update
+[33m4ed4ef21[m Merge branch 'dev' into refactor/urls
+[33mde8b3d2a[m Merge branch 'dev' into chore/readme_update
+[33m307ceac9[m fix(email): resolve merge conflict in email templates setup
+[33m5fb87068[m fix(models): adjust indentation in Blog model
+[33md6109fd5[m Merge pull request #1140 from 0xNuru/fix/login-error-handling
+[33mef04fb7b[m Merge branch 'dev' into feat/delete-user-endpoint
+[33mabc8255a[m fix(models): correct indentation in Blog model
+[33m46122f32[m Merge branch 'dev' into fix/login-error-handling
+[33ma4f4267b[m Merge pull request #1125 from johnafariogun/feat/telex-integration-for-enhanced-logging
+[33m72663867[m Merge branch 'dev' into fix/login-error-handling
+[33m5fb8df6b[m Merge branch 'dev' into feature/add-database-indexing
+[33mb1df4d0b[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m1cbcec91[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m01b25020[m Merge branch 'dev' into feature/login-email-notification
+[33mc1f42258[m Merge branch 'dev' into chore/blog-service-refactor
+[33m58037817[m chore: removed telex channel webhook
+[33m0b109a62[m Merge pull request #1170 from Joe-encodes/chore/cleanup-blogservice
+[33ma2160fcc[m Merge branch 'dev' into feature/add-database-indexing
+[33m1bddd7f6[m Merge branch 'dev' into feat/delete-user-endpoint
+[33mbf1c7864[m Merge branch 'dev' into feature/login-email-notification
+[33m61ce8be9[m chore: added telex channel webhook
+[33m81a12885[m Merge branch 'dev' into chore/cleanup-blogservice
+[33m5c7800fe[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m9027b260[m Merge pull request #1149 from Magnus984/bookmark-feature
+[33md8f6e7c0[m feat(tests): create test cases against updating squeeze page impl
+[33md1f71112[m feat(routes): create route to handle updating squeeze page details
+[33m2f6ccaa0[m feat(services): create business logic to handle updating squeeze page details
+[33m9b005807[m feat(schemas): create schema for updating squeeze page
+[33m74a4eadd[m Merge branch 'dev' into bookmark-feature
+[33m4e3a1de1[m Merge branch 'dev' into chore/cleanup-blogservice
+[33mf7ad467a[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m23cc2edc[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m9634f02c[m Merge branch 'dev' into feat/email_verification
+[33m2793610c[m Merge pull request #1095 from Afeh/feat/add-wishlist
+[33mda48bfe7[m Merge branch 'dev' into chore/blog-service-refactor
+[33m885f03bc[m Merge branch 'dev' into bookmark-feature
+[33m81f6441e[m Merge branch 'dev' into feat/add-wishlist
+[33m9deaf625[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m97d1401f[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m6cd8e1c7[m Merge pull request #1105 from Tonyjr7/feat/confirmpassword
+[33m56e7f2de[m Merge branch 'dev' into feat/confirmpassword
+[33m312c4ec3[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m57ee1aef[m Merge branch 'dev' into feat/add-wishlist
+[33md696e57f[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m72bb4926[m Merge pull request #1083 from Marlinekhavele/feat/remove_member_from_organization
+[33med7f371e[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33md79dddfe[m Merge branch 'dev' into chore/cleanup-blogservice
+[33m2233505d[m Merge branch 'dev' into backend
+[33mae62790e[m Merge branch 'dev' into feat/remove_member_from_organization
+[33m15ea4f15[m Merge branch 'dev' into feat/delete-user-endpoint
+[33me05956dc[m Merge pull request #1097 from simplicityf/feat/delete_blog_like
+[33mad5746a5[m Merge branch 'dev' into feat/delete_blog_like
+[33md23fe94a[m Merge branch 'dev' into feat/confirmpassword
+[33m4a7caf96[m Merge branch 'dev' into chore/cleanup-blogservice
+[33m2850c3c4[m resolved conflicts
+[33mc826e2a1[m resolved conflicts
+[33m7f6b1525[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m898d18b9[m resolved conflicts
+[33mc64a0b41[m Remove .DS_Store files and add them to .gitignore
+[33md5e2ea1c[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m4931e718[m resolved conflicts
+[33m6acbf90d[m Merge branch 'dev' into feat/remove_member_from_organization
+[33m73645573[m resolved conflicts
+[33m17ca6a7f[m chore(blog): implement base interaction service for likes/dislikes
+[33m959d59c9[m resolved conflicts
+[33m54dcdf74[m Merge pull request #1066 from CynthiaWahome/feature/blog-view-count
+[33m27dc54cc[m resolved conflicts
+[33m084efcb1[m resolved conflicts
+[33m386e2460[m resolved conflicts
+[33m2309a237[m resolved conflicts
+[33m092725f0[m Merge branch 'dev' into feature/login-email-notification
+[33m0d3c59f2[m resolved conflicts
+[33m49103061[m resolved conflicts
+[33m83a1c02e[m fix(auth): resolve merge conflicts with dev branch in login tests
+[33mde7934ab[m resolved conflicts
+[33mfe96d758[m Merge branch 'dev' into chore/cleanup-blogservice
+[33m69ee0069[m fix: update test to expect 200 status code for user deletion
+[33mc14355b8[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m99674be4[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33m2d5d0259[m Merge branch 'dev' into feature/blog-view-count
+[33m358704f5[m refactor: Enhance blog view counter with improved error handling
+[33me86a48db[m Merge branch 'dev' into feat/remove_member_from_organization
+[33m7ca8f7a8[m Merge pull request #1162 from osadeleke/feat/paginate_newsletter_subscribers
+[33m5827ed88[m feat(auth): email verification added
+[33m15bf1a78[m Deleted alembic/.DS_Store file
+[33m032115cd[m Deleted tests/.DS_Store file
+[33mbc6903d8[m Deleted an api\.DS_Store file
+[33mc5ee4e86[m Deleted a.DS_Store file
+[33ma1f46d88[m feat(auth): email verification added
+[33m23701153[m feat(auth): email verification added
+[33mc2f5f023[m feat(auth): email verification added
+[33m2fb0e89a[m fix: added status code in response json as per new response standards
+[33m98aebfb6[m Merge branch 'dev' into chore/cleanup-blogservice
+[33m29963657[m chore: Removed outdated setup instructions to follow current standards
+[33m5113c0df[m fix: removed success field from response json as per new response standards
+[33ma3c2f23d[m fix: Updated files
+[33md20267d5[m fix: implemented fix for missing , in test_delelte_user.py
+[33m6345911b[m fix: Updated files
+[33m3996087b[m Merge branch 'chore/cleanup-blogservice' of https://github.com/Joe-encodes/hng_boilerplate_python_fastapi_web into chore/cleanup-blogservice
+[33mbab12300[m fix base: Added .DS_Store to .gitignore
+[33mb72cb7ca[m Merge remote-tracking branch 'refs/remotes/origin/chore/readme_update' into chore/readme_update
+[33mcdf5351d[m Delete .DS_Store
+[33mf4bb1d20[m chore: refactored BlogService methods to use instance db and improve authentication checks
+[33m93b89c3b[m chore: refactored BlogService methods to use instance db and improve authentication checks
+[33m29fb6b16[m chore: Removed outdated setup instructions to follow current standards
+[33m5459f36d[m Merge branch 'dev' into feat/add-wishlist
+[33m1796f8d3[m fix: Delete alembic/versions/a860d2b54034_added_wishlist_model.py
+[33m99e25f8f[m fix: Delete alembic/versions/66d2371b0b34_added_wishlist_model.py
+[33m73d370c5[m fix: Delete alembic/versions/51c061a73b85_initial_migration.py
+[33m5c032033[m Update test_delete_user.py
+[33m38d1324f[m Merge branch 'dev' into Total-Blog-Reactions
+[33m49ac4f6d[m Merge branch 'dev' into feature/blog-view-count
+[33m6239b229[m fix: remove unneccessary commented code
+[33mfb7fc35d[m Merge branch 'dev' into feat/delete-user-endpoint
+[33m028cdb4b[m Merge branch 'dev' into feat/paginate_newsletter_subscribers
+[33mf42cf35e[m Merge branch 'feat/remove_member_from_organization' of github.com:Marlinekhavele/hng_boilerplate_python_fastapi_web into feat/remove_member_from_organization
+[33m5ccc4884[m fix: forgot to add status code on the endpoint causing datamismatch with the test
+[33m0835bf86[m refactor: move hardcoded URLs to configuration settings
+[33m367ab2fa[m Merge branch 'dev' into fix/login-error-handling
+[33m5a9e83e5[m feat : Retrieves the Total Number of Likes and Dislikes for a Specific Blog Post
+[33m43ed97b7[m Merge branch 'dev' into feat/remove_member_from_organization
+[33m283303b3[m fix: fixed CI/CD fail by removing alembic migrations
+[33m633b36de[m chore: pushing alembic migration files
+[33mbba086d0[m test: add test for subscriber retrieval on nil subs and with some subscribers
+[33m19ee81d6[m Merge branch 'dev' into feat/telex-integration-for-enhanced-logging
+[33mfafccdee[m refactor(tests): removed redundant comments
+[33m9317fc3e[m Merge branch 'dev' into chore/readme_update
+[33m207a110b[m Merge pull request #1082 from Ayobamidele/feat/response
+[33m534182dd[m fix: standardize user deletion responses and add proper error handling
+[33md4641f62[m ci: Removed branch restriction for CI testing
+[33m21c63761[m chore: Removed outdated setup instructions to follow current standards
+[33m68d7a514[m fix(auth): handle login notification API errors and improve test coverage
+[33m5ec934dc[m Merge branch 'dev' into feature/add-database-indexing
+[33m978e29ef[m refactor(tests): replace with-patch syntax with decorator for mocking
+[33mea2a5e48[m Merge branch 'dev' into feat/response
+[33mee318845[m fix: updated tests to folow changes
+[33m59a3f0b3[m fix: updated test code to remove phantom assert
+[33m5167e0fc[m fix: updated test code to remove phantom assert
+[33m5b98345d[m test: added mock webhook properly
+[33m1c9e33c0[m fix: updated tests to folow changes
+[33m5ec90963[m refactor(tests): simplify database fixture documentation and cleanup
+[33mac35e5fe[m fix: removed prints from tests
+[33ma595466b[m Merge branch 'feat/add-wishlist' of https://github.com/Afeh/hng_boilerplate_python_fastapi_web into feat/add-wishlist
+[33m0feb59c8[m fix: added logic in wishlist routes to check if a user ia authenticated before they can add a product to wishlist, added authentication headers to tests as a result, wrote two new tests; test to check if the user adding the wish list is unauthorized and test to check for unprocessable entity when a user sends an empty request.
+[33mc1bf55c5[m fix: updated tests to folow changes
+[33m14ea25d2[m feat: modified the query parameter to all filtering faq by category and wrote tests for that functionality
+[33m1b613e12[m feat: add pagination to newsletter subscribers fetch
+[33m001ebf55[m feat(models): add indexing to Blog model
+[33m7ceaa997[m test: fix assertion errors and ensure correct mocking
+[33m1c5797ed[m test: added unit tests to test endpoint
+[33m2a63bfb1[m Merge branch 'feat/remove_member_from_organization' of github.com:Marlinekhavele/hng_boilerplate_python_fastapi_web into feat/remove_member_from_organization
+[33m38a8d858[m fix: rewrite tests for  test_delete_user_from_organisation
+[33m8ab36038[m chore(env): add MAIL_USERNAME and MAIL_PASSWORD to .env.sample
+[33mbec309ac[m rename blog_id, refactor error 403
+[33m04131699[m fix: extract status code dynamically and handle missing webhook URL
+[33me72a91a8[m rename blog_id, refactor error 403
+[33m08032bd4[m test: add test for Swagger UI auth form handling
+[33m20d170ff[m tests: added unittests for the delete user endpoint
+[33mc1c79f4d[m revert(test): restore original test setup for user login
+[33me081299e[m feat(models): add indexin
