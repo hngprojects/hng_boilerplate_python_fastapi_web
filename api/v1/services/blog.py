@@ -1,3 +1,5 @@
+import asyncio
+from datetime import datetime, timezone
 from typing import Optional
 
 from fastapi import HTTPException, status
@@ -8,7 +10,7 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.blog import Blog, BlogDislike, BlogLike
 from api.v1.models.comment import Comment
 from api.v1.models.user import User
-from api.v1.schemas.blog import BlogCreate
+from api.v1.schemas.blog import BlogCreate, BlogStatus
 
 
 class BlogService:
@@ -21,6 +23,18 @@ class BlogService:
         """Create a new blog post"""
 
         new_blogpost = Blog(**schema.model_dump(), author_id=author_id)
+
+        if new_blogpost.scheduled_at:
+            if new_blogpost.scheduled_at.astimezone(timezone.utc) < datetime.now(timezone.utc):
+                raise HTTPException(
+                    status_code=400, detail="Scheduled time must be in the future."
+                )
+            else:
+                new_blogpost.status = BlogStatus.PENDING
+                new_blogpost.scheduled_at = new_blogpost.scheduled_at.astimezone(timezone.utc)
+        else:
+            new_blogpost.status = BlogStatus.PUBLISHED
+
         db.add(new_blogpost)
         db.commit()
         db.refresh(new_blogpost)
@@ -39,6 +53,18 @@ class BlogService:
         if not blog_post:
             raise HTTPException(status_code=404, detail="Post not found")
         return blog_post
+
+    def fetch_scheduled_blogs(
+            self,
+            current_user: User,
+        ):
+        """Fetch all scheduled blog posts for the current user"""
+
+        scheduled_blogs = self.db.query(Blog).filter(
+            Blog.status == BlogStatus.PENDING,
+            Blog.author_id == current_user.id
+        ).all()
+        return scheduled_blogs
 
     def update(
         self,
@@ -80,9 +106,7 @@ class BlogService:
         self, db: Session, blog_id: str, user_id: str, ip_address: str = None
     ):
         """Create new blog like."""
-        blog_like = BlogLike(
-            blog_id=blog_id, user_id=user_id, ip_address=ip_address
-        )
+        blog_like = BlogLike(blog_id=blog_id, user_id=user_id, ip_address=ip_address)
         db.add(blog_like)
         db.commit()
         db.refresh(blog_like)
@@ -103,9 +127,7 @@ class BlogService:
     def fetch_blog_like(self, blog_id: str, user_id: str):
         """Fetch a blog like by blog ID & ID of user who liked it"""
         blog_like = (
-            self.db.query(BlogLike)
-            .filter_by(blog_id=blog_id, user_id=user_id)
-            .first()
+            self.db.query(BlogLike).filter_by(blog_id=blog_id, user_id=user_id).first()
         )
         return blog_like
 
@@ -117,7 +139,7 @@ class BlogService:
             .first()
         )
         return blog_dislike
-    
+
     def check_user_already_liked_blog(self, blog: Blog, user: User):
         existing_like = self.fetch_blog_like(blog.id, user.id)
         if isinstance(existing_like, BlogLike):
@@ -125,7 +147,7 @@ class BlogService:
                 detail="You have already liked this blog post",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
-    
+
     def check_user_already_disliked_blog(self, blog: Blog, user: User):
         existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
         if isinstance(existing_dislike, BlogDislike):
@@ -133,10 +155,12 @@ class BlogService:
                 detail="You have already disliked this blog post",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
-    
-    def delete_opposite_blog_like_or_dislike(self, blog: Blog, user: User, creating: str):
+
+    def delete_opposite_blog_like_or_dislike(
+        self, blog: Blog, user: User, creating: str
+    ):
         """
-        This method checks if there's a BlogLike by `user` on `blog` when a BlogDislike 
+        This method checks if there's a BlogLike by `user` on `blog` when a BlogDislike
         is being created and deletes the BlogLike. The same for BlogLike creation. \n
 
         :param blog: `Blog` The blog being liked or disliked
@@ -146,19 +170,19 @@ class BlogService:
         if creating == "like":
             existing_dislike = self.fetch_blog_dislike(blog.id, user.id)
             if existing_dislike:
-                # delete, but do not commit yet. Allow everything 
+                # delete, but do not commit yet. Allow everything
                 # to be commited after the actual like is created
                 self.db.delete(existing_dislike)
         elif creating == "dislike":
             existing_like = self.fetch_blog_like(blog.id, user.id)
             if existing_like:
-                # delete, but do not commit yet. Allow everything 
+                # delete, but do not commit yet. Allow everything
                 # to be commited after the actual dislike is created
                 self.db.delete(existing_like)
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid `creating` value for blog like/dislike"
+                detail="Invalid `creating` value for blog like/dislike",
             )
 
     def num_of_likes(self, blog_id: str) -> int:
@@ -211,9 +235,7 @@ class BlogService:
         db = self.db
 
         if not content:
-            raise HTTPException(
-                status_code=400, detail="Blog comment cannot be empty"
-            )
+            raise HTTPException(status_code=400, detail="Blog comment cannot be empty")
 
         # check if the blog and comment exist
         blog_post = check_model_existence(db, Blog, blog_id)
@@ -234,7 +256,8 @@ class BlogService:
         except Exception as exc:
             db.rollback()
             raise HTTPException(
-                status_code=500, detail=f"An error occurred while updating the blog comment; {exc}"
+                status_code=500,
+                detail=f"An error occurred while updating the blog comment; {exc}",
             )
 
         return comment
@@ -258,13 +281,13 @@ class BlogLikeService:
         if blog_like.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Insufficient permission"
+                detail="Insufficient permission",
             )
 
         self.db.delete(blog_like)
         self.db.commit()
 
-        
+
 class BlogDislikeService:
     """BlogDislike service functionality"""
 
@@ -283,7 +306,7 @@ class BlogDislikeService:
         if blog_dislike.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Insufficient permission"
+                detail="Insufficient permission",
             )
 
         self.db.delete(blog_dislike)
