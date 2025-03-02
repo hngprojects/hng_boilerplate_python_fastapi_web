@@ -89,10 +89,7 @@ def paginated_response(
     results = jsonable_encoder(query.offset(skip).limit(limit).all())
     total_pages = int(total / limit) + (total % limit > 0)
 
-    return success_response(
-        status_code=200,
-        message="Successfully fetched items",
-        data={
+    return {
             "pages": total_pages,
             "total": total,
             "skip": skip,
@@ -107,4 +104,4 @@ def paginated_response(
                 }
             )
         }
-    )
+    
