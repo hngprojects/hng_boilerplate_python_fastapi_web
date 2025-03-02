@@ -52,7 +52,20 @@ def create_blog(
 def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0):
     """Endpoint to get all blogs"""
 
-    return paginated_response(
+    blog = paginated_response(
+        db=db,
+        model=Blog,
+        limit=limit,
+        skip=skip,
+    )
+
+    return success_response(200, message="Successfully fetched all blogs", data=blog)
+
+@blog.get("/active", response_model=success_response)
+def get_all_active_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0):
+    """Endpoint to get all active blogs"""
+
+    blog = paginated_response(
         db=db,
         model=Blog,
         limit=limit,
@@ -60,6 +73,7 @@ def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0)
         filters={"is_deleted": False} #filter out soft-deleted blogs
     )
 
+    return success_response(200, message="Successfully fetched active blogs", data=blog)
 
 @blog.get("/{id}", response_model=BlogPostResponse)
 def get_blog_by_id(id: str, db: Session = Depends(get_db)):
@@ -109,6 +123,8 @@ async def update_blog(
         status_code=200,
         data=jsonable_encoder(updated_blog_post),
     )
+
+
 
 
 @blog.post("/{blog_id}/like", response_model=BlogLikeDislikeResponse)
@@ -237,6 +253,34 @@ async def archive_blog_post(
 
     return success_response(
         message="Blog post archived successfully!",
+        status_code=200,
+        data=jsonable_encoder(blog_post),
+    )
+
+@blog.put("/{blog_id}/restore")
+async def restore_blog_post(
+    blog_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    
+    """Endpoint to restore a soft-deleted blog post"""
+
+    blog_service = BlogService(db=db)
+    blog_post = blog_service.fetch(blog_id=blog_id)
+    if not blog_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    #check if admin/ authorized user
+    if not (blog_post.author_id != current_user.id or current_user.is_superadmin):
+        raise HTTPException(status_code=403, detail="You don't have permission to perform this action")
+    if not blog_post.is_deleted:
+        raise HTTPException(status_code=400, detail="Blog post is already active")
+    blog_post.is_deleted = False
+    db.commit()
+    db.refresh(blog_post)
+
+    return success_response(
+        message="Blog post restored successfully!",
         status_code=200,
         data=jsonable_encoder(blog_post),
     )
