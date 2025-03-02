@@ -69,7 +69,7 @@ class BlogService:
     def fetch_all(self):
         """Fetch all blog posts"""
 
-        blogs = self.db.query(Blog).filter(Blog.is_deleted == False).all()
+        blogs = self.db.query(Blog).filter(Blog.is_deleted == False, Blog.status == BlogStatus.PUBLISHED).all()
         return blogs
 
     def fetch(self, blog_id: str):
