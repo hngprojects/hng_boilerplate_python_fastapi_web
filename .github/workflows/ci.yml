@@ -23,10 +23,10 @@ jobs:
       redis:
         image: redis:latest
         env:
-          REDIS_PASSWORD: "password"
-          REDIS_DB: "0"
-          REDIS_PORT: "11305"
-          REDIS_HOST: "redis-11305.c341.af-south-1-1.ec2.redns.redis-cloud.com"
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
         ports:
           - 11305:11305
 
