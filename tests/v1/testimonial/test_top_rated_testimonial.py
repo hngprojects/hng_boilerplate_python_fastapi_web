@@ -37,3 +37,20 @@ def test_get_top_rated_api(db_session_mock):
     assert response.status_code == 200
     assert response.json()["message"] == "Top-rated testimonials retrieved successfully."
     assert len(response.json()["data"]) == 1
+
+def test_no_testimonials(db_session_mock):
+    """Test for when no testimonials exist in the database"""
+    db_session_mock.query().order_by().offset().limit().all.return_value = []
+
+    response = client.get("/api/v1/testimonials/top-rated", params={"page": 1, "per_page": 10})
+
+    assert response.status_code == 200
+    assert response.json()["message"] == "No testimonials found."
+    assert response.json()["data"] == []
+
+@pytest.mark.parametrize("page, per_page", [(0, 10),  (-1, 10), (1, 0), (1, -5)])
+def test_invalid_pagination_params(page, per_page):
+    """Test for invalid pagination"""
+    response = client.get("/api/v1/testimonials/top-rated", params={"page": page, "per_page": per_page})
+
+    assert response.status_code == 422

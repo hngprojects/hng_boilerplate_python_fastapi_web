@@ -7,7 +7,7 @@ from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
 from fastapi import Depends, APIRouter, status,Query
-from api.utils.success_response import success_response
+from api.utils.success_response import success_response, fail_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
 from api.v1.schemas.testimonial import CreateTestimonial
@@ -41,22 +41,26 @@ def get_top_rated_testimonials(
     db: Session = Depends(get_db),
 ):
     """Endpoint to fetch top-rated testimonials"""
-    testimonials = testimonial_service.top_rated_testimonials(db, page, per_page)
+    try:
 
-    if not testimonials:
-        return success_response(status_code=200, message="No testimonials found.", data=[])
+        testimonials = testimonial_service.top_rated_testimonials(db, page, per_page)
+
+        if not testimonials:
+            return success_response(status_code=200, message="No testimonials found.", data=[])
     
-    return success_response(
-        status_code=200,
-        message="Top-rated testimonials retrieved successfully.",
-        data=[{
-            "id": testimonial.id,
-            "content": testimonial.content,
-            "ratings": testimonial.ratings,
-            "author_id": testimonial.author_id,
-            "created_at": testimonial.created_at.isoformat()
-        } for testimonial in testimonials]
+        return success_response(
+            status_code=200,
+            message="Top-rated testimonials retrieved successfully.",
+            data=[{
+                "id": testimonial.id,
+                "content": testimonial.content,
+                "ratings": testimonial.ratings,
+                "author_id": testimonial.author_id,
+                "created_at": testimonial.created_at.isoformat()
+            } for testimonial in testimonials]
     )
+    except Exception as e:
+        return fail_response(status_code=500, message="An error occurred.", data={"error": str(e)})
 
 @testimonial.get("/{testimonial_id}", status_code=status.HTTP_200_OK)
 def get_testimonial(
