@@ -124,3 +124,49 @@ def delete_all_product_comments(
         message=deleted_comment["message"],
         status_code=200,
     )
+    
+    
+
+
+
+#  ======== Implement feature to delete a comment on a single product  ============
+@product_comment.delete("/{comment_id}", status_code=status.HTTP_200_OK)
+def delete_product_comment(
+    product_id: str,
+    comment_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user),
+):
+    """Delete a product comment by ID"""
+
+    # Fetch the comment
+    comment = product_comment_service.fetch(db=db, id=comment_id)
+
+    # Check if comment exists
+    if not comment:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Comment Not Found"
+        )
+
+    # Ensure the comment belongs to the current user
+    if comment.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorized to delete this comment"
+        )
+
+    # Delete the comment
+    db.delete(comment)
+    db.commit()
+
+    return {
+        "status": "successful",
+        "status_code": 200,
+        "message": "Comment successfully deleted"
+    }
+
+
+
+
+  
