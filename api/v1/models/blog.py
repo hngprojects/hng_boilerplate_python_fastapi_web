@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """The Blog Post Model."""
 
-from sqlalchemy import Column, String, Text, ForeignKey, Boolean, text, Index, Integer
+from sqlalchemy import Column, DateTime, Enum, String, Text, ForeignKey, Boolean, text
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import ENUM
 from api.v1.models.base_model import BaseTableModel
+from api.v1.schemas.blog import BlogStatus
 
-
+blog_status_enum = ENUM(BlogStatus, name="blogstatus", create_type=True)
 class Blog(BaseTableModel):
     __tablename__ = "blogs"
 
@@ -20,7 +22,10 @@ class Blog(BaseTableModel):
     tags = Column(
         Text, nullable=True
     )  # Assuming tags are stored as a comma-separated string
+    scheduled_at = Column(DateTime(timezone=True), nullable=True)
+    status = Column(blog_status_enum, nullable=True)
 
+    # Relationships
     author = relationship("User", back_populates="blogs")
     comments = relationship(
         "Comment", back_populates="blog", cascade="all, delete-orphan"
