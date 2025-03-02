@@ -182,15 +182,3 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)
 
-
-
-class UserMiddleware(BaseHTTPMiddleware):
-    def dispatch(self, request: Request, call_next):
-        db = next(get_db())
-        access_token = request.headers.get("Authorization")
-        request.state.current_user = user_service.get_current_user_or_none(access_token, db)
-        response = call_next(request)
-        return response
-
-app.add_middleware(UserMiddleware)
-
