@@ -12,6 +12,7 @@ data1 = {
     "first_name": "Marvelous",
     "last_name": "Uboh",
     "password": "Doyinsola174@$",
+    "confirm_password": "Doyinsola174@$",
     "email": "utibesolomon12@gmail.com"
 }
 data2 = {
@@ -19,6 +20,7 @@ data2 = {
     "first_name": "Marvelou",
     "last_name": "Ubh",
     "password": "Doyinsola177@$",
+    "confirm_password": "Doyinsola177@$",
     "email": "utibesolomon15@gmail.com"
 
 }
@@ -27,6 +29,7 @@ data3 = {
     "first_name": "Marvelu",
     "last_name": "Ubah",
     "password": "Doyinsola179@$",
+    "confirm_password": "Doyinsola179@$",
     "email": "utibesolomon17@gmail.com"
     
 }

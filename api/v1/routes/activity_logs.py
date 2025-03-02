@@ -31,14 +31,20 @@ async def create_activity_log(
 
 
 @activity_logs.get("", response_model=list[ActivityLogResponse])
-async def get_all_activity_logs(current_user: User = Depends(user_service.get_current_super_admin), db: Session = Depends(get_db)):
-    '''Get all activity logs'''
+async def get_all_activity_logs(action: str = None, current_user: User = Depends(user_service.get_current_super_admin), db: Session = Depends(get_db)):
+    '''Get all activity logs, optionally filter for specific action'''
 
-    activity_logs = activity_log_service.fetch_all(db=db)
+    activity_logs = activity_log_service.fetch_all(db=db, action=action)
+
+    if not activity_logs:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No logs found for the specified action"
+            )
 
     return success_response(
         status_code=200,
-        message="Activity logs retrieved successfully",
+        message=(f"{action} " if action else "") + "Activity logs retrieved successfully",
         data=jsonable_encoder(activity_logs)
     )
 

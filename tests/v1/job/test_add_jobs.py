@@ -57,7 +57,7 @@ class TestCodeUnderTest:
                 assert response.json()['message'] == "Job listing created successfully"
 
                 assert response.json()['data']['title'] == test_job['title']
-                assert response.json()['success'] == True
+                assert response.json()['status'] == "success"
 
     # Handling empty title field and raising appropriate exception
     def test_add_jobs_empty_title(self, client):

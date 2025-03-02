@@ -73,7 +73,8 @@ def test_get_comments(db_session, comment_service_mock):
                 "content": "Comment 1",
                 "likes": [],
                 "dislikes": [],
-                "created_at": "2023-07-28T12:00:00"
+                "created_at": "2023-07-28T12:00:00",
+                "replies": []
             },
             {
                 "user_id": "user2",
@@ -81,7 +82,8 @@ def test_get_comments(db_session, comment_service_mock):
                 "content": "Comment 2",
                 "likes": [],
                 "dislikes": [],
-                "created_at": "2023-07-28T12:01:00"
+                "created_at": "2023-07-28T12:01:00",
+                "replies": []
             }
         ]
     }

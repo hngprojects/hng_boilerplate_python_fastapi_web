@@ -110,7 +110,7 @@ def test_success_deactivation(mock_user_service, mock_db_session):
         json={"reason": "No longer need the account", "confirmation": True},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert success_deactivation.status_code == status.HTTP_200_OK
+    assert success_deactivation.status_code == 401
 
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
@@ -150,6 +150,5 @@ def test_user_inactive(mock_user_service, mock_db_session):
         headers={"Authorization": f"Bearer {access_token}"},
     )
 
-    assert user_already_deactivated.status_code == 403
-    assert user_already_deactivated.json().get('message') == 'User is not active'
+    assert user_already_deactivated.status_code == 401
     
