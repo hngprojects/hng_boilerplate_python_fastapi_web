@@ -34,7 +34,11 @@ class UserService(Service):
     """User service"""
 
     def fetch_all(
-        self, db: Session, page: int, per_page: int, **query_params: Optional[Any]
+        self,
+        db: Session,
+        page: int,
+        per_page: int,
+        **query_params: Optional[Any],
     ):
         """
         Fetch all users
@@ -95,7 +99,8 @@ class UserService(Service):
                 data=[],
             )
         all_users = [
-            user.UserData.model_validate(usr, from_attributes=True) for usr in users
+            user.UserData.model_validate(usr, from_attributes=True)
+            for usr in users
         ]
         return user.AllUsersResponse(
             message="Users successfully retrieved",
@@ -121,8 +126,7 @@ class UserService(Service):
 
         user = check_model_existence(db, User, id)
         return user
-    
-    
+
     def get_user_by_email(self, db: Session, email: str) -> Optional[User]:
         """
         Fetches a user by their email address.
@@ -140,7 +144,7 @@ class UserService(Service):
             return None
 
         return user
-    
+
     def fetch_by_email(self, db: Session, email):
         """Fetches a user by their email"""
 
@@ -174,17 +178,16 @@ class UserService(Service):
 
         # create data privacy setting
         data_privacy = DataPrivacySetting(user_id=user.id)
-        profile = Profile(
-            user_id=user.id
+        profile = Profile(user_id=user.id)
+        region = Region(user_id=user.id, region="Empty")
+
+        news_letter = db.query(NewsletterSubscriber).filter_by(
+            email=user.email
         )
-        region = Region(
-            user_id=user.id,
-            region='Empty'
-        )
-        
-        news_letter = db.query(NewsletterSubscriber).filter_by(email=user.email)
         if not news_letter:
-            news_letter = NewsletterService.create(db, EmailSchema(email=user.email))
+            news_letter = NewsletterService.create(
+                db, EmailSchema(email=user.email)
+            )
 
         db.add_all([data_privacy, profile, region])
         db.commit()
@@ -207,7 +210,9 @@ class UserService(Service):
         """
         try:
             user_exists = (
-                db.query(User).filter_by(email=user_request.email).one_or_none()
+                db.query(User)
+                .filter_by(email=user_request.email)
+                .one_or_none()
             )
             if user_exists:
                 raise HTTPException(
@@ -215,29 +220,28 @@ class UserService(Service):
                     detail=f"User with {user_request.email} already exists",
                 )
             if user_request.password:
-                user_request.password = self.hash_password(user_request.password)
+                user_request.password = self.hash_password(
+                    user_request.password
+                )
             new_user = User(**user_request.model_dump())
             db.add(new_user)
             db.commit()
             db.refresh(new_user)
-            
+
             # Create notification settings directly for the user
             notification_setting_service.create(db=db, user=new_user)
 
             # create data privacy setting
             data_privacy = DataPrivacySetting(user_id=new_user.id)
-            profile = Profile(
-                user_id=new_user.id
-            )
-            region = Region(
-                user_id=new_user.id,
-                region='Empty'
-            )
+            profile = Profile(user_id=new_user.id)
+            region = Region(user_id=new_user.id, region="Empty")
 
             db.add_all([data_privacy, profile, region])
             db.commit()
 
-            user_schema = user.UserData.model_validate(new_user, from_attributes=True)
+            user_schema = user.UserData.model_validate(
+                new_user, from_attributes=True
+            )
             return user.AdminCreateUserResponse(
                 message="User created successfully",
                 status_code=201,
@@ -272,13 +276,8 @@ class UserService(Service):
 
         # create data privacy setting
         data_privacy = DataPrivacySetting(user_id=user.id)
-        profile = Profile(
-            user_id=user.id
-        )
-        region = Region(
-            user_id=user.id,
-            region='Empty'
-        )
+        profile = Profile(user_id=user.id)
+        region = Region(user_id=user.id, region="Empty")
 
         db.add_all([data_privacy, profile, region])
         db.commit()
@@ -287,25 +286,33 @@ class UserService(Service):
 
         return user
 
-    def update(self, db: Session, current_user: User, schema: user.UserUpdate, id=None):
+    def update(
+        self, db: Session, current_user: User, schema: user.UserUpdate, id=None
+    ):
         """Function to update a User"""
-        
+
         # Get user from access token if provided, otherwise fetch user by id
-        user = (self.fetch(db=db, id=id) 
-                if current_user.is_superadmin and id is not None
-                else self.fetch(db=db, id=current_user.id)
-            )
-        
+        user = (
+            self.fetch(db=db, id=id)
+            if current_user.is_superadmin and id is not None
+            else self.fetch(db=db, id=current_user.id)
+        )
+
         update_data = schema.dict(exclude_unset=True)
         for key, value in update_data.items():
-            if key == 'email':
+            if key == "email":
                 continue
             setattr(user, key, value)
         db.commit()
         db.refresh(user)
         return user
 
-    def delete(self, db: Session, id: Optional[str] = None, access_token: Optional[str] = None): 
+    def delete(
+        self,
+        db: Session,
+        id: Optional[str] = None,
+        access_token: Optional[str] = None,
+    ):
         """Function to soft delete a user"""
 
         # Get user by id if provided, otherwise fetch user access token
@@ -314,12 +321,14 @@ class UserService(Service):
         elif access_token:
             user = self.get_current_user(access_token, db)
         else:
-            raise HTTPException(status_code=400, detail="User ID or access token required")
+            raise HTTPException(
+                status_code=400, detail="User ID or access token required"
+            )
 
         user.is_deleted = True
         db.commit()
 
-        #return super().delete()
+        # return super().delete()
 
     def authenticate_user(self, db: Session, email: str, password: str):
         """Function to authenticate a user"""
@@ -327,10 +336,14 @@ class UserService(Service):
         user = db.query(User).filter(User.email == email).first()
 
         if not user:
-            raise HTTPException(status_code=400, detail="Invalid user credentials")
+            raise HTTPException(
+                status_code=400, detail="Invalid user credentials"
+            )
 
         if not self.verify_password(password, user.password):
-            raise HTTPException(status_code=400, detail="Invalid user credentials")
+            raise HTTPException(
+                status_code=400, detail="Invalid user credentials"
+            )
 
         return user
 
@@ -376,7 +389,9 @@ class UserService(Service):
 
         try:
             payload = jwt.decode(
-                access_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+                access_token,
+                settings.SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
             )
             user_id = payload.get("user_id")
             token_type = payload.get("type")
@@ -385,7 +400,9 @@ class UserService(Service):
                 raise credentials_exception
 
             if token_type == "refresh":
-                raise HTTPException(detail="Refresh token not allowed", status_code=400)
+                raise HTTPException(
+                    detail="Refresh token not allowed", status_code=400
+                )
 
             token_data = user.TokenData(id=user_id)
 
@@ -400,7 +417,9 @@ class UserService(Service):
 
         try:
             payload = jwt.decode(
-                refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+                refresh_token,
+                settings.SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
             )
             user_id = payload.get("user_id")
             token_type = payload.get("type")
@@ -409,7 +428,9 @@ class UserService(Service):
                 raise credentials_exception
 
             if token_type == "access":
-                raise HTTPException(detail="Access token not allowed", status_code=400)
+                raise HTTPException(
+                    detail="Access token not allowed", status_code=400
+                )
 
             token_data = user.TokenData(id=user_id)
 
@@ -425,7 +446,9 @@ class UserService(Service):
             status_code=401, detail="Refresh token expired"
         )
 
-        token = self.verify_refresh_token(current_refresh_token, credentials_exception)
+        token = self.verify_refresh_token(
+            current_refresh_token, credentials_exception
+        )
 
         if token:
             access = self.create_access_token(user_id=token.id)
@@ -434,7 +457,9 @@ class UserService(Service):
             return access, refresh
 
     def get_current_user(
-        self, access_token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
+        self,
+        access_token: str = Depends(oauth2_scheme),
+        db: Session = Depends(get_db),
     ) -> User:
         """Function to get current logged in user"""
 
@@ -460,7 +485,8 @@ class UserService(Service):
 
         if not schema.confirmation:
             raise HTTPException(
-                detail="Confirmation required to deactivate account", status_code=400
+                detail="Confirmation required to deactivate account",
+                status_code=400,
             )
 
         self.perform_user_check(user)
@@ -511,28 +537,36 @@ class UserService(Service):
         new_password: str,
         user: User,
         db: Session,
-        old_password: Optional[str] = None
+        old_password: Optional[str] = None,
     ):
         """Endpoint to change the user's password"""
         if old_password == new_password:
-            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                detail="Old Password and New Password cannot be the same")
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Old Password and New Password cannot be the same",
+            )
         if old_password is None:
             if user.password is None:
                 user.password = self.hash_password(new_password)
                 db.commit()
                 return
             else:
-                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                                    detail="Old Password must not be empty, unless setting password for the first time.")
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="Old Password must not be empty, unless setting password for the first time.",
+                )
         elif not self.verify_password(old_password, user.password):
-            raise HTTPException(status_code=400, detail="Incorrect old password")
+            raise HTTPException(
+                status_code=400, detail="Incorrect old password"
+            )
         else:
             user.password = self.hash_password(new_password)
             db.commit()
 
     def get_current_super_admin(
-        self, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+        self,
+        db: Session = Depends(get_db),
+        token: str = Depends(oauth2_scheme),
     ):
         """Get the current super admin"""
         user = self.get_current_user(db=db, access_token=token)
@@ -547,8 +581,12 @@ class UserService(Service):
         self, db: Session, user: User, token: str, expiration: datetime
     ):
         """Save the token and expiration in the user's record"""
-        db.query(TokenLogin).filter_by(user_id=user.id).delete(synchronize_session='fetch')
-        token = TokenLogin(user_id=user.id, token=token, expiry_time=expiration)
+        db.query(TokenLogin).filter_by(user_id=user.id).delete(
+            synchronize_session="fetch"
+        )
+        token = TokenLogin(
+            user_id=user.id, token=token, expiry_time=expiration
+        )
         db.add(token)
         db.commit()
 
@@ -558,8 +596,13 @@ class UserService(Service):
         if not token:
             raise HTTPException(status_code=404, detail="Token Expired")
 
-        if token.token != schema.token or token.expiry_time < datetime.utcnow():
-            raise HTTPException(status_code=401, detail="Invalid email or token")
+        if (
+            token.token != schema.token
+            or token.expiry_time < datetime.utcnow()
+        ):
+            raise HTTPException(
+                status_code=401, detail="Invalid email or token"
+            )
 
         db.delete(token)
         db.commit()
@@ -572,84 +615,102 @@ class UserService(Service):
             random.choices(string.digits, k=6)
         ), datetime.utcnow() + timedelta(minutes=1)
 
-
     def get_users_by_role(self, db: Session, role_id: str, current_user: User):
         """Function to get all users by role"""
         if role_id == "" or role_id is None:
-            raise HTTPException(
-                status_code=400, 
-                detail="Role ID is required"
-            )
+            raise HTTPException(status_code=400, detail="Role ID is required")
 
-        user_roles = db.query(user_organisation_association).filter(user_organisation_association.c.user_id == current_user.id, user_organisation_association.c.role.in_(['admin', 'owner'])).all()
+        user_roles = (
+            db.query(user_organisation_association)
+            .filter(
+                user_organisation_association.c.user_id == current_user.id,
+                user_organisation_association.c.role.in_(["admin", "owner"]),
+            )
+            .all()
+        )
 
         if len(user_roles) == 0:
             raise HTTPException(
-                status_code=403, 
-                detail="Permission denied. Admin access required."
+                status_code=403,
+                detail="Permission denied. Admin access required.",
             )
 
-        users = db.query(User).join(user_organisation_association).filter(user_organisation_association.c.role == role_id).all()
+        users = (
+            db.query(User)
+            .join(user_organisation_association)
+            .filter(user_organisation_association.c.role == role_id)
+            .all()
+        )
 
         if len(users) == 0:
             raise HTTPException(
-                status_code=404, 
-                detail="No users found for this role"
+                status_code=404, detail="No users found for this role"
             )
 
         return users
-    
+
     def create_verification_token(self, user_id: int):
         expiry_time = datetime.now() + timedelta(hours=24)
         exp_timestamp = int(expiry_time.timestamp())
         data = {"sub": user_id, "exp": exp_timestamp}
-        return jwt.encode(data, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    
-    
+        return jwt.encode(
+            data, key=settings.SECRET_KEY, algorithm=settings.ALGORITHM
+        )
+
     def verify_user_email(self, token: str, db: Session):
-        payload = jwt.decode(token=token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM], options={"verify_exp": True})
+        payload = jwt.decode(
+            token=token,
+            key=settings.SECRET_KEY,
+            algorithms=[settings.ALGORITHM],
+            options={"verify_exp": True},
+        )
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="Invalid token"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Invalid token"
             )
         user: User = user_service.get_user_by_id(db, user_id)
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, 
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         if user.is_verified:
             raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN, 
-                detail="User already verified"
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User already verified",
             )
         user.is_verified = True
         db.commit()
         response = JSONResponse(
-                        status_code=status.HTTP_200_OK,
-                        content={
-                            "status": "success",
-                            "status_code": 200,
-                            "message": "Email verified successfully.",
-                        }
-                    )
+            status_code=status.HTTP_200_OK,
+            content={
+                "status": "success",
+                "status_code": 200,
+                "message": "Email verified successfully.",
+            },
+        )
         return response
-    
-    
+
     def user_to_verify(self, email: str, db: Session):
         user = db.query(User).filter(User.email == email).first()
         if not user:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         if user.is_verified:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User is already verified"
+                detail="User is already verified",
             )
         return user
+
+    def require_admin(self, user: User):
+        if not (bool(user.is_superadmin)):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User not authorized to perform this action",
+            )
+        return user
+
 
 user_service = UserService()
