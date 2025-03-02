@@ -21,13 +21,12 @@ from api.utils.logger import logger
 from api.v1.routes import api_version_one
 from api.utils.settings import settings
 from api.utils.send_logs import send_error_to_telex
-from scripts.populate_db import populate_roles_and_permissions
-
+from api.v1.services.blog_scheduler import setup_blog_scheduler
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Lifespan function"""
-
+    '''Lifespan function'''
+    setup_blog_scheduler(app)
     yield
 
 
