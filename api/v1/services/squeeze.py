@@ -1,15 +1,20 @@
-from fastapi import HTTPException, BackgroundTasks
+from fastapi import BackgroundTasks, HTTPException
 from sqlalchemy.orm import Session
+
 from api.core.base.services import Service
+from api.utils.settings import settings
 from api.v1.models.squeeze import Squeeze
 from api.core.dependencies.email_sender import send_email
-from api.v1.schemas.squeeze import CreateSqueeze, FilterSqueeze
+from api.v1.models.squeeze import Squeeze
+from api.v1.schemas.squeeze import CreateSqueeze, FilterSqueeze, UpdateSqueeze
 
 
 class SqueezeService(Service):
     """Squeeze service"""
 
-    def create(self, background_tasks: BackgroundTasks, db: Session, data: CreateSqueeze):
+    def create(
+        self, background_tasks: BackgroundTasks, db: Session, data: CreateSqueeze
+    ):
         """Create squeeze page"""
         new_squeeze = Squeeze(
             title=data.title,
@@ -26,16 +31,13 @@ class SqueezeService(Service):
         db.add(new_squeeze)
         db.commit()
         db.refresh(new_squeeze)
-        cta_link = 'https://anchor-python.teams.hng.tech/about-us'
+        cta_link = f"{settings.ANCHOR_PYTHON_BASE_URL}/about-us"
         background_tasks.add_task(
-            send_email, 
+            send_email,
             recipient=data.email,
-            template_name='squeeze.html',
-            subject='Welcome to HNG Squeeze',
-            context={
-                'name': data.full_name,
-                'cta_link': cta_link
-            }
+            template_name="squeeze.html",
+            subject="Welcome to HNG Squeeze",
+            context={"name": data.full_name, "cta_link": cta_link},
         )
 
         return new_squeeze
@@ -62,9 +64,28 @@ class SqueezeService(Service):
             squeeze = db.query(Squeeze).filter(Squeeze.id == id).first()
         return squeeze
 
-    def update(self, db: Session, id: str, schema):
+    def update(self, db: Session, id: str, data: UpdateSqueeze):
         """Update a specific squeeze page"""
-        pass
+        squeeze = db.query(Squeeze).filter(Squeeze.id == id).first()
+
+        if not squeeze:
+            raise HTTPException(status_code=404, detail="Squeeze page not found")
+
+        # Update only the fields that are provided in the update data
+        for field, value in data.dict(exclude_unset=True).items():
+            setattr(squeeze, field, value)
+
+        try:
+            db.commit()
+            db.refresh(squeeze)
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Unexpected error occurred while updating the squeeze page: {e}",
+            )
+
+        return squeeze
 
     def delete(self, db: Session, id: str):
         """Delete a specific squeeze page"""
@@ -72,7 +93,7 @@ class SqueezeService(Service):
 
         if not squeeze:
             raise HTTPException(status_code=404, detail="Squeeze page not found")
-        
+
         db.delete(squeeze)
         db.commit()
         db.refresh()

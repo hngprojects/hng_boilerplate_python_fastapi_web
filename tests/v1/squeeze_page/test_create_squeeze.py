@@ -87,7 +87,7 @@ def test_create_squeeze_page(mock_db_session, data, mock_send_email):
     ).json()
     print(tok)
     assert tok["status_code"] == status.HTTP_200_OK
-    token = tok["access_token"]
+    token = tok['data']["access_token"]
     res = client.post(URI, json=data, headers=theader(token))
     assert res.status_code == data["status_code"]
     assert res.json()['data']['title'] == data["title"]

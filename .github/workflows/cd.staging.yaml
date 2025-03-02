@@ -9,12 +9,21 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  on-success:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Archive application build
+        run: |
+          mkdir app
+          cp -r alembic api qa_tests scripts tests requirements.txt *.py alembic.ini app
+          tar -czf python-staging.tar.gz app
+      - name: Copy Artifacts to server
+        run: |
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no python-staging.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/python
+          rm -f python-staging.tar.gz
       - name: Use SSH Action
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -22,11 +31,12 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd hng_boilerplate_python_fastapi_web/staging
-            git add .
-            git stash
-            git pull origin staging
+            cd boilerplate/python/staging
+            tar -xzf /tmp/python/python-staging.tar.gz -C .
+            rm -f /tmp/python/python-staging.tar.gz
+            cp .env app/.env
             source venv/bin/activate
+            cd app
             pip install -r requirements.txt
             alembic revision --autogenerate
             alembic upgrade head

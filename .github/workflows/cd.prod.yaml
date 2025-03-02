@@ -1,4 +1,4 @@
-name: Prod Branch Deployment
+name: Production Branch Deployment
 
 on:
   push:
@@ -19,13 +19,11 @@ jobs:
         run: |
           mkdir app
           cp -r alembic api qa_tests scripts tests requirements.txt *.py alembic.ini app
-          tar -czf python.tar.gz app
-
+          tar -czf python-prod.tar.gz app
       - name: Copy Artifacts to server
         run: |
-          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no python.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/python
-          rm -f python.tar.gz
-
+          sshpass -p ${{ secrets.PASSWORD }} scp -o StrictHostKeyChecking=no python-prod.tar.gz ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/tmp/python
+          rm -f python-prod.tar.gz
       - name: Use SSH Action
         uses: appleboy/ssh-action@v0.1.8
         with:
@@ -33,11 +31,12 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            cd backend/python
-            tar -xzf /tmp/python/python.tar.gz -C .
-            rm -f /tmp/python/python.tar.gz
-            cd app
+            cd boilerplate/python/prod
+            tar -xzf /tmp/python/python-prod.tar.gz -C .
+            rm -f /tmp/python/python-prod.tar.gz
+            cp .env app/.env
             source venv/bin/activate
+            cd app
             pip install -r requirements.txt
             alembic revision --autogenerate
             alembic upgrade head

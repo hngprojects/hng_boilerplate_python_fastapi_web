@@ -62,6 +62,7 @@ def before_all(client_with_mocks):
         "/api/v1/auth/register",
         json={
             "password": "strin8Hsg263@",
+            "confirm_password": "strin8Hsg263@",
             "first_name": "string",
             "last_name": "string",
             "email": email,
@@ -73,7 +74,9 @@ def before_all(client_with_mocks):
         raise Exception(f"Setup failed: {user_response.json()}")
 
     global auth_token
-    auth_token = user_response.json()["access_token"]
+    # auth_token = user_response.json()["access_token"]
+    auth_token = user_response.json()['data']["access_token"]
+    print(auth_token)
 
 def test_create_testimonial(client_with_mocks):
     client, mock_db = client_with_mocks

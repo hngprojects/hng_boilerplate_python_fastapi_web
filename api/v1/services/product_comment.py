@@ -109,6 +109,9 @@ class ProductCommentService(Service):
             )
         except Exception:
             return False
+      
+      
+        # ============== delete for product_service =======
         
     def delete_product_comments(self, db: Session, product_id: str):
         try:
@@ -124,6 +127,7 @@ class ProductCommentService(Service):
         except Exception as e:
             db.rollback()  
             raise HTTPException(status_code=500, detail=str(e))
+    
 
 
 product_comment_service = ProductCommentService()

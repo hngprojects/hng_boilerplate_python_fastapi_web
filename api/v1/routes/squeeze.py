@@ -1,12 +1,13 @@
-from fastapi import APIRouter, Depends, status, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from api.db.database import get_db
+
 from api.core.responses import SUCCESS
+from api.db.database import get_db
 from api.utils.success_response import success_response
-from api.v1.services.squeeze import squeeze_service
-from api.v1.schemas.squeeze import CreateSqueeze, FilterSqueeze
-from api.v1.services.user import user_service
 from api.v1.models import *
+from api.v1.schemas.squeeze import CreateSqueeze, FilterSqueeze, UpdateSqueeze
+from api.v1.services.squeeze import squeeze_service
+from api.v1.services.user import user_service
 
 squeeze = APIRouter(prefix="/squeeze", tags=["Squeeze Page"])
 
@@ -52,7 +53,34 @@ def get_squeeze(
         return success_response(status.HTTP_404_NOT_FOUND, "Squeeze page not found!")
     return success_response(status.HTTP_200_OK, SUCCESS, squeeze_page)
 
+
 @squeeze.delete("/{squeeze_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_squeeze(squeeze_id: str, db: Session = Depends(get_db), current_user: User = Depends(user_service.get_current_super_admin)):
+def delete_squeeze(
+    squeeze_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
     """Delete a squeeze page"""
     squeeze_service.delete(db, squeeze_id)
+
+
+@squeeze.put(
+    "/{squeeze_id}", response_model=success_response, status_code=status.HTTP_200_OK
+)
+def update_squeeze(
+    squeeze_id: str,
+    data: UpdateSqueeze,
+    db: Session = Depends(get_db),
+    authorized_user: User = Depends(user_service.get_current_super_admin),
+):
+    """Update a squeeze page"""
+
+    if not authorized_user:
+        raise HTTPException(status_code=401, detail="You are not Authorized")
+
+    updated_squeeze = squeeze_service.update(db, squeeze_id, data)
+    return success_response(
+        status.HTTP_200_OK,
+        "Squeeze page updated successfully",
+        updated_squeeze.to_dict(),
+    )
