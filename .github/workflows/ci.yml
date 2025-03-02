@@ -5,7 +5,6 @@ on:
     types: [opened, synchronize, reopened]
     paths-ignore:
       - "README.md"
-      # - ".github/workflows/**"
 
 jobs:
   build-and-test:
@@ -20,6 +19,17 @@ jobs:
           POSTGRES_DB: "test"
         ports:
           - 5432:5432
+
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+
+    env:
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+      REDIS_DB: ${{ secrets.REDIS_DB }}
+      REDIS_PORT: ${{ secrets.REDIS_PORT }}
+      REDIS_HOST: ${{ secrets.REDIS_HOST }}
 
     steps:
       - name: Checkout code
@@ -44,15 +54,19 @@ jobs:
 
       - name: Copy env file
         run: cp .env.sample .env
-        
+
+      - name: Verify Redis secrets
+        run: |
+          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}"
+          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}"
+          echo "REDIS_DB=${{ secrets.REDIS_DB }}"
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}"
+
+      - name: Test Redis connection
+        run: |
+          redis-cli -h $REDIS_HOST -p $REDIS_PORT ping || echo "Redis connection failed"
 
       - name: Run app
-        env:
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          REDIS_DB: ${{ secrets.REDIS_DB }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-
         run: |
           python3 main.py &
           pid=$!
@@ -72,4 +86,4 @@ jobs:
 
       - name: Run tests
         run: |
-          PYTHONPATH=. pytest
+          PYTHONPATH=. pytest --disable-warnings --maxfail=3
