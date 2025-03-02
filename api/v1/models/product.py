@@ -1,5 +1,4 @@
-""" The Product model
-"""
+"""The Product model"""
 
 from sqlalchemy import (
     Column,
@@ -24,9 +23,11 @@ class ProductStatusEnum(Enum):
     out_of_stock = "out_of_stock"
     low_on_stock = "low_on_stock"
 
+
 class ProductFilterStatusEnum(Enum):
     active = "active"
     draft = "draft"
+
 
 class Product(BaseTableModel):
     __tablename__ = "products"
@@ -35,10 +36,14 @@ class Product(BaseTableModel):
     description = Column(Text, nullable=True)
     price = Column(Numeric, nullable=False)
     org_id = Column(
-        String, ForeignKey("organisations.id", ondelete="CASCADE"), nullable=False
+        String,
+        ForeignKey("organisations.id", ondelete="CASCADE"),
+        nullable=False,
     )
     category_id = Column(
-        String, ForeignKey("product_categories.id", ondelete="CASCADE"), nullable=False
+        String,
+        ForeignKey("product_categories.id", ondelete="CASCADE"),
+        nullable=False,
     )
     quantity = Column(Integer, default=0)
     image_url = Column(String, nullable=False)
@@ -47,18 +52,25 @@ class Product(BaseTableModel):
     )
     archived = Column(Boolean, default=False)
     filter_status = Column(
-        SQLAlchemyEnum(ProductFilterStatusEnum), default=ProductFilterStatusEnum.active
+        SQLAlchemyEnum(ProductFilterStatusEnum),
+        default=ProductFilterStatusEnum.active,
     )
 
     variants = relationship(
-        "ProductVariant", back_populates="product", cascade="all, delete-orphan"
+        "ProductVariant",
+        back_populates="product",
+        cascade="all, delete-orphan",
     )
     organisation = relationship("Organisation", back_populates="products")
     category = relationship("ProductCategory", back_populates="products")
-    sales = relationship('Sales', back_populates='product',
-                         cascade='all, delete-orphan')
-    comments = relationship("ProductComment", back_populates="product", cascade="all, delete-orphan")
-
+    sales = relationship(
+        "Sales", back_populates="product", cascade="all, delete-orphan"
+    )
+    comments = relationship(
+        "ProductComment",
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
 
     def __str__(self):
         return self.name
@@ -79,6 +91,7 @@ class ProductCategory(BaseTableModel):
 
     name = Column(String, nullable=False, unique=True)
     products = relationship("Product", back_populates="category")
+    is_deleted = Column(Boolean, default=False)  # soft delete flag
 
     def __str__(self):
         return self.name
@@ -87,14 +100,20 @@ class ProductCategory(BaseTableModel):
 class ProductComment(BaseTableModel):
     __tablename__ = "product_comments"
 
-    product_id = Column(String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
-    user_id = Column(String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True) 
+    product_id = Column(
+        String, ForeignKey("products.id", ondelete="CASCADE"), nullable=False
+    )
+    user_id = Column(
+        String, ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+    updated_at = Column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
 
     product = relationship("Product", back_populates="comments")
-    user = relationship("User", back_populates="product_comments")  
+    user = relationship("User", back_populates="product_comments")
 
     def __str__(self):
         return f"Comment by User ID: {self.user_id} on Product ID: {self.product_id}"
