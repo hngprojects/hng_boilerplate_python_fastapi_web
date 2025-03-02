@@ -34,15 +34,16 @@ blog = APIRouter(prefix="/blogs", tags=["Blog"])
 def create_blog(
     blog: BlogCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(user_service.get_current_super_admin),
+    current_user: User = Depends(user_service.get_current_user),
 ):
     if not current_user:
-        raise HTTPException(status_code=401, detail="You are not Authorized")
+        raise HTTPException(status_code=401, detail="Not authenticated")
     blog_service = BlogService(db)
     new_blogpost = blog_service.create(db=db, schema=blog, author_id=current_user.id)
-
+    message = "Blog post scheduled successfully!" if blog.scheduled_at else "Blog created successfully!"
+    
     return success_response(
-        message="Blog created successfully!",
+        message=message,
         status_code=200,
         data=jsonable_encoder(new_blogpost),
     )
@@ -50,13 +51,31 @@ def create_blog(
 
 @blog.get("/", response_model=success_response)
 def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0):
-    """Endpoint to get all blogs"""
+    """Endpoint to get all blogs except scheduled blogs"""
+    blog_service = BlogService(db)
+    blogs = blog_service.fetch_all()
 
     return paginated_response(
         db=db,
-        model=Blog,
+        model=blogs,
         limit=limit,
         skip=skip,
+    )
+
+
+@blog.get("/scheduled", response_model=success_response)
+def get_scheduled_blogs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_user)
+):
+    """Endpoint to get all scheduled blogs for the current user"""
+    blog_service = BlogService(db)
+    scheduled_blogs = blog_service.fetch_scheduled_blogs(current_user)
+
+    return success_response(
+        message="Scheduled blogs retrieved successfully",
+        status_code=200,
+        data=jsonable_encoder(scheduled_blogs)
     )
 
 
