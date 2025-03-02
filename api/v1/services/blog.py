@@ -39,6 +39,11 @@ class BlogService:
 
         query = self.db.query(Blog).filter(Blog.is_deleted.is_(False))
 
+        # Validate sort_by field
+        valid_columns = {column.key for column in inspect(Blog).columns}
+        if sort_by not in valid_columns:
+            sort_by = "created_at"  # Default to a safe column
+
         # Apply filters
         if author_id:
             query = query.filter(Blog.author_id == author_id)
@@ -49,11 +54,12 @@ class BlogService:
 
         # Apply sorting
         if sort_order == "desc":
-            query = query.order_by(desc(getattr(Blog, sort_by, Blog.created_at)))
+            query = query.order_by(desc(getattr(Blog, sort_by)))
         else:
-            query = query.order_by(asc(getattr(Blog, sort_by, Blog.created_at)))
+            query = query.order_by(asc(getattr(Blog, sort_by)))
 
         # Apply pagination
+        total_count = query.count()
         blogs = query.offset(offset).limit(limit).all()
 
         return {"total_count": total_count, "blogs": blogs}
