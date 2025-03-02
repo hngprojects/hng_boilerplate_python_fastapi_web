@@ -17,6 +17,7 @@ from api.v1.schemas.blog import (
     BlogCreate,
     BlogPostResponse,
     BlogRequest,
+    BlogStatus,
     BlogUpdateResponseModel,
     BlogLikeDislikeResponse,
     CommentRequest,
@@ -58,11 +59,12 @@ def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0)
     blog_service = BlogService(db)
     blogs = blog_service.fetch_all()
 
-    return paginated_response(
-        db=db,
-        model=blogs,
-        limit=limit,
-        skip=skip,
+    paginated_blogs = blogs[skip: skip+limit]
+    
+    return success_response(
+        message="Blogs retrieved successfully",
+        status_code=200,
+        data=jsonable_encoder(paginated_blogs),
         filters={"is_deleted": False} #filter out soft-deleted blogs
     )
 
