@@ -1,3 +1,5 @@
+import asyncio
+from datetime import datetime, timezone
 from typing import Generic, TypeVar, Optional
 
 from fastapi import HTTPException, status
@@ -9,7 +11,7 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.blog import Blog, BlogDislike, BlogLike
 from api.v1.models.comment import Comment
 from api.v1.models.user import User
-from api.v1.schemas.blog import BlogCreate
+from api.v1.schemas.blog import BlogCreate, BlogStatus
 
 ModelType = TypeVar("ModelType")
 
@@ -47,6 +49,18 @@ class BlogService:
         """Create a new blog post"""
 
         new_blogpost = Blog(**schema.model_dump(), author_id=author_id)
+
+        if new_blogpost.scheduled_at:
+            if new_blogpost.scheduled_at.astimezone(timezone.utc) < datetime.now(timezone.utc):
+                raise HTTPException(
+                    status_code=400, detail="Scheduled time must be in the future."
+                )
+            else:
+                new_blogpost.status = BlogStatus.PENDING
+                new_blogpost.scheduled_at = new_blogpost.scheduled_at.astimezone(timezone.utc)
+        else:
+            new_blogpost.status = BlogStatus.PUBLISHED
+
         self.db.add(new_blogpost)
         self.db.commit()
         self.db.refresh(new_blogpost)
@@ -130,6 +144,18 @@ class BlogService:
         }
     
     
+    def fetch_scheduled_blogs(
+            self,
+            current_user: User,
+        ):
+        """Fetch all scheduled blog posts for the current user"""
+
+        scheduled_blogs = self.db.query(Blog).filter(
+            Blog.status == BlogStatus.PENDING,
+            Blog.author_id == current_user.id
+        ).all()
+        return scheduled_blogs
+
     def update(
         self,
         blog_id: str,
@@ -187,9 +213,7 @@ class BlogService:
     def fetch_blog_like(self, blog_id: str, user_id: str):
         """Fetch a blog like by blog ID & ID of user who liked it"""
         blog_like = (
-            self.db.query(BlogLike)
-            .filter_by(blog_id=blog_id, user_id=user_id)
-            .first()
+            self.db.query(BlogLike).filter_by(blog_id=blog_id, user_id=user_id).first()
         )
         return blog_like
 
@@ -201,7 +225,7 @@ class BlogService:
             .first()
         )
         return blog_dislike
-    
+
     def check_user_already_liked_blog(self, blog: Blog, user: User):
         if not user:
             raise HTTPException(status_code=401, detail="Not authenticated")
@@ -221,10 +245,12 @@ class BlogService:
                 detail="You have already disliked this blog post",
                 status_code=status.HTTP_403_FORBIDDEN,
             )
-    
-    def delete_opposite_blog_like_or_dislike(self, blog: Blog, user: User, creating: str):
+
+    def delete_opposite_blog_like_or_dislike(
+        self, blog: Blog, user: User, creating: str
+    ):
         """
-        This method checks if there's a BlogLike by `user` on `blog` when a BlogDislike 
+        This method checks if there's a BlogLike by `user` on `blog` when a BlogDislike
         is being created and deletes the BlogLike. The same for BlogLike creation. \n
 
         :param blog: `Blog` The blog being liked or disliked
@@ -244,7 +270,7 @@ class BlogService:
         else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid `creating` value for blog like/dislike"
+                detail="Invalid `creating` value for blog like/dislike",
             )
 
     def num_of_likes(self, blog_id: str) -> int:
@@ -323,9 +349,7 @@ class BlogService:
         db = self.db
 
         if not content:
-            raise HTTPException(
-                status_code=400, detail="Blog comment cannot be empty"
-            )
+            raise HTTPException(status_code=400, detail="Blog comment cannot be empty")
 
         # check if the blog and comment exist
         blog_post = check_model_existence(db, Blog, blog_id)
@@ -346,7 +370,8 @@ class BlogService:
         except Exception as exc:
             db.rollback()
             raise HTTPException(
-                status_code=500, detail=f"An error occurred while updating the blog comment; {exc}"
+                status_code=500,
+                detail=f"An error occurred while updating the blog comment; {exc}",
             )
 
         return comment
