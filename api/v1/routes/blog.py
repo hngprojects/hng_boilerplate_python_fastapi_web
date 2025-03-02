@@ -1,10 +1,12 @@
 from fastapi import (
     APIRouter, Depends, HTTPException, status, 
-    HTTPException, Response, Request
+    HTTPException, Response, Request, Query
 )
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, List, Optional
+from datetime import datetime
+from sqlalchemy import and_, or_, cast, String
 
 from api.db.database import get_db
 from api.utils.pagination import paginated_response
@@ -18,7 +20,8 @@ from api.v1.schemas.blog import (
     BlogUpdateResponseModel,
     BlogLikeDislikeResponse,
     CommentRequest,
-    CommentUpdateResponseModel
+    CommentUpdateResponseModel,
+    BlogSearchResponse
 )
 from api.v1.services.blog import BlogService, BlogDislikeService, BlogLikeService
 from api.v1.services.user import user_service
@@ -57,8 +60,120 @@ def get_all_blogs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0)
         model=Blog,
         limit=limit,
         skip=skip,
+        filters={"is_deleted": False} #filter out soft-deleted blogs
     )
 
+# blog search endpoint
+@blog.get("/search", response_model=BlogSearchResponse)
+def search_blogs(
+    db: Session = Depends(get_db),
+    keyword: Optional[str] = Query(None, description="Search in title and content"),
+    category: Optional[str] = Query(None, description="Filter by blog category"),
+    author: Optional[str] = Query(None, description="Filter by author name"),
+    start_date: Optional[str] = Query(None, description="Start date for date range filter (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End date for date range filter (YYYY-MM-DD)"),
+    tags: Optional[str] = Query(None, description="Filter by tags (comma-separated)"),
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
+):
+    """
+    Search and filter blogs based on different parameters.
+    """
+    blog_service = BlogService(db)
+    
+    # Build the filters
+    filters = []
+    
+    if keyword:
+        filters.append(or_(
+            Blog.title.ilike(f"%{keyword}%"),
+            Blog.content.ilike(f"%{keyword}%"),
+            Blog.excerpt.ilike(f"%{keyword}%")
+        ))
+    
+    if category:
+        # Assuming category might be stored in tags or as a separate field
+        filters.append(or_(
+            cast(Blog.tags, String).ilike(f"%{category}%")
+        ))
+    
+    if author:
+        query = blog_service.db.query(User.id).filter(
+            or_(
+                User.first_name.ilike(f"%{author}%"),
+                User.last_name.ilike(f"%{author}%"),
+            )
+        ).all()
+
+        author_ids = [user_id[0] for user_id in query]
+        if author_ids:
+            filters.append(Blog.author_id.in_(author_ids))
+        else:
+            # No matching authors, return empty result
+            return {
+                "status_code": 200,
+                "total_results": 0,
+                "blogs": []
+            }
+    
+    # Rest of the function remains the same
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+            filters.append(Blog.created_at >= start_date_obj)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid start_date format. Use YYYY-MM-DD."
+            )
+    
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+            # Add 1 day to include the end date
+            end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+            filters.append(Blog.created_at <= end_date_obj)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid end_date format. Use YYYY-MM-DD."
+            )
+    
+    if tags:
+        tag_list = [tag.strip() for tag in tags.split(",")]
+        for tag in tag_list:
+            filters.append(cast(Blog.tags, str).ilike(f"%{tag}%"))
+    
+    # Get total count and paginated results
+    search_results = blog_service.search_blogs(
+        filters=filters,
+        page=page,
+        per_page=per_page
+    )
+    
+    # Fix the tags format in the returned blogs
+    processed_blogs = []
+    for blog in search_results["items"]:
+        blog_dict = blog
+        # Convert PostgreSQL array format to Python list
+        if "tags" in blog_dict and blog_dict["tags"]:
+            # Check if tags is in PostgreSQL array format
+            if isinstance(blog_dict["tags"], str) and blog_dict["tags"].startswith('{') and blog_dict["tags"].endswith('}'):
+                # Remove curly braces and split by commas
+                tags_str = blog_dict["tags"][1:-1]
+                # Simple split for basic cases
+                import re
+                # This regex handles both quoted and unquoted elements in the array
+                tags_list = re.findall(r'"([^"]*)"|\s*([^,]+)', tags_str)
+                # Extract the matched groups and clean them
+                blog_dict["tags"] = [t[0] or t[1].strip() for t in tags_list if t[0] or t[1].strip()]
+        processed_blogs.append(blog_dict)
+    
+    return {
+        "status_code": 200,
+        "total_results": search_results["total"],
+        "blogs": processed_blogs
+    }
 
 @blog.get("/{id}", response_model=BlogPostResponse)
 def get_blog_by_id(id: str, db: Session = Depends(get_db)):
@@ -239,6 +354,34 @@ async def delete_blog_post(
 
     blog_service = BlogService(db=db)
     blog_service.delete(blog_id=id)
+
+@blog.put("/{blog_id}/soft_delete")
+async def archive_blog_post(
+    blog_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    
+    """Endpoint to archive/soft-delete a blog post"""
+
+    blog_service = BlogService(db=db)
+    blog_post = blog_service.fetch(blog_id=id)
+    if not blog_post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    #check if admin/ authorized user
+    if not (blog_post.author_id != current_user.id or current_user.is_superadmin):
+        raise HTTPException(status_code=403, detail="You don't have permission to perform this action")
+    
+    blog_post.is_deleted = True
+    db.commit()
+    db.refresh(blog_post)
+
+    return success_response(
+        message="Blog post archived successfully!",
+        status_code=200,
+        data=jsonable_encoder(blog_post),
+    )
+
 
 
 # Post a comment to a blog
