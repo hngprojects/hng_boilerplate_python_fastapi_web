@@ -75,68 +75,134 @@ def register(
 ):
     """Endpoint for a user to register their account"""
 
-    # Check if user already exists
-    existing_user = user_service.get_user_by_email(db, email=user_schema.email)
-    if existing_user:
+    try:
+        # Check if user already exists
+        existing_user = user_service.get_user_by_email(db, email=user_schema.email)
+        if existing_user:
 
-        return fail_response(
-            status_code=400,
-            message="User with this email already exists",
-            data={
-            'user_email': user_schema.email
+            return fail_response(
+                status_code=400,
+                message="User with this email already exists",
+                data={
+                'user_email': user_schema.email
+                }
+            )
+
+        # Generate verification token
+        verification_token = AuthService.generate_verification_token()
+        logger.info(f"Generated Token: {verification_token}")
+
+        # Check if the user email is already cached in Redis
+        redis_key = f"pending_user:{user_schema.email}"
+        cached_user = redis_client.hgetall(redis_key)
+
+
+        if cached_user:
+            verification_token = cached_user.get('token')
+        else:
+            verification_token = AuthService.generate_verification_token()
+            logger.info(f"Generated Token Two: {verification_token}")
+            redis_client.hmset(redis_key, {
+                "email": user_schema.email,
+                "password": user_schema.password,
+                "first_name": user_schema.first_name,
+                "last_name": user_schema.last_name,
+                "token": verification_token
+            })
+            redis_client.expire(redis_key, 900)
+            
+        cta_link = f'{settings.FRONTEND_URL}/verify?email={user_schema.email}&token={verification_token}'
+        background_tasks.add_task(
+            send_email,
+            recipient=user_schema.email,
+            template_name='email-verification.html',
+            subject='Verify Your Email Address',
+            context={
+                'first_name': user_schema.first_name,
+                'last_name': user_schema.last_name,
+                'cta_link': cta_link
             }
         )
 
-    # Generate verification token
-    verification_token = AuthService.generate_verification_token()
-    logger.info(f"Generated Token: {verification_token}")
 
-    # Check if the user email is already cached in Redis
-    redis_key = f"pending_user:{user_schema.email}"
-    cached_user = redis_client.hgetall(redis_key)
-
-
-    if cached_user:
-        verification_token = cached_user.get('token')
-    else:
-        verification_token = AuthService.generate_verification_token()
-        logger.info(f"Generated Token Two: {verification_token}")
-        redis_client.hmset(redis_key, {
-            "email": user_schema.email,
-            "password": user_schema.password,
-            "first_name": user_schema.first_name,
-            "last_name": user_schema.last_name,
-            "token": verification_token
-        })
-        redis_client.expire(redis_key, 900)
-        
-    cta_link = f'{settings.FRONTEND_URL}/verify?email={user_schema.email}&token={verification_token}'
-    background_tasks.add_task(
-        send_email,
-        recipient=user_schema.email,
-        template_name='email-verification.html',
-        subject='Verify Your Email Address',
-        context={
-            'first_name': user_schema.first_name,
-            'last_name': user_schema.last_name,
-            'cta_link': cta_link
-        }
-    )
-
-
-    return success_response(
-        status_code=201, 
-        message=f"Verification email sent. Please check your inbox at {user_schema.email}",
-        data={
-            'user': {
-                "email": user_schema.email,
-                'first_name': user_schema.first_name,
-                'last_name': user_schema.last_name,
-                'is_superadmin': 'false'
+        return success_response(
+            status_code=201, 
+            message=f"Verification email sent. Please check your inbox at {user_schema.email}",
+            data={
+                'user': {
+                    "email": user_schema.email,
+                    'first_name': user_schema.first_name,
+                    'last_name': user_schema.last_name,
+                    'is_superadmin': 'false'
+                }
+                
             }
-            
-        }
-    )
+        )
+    except AttributeError as e:
+        logger.warning(f"Redis Connection failed: {e}")
+        base_url = str(request.base_url).strip("/")
+        # Create user account
+        user = user_service.create(db=db, schema=user_schema)
+
+
+        verification_token = user_service.create_verification_token(user.id)
+        verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
+
+        access_token = user_service.create_access_token(user_id=user.id)
+        refresh_token = user_service.create_refresh_token(user_id=user.id)
+        cta_link = "https://anchor-python.teams.hng.tech/about-us"
+
+        # create an organization for the user
+        org = CreateUpdateOrganisation(
+            name=f"{user.email}'s Organisation", email=user.email
+        )
+        organisation_service.create(db=db, schema=org, user=user)
+        user_organizations = organisation_service.retrieve_user_organizations(user, db)
+
+        # Create access and refresh tokens
+        access_token = user_service.create_access_token(user_id=user.id)
+        refresh_token = user_service.create_refresh_token(user_id=user.id)
+        cta_link = f"{settings.ANCHOR_PYTHON_BASE_URL}/about-us"
+
+
+        # Send email in the background
+        background_tasks.add_task(
+            send_email,
+            recipient=user.email,
+            template_name="welcome.html",
+            subject="Welcome to HNG Boilerplate",
+            context={
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                'verification_link': verification_link,
+                "cta_link": cta_link,
+            },
+        )
+
+        response = auth_response(
+            status_code=201,
+            message="User created successfully",
+            access_token=access_token,
+            data={
+                "user": jsonable_encoder(
+                    user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
+                ),
+                "organisations": user_organizations,
+            },
+        )
+
+        # Add refresh token to cookies
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            expires=timedelta(days=60),
+            httponly=True,
+            secure=True,
+            samesite="none",
+        )
+        return response
+
+
 
 
 @auth.get("/verify-email")
@@ -194,71 +260,109 @@ def resend_verification_email(request: Request, data: UserEmailSender, backgroun
 def register_as_super_admin(request: Request, background_tasks: BackgroundTasks, user_schema: UserCreate, db: Session = Depends(get_db)):
     """Endpoint for super admin creation"""
 
+    try:
 
-    # Check if user already exists
-    existing_user = user_service.get_user_by_email(db, email=user_schema.email)
-    if existing_user:
-        return fail_response(
-            status_code=400,
-            message="User with this email already exists",
+        # Check if user already exists
+        existing_user = user_service.get_user_by_email(db, email=user_schema.email)
+        if existing_user:
+            return fail_response(
+                status_code=400,
+                message="User with this email already exists",
+                data={
+                    'user': {
+                        'email': user_schema.email,
+                        'first_name': user_schema.first_name,
+                        'last_name': user_schema.last_name
+                    }
+                }
+            )
+
+        # Generate verification token
+        verification_token = AuthService.generate_verification_token()
+        print(f"Generated Token: {verification_token}")
+
+        # Check if the user email is already cached in Redis
+        redis_key = f"pending_user:{user_schema.email}"
+        cached_user = redis_client.hgetall(redis_key)
+
+        if cached_user:
+            # Use the existing token if the cache hasn't expired
+            verification_token = cached_user.get('token')
+        else:
+            # Generate a new token and cache user details (15 mins expiry)
+            verification_token = AuthService.generate_verification_token()
+            redis_client.hmset(redis_key, {
+                "email": user_schema.email,
+                "password": user_schema.password,
+                "first_name": user_schema.first_name,
+                "last_name": user_schema.last_name,
+                "token": verification_token,
+                "is_superadmin": "true"
+            })
+            redis_client.expire(redis_key, 900)
+
+        # Send email verification link (reuse existing token or use new one)
+        cta_link = f'{settings.FRONTEND_URL}/verify?email={user_schema.email}&token={verification_token}'
+        background_tasks.add_task(
+            send_email,
+            recipient=user_schema.email,
+            template_name='email-verification.html',
+            subject='Verify Your Email Address',
+            context={
+                'first_name': user_schema.first_name,
+                'last_name': user_schema.first_name,
+                'cta_link': cta_link
+            }
+        )
+        return success_response(
+            status_code=201, 
+            message=f"Verification email sent. Please check your inbox at {user_schema.email}",
             data={
                 'user': {
-                    'email': user_schema.email,
+                    "email": user_schema.email,
                     'first_name': user_schema.first_name,
-                    'last_name': user_schema.last_name
+                    'last_name': user_schema.last_name,
+                    'is_superadmin': 'true'
                 }
             }
         )
+    except AttributeError as e:
+        logger.warning(f"Redis Connection failed: {e}")
+        user = user_service.create_admin(db=db, schema=user_schema)
+        # create an organization for the user
+        org = CreateUpdateOrganisation(
+            name=f"{user.email}'s Organisation", email=user.email
+        )
+        organisation_service.create(db=db, schema=org, user=user)
+        user_organizations = organisation_service.retrieve_user_organizations(user, db)
 
-    # Generate verification token
-    verification_token = AuthService.generate_verification_token()
-    print(f"Generated Token: {verification_token}")
+        # Create access and refresh tokens
+        access_token = user_service.create_access_token(user_id=user.id)
+        refresh_token = user_service.create_refresh_token(user_id=user.id)
 
-    # Check if the user email is already cached in Redis
-    redis_key = f"pending_user:{user_schema.email}"
-    cached_user = redis_client.hgetall(redis_key)
+        response = auth_response(
+            status_code=201,
+            message="User created successfully",
+            access_token=access_token,
+            data={
+                "user": jsonable_encoder(
+                    user, exclude=["password", "is_deleted", "is_verified", "updated_at"]
+                ),
+                "organisations": user_organizations,
+            },
+        )
 
-    if cached_user:
-        # Use the existing token if the cache hasn't expired
-        verification_token = cached_user.get('token')
-    else:
-        # Generate a new token and cache user details (15 mins expiry)
-        verification_token = AuthService.generate_verification_token()
-        redis_client.hmset(redis_key, {
-            "email": user_schema.email,
-            "password": user_schema.password,
-            "first_name": user_schema.first_name,
-            "last_name": user_schema.last_name,
-            "token": verification_token,
-            "is_superadmin": "true"
-        })
-        redis_client.expire(redis_key, 900)
+        # Add refresh token to cookies
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            expires=timedelta(days=60),
+            httponly=True,
+            secure=True,
+            samesite="none",
+        )
 
-    # Send email verification link (reuse existing token or use new one)
-    cta_link = f'{settings.FRONTEND_URL}/verify?email={user_schema.email}&token={verification_token}'
-    background_tasks.add_task(
-        send_email,
-        recipient=user_schema.email,
-        template_name='email-verification.html',
-        subject='Verify Your Email Address',
-        context={
-            'first_name': user_schema.first_name,
-            'last_name': user_schema.first_name,
-            'cta_link': cta_link
-        }
-    )
-    return success_response(
-        status_code=201, 
-        message=f"Verification email sent. Please check your inbox at {user_schema.email}",
-        data={
-            'user': {
-                "email": user_schema.email,
-                'first_name': user_schema.first_name,
-                'last_name': user_schema.last_name,
-                'is_superadmin': 'true'
-            }
-        }
-    )
+        return response
 
 @auth.post("/login", status_code=status.HTTP_200_OK, response_model=auth_response)
 @limiter.limit("5/minute")  # Limit to 5 requests per minute per IP
