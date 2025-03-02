@@ -44,14 +44,15 @@ jobs:
 
       - name: Copy env file
         run: cp .env.sample .env
+        
+
+      - name: Run app
         env:
           REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
           REDIS_DB: ${{ secrets.REDIS_DB }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
 
-
-      - name: Run app
         run: |
           python3 main.py &
           pid=$!
