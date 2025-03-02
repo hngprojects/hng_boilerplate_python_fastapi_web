@@ -133,7 +133,7 @@ celerybeat.pid
 .blog_env/
 
 env/
-dev/
+venv/
 venv*
 *venv/
 ENV/
