@@ -6,7 +6,10 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from api.utils.success_response import success_response
 from api.v1.models.user import User
+from api.v1.models.permissions.user_org_role import user_organisation_roles
+
 from api.v1.models.invitation import Invitation
+
 from api.v1.schemas.organisation import (
     CreateUpdateOrganisation,
     PaginatedOrgUsers,
@@ -158,3 +161,51 @@ async def delete_organisation(
             status_code=status.HTTP_200_OK,
             message="Organisation with ID {org_id} deleted successfully",
         )
+
+@organisation.delete("/{org_id}/users/{user_id}")
+async def remove_user_from_organisation(
+    org_id: str,
+    user_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(user_service.get_current_super_admin),
+):
+    """
+    Endpoint to remove a user from an organisation
+    """
+
+    organisation = organisation_service.get_organisation_by_id(db, org_id)
+    if not organisation:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Organisation not found",
+        )
+
+    user = user_service.get_user_by_id(db, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user_in_org = db.execute(user_organisation_roles.select().where(
+        (user_organisation_roles.c.organisation_id == org_id) &
+        (user_organisation_roles.c.user_id == user_id)
+    )).fetchone()
+
+    if not user_in_org:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User is not part of this organisation",
+        )
+
+    db.execute(user_organisation_roles.delete().where(
+        (user_organisation_roles.c.organisation_id == org_id) &
+        (user_organisation_roles.c.user_id == user_id)
+    ))
+    db.commit()
+
+    return {
+        "message": "User successfully removed from organisation",
+        "success": True,
+        "status_code": 200
+    }

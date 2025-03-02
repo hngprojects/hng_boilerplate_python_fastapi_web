@@ -1,7 +1,8 @@
-from sqlalchemy import Column, String, Text, ForeignKey
+from datetime import datetime, timezone
+from sqlalchemy import Column, String, Text, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from api.v1.models.base_model import BaseTableModel
-
+UTC = timezone.utc
 
 class Comment(BaseTableModel):
     __tablename__ = "comments"
@@ -17,6 +18,9 @@ class Comment(BaseTableModel):
     )
     dislikes = relationship(
         "CommentDislike", back_populates="comment", cascade="all, delete-orphan"
+    )
+    replies = relationship(
+        "Reply", back_populates="comment", cascade="all, delete-orphan"
     )
 
 
@@ -44,3 +48,14 @@ class CommentDislike(BaseTableModel):
 
     comment = relationship("Comment", back_populates="dislikes")
     user = relationship("User", back_populates="comment_dislikes")
+
+class Reply(BaseTableModel):
+    __tablename__ = "comment_replies"
+
+    user_id = Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    comment_id = Column(String, ForeignKey("comments.id", ondelete="CASCADE"), nullable=False)
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+
+    user = relationship("User", back_populates="comment_replies")
+    comment = relationship("Comment", back_populates="replies")

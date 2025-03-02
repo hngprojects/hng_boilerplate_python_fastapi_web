@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing_extensions import Annotated, List
-from pydantic import BaseModel, StringConstraints, ConfigDict
+from pydantic import BaseModel, StringConstraints, ConfigDict, Field
 
 
 class CommentCreate(BaseModel):
@@ -74,6 +74,16 @@ class LikeSchema(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class ReplySchema(BaseModel):
+    """
+    Schema for replies
+    """
+    content: str = ""
+    user_id: str = ""
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 class CommentsSchema(BaseModel):
     """
@@ -86,6 +96,7 @@ class CommentsSchema(BaseModel):
     likes: List[LikeSchema] = []
     dislikes: List[CommentDislike] = []
     created_at: datetime = datetime.now()
+    replies: List[ReplySchema] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -131,3 +142,15 @@ class LikeSuccessResponse(BaseModel):
     message: str
     success: bool = True
     data: CommentLike
+
+class ReplyCreate(BaseModel):
+    content: str = Field(..., min_length=1, description="The reply content")
+
+    class Config:
+        from_attributes = True
+
+class ReplyResponse(ReplyCreate, ReplySchema):
+    id: str
+
+    class Config:
+        from_attributes = True
