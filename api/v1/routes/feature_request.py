@@ -92,7 +92,15 @@ def update_feature_request(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not authorized to update this feature request"
         )
-    
+
+     # Prevent non-superadmins from updating the status field
+    update_data = feature_request_update.dict(exclude_unset=True)
+    if not current_user.is_superadmin and "status" in update_data:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can update the status field"
+        )
+        
     updated_feature_request = FeatureRequestService.update_feature_request(
         db, feature_request_id, feature_request_update
     )
