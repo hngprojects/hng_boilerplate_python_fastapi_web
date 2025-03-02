@@ -82,7 +82,7 @@ def test_verify_signin_token_success(db_session_mock, redis_mock):
         "password": "hashedpassword"
     }
 
-    with patch("api.core.dependencies.redis_cache.redis_client", redis_mock):
+    with patch("api.core.dependencies.redis_cache.get_redis_client", redis_mock):
         token_schema = {"email": "user@gmail.com", "token": "123456"}
         response = client.post("/api/v1/auth/verify-token", json=token_schema)
 
@@ -95,7 +95,7 @@ def test_verify_signin_token_invalid(db_session_mock, redis_mock):
         "token": "654321"
     }
 
-    with patch("api.core.dependencies.redis_cache.redis_client", redis_mock):
+    with patch("api.core.dependencies.redis_cache.get_redis_client", redis_mock):
         token_data = {"email": "user@gmail.com", "token": "123456"}
         response = client.post("/api/v1/auth/verify-token", json=token_data)
 

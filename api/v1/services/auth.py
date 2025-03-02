@@ -6,7 +6,7 @@ from api.v1.services.user import user_service
 from api.utils.settings import settings
 from fastapi import HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
-from api.core.dependencies.redis_cache import redis_client
+from api.core.dependencies.redis_cache import get_redis_client
 from sqlalchemy.orm import Session
 from typing import Tuple
 import jwt
@@ -14,6 +14,9 @@ import random
 import string
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
+
+# Initialize Redis client
+redis_client = get_redis_client()
 
 class AuthService(Service):
     """Auth Service"""

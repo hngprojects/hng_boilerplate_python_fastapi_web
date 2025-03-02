@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from jose import ExpiredSignatureError, JWTError
 from slowapi import Limiter
 from redis import Redis
-from api.core.dependencies.redis_cache import redis_client
+from api.core.dependencies.redis_cache import get_redis_client
 from slowapi.util import get_remote_address
 from api.utils.settings import settings
 
@@ -57,6 +57,8 @@ auth = APIRouter(prefix="/auth", tags=["Authentication"])
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
+# Initialize Redis client
+redis_client = get_redis_client()
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
