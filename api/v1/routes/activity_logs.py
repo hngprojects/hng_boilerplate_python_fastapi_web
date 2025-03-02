@@ -51,6 +51,8 @@ async def get_all_activity_logs(
 @activity_logs.get("/{user_id}", status_code=status.HTTP_200_OK)
 async def fetch_all_users_activity_log(
     user_id: str,
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_super_admin)
 ):
