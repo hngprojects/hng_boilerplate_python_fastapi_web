@@ -224,7 +224,7 @@ async def archive_blog_post(
     """Endpoint to archive/soft-delete a blog post"""
 
     blog_service = BlogService(db=db)
-    blog_post = blog_service.fetch(blog_id=id)
+    blog_post = blog_service.fetch(blog_id=blog_id)
     if not blog_post:
         raise HTTPException(status_code=404, detail="Post not found")
     #check if admin/ authorized user
