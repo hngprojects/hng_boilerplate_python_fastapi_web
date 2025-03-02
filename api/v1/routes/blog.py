@@ -1,10 +1,12 @@
 from fastapi import (
     APIRouter, Depends, HTTPException, status, 
-    HTTPException, Response, Request
+    HTTPException, Response, Request, Query
 )
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
-from typing import Annotated
+from typing import Annotated, List, Optional
+from datetime import datetime
+from sqlalchemy import and_, or_, cast, String
 
 from api.db.database import get_db
 from api.utils.pagination import paginated_response
@@ -18,7 +20,8 @@ from api.v1.schemas.blog import (
     BlogUpdateResponseModel,
     BlogLikeDislikeResponse,
     CommentRequest,
-    CommentUpdateResponseModel
+    CommentUpdateResponseModel,
+    BlogSearchResponse
 )
 from api.v1.services.blog import BlogService, BlogDislikeService, BlogLikeService
 from api.v1.services.user import user_service
@@ -74,6 +77,117 @@ def get_all_active_blogs(db: Session = Depends(get_db), limit: int = 10, skip: i
     )
 
     return success_response(200, message="Successfully fetched active blogs", data=blog)
+# blog search endpoint
+@blog.get("/search", response_model=BlogSearchResponse)
+def search_blogs(
+    db: Session = Depends(get_db),
+    keyword: Optional[str] = Query(None, description="Search in title and content"),
+    category: Optional[str] = Query(None, description="Filter by blog category"),
+    author: Optional[str] = Query(None, description="Filter by author name"),
+    start_date: Optional[str] = Query(None, description="Start date for date range filter (YYYY-MM-DD)"),
+    end_date: Optional[str] = Query(None, description="End date for date range filter (YYYY-MM-DD)"),
+    tags: Optional[str] = Query(None, description="Filter by tags (comma-separated)"),
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(10, ge=1, le=100, description="Items per page"),
+):
+    """
+    Search and filter blogs based on different parameters.
+    """
+    blog_service = BlogService(db)
+    
+    # Build the filters
+    filters = []
+    
+    if keyword:
+        filters.append(or_(
+            Blog.title.ilike(f"%{keyword}%"),
+            Blog.content.ilike(f"%{keyword}%"),
+            Blog.excerpt.ilike(f"%{keyword}%")
+        ))
+    
+    if category:
+        # Assuming category might be stored in tags or as a separate field
+        filters.append(or_(
+            cast(Blog.tags, String).ilike(f"%{category}%")
+        ))
+    
+    if author:
+        query = blog_service.db.query(User.id).filter(
+            or_(
+                User.first_name.ilike(f"%{author}%"),
+                User.last_name.ilike(f"%{author}%"),
+            )
+        ).all()
+
+        author_ids = [user_id[0] for user_id in query]
+        if author_ids:
+            filters.append(Blog.author_id.in_(author_ids))
+        else:
+            # No matching authors, return empty result
+            return {
+                "status_code": 200,
+                "total_results": 0,
+                "blogs": []
+            }
+    
+    # Rest of the function remains the same
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+            filters.append(Blog.created_at >= start_date_obj)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid start_date format. Use YYYY-MM-DD."
+            )
+    
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+            # Add 1 day to include the end date
+            end_date_obj = end_date_obj.replace(hour=23, minute=59, second=59)
+            filters.append(Blog.created_at <= end_date_obj)
+        except ValueError:
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid end_date format. Use YYYY-MM-DD."
+            )
+    
+    if tags:
+        tag_list = [tag.strip() for tag in tags.split(",")]
+        for tag in tag_list:
+            filters.append(cast(Blog.tags, str).ilike(f"%{tag}%"))
+    
+    # Get total count and paginated results
+    search_results = blog_service.search_blogs(
+        filters=filters,
+        page=page,
+        per_page=per_page
+    )
+    
+    # Fix the tags format in the returned blogs
+    processed_blogs = []
+    for blog in search_results["items"]:
+        blog_dict = blog
+        # Convert PostgreSQL array format to Python list
+        if "tags" in blog_dict and blog_dict["tags"]:
+            # Check if tags is in PostgreSQL array format
+            if isinstance(blog_dict["tags"], str) and blog_dict["tags"].startswith('{') and blog_dict["tags"].endswith('}'):
+                # Remove curly braces and split by commas
+                tags_str = blog_dict["tags"][1:-1]
+                # Simple split for basic cases
+                import re
+                # This regex handles both quoted and unquoted elements in the array
+                tags_list = re.findall(r'"([^"]*)"|\s*([^,]+)', tags_str)
+                # Extract the matched groups and clean them
+                blog_dict["tags"] = [t[0] or t[1].strip() for t in tags_list if t[0] or t[1].strip()]
+        processed_blogs.append(blog_dict)
+    
+    return {
+        "status_code": 200,
+        "total_results": search_results["total"],
+        "blogs": processed_blogs
+    }
 
 @blog.get("/{id}", response_model=BlogPostResponse)
 def get_blog_by_id(id: str, db: Session = Depends(get_db)):
@@ -92,7 +206,8 @@ def get_blog_by_id(id: str, db: Session = Depends(get_db)):
     """
     blog_service = BlogService(db)
 
-    blog_post = blog_service.fetch(id)
+    # Fetch blog and increment view count
+    blog_post = blog_service.fetch_and_increment_view(id)
 
     return success_response(
         message="Blog post retrieved successfully!",
@@ -216,6 +331,32 @@ def dislike_blog_post(
             'object': new_dislike.to_dict(), 
             'objects_count': blog_service.num_of_dislikes(blog_id)
         },
+    )
+
+
+@blog.get("/{post_id}/likes-dislikes")
+def get_likes_dislikes_count(
+    post_id: str,
+    db: Session = Depends(get_db),
+):
+    """Fetch total number of likes and dislikes for a blog post."""
+    blog_service = BlogService(db)
+    
+    # Validate if blog post exists
+    blog_service.fetch(post_id)
+    
+    # Fetch like and dislike counts
+    likes_count = blog_service.num_of_likes(post_id)
+    dislikes_count = blog_service.num_of_dislikes(post_id)
+    
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Likes and dislikes retrieved successfully",
+        data={
+            "post_id": post_id,
+            "likes": likes_count,
+            "dislikes": dislikes_count,
+        }
     )
 
 
@@ -396,11 +537,35 @@ async def delete_blog_like(
         request: `default` Request.
         db: `default` Session.
     """
+    
+    # Validate User
+    if not current_user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Could not validate credentials")
+    
     blog_like_service = BlogLikeService(db)
-
-    # delete blog like
-    return blog_like_service.delete(blog_like_id, current_user.id)
-
+    
+    blog_like = blog_like_service.fetch(blog_like_id)
+    
+    # Check if blogLike exist
+    if not blog_like:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="BlogLike does not exist"
+        )
+    
+    # Check if current user is the owner of blogLike
+    if blog_like.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Insufficient permission"
+        )
+    
+    db.delete(blog_like)
+    db.commit()
+    
+    return Response(
+        status_code=204
+    )
 
 @blog.delete("/dislikes/{blog_dislike_id}", 
              status_code=status.HTTP_204_NO_CONTENT)

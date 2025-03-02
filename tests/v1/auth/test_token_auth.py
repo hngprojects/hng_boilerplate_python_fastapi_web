@@ -52,4 +52,4 @@ def test_verify_signin_token(mock_verify_login_token, db_session_mock):
                            json={"email": "user@gmail.com", "token": "123456"})
 
     assert response.status_code == 200
-    assert "access_token" in response.json()
+    assert "access_token" in response.json()['data']

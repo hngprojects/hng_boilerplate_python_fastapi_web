@@ -54,7 +54,7 @@ def test_create_activity_log(mock_activity_log_service, mock_db_session):
     assert response.json() == {
         "status_code": 201,
         "message": "Activity log created successfully",
-        "success": True,
+        "status": "success",
         "data": {
             "user_id": mock_activity_log.user_id,
             "action": mock_activity_log.action,

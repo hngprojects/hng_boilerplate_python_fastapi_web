@@ -8,6 +8,9 @@ from api.v1.models.notifications import Notification
 from api.db.database import get_db
 from api.utils.settings import settings
 import jwt
+from uuid_extensions import uuid7
+from api.v1.models.user import User
+from api.v1.services.user import user_service
 
 client = TestClient(app)
 
@@ -32,7 +35,21 @@ def create_test_token() -> str:
     return jwt.encode(data, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 def test_send_notification(db_session_mock):
-    with patch("api.utils.dependencies.get_current_user", return_value=None):
+    user_id = uuid7()
+    user = User(
+        id=user_id,
+        email="testuser1@gmail.com",
+        password=user_service.hash_password("Testpassword@123"),
+        first_name="Test",
+        last_name="User",
+        is_active=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    access_token = user_service.create_access_token(str(user_id))
+    headers = {"authorization": f"Bearer {access_token}"}
+
+    with patch("api.utils.dependencies.get_current_user", return_value=user):
         token = create_test_token()
 
         response = client.post(
@@ -41,15 +58,27 @@ def test_send_notification(db_session_mock):
                 "title": "Test Notification",
                 "message": "This is a test notification."
             },
-            headers={"Authorization": f"Bearer {token}"},
+            headers=headers,
         )
 
-    print(response.json())  # Debug print
     assert response.status_code == 201
     assert response.json()["message"] == "Notification sent successfully"
     assert response.json()["data"]["title"] == "Test Notification"
     assert response.json()["data"]["message"] == "This is a test notification."
     assert response.json()["data"]["status"] == "unread"
+
+def test_send_notification_unauthenticated_user(db_session_mock):
+    with patch("api.utils.dependencies.get_current_user", return_value=None):
+        response = client.post(
+            "/api/v1/notifications/send",
+            json={
+                "title": "Test Notification",
+                "message": "This is a test notification."
+            },
+        )
+
+    assert response.status_code == 401
+    assert response.json()["message"] == "Not authenticated"
 
 def test_get_notification_by_id(db_session_mock):
     notification = Notification(

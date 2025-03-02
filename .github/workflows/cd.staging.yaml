@@ -34,8 +34,9 @@ jobs:
             cd boilerplate/python/staging
             tar -xzf /tmp/python/python-staging.tar.gz -C .
             rm -f /tmp/python/python-staging.tar.gz
-            cd app
+            cp .env app/.env
             source venv/bin/activate
+            cd app
             pip install -r requirements.txt
             alembic revision --autogenerate
             alembic upgrade head

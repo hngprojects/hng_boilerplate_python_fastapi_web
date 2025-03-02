@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Login Detected{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif;">
+  <h2 style="text-align: left; margin-bottom: 20px;">Account Login Detected</h2>
+
+  <p style="margin-bottom: 15px;"><strong>Hi {{ first_name }} {{ last_name }},</strong></p>
+
+  <p style="margin-bottom: 25px;">We detected a new login to your account. If this was you, no action is needed. If you didn't log in, please take action immediately.</p>
+
+  <div style="margin-bottom: 25px;">
+    <p style="margin-bottom: 5px;"><strong>Date & Time: </strong>{{ login_time }}</p>
+    <p style="margin-bottom: 5px;"><strong>IP Address: </strong>{{ ip_address }}</p>
+    <p style="margin-bottom: 5px;"><strong>Location: </strong>{{ location }}</p>
+    <p style="margin-bottom: 15px;"><strong>Device: </strong>{{ device }}</p>
+  </div>
+
+  <div style="margin-top: 30px; margin-bottom: 30px; padding-left: 10px; border-left: 4px solid #ffc107; background-color: #fff8e1; padding: 15px;">
+    <h3 style="margin-top: 0; margin-bottom: 15px;">Was this not you?</h3>
+
+    <p>If you didn't log in to your account at this time, someone else may have access to your account. Please take the following steps immediately:</p>
+
+    <ol style="padding-left: 25px; margin-bottom: 20px;">
+      <li style="margin-bottom: 8px;">Change your password immediately</li>
+      <li style="margin-bottom: 8px;">Enable two-factor authentication if available</li>
+      <li style="margin-bottom: 8px;">Contact our customer support at <a href="{{ help_center_link }}" style="color: blue; text-decoration: underline;">Help Center</a></li>
+    </ol>
+
+    <a href="{{ change_password_link }}" style="display: inline-block; background-color: #F97414; color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold;">Change Password</a>
+  </div>
+
+</div>
+{% endblock %}

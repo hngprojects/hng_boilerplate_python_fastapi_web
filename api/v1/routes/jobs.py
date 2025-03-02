@@ -4,7 +4,7 @@ from api.utils.success_response import success_response
 from api.v1.schemas.jobs import PostJobSchema, AddJobSchema, JobCreateResponseSchema, UpdateJobSchema
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 
 from api.v1.services.user import user_service
@@ -15,6 +15,7 @@ from api.v1.models.user import User
 from api.v1.models.job import Job, JobApplication
 from api.v1.services.jobs import job_service
 from api.v1.services.job_application import job_application_service, UpdateJobApplication
+from api.v1.services.bookmark import bookmark_service
 from api.utils.pagination import paginated_response
 from api.utils.db_validators import check_model_existence
 import uuid
@@ -59,9 +60,38 @@ async def add_jobs(
         data=jsonable_encoder(JobCreateResponseSchema.model_validate(new_job))
     )
 
+@jobs.get("/filter", response_model=success_response)
+async def filter(
+        title: Optional[str] = None,
+        location: Optional[str] = None,
+        job_type: Optional[str] = None,
+        db: Session = Depends(get_db)
+):
+    """
+        Retrieve job details by specified search parameters salary range, location and job_type.
+        This endpoint to handle job filtering based on user preferences. This endpoint will allow users to filter
+        job listings by parameters such as salary range, location, and job type to find positions that match
+        their specific needs
+
+        Parameters:
+        - title: str (optional)
+            The job title
+        - location: str (optional)
+            The job location
+        - job_type: str (optional)
+            The type of job
+        - db: The database session
+        """
+    jobs = job_service.fetch_by_filters(db, title, location, job_type)
+
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        data=jsonable_encoder(jobs),
+        message= f"Successfully retrieved {len(jobs)} jobs"
+    )
 
 @jobs.get("/{job_id}", response_model=success_response)
-async def get_job(
+async def retrieveJob(
     job_id: str,
     db: Session = Depends(get_db)
 ):
@@ -74,14 +104,13 @@ async def get_job(
         The ID of the job to retrieve.
     - db: The database session
     """
-    job = job_service.fetch(db, job_id)
+    job = job_service.retrieve(db, job_id)
 
     return success_response(
         message="Retrieved Job successfully",
-        status_code=200,
+        status_code=status.HTTP_200_OK,
         data=jsonable_encoder(job)
     )
-
 
 @jobs.get("")
 async def fetch_all_jobs(
@@ -143,6 +172,7 @@ async def update_job(
         message="Successfully updated a job listing",
         status_code=status.HTTP_200_OK,
     )
+
 
 
 # -------------------- JOB APPLICATION ROUTES ------------------------
@@ -210,7 +240,7 @@ async def fetch_all_job_applications(
     Args:
         - job_id (str): The Job ID
         - db (Annotated[Session, Depends): the database session
-        - current_user: The current authenticated super admin 
+        - current_user: The current authenticated super admin
         - per_page: Number of customers per page (default: 10, minimum: 1)
         - page: Page number (starts from 1)
 
@@ -239,3 +269,57 @@ async def delete_application(job_id: str,
         HTTP 204 No Content on success
     """
     job_application_service.delete(job_id, application_id, db)
+
+
+
+# -------------------- JOB BOOKMARK ROUTES ------------------------
+# --------------------------------------------------------------------
+
+@jobs.post("/bookmark/{job_id}", status_code=status.HTTP_200_OK)
+async def create_bookmark(
+    job_id: str,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(user_service.get_current_user)]
+    ):
+    """
+    Saves specified job for authenticated user.
+    Args:
+        job_id: The id of the job
+        db: database Session object
+        current_user: currently logged in user
+    Returns:
+        HTTP 200 on success
+    """
+    try:
+        job = db.query(Job).filter(Job.id == job_id).first()
+        if job:
+            new_bookmark = bookmark_service.create(db, job_id, current_user.id)
+            logger.info(f"Job bookmarked successfully {new_bookmark.id}")
+
+            return {
+                "status": "success",
+                "message": "Job saved successfully",
+                "status_code": 200,
+                "data": {}
+                }
+
+        return {
+            "status": "failure",
+            "message": "Job not listed",
+            "status_code": 400,
+            "data": {}
+        }
+    except HTTPException as e:
+        return {
+            "status": "failure",
+            "message": str(e.detail),
+            "status_code": 400,
+            "data": {}
+        }
+    except Exception as e:
+        return {
+        "status": "failure",
+        "message": str(e),
+        "status_code": 500,
+        "data": {}
+    }
