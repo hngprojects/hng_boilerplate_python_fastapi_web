@@ -3,12 +3,16 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from api.v1.models.feature_request import FeatureRequest
-from api.v1.schemas.feature_request import FeatureRequestCreate, FeatureRequestUpdate
+from api.v1.schemas.feature_request import FeatureRequestCreate, FeatureRequestUpdate, FeatureRequestBase, FeatureRequestInDB, FeatureRequestResponse 
 
 
 class FeatureRequestService:
     @staticmethod
     def create_feature_request(db: Session, feature_request_data: FeatureRequestCreate, user_id: str):
+        # Convert to dict and explicitly set status to "Pending"
+        feature_request_dict = feature_request_data.dict()
+        feature_request_dict["status"] = "Pending"
+    
         db_feature_request = FeatureRequest(**feature_request_data.dict(), user_id=user_id)
         db.add(db_feature_request)
         db.commit()
@@ -44,34 +48,7 @@ class FeatureRequestService:
             db.delete(db_feature_request)
             db.commit()
         return db_feature_request
-class FeatureRequestBase(BaseModel):
-    title: str = Field(..., description="Title of the feature request")
-    description: str = Field(..., description="Detailed description of the requested feature")
-    priority: str = Field(default="Low", description="Priority level (Low, Medium, High)")
-    status: str = Field(default="Pending", description="Status (Pending, Approved, Rejected)")
 
-
-class FeatureRequestCreate(FeatureRequestBase):
-    pass
-
-
-class FeatureRequestUpdate(BaseModel):
-    title: Optional[str] = Field(None, description="Title of the feature request")
-    description: Optional[str] = Field(None, description="Detailed description of the requested feature")
-    priority: Optional[str] = Field(None, description="Priority level (Low, Medium, High)")
-    status: Optional[str] = Field(None, description="Status (Pending, Approved, Rejected)")
-
-
-class FeatureRequestInDB(FeatureRequestBase):
-    id: str
-    created_at: datetime
-    updated_at: datetime
-    user_id: str
-    is_deleted: bool = False
 
     class Config:
         orm_mode = True
-
-
-class FeatureRequestResponse(FeatureRequestInDB):
-    pass
