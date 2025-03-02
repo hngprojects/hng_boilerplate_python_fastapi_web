@@ -43,7 +43,7 @@ class BlogService:
         if author_id:
             query = query.filter(Blog.author_id == author_id)
         if category:
-            query = query.filter(Blog.category == category)
+            query = query.filter(Blog.category.ilike(f"%{category}%"))
 
         total_count = query.count()
 
