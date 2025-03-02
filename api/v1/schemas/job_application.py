@@ -2,9 +2,21 @@
 Job application schemas
 """
 from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
-
+from enum import Enum
 from typing import Union, Optional, List
 import re
+
+class JobStatus(str,Enum):
+    PENDING = "Pending"
+    APPLIED = "Applied"
+    UNDER_REVIEW = "Under Review"
+    INTERVIEW_SCHEDULED = "Interview Scheduled"
+    INTERVIEW_COMPLETED = "Interview Completed"
+    OFFER_EXTENDED = "Offer Extended"
+    OFFER_ACCEPTED = "Offer Accepted"
+    Hired ="Hired"
+    REJECTED = "Rejected"
+    WITHDRAWN = "Withdrawn"
 
 class JobApplicationData(BaseModel):
     """
@@ -30,7 +42,7 @@ class JobApplicationBase(BaseModel):
     resume_link: str
     portfolio_link: Union[str, None]
     cover_letter: Union[str, None]
-    application_status: str
+    application_status: JobStatus
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -92,7 +104,7 @@ class UpdateJobApplication(BaseModel):
     cover_letter: Optional[str] = None
     resume_link: Optional[str] = None
     portfolio_link: Optional[str] = None
-    application_status: Optional[str] = None
+    application_status: Optional[JobStatus] = None
 
     @field_validator('resume_link', 'portfolio_link')
     def validate_links(cls, v):

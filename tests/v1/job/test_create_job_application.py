@@ -9,7 +9,7 @@ from uuid_extensions import uuid7
 from api.db.database import get_db
 from api.v1.services.user import user_service
 from api.v1.models.user import User
-from api.v1.models.job import Job, JobApplication
+from api.v1.models.job import Job, JobApplication,JobStatus
 from api.v1.services.jobs import job_service
 from api.v1.services.job_application import job_application_service
 from main import app
@@ -49,7 +49,7 @@ def mock_job_application():
         cover_letter=fake.paragraph(),
         resume_link=fake.url(),
         portfolio_link=fake.url() if fake.boolean(chance_of_getting_true=50) else None,
-        application_status=fake.random_element(["pending", "accepted", "rejected"]),        
+        application_status=JobStatus.APPLIED,        
     )
 
 @pytest.fixture

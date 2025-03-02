@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 from api.utils.logger import logger
 from api.db.database import get_db
 from api.v1.models.user import User
-from api.v1.models.job import Job, JobApplication
+from api.v1.models.job import Job, JobApplication,JobStatus
 from api.v1.services.jobs import job_service
 from api.v1.services.job_application import job_application_service, UpdateJobApplication
 from api.v1.services.bookmark import bookmark_service
