@@ -20,6 +20,15 @@ jobs:
           POSTGRES_DB: "test"
         ports:
           - 5432:5432
+      redis:
+        image: redis:latest
+        env:
+          REDIS_PASSWORD: "REDIS_PASSWORD"
+          REDIS_DB: "0"
+          REDIS_PORT: "11305"
+          REDIS_HOST: "REDIS_HOST"
+        ports:
+          - 11305:11305
 
     steps:
       - name: Checkout code
