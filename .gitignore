@@ -173,3 +173,11 @@ cython_debug/
 #.idea/
 
 alembic/versions
+
+# Ignore environment files
+.env
+.env.*
+.ven
+.venv
+env
+alembic/env.py
