@@ -104,3 +104,17 @@ def test_get_all_activity_logs_non_super_admin(mock_user_service, mock_db_sessio
                           'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.usefixture("mock_db_session", "mock_user_service")
+def test_fetch_all_pagination(test_client):
+    response = test_client.get("/activity-logs?page=1&limit=5")
+    assert response.status_code == 200
+    data = response.json()
+
+    assert len(data["data"]) == 5  # Ensure it returns exactly 5 logs
+
+    # Verify sorting by created_at in descending order
+    timestamps = [log["created_at"] for log in data["data"]]
+    assert timestamps == sorted(timestamps, reverse=True)
+    
