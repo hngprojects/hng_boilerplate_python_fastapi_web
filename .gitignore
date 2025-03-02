@@ -129,7 +129,6 @@ celerybeat.pid
 # Environments
 .env*
 !.env.sample
-.venv
 .blog_env/
 
 env/
@@ -174,14 +173,6 @@ cython_debug/
 
 alembic/versions
 
-# Ignore environment files
-.env
-.env.*
-.ven
-.venv
-env
-alembic/env.py
-
 # Ignore environment and virtual environment files
 .env
 .env.*
@@ -190,18 +181,3 @@ alembic/env.py
 env
 alembic/env.py
 
-# Ignore environment and virtual environment files
-.env
-.env.*
-.ven
-.venv
-env
-alembic/env.py
-
-# Ignore environment and virtual environment files
-.env
-.env.*
-.ven
-.venv
-env
-alembic/env.py
