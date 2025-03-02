@@ -15,8 +15,13 @@ from api.core.responses import SUCCESS
 from typing import Annotated
 from api.utils.pagination import paginated_response
 from api.v1.models.testimonial import Testimonial
+import json
+import logging
+from api.utils.logger import logger
 
 testimonial = APIRouter(prefix="/testimonials", tags=['Testimonial'])
+
+logger = logging.getLogger(__name__)
 
 
 @testimonial.get("", status_code=status.HTTP_200_OK)
