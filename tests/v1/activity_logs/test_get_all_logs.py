@@ -104,3 +104,61 @@ def test_get_all_activity_logs_non_super_admin(mock_user_service, mock_db_sessio
                           'Authorization': f'Bearer {access_token}'})
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.parametrize("action", ["login", "logout"])
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_get_activity_logs_by_action(mock_user_service, mock_db_session, action):
+    """Test for fetching activity logs filtered by different actions."""
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    access_token = user_service.create_access_token(user_id=str(uuid7()))
+
+    log_id = str(uuid7())
+    user_id = str(uuid7())
+    timestamp = datetime.now(timezone.utc)
+
+    activity_log = ActivityLog(
+        id=log_id,
+        user_id=user_id,
+        action=action,
+        timestamp=timestamp,
+        created_at=timestamp,
+        updated_at=timestamp
+    )
+
+    mock_db_session.query.return_value.filter.return_value.all.return_value = [activity_log]
+
+    response = client.get(f"{ACTIVITY_LOGS_ENDPOINT}?action={action}", headers={
+        'Authorization': f'Bearer {access_token}'
+    })
+
+    assert response.status_code == status.HTTP_200_OK
+    
+
+@pytest.mark.parametrize("action", ["login", "logout"])
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_get_activity_logs_by_action_no_data(mock_user_service, mock_db_session, action):
+    """Test for fetching activity logs when no logs match the action."""
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    access_token = user_service.create_access_token(user_id=str(uuid7()))
+
+    mock_db_session.query.return_value.filter.return_value.all.return_value = []
+
+    response = client.get(f"{ACTIVITY_LOGS_ENDPOINT}?action={action}", headers={
+        'Authorization': f'Bearer {access_token}'
+    })
+
+    assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+@pytest.mark.parametrize("action", ["login", "logout"])
+@pytest.mark.usefixtures("mock_db_session", "mock_user_service")
+def test_get_all_activity_logs_non_super_admin(mock_user_service, mock_db_session, action):
+    """Test for fetching all activity logs matching the action as a non-super admin user."""
+    mock_user = create_mock_user(
+        mock_user_service, mock_db_session, is_superadmin=False)
+    access_token = user_service.create_access_token(user_id=str(uuid7()))
+    response = client.get(f"{ACTIVITY_LOGS_ENDPOINT}?action={action}", headers={
+                          'Authorization': f'Bearer {access_token}'})
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
