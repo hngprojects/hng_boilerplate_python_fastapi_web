@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field
+from enum import Enum
+
 from api.v1.schemas.comment import CommentData
 
 class BlogCreate(BaseModel):
@@ -9,10 +11,15 @@ class BlogCreate(BaseModel):
     image_url: str = None
     tags: list[str] = None
     excerpt: str = Field(None, max_length=500)
+    scheduled_at: datetime = None
 
 class BlogRequest(BaseModel):
     title: str
     content: str
+
+class BlogStatus(str, Enum):
+    PENDING = "pending"
+    PUBLISHED = "published"
 
 class BlogUpdateResponseModel(BaseModel):
     status: str
@@ -30,6 +37,8 @@ class BlogBaseResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     views: int
+    status: BlogStatus
+    scheduled_at: Optional[datetime]
 
     class Config:
         from_attributes = True
