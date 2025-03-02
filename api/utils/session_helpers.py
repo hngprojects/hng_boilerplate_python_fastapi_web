@@ -1,32 +1,38 @@
-import requests
+import httpx
+from fastapi import Request, BackgroundTasks
+from sqlalchemy.orm import Session
 
-from fastapi import Request
-
+from api.db.database import get_db
 from api.v1.schemas.session import SessionCreate
+from api.v1.services.session import SessionService
 from api.utils.client_helpers import get_ip_address
 
 
-def get_ip_location(ip):
+async def get_ip_location(ip):
     """ Get IP location.
     
     Args:
         ip (str): IP address
     """
     country = region = "Unknown"
-    
+
     try:
-        response = requests.get(f"https://ipinfo.io/{ip}/json/", timeout=10)
-        if response.status_code != 200:
-            return f"{region}, {country}"
-        data = response.json()
-        region = data.get("region", "Unknown")
-        country = data.get("country", "Unknown")
-    except Exception as e:
-        return f"{region}, {country}"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"https://ipinfo.io/{ip}/json/", timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            region = data.get("region", "Unknown")
+            country = data.get("country", "Unknown")
+    except httpx.RequestError as exc:
+        print(f"An error occurred while requesting {exc.request.url!r}.")
+    except httpx.HTTPStatusError as exc:
+        print(f"Error response {exc.response.status_code} while requesting {exc.request.url!r}.")
+    except Exception as exc:
+        print(f"An unexpected error occurred: {exc}")
+    
     return f"{region}, {country}"
-
-
-def get_session_schema_data(request: Request, refresh_token: str = "", expires_at: str = ""):
+    
+async def get_session_schema_data(request: Request, refresh_token: str = "", expires_at: str = ""):
     """Get session schema data.
     
     Args:
@@ -35,12 +41,34 @@ def get_session_schema_data(request: Request, refresh_token: str = "", expires_a
         expires_at (str): Expiry date
     """
     ip = get_ip_address(request)
-    user_agent= request.headers.get("User-Agent")
     return SessionCreate(
         ip_address=ip,
-        location=get_ip_location(ip),
-        device=user_agent,
+        location=await get_ip_location(ip),
+        device=request.headers.get("User-Agent"),
         is_revoked=False,
         refresh_token=refresh_token,
         expires_at=expires_at
     )
+
+async def create_session_for_user(
+        request: Request,
+        user_id: str,
+        refresh_token: str = "",
+        expires_at: str = "",
+    ):
+    """Create session for user.
+    
+    Args:
+        request (Request): Request object
+        db: Database session
+        refresh_token (str): Refresh token
+        expires_at (str): Expiry date
+    """
+    session_data: SessionCreate = await get_session_schema_data(
+        request,
+        refresh_token=refresh_token,
+        expires_at=expires_at,
+    )
+    db = next(get_db())
+    session_service = SessionService(db)
+    session_service.create(schema=session_data, user_id=user_id)

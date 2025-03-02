@@ -23,7 +23,7 @@ from api.core.dependencies.email_sender import send_email
 from api.utils.success_response import auth_response, success_response
 from api.utils.send_mail import send_magic_link
 from api.utils.settings import settings
-from api.utils.session_helpers import get_session_schema_data
+from api.utils.session_helpers import create_session_for_user
 from api.v1.models import User
 from api.v1.schemas.user import Token, UserEmailSender
 from api.v1.schemas.user import (
@@ -34,7 +34,7 @@ from api.v1.schemas.user import (
     UserData2,
 )
 from api.v1.schemas.token import TokenRequest
-from api.v1.schemas.session import SessionCreate
+# from api.v1.schemas.session import SessionCreate
 from api.v1.schemas.user import (MagicLinkRequest,
                                  ChangePasswordSchema,
                                  AuthMeResponse)
@@ -53,7 +53,7 @@ from api.v1.schemas.totp_device import (
 )
 from api.v1.services.totp import totp_service
 from api.utils.settings import settings
-from api.v1.services.session import SessionService
+# from api.v1.services.session import SessionService
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -79,13 +79,8 @@ def register(
     # Create user account
     user = user_service.create(db=db, schema=user_schema)
 
-
     verification_token = user_service.create_verification_token(user.id)
     verification_link = f"{base_url}/api/v1/auth/verify-email?token={verification_token}"
-
-    access_token = user_service.create_access_token(user_id=user.id)
-    refresh_token = user_service.create_refresh_token(user_id=user.id)
-    cta_link = "https://anchor-python.teams.hng.tech/about-us"
 
     # create an organization for the user
     org = CreateUpdateOrganisation(
@@ -98,15 +93,18 @@ def register(
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
     cta_link = f"{settings.ANCHOR_PYTHON_BASE_URL}/about-us"
+
+    # create session for user
     expires = dt.datetime.now(dt.timezone.utc) + (dt.timedelta(
         days=settings.JWT_REFRESH_EXPIRY) - dt.timedelta(seconds=1)
     )
-    session_schema: SessionCreate = get_session_schema_data(
-        request,
+    background_tasks.add_task(
+        create_session_for_user,
+        request=request,
+        user_id=user.id,
         refresh_token=refresh_token,
-        expires_at=expires)
-    session_service = SessionService(db)
-    session_service.create(db=db, schema=session_schema, user_id=user.id)
+        expires_at=expires
+    )
 
     # Send email in the background
     background_tasks.add_task(
@@ -257,15 +255,18 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
     # Generate access and refresh tokens
     access_token = user_service.create_access_token(user_id=user.id)
     refresh_token = user_service.create_refresh_token(user_id=user.id)
+
+    # create session for user
     expires = dt.datetime.now(dt.timezone.utc) + (dt.timedelta(
         days=settings.JWT_REFRESH_EXPIRY) - dt.timedelta(seconds=1)
     )
-    session_schema: SessionCreate = get_session_schema_data(
-        request,
+    background_tasks.add_task(
+        create_session_for_user,
+        request=request,
+        user_id=user.id,
         refresh_token=refresh_token,
-        expires_at=expires)
-    session_service = SessionService(db)
-    session_service.create(db=db, schema=session_schema, user_id=user.id)
+        expires_at=expires
+    )
 
     # Background task for email notification
     logger.info(f"Queueing login notification for {user.email} in the background...")

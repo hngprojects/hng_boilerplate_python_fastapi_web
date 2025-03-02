@@ -10,6 +10,7 @@ class SessionService:
     """Session service functionality."""
 
     def __init__(self, db: Session):
+        """Initialize the service."""
         self.db = db
 
     def is_revoked_or_expired(self, refresh_token: str):
@@ -19,6 +20,8 @@ class SessionService:
             return True
         if isinstance(session.expires_at, str):
             session.expires_at = datetime.fromisoformat(session.expires_at)
+
+        session.expires_at = session.expires_at.astimezone(timezone.utc)
         current_time = datetime.now(timezone.utc)
         if session.is_revoked or (session.expires_at < current_time):
             return True
@@ -46,16 +49,15 @@ class SessionService:
         ).all()
         return sessions
   
-    def create(self, db: Session, schema: SessionCreate, user_id: str):
+    def create(self, schema: SessionCreate, user_id: str):
         """Create a new session."""
         sessions = self.fetch_by_ip_and_user_agent(schema.ip_address, schema.device)
         if sessions:
-            print(sessions)
             self.revoke_sessions(sessions)
         new_session = UserSession(**schema.model_dump(), user_id=user_id)
-        db.add(new_session)
-        db.commit()
-        db.refresh(new_session)
+        self.db.add(new_session)
+        self.db.commit()
+        self.db.refresh(new_session)
         return new_session
 
     def fetch_all(self, user_id):
