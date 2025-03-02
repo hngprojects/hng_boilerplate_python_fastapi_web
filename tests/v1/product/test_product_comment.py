@@ -1,4 +1,4 @@
- import pytest
+import pytest
 from unittest.mock import MagicMock
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
@@ -145,5 +145,3 @@ def test_fetch_all_product_comment(client, db_session_mock):
 # ========= delete a comment of a single product PYTEST TEST =====
 
 # Add these after your existing tests
-
- 
