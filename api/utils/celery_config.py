@@ -9,11 +9,22 @@ celery_app = Celery('api', broker='redis://localhost:6379/0', backend='redis://l
 celery_app.conf.beat_schedule = {
     "clean_db_every_day": {
         "task": "api.utils.celery_config.clean_expired_and_revoked_tokens_from_sessions_table",
-        "schedule": crontab(day_of_week=0, hour=0, minute=0)# run every sunday midnight 
+        "schedule": crontab(hour=0, minute=0) # run everyday at midnight
     }
 }
 
 celery_app.conf.timezone = "UTC"
+
+# Additional configurations
+celery_app.conf.update(
+    task_serializer='json',
+    result_serializer='json',
+    accept_content=['json'],
+    task_acks_late=True,
+    worker_prefetch_multiplier=1,
+    task_time_limit=300,
+    task_soft_time_limit=180,
+)
 
 @celery_app.task
 def clean_expired_and_revoked_tokens_from_sessions_table():
