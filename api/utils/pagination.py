@@ -12,7 +12,8 @@ def paginated_response(
     skip: int,
     limit: int,
     join: Optional[Any] = None,
-    filters: Optional[Dict[str, Any]]=None
+    filters: Optional[Dict[str, Any]]=None,
+    order_by: Optional[Any] = None
 ):
 
     '''
@@ -79,6 +80,9 @@ def paginated_response(
                 query = query.filter(
                     getattr(getattr(join, "columns"),
                             attr).like(f"%{value}%"))
+    
+    if order_by is not None:
+        query = query.order_by(order_by)
 
     total = query.count()
     results = jsonable_encoder(query.offset(skip).limit(limit).all())
