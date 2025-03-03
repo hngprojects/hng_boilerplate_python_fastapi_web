@@ -77,7 +77,7 @@ async def get_question_with_answers(
             detail=f"Question with ID {question_id} not found"
         )
 
-    answers = community_answer_service.fetch_by_column(db=db, column="question_id", value=question_id)
+    answers = community_answer_service.fetch_by_question_id(db=db, question_id=question_id)
     
     question_data = jsonable_encoder(question)
     question_data["answers"] = jsonable_encoder(answers)
@@ -105,7 +105,7 @@ async def get_user_questions(
             detail="You can only view your own questions unless you're an admin"
         )
     
-    questions = community_question_service.fetch_by_column(db=db, column="user_id", value=user_id)
+    questions = community_question_service.fetch_by_user_id(db=db, user_id=user_id)
     
     return success_response(
         status_code=200,
@@ -125,6 +125,12 @@ async def update_question(
     # Fetch the question first to check ownership
     existing_question = community_question_service.fetch_by_id(db=db, question_id=question_id)
     
+    if existing_question is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question with ID {question_id} not found"
+        )
+    
     # Check if user is the owner or an admin
     if existing_question.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -139,8 +145,8 @@ async def update_question(
     
     updated_question = community_question_service.update(
         db=db, 
-        item_id=question_id, 
-        update_data=update_data
+        id=question_id, 
+        data=update_data
     )
     
     return success_response(
@@ -160,6 +166,12 @@ async def mark_question_resolved(
     
     # Fetch the question first to check ownership
     existing_question = community_question_service.fetch_by_id(db=db, question_id=question_id)
+    
+    if existing_question is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question with ID {question_id} not found"
+        )
     
     # Check if user is the owner or an admin
     if existing_question.user_id != current_user.id and not current_user.is_admin:
@@ -191,6 +203,12 @@ async def delete_question(
     # Fetch the question first to check ownership
     existing_question = community_question_service.fetch_by_id(db=db, question_id=question_id)
     
+    if existing_question is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question with ID {question_id} not found"
+        )
+    
     # Check if user is the owner or an admin
     if existing_question.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -198,11 +216,12 @@ async def delete_question(
             detail="You can only delete your own questions"
         )
     
-    result = community_question_service.delete(db=db, item_id=question_id)
+    # Using the delete method from BaseService
+    community_question_service.delete(db=db, id=question_id)
     
     return success_response(
         status_code=200,
-        message=result["detail"]
+        message="Question deleted successfully"
     )
 
 # Router for Answers
@@ -236,7 +255,15 @@ async def get_question_answers(
 ):
     """Get all answers for a specific question"""
     
-    answers = community_answer_service.fetch_by_column(db=db, column="question_id", value=question_id)
+    # First check if question exists
+    question = community_question_service.fetch_by_id(db=db, question_id=question_id)
+    if question is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question with ID {question_id} not found"
+        )
+    
+    answers = community_answer_service.fetch_by_question_id(db=db, question_id=question_id)
     
     return success_response(
         status_code=200,
@@ -259,7 +286,7 @@ async def get_user_answers(
             detail="You can only view your own answers unless you're an admin"
         )
     
-    answers = community_answer_service.fetch_by_column(db=db, column="user_id", value=user_id)
+    answers = community_answer_service.fetch_by_user_id(db=db, user_id=user_id)
     
     return success_response(
         status_code=200,
@@ -279,6 +306,12 @@ async def update_answer(
     # Fetch the answer first to check ownership
     existing_answer = community_answer_service.fetch_by_id(db=db, answer_id=answer_id)
     
+    if existing_answer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Answer with ID {answer_id} not found"
+        )
+    
     # Check if user is the owner or an admin
     if existing_answer.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -292,8 +325,8 @@ async def update_answer(
     
     updated_answer = community_answer_service.update(
         db=db, 
-        item_id=answer_id, 
-        update_data=update_data
+        id=answer_id, 
+        data=update_data
     )
     
     return success_response(
@@ -314,8 +347,20 @@ async def mark_answer_accepted(
     # Fetch the answer
     answer = community_answer_service.fetch_by_id(db=db, answer_id=answer_id)
     
+    if answer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Answer with ID {answer_id} not found"
+        )
+    
     # Fetch the question to check ownership
     question = community_question_service.fetch_by_id(db=db, question_id=answer.question_id)
+    
+    if question is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Question with ID {answer.question_id} not found"
+        )
     
     # Only the question owner or an admin can mark an answer as accepted
     if question.user_id != current_user.id and not current_user.is_admin:
@@ -347,6 +392,12 @@ async def delete_answer(
     # Fetch the answer first to check ownership
     existing_answer = community_answer_service.fetch_by_id(db=db, answer_id=answer_id)
     
+    if existing_answer is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Answer with ID {answer_id} not found"
+        )
+    
     # Check if user is the owner or an admin
     if existing_answer.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -354,9 +405,10 @@ async def delete_answer(
             detail="You can only delete your own answers"
         )
     
-    result = community_answer_service.delete(db=db, item_id=answer_id)
+    # Using the delete method from BaseService
+    community_answer_service.delete(db=db, id=answer_id)
     
     return success_response(
         status_code=200,
-        message=result["detail"]
+        message="Answer deleted successfully"
     )
