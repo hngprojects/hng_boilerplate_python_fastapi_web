@@ -62,8 +62,6 @@ async def get_all_questions(
         data=jsonable_encoder(questions)
     )
 
-from fastapi import HTTPException
-
 @community_questions.get("/{question_id}", response_model=CommunityQuestionWithAnswers)
 async def get_question_with_answers(
     question_id: str,
@@ -79,7 +77,7 @@ async def get_question_with_answers(
             detail=f"Question with ID {question_id} not found"
         )
 
-    answers = community_answer_service.fetch_by_question_id(db=db, question_id=question_id)
+    answers = community_answer_service.fetch_by_column(db=db, column="question_id", value=question_id)
     
     question_data = jsonable_encoder(question)
     question_data["answers"] = jsonable_encoder(answers)
@@ -107,7 +105,7 @@ async def get_user_questions(
             detail="You can only view your own questions unless you're an admin"
         )
     
-    questions = community_question_service.fetch_by_user_id(db=db, user_id=user_id)
+    questions = community_question_service.fetch_by_column(db=db, column="user_id", value=user_id)
     
     return success_response(
         status_code=200,
@@ -139,9 +137,9 @@ async def update_question(
         "message": question_update.message
     }
     
-    updated_question = community_question_service.update_question(
+    updated_question = community_question_service.update(
         db=db, 
-        question_id=question_id, 
+        item_id=question_id, 
         update_data=update_data
     )
     
@@ -200,7 +198,7 @@ async def delete_question(
             detail="You can only delete your own questions"
         )
     
-    result = community_question_service.delete_question(db=db, question_id=question_id)
+    result = community_question_service.delete(db=db, item_id=question_id)
     
     return success_response(
         status_code=200,
@@ -238,7 +236,7 @@ async def get_question_answers(
 ):
     """Get all answers for a specific question"""
     
-    answers = community_answer_service.fetch_by_question_id(db=db, question_id=question_id)
+    answers = community_answer_service.fetch_by_column(db=db, column="question_id", value=question_id)
     
     return success_response(
         status_code=200,
@@ -261,7 +259,7 @@ async def get_user_answers(
             detail="You can only view your own answers unless you're an admin"
         )
     
-    answers = community_answer_service.fetch_by_user_id(db=db, user_id=user_id)
+    answers = community_answer_service.fetch_by_column(db=db, column="user_id", value=user_id)
     
     return success_response(
         status_code=200,
@@ -292,9 +290,9 @@ async def update_answer(
         "message": answer_update.message
     }
     
-    updated_answer = community_answer_service.update_answer(
+    updated_answer = community_answer_service.update(
         db=db, 
-        answer_id=answer_id, 
+        item_id=answer_id, 
         update_data=update_data
     )
     
@@ -356,7 +354,7 @@ async def delete_answer(
             detail="You can only delete your own answers"
         )
     
-    result = community_answer_service.delete_answer(db=db, answer_id=answer_id)
+    result = community_answer_service.delete(db=db, item_id=answer_id)
     
     return success_response(
         status_code=200,
