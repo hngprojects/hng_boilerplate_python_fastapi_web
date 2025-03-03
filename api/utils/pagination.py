@@ -84,7 +84,7 @@ def paginated_response(
     if order_by is not None:
         query = query.order_by(order_by)
 
-    total = query.count()
+    total = int(query.count())
     results = jsonable_encoder(query.offset(skip).limit(limit).all())
     total_pages = int(total / limit) + (total % limit > 0)
 

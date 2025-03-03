@@ -39,7 +39,11 @@ class ProductService(Service):
     #     check_user_in_org(user=current_user, organisation=organisation)
 
     def create(
-        self, db: Session, schema: ProductCreate, org_id: str, current_user: User
+        self,
+        db: Session,
+        schema: ProductCreate,
+        org_id: str,
+        current_user: User,
     ):
         """Create a new product"""
 
@@ -54,7 +58,9 @@ class ProductService(Service):
         category_name = schema.category
         category = (
             db.query(ProductCategory)
-            .filter(func.lower(ProductCategory.name) == func.lower(category_name))
+            .filter(
+                func.lower(ProductCategory.name) == func.lower(category_name)
+            )
             .first()
         )
 
@@ -96,7 +102,12 @@ class ProductService(Service):
         return product
 
     def update(
-        self, db: Session, product_id: str, current_user: User, org_id: str, schema
+        self,
+        db: Session,
+        product_id: str,
+        current_user: User,
+        org_id: str,
+        schema,
     ):
         """Updates a product"""
 
@@ -113,7 +124,9 @@ class ProductService(Service):
         db.refresh(product)
         return product
 
-    def delete(self, db: Session, org_id: str, product_id: str, current_user: User):
+    def delete(
+        self, db: Session, org_id: str, product_id: str, current_user: User
+    ):
         """Deletes a product"""
 
         product: Product = self.fetch_single_by_organisation(
@@ -135,7 +148,8 @@ class ProductService(Service):
             for column, value in query_params.items():
                 if hasattr(Product, column) and value:
                     query = query.filter(
-                        getattr(Product, column).ilike(f"%{value}%"))
+                        getattr(Product, column).ilike(f"%{value}%")
+                    )
 
         return query.all()
 
@@ -179,11 +193,15 @@ class ProductService(Service):
                 .filter(Product.filter_status == filter_status.value)
                 .all()
             )
-            return [ProductFilterResponse.from_orm(product) for product in products]
+            return [
+                ProductFilterResponse.from_orm(product) for product in products
+            ]
         except Exception as e:
             raise
 
-    def fetch_by_status(self, db: Session, org_id: str, status: ProductStatusEnum):
+    def fetch_by_status(
+        self, db: Session, org_id: str, status: ProductStatusEnum
+    ):
         """Fetch products by filter status"""
         try:
             products = (
@@ -204,7 +222,10 @@ class ProductService(Service):
     ) -> dict:
         """Fetches the current stock level for a specific product"""
         product = self.fetch_single_by_organisation(
-            db=db, org_id=org_id, product_id=product_id, current_user=current_user
+            db=db,
+            org_id=org_id,
+            product_id=product_id,
+            current_user=current_user,
         )
 
         total_stock = product.quantity
@@ -216,14 +237,14 @@ class ProductService(Service):
         }
 
     def search_products(
-            db: Session,
-            org_id: str,
-            name: Optional[str] = None,
-            category: Optional[str] = None,
-            min_price: Optional[float] = None,
-            max_price: Optional[float] = None,
-            limit: int = 10,
-            page: int = 1,
+        db: Session,
+        org_id: str,
+        name: Optional[str] = None,
+        category: Optional[str] = None,
+        min_price: Optional[float] = None,
+        max_price: Optional[float] = None,
+        limit: int = 10,
+        page: int = 1,
     ):
 
         query = db.query(Product).filter(Product.org_id == org_id)
@@ -267,10 +288,82 @@ class ProductCategoryService(Service):
         return new_category
 
     @staticmethod
+    def soft_delete(db: Session, category_name: str):
+        """Soft delete a category"""
+
+        category: ProductCategory = (
+            db.query(ProductCategory).filter_by(name=category_name).first()
+        )
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found.",
+            )
+
+        category.is_deleted = True
+        try:
+            db.commit()
+            db.refresh(category)
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Deletion failed due to integrity error.",
+            )
+        return category
+
+    @staticmethod
+    def restore_deleted(db: Session, category_name: str):
+        category = (
+            db.query(ProductCategory).filter_by(name=category_name).first()
+        )
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found",
+            )
+        if not bool(category.is_deleted):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Category is not deleted",
+            )
+
+        category.is_deleted = False  # restore the category
+        try:
+            db.commit()
+            db.refresh(category)
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Restoration failed due to integrity error.",
+            )
+        return category
+
+    @staticmethod
+    def permanent_delete(db: Session, category_name: str):
+        category = (
+            db.query(ProductCategory).filter_by(name=category_name).first()
+        )
+        if not category:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Category not found",
+            )
+
+        try:
+            db.delete(category)
+            db.commit()
+        except sqlalchemy.exc.IntegrityError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Permanent deletion failed due to integrity error.",
+            )
+        return category
+
+    @staticmethod
     def fetch_all(db: Session, **query_params: Optional[Any]):
         """Fetch all newsletter subscriptions with option to search using query parameters"""
 
-        query = db.query(ProductCategory)
+        query = db.query(ProductCategory).filter_by(is_deleted=False)
 
         # Enable filter by query parameter
         if query_params:
