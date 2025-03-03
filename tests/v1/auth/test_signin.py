@@ -34,7 +34,7 @@ class TestUserLogin:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
-        self.user_session = UserSession(
+        self.mock_user_session = UserSession(
             id=str(uuid7()),
             user_id=self.mock_user.id,
             expires_at=datetime.now(timezone.utc) + timedelta(days=1),
@@ -75,7 +75,7 @@ class TestUserLogin:
         monkeypatch.setattr(
             session_service,
             "create",
-            lambda db, schema, user_id: self.user_session
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -109,7 +109,7 @@ class TestUserLogin:
         monkeypatch.setattr(
             session_service,
             "create",
-            lambda db, schema, user_id: self.user_session
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -146,7 +146,7 @@ class TestUserLogin:
         monkeypatch.setattr(
             session_service,
             "create",
-            lambda db, schema, user_id: self.user_session
+            lambda db, schema, user_id: self.mock_user_session
         )
         response = self.client.post(
             "/api/v1/auth/login",
@@ -179,6 +179,11 @@ class TestUserLogin:
             totp_service,
             "check_2fa_status_and_verify",
             lambda db, user_id, schema: mock_check_2fa_status_and_verify()
+        )
+        monkeypatch.setattr(
+            session_service,
+            "create",
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -249,7 +254,7 @@ class TestUserLogin:
         monkeypatch.setattr(
             session_service,
             "create",
-            lambda db, schema, user_id: self.user_session
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -316,7 +321,7 @@ def test_user_login(db_session_mock):
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
-    user_session = UserSession(
+    mock_user_session = UserSession(
         id=str(uuid7()),
         user_id=mock_user.id,
         expires_at=datetime.now(timezone.utc) + timedelta(days=1),
@@ -329,7 +334,9 @@ def test_user_login(db_session_mock):
         updated_at=datetime.now(timezone.utc),
     )
     db_session_mock.query.return_value.filter.return_value.first.return_value = mock_user
-    db_session_mock.query.return_value.filter.return_value.first.return_value = user_session
+
+    # Mock the SessionService.create method
+    session_service.create = MagicMock(return_value=mock_user_session)
 
     # Login with mock user details
     login = client.post("/api/v1/auth/login", json={
