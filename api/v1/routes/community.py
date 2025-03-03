@@ -62,6 +62,8 @@ async def get_all_questions(
         data=jsonable_encoder(questions)
     )
 
+from fastapi import HTTPException
+
 @community_questions.get("/{question_id}", response_model=CommunityQuestionWithAnswers)
 async def get_question_with_answers(
     question_id: str,
@@ -70,9 +72,15 @@ async def get_question_with_answers(
     """Get a specific question with all its answers"""
     
     question = community_question_service.fetch_by_id(db=db, question_id=question_id)
+
+    if question is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Question with ID {question_id} not found"
+        )
+
     answers = community_answer_service.fetch_by_question_id(db=db, question_id=question_id)
     
-    # Create a response with the question and its answers
     question_data = jsonable_encoder(question)
     question_data["answers"] = jsonable_encoder(answers)
     question_data["answer_count"] = len(answers)
@@ -82,6 +90,7 @@ async def get_question_with_answers(
         message="Question and answers retrieved successfully",
         data=question_data
     )
+
 
 @community_questions.get("/user/{user_id}", response_model=List[CommunityQuestionResponse])
 async def get_user_questions(

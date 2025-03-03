@@ -3,7 +3,6 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, Any, List, Dict
 
-from api.v1.models.activity_logs import ActivityLog
 from api.v1.models.community import CommunityQuestion, CommunityAnswer
 
 
