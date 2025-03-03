@@ -44,7 +44,7 @@ def test_update_question(mock_question_service, mock_db_session, mocker):
         )
         
         assert response.status_code == status.HTTP_200_OK
-        assert response.json()["success"] is True
+        assert response.json()["status"] == "success"
         
     finally:
         # Clean up dependency overrides

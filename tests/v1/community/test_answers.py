@@ -103,11 +103,11 @@ def test_create_answer(mock_answer_service, mock_db_session, mock_user_service):
     
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json()["status_code"] == 201
-    assert "success" in response.json() and response.json()["success"] == True
+    assert response.json()["status"] == "success"
     assert "data" in response.json()
     assert response.json()["data"]["message"] == mock_message
     assert response.json()["data"]["question_id"] == mock_question_id
-    # assert response.json()["data"]["user_id"] == mock_user.id
+    
 
 @pytest.mark.usefixtures("mock_db_session", "mock_answer_service")
 def test_get_answers_by_question(mock_answer_service, mock_db_session):
@@ -121,8 +121,7 @@ def test_get_answers_by_question(mock_answer_service, mock_db_session):
     
     response = client.get(GET_ANSWERS_BY_QUESTION_ENDPOINT.format(question_id=question_id))
     assert response.status_code == status.HTTP_200_OK
-    # assert len(response.json()["data"]) == 2
-    assert response.json()["success"] == True
+    assert response.json()["status"] == "success"
 
 @pytest.mark.usefixtures("mock_db_session", "mock_answer_service", "mock_auth_user")
 def test_get_answers_by_user(mock_answer_service, mock_db_session, mock_auth_user):
@@ -137,8 +136,7 @@ def test_get_answers_by_user(mock_answer_service, mock_db_session, mock_auth_use
     response = client.get(GET_ANSWERS_BY_USER_ENDPOINT.format(user_id=user_id))
     
     assert response.status_code == status.HTTP_200_OK
-    # assert len(response.json()["data"]) == 2
-    assert response.json()["success"] == True
+    assert response.json()["status"] == "success"
 
 @pytest.mark.usefixtures("mock_db_session", "mock_answer_service", "mock_auth_user")
 def test_update_answer(mock_answer_service, mock_db_session, mock_user_service):

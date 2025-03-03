@@ -29,7 +29,7 @@ def test_create_question(mock_question_service, mock_db_session,mock_user_servic
     assert response.json() == {
         "status_code": 201,
         "message": "Question created successfully",
-        "success": True,
+        "status": "success",
         "data": {
             "title": mock_question.title,
             "message": mock_question.message,

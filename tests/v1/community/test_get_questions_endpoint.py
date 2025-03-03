@@ -23,7 +23,7 @@ def test_get_all_questions(mock_question_service, mock_db_session):
     response = client.get(GET_ALL_QUESTIONS_ENDPOINT,
                           headers={'Authorization': f'Bearer {access_token}'})
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["success"] == True
+    assert response.json()["status"] == "success"
 
 @pytest.mark.usefixtures("mock_db_session", "mock_question_service",)
 def test_get_question_by_id(mock_question_service, mock_db_session):
@@ -38,7 +38,7 @@ def test_get_question_by_id(mock_question_service, mock_db_session):
     response = client.get(GET_QUESTION_BY_ID_ENDPOINT.format(question_id=mock_question.id))
     
     assert response.status_code == status.HTTP_200_OK
-    assert response.json()["success"] == True
+    assert response.json()["status"] == "success"
 
 @pytest.mark.usefixtures("mock_db_session", "mock_question_service")
 def test_get_questions_by_user(mock_question_service, mock_db_session):
@@ -57,7 +57,7 @@ def test_get_questions_by_user(mock_question_service, mock_db_session):
                           headers={'Authorization': f'Bearer {access_token}'})
     assert response.status_code == status.HTTP_200_OK
     assert mock_questions[0].user_id == mock_questions[1].user_id
-    assert response.json()["success"] == True
+    assert response.json()["status"] == "success"
     app.dependency_overrides.pop(user_service.get_current_user, None)
 
 @pytest.mark.usefixtures("mock_db_session")
