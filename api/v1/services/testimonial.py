@@ -59,23 +59,5 @@ class TestimonialService(Service):
             db.rollback()
             raise e
     
-    def top_rated_testimonials(self, db: Session, page: int = 1, per_page: int = 10):
-        """
-        Fetch testimonials with the highest ratings and paginates the results.
-        """
-        try:
-            offset = (page - 1) * per_page
-    
-            testimonials = (
-                db.query(Testimonial)
-                .order_by(desc(Testimonial.ratings))
-                .offset(offset)
-                .limit(per_page)
-                .all()
-            )
-            return testimonials
-        
-        except SQLAlchemyError as e:
-            return fail_response(status_code=500, message="An error occurred while fetching top-rated testimonials.")
 
 testimonial_service = TestimonialService()
