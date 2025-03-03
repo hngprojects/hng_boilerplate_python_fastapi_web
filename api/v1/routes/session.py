@@ -41,7 +41,7 @@ def get_session(
     session = session_service.fetch(db, current_user.id, session_id)
     return success_response(
         status_code=status.HTTP_200_OK,
-        message="Session retrived successfully",
+        message="Session retrieved successfully",
         data=jsonable_encoder(session, exclude={"refresh_token"})
     )
 
@@ -59,11 +59,31 @@ def delete_session(
         - db: the database session
         - current_user: current authenticated user
     """
-    return session_service.delete(db, current_user.id, session_id)
+    session_service.delete(db, current_user.id, session_id)
+    response_data = {
+        "status": "success",
+        "status_code": 204,
+        "message": "Session deleted successfully",
+        "data": {}
+    }
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
+        content=jsonable_encoder(response_data)
+    )
 
 @session_router.delete('/', status_code=status.HTTP_204_NO_CONTENT)
 def delete_all_sessions(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)
 ):
-    return session_service.delete_all(db, current_user.id)
+    session_service.delete_all(db, current_user.id)
+    response_data = {
+        "status": "success",
+        "status_code": 204,
+        "message": "Sessions deleted successfully",
+        "data": {}
+    }
+    return JSONResponse(
+        status_code=status.HTTP_204_NO_CONTENT,
+        content=jsonable_encoder(response_data)
+    )
