@@ -47,7 +47,7 @@ class SessionService:
         except Exception as e:
             self.db.rollback()
             raise HTTPException(
-                status_code=400, detail="Could not update session"
+                status_code=400, detail="Could not revoke session(s)"
             )
 
     def fetch_by_ip_and_user_agent(self, ip_address: str, user_agent: str):
@@ -89,25 +89,9 @@ class SessionService:
             raise HTTPException(
                 status_code=404, detail="Session not found"
             )
-        try:
-            self.db.delete(session)
-            self.db.commit()
-        except Exception as e:
-            self.db.rollback()
-            raise HTTPException(
-                status_code=500, detail="Could not delete session"
-            )
-        
+        self.revoke_sessions([session])
+
     def delete_all(self, user_id):
-        """Delete all sessions associated to a user"""
+        """Revoke all sessions associated to a user"""
         sessions = self.fetch_all(user_id)
-        try:
-            for session in sessions:
-                self.db.delete(session)
-            self.db.commit()
-        except Exception as e:
-            self.db.rollback()
-            raise HTTPException(
-                status_code=500,
-                detail="Could not delete sessions"
-            )
+        self.revoke_sessions(sessions)
