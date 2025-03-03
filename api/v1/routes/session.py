@@ -8,7 +8,7 @@ from api.v1.models import User
 from api.db.database import get_db
 from api.utils.success_response import success_response
 from api.v1.services.user import user_service
-from api.v1.services.session import SessionService
+from api.v1.services.session import session_service
 
 
 session_router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -25,8 +25,7 @@ def get_all_sessions(
         - db: the database session
         - current_user: current authenticated user
     """
-    session_service = SessionService(db)
-    sessions = session_service.fetch_all(current_user.id) 
+    sessions = session_service.fetch_all(db, current_user.id) 
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Sessions retrieved successfully",
@@ -39,11 +38,7 @@ def get_session(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)
 ):
-    session_service = SessionService(db)
-    session = session_service.fetch(
-        user_id=current_user.id,
-        session_id=session_id
-    )
+    session = session_service.fetch(db, current_user.id, session_id)
     return success_response(
         status_code=status.HTTP_200_OK,
         message="Session retrived successfully",
@@ -64,16 +59,11 @@ def delete_session(
         - db: the database session
         - current_user: current authenticated user
     """
-    session_service = SessionService(db)
-    return session_service.delete(
-        user_id=current_user.id,
-        session_id=session_id
-    )
+    return session_service.delete(db, current_user.id, session_id)
 
 @session_router.delete('/', status_code=status.HTTP_204_NO_CONTENT)
 def delete_all_sessions(
     db: Session = Depends(get_db),
     current_user: User = Depends(user_service.get_current_user)
 ):
-    session_service = SessionService(db)
-    return session_service.delete_all(current_user.id)
+    return session_service.delete_all(db, current_user.id)

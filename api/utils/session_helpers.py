@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from api.db.database import get_db
 from api.v1.schemas.session import SessionCreate
-from api.v1.services.session import SessionService
+from api.v1.services.session import session_service
 from api.utils.client_helpers import get_ip_address
 
 
@@ -51,6 +51,7 @@ async def get_session_schema_data(request: Request, refresh_token: str = "", exp
     )
 
 async def create_session_for_user(
+        db: Session,
         request: Request,
         user_id: str,
         refresh_token: str = "",
@@ -69,6 +70,4 @@ async def create_session_for_user(
         refresh_token=refresh_token,
         expires_at=expires_at,
     )
-    db = next(get_db())
-    session_service = SessionService(db)
-    session_service.create(schema=session_data, user_id=user_id)
+    session_service.create(db, schema=session_data, user_id=user_id)

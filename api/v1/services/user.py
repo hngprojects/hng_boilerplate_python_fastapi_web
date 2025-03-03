@@ -25,7 +25,7 @@ from api.v1.schemas import user
 from api.v1.schemas import token
 from api.v1.services.notification_settings import notification_setting_service
 from api.v1.services.newsletter import NewsletterService, EmailSchema
-from api.v1.services.session import SessionService
+from api.v1.services.session import session_service
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -419,8 +419,7 @@ class UserService(Service):
 
         try:
             db: Session = next(get_db())
-            session_service = SessionService(db)
-            is_revoked = session_service.is_revoked_or_expired(refresh_token)
+            is_revoked = session_service.is_revoked_or_expired(db, refresh_token)
             if is_revoked:
                 raise credentials_exception
             payload = jwt.decode(

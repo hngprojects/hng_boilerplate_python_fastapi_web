@@ -52,7 +52,7 @@ from api.v1.schemas.totp_device import (
 )
 from api.v1.services.totp import totp_service
 from api.utils.settings import settings
-from api.v1.services.session import SessionService
+from api.v1.services.session import session_service
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -99,6 +99,7 @@ def register(
     )
     background_tasks.add_task(
         create_session_for_user,
+        db=db,
         request=request,
         user_id=user.id,
         refresh_token=refresh_token,
@@ -261,6 +262,7 @@ def login(request: Request, login_request: LoginRequest, background_tasks: Backg
     )
     background_tasks.add_task(
         create_session_for_user,
+        db=db,
         request=request,
         user_id=user.id,
         refresh_token=refresh_token,
@@ -308,7 +310,7 @@ def logout(
 
     # logout/delete current user session    
     current_refresh_token = request.cookies.get("refresh_token")
-    SessionService.logout_session(db, current_user.id, current_refresh_token)
+    session_service.logout_session(db, current_user.id, current_refresh_token)
     
 
     response = success_response(status_code=200, message="User logged put successfully")
