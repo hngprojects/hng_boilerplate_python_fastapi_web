@@ -34,7 +34,6 @@ from api.v1.schemas.user import (
     UserData2,
 )
 from api.v1.schemas.token import TokenRequest
-# from api.v1.schemas.session import SessionCreate
 from api.v1.schemas.user import (MagicLinkRequest,
                                  ChangePasswordSchema,
                                  AuthMeResponse)
@@ -53,7 +52,7 @@ from api.v1.schemas.totp_device import (
 )
 from api.v1.services.totp import totp_service
 from api.utils.settings import settings
-# from api.v1.services.session import SessionService
+from api.v1.services.session import SessionService
 
 auth = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -306,6 +305,11 @@ def logout(
     current_user: User = Depends(user_service.get_current_user),
 ):
     """Endpoint to log a user out of their account"""
+
+    # logout/delete current user session    
+    current_refresh_token = request.cookies.get("refresh_token")
+    SessionService.logout_session(db, current_user.id, current_refresh_token)
+    
 
     response = success_response(status_code=200, message="User logged put successfully")
 

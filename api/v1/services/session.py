@@ -13,6 +13,16 @@ class SessionService:
         """Initialize the service."""
         self.db = db
 
+    @staticmethod
+    def logout_session(db: Session, user_id: str, refresh_token: str):
+        """Logout a session."""
+        session = db.query(UserSession).filter(
+            UserSession.refresh_token == refresh_token, UserSession.user_id == user_id).first()
+        if not session:
+            return
+        db.delete(session)
+        db.commit()
+
     def is_revoked_or_expired(self, refresh_token: str):
         """Check if a session (refresh token) is revoked."""
         session = self.db.query(UserSession).filter(UserSession.refresh_token == refresh_token).first()
