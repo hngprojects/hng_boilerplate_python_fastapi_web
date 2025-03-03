@@ -62,6 +62,8 @@ async def get_all_questions(
         data=jsonable_encoder(questions)
     )
 
+from fastapi import HTTPException
+
 @community_questions.get("/{question_id}", response_model=CommunityQuestionWithAnswers)
 async def get_question_with_answers(
     question_id: str,
@@ -125,12 +127,6 @@ async def update_question(
     # Fetch the question first to check ownership
     existing_question = community_question_service.fetch_by_id(db=db, question_id=question_id)
     
-    if existing_question is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with ID {question_id} not found"
-        )
-    
     # Check if user is the owner or an admin
     if existing_question.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -143,10 +139,10 @@ async def update_question(
         "message": question_update.message
     }
     
-    updated_question = community_question_service.update(
+    updated_question = community_question_service.update_question(
         db=db, 
-        id=question_id, 
-        data=update_data
+        question_id=question_id, 
+        update_data=update_data
     )
     
     return success_response(
@@ -166,12 +162,6 @@ async def mark_question_resolved(
     
     # Fetch the question first to check ownership
     existing_question = community_question_service.fetch_by_id(db=db, question_id=question_id)
-    
-    if existing_question is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with ID {question_id} not found"
-        )
     
     # Check if user is the owner or an admin
     if existing_question.user_id != current_user.id and not current_user.is_admin:
@@ -203,12 +193,6 @@ async def delete_question(
     # Fetch the question first to check ownership
     existing_question = community_question_service.fetch_by_id(db=db, question_id=question_id)
     
-    if existing_question is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with ID {question_id} not found"
-        )
-    
     # Check if user is the owner or an admin
     if existing_question.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -216,12 +200,11 @@ async def delete_question(
             detail="You can only delete your own questions"
         )
     
-    # Using the delete method from BaseService
-    community_question_service.delete(db=db, id=question_id)
+    result = community_question_service.delete_question(db=db, question_id=question_id)
     
     return success_response(
         status_code=200,
-        message="Question deleted successfully"
+        message=result["detail"]
     )
 
 # Router for Answers
@@ -254,14 +237,6 @@ async def get_question_answers(
     db: Session = Depends(get_db)
 ):
     """Get all answers for a specific question"""
-    
-    # First check if question exists
-    question = community_question_service.fetch_by_id(db=db, question_id=question_id)
-    if question is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with ID {question_id} not found"
-        )
     
     answers = community_answer_service.fetch_by_question_id(db=db, question_id=question_id)
     
@@ -306,12 +281,6 @@ async def update_answer(
     # Fetch the answer first to check ownership
     existing_answer = community_answer_service.fetch_by_id(db=db, answer_id=answer_id)
     
-    if existing_answer is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Answer with ID {answer_id} not found"
-        )
-    
     # Check if user is the owner or an admin
     if existing_answer.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -323,10 +292,10 @@ async def update_answer(
         "message": answer_update.message
     }
     
-    updated_answer = community_answer_service.update(
+    updated_answer = community_answer_service.update_answer(
         db=db, 
-        id=answer_id, 
-        data=update_data
+        answer_id=answer_id, 
+        update_data=update_data
     )
     
     return success_response(
@@ -347,20 +316,8 @@ async def mark_answer_accepted(
     # Fetch the answer
     answer = community_answer_service.fetch_by_id(db=db, answer_id=answer_id)
     
-    if answer is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Answer with ID {answer_id} not found"
-        )
-    
     # Fetch the question to check ownership
     question = community_question_service.fetch_by_id(db=db, question_id=answer.question_id)
-    
-    if question is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Question with ID {answer.question_id} not found"
-        )
     
     # Only the question owner or an admin can mark an answer as accepted
     if question.user_id != current_user.id and not current_user.is_admin:
@@ -392,12 +349,6 @@ async def delete_answer(
     # Fetch the answer first to check ownership
     existing_answer = community_answer_service.fetch_by_id(db=db, answer_id=answer_id)
     
-    if existing_answer is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Answer with ID {answer_id} not found"
-        )
-    
     # Check if user is the owner or an admin
     if existing_answer.user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
@@ -405,10 +356,9 @@ async def delete_answer(
             detail="You can only delete your own answers"
         )
     
-    # Using the delete method from BaseService
-    community_answer_service.delete(db=db, id=answer_id)
+    result = community_answer_service.delete_answer(db=db, answer_id=answer_id)
     
     return success_response(
         status_code=200,
-        message="Answer deleted successfully"
+        message=result["detail"]
     )
