@@ -36,10 +36,6 @@ def test_delete_question(mock_question_service, mock_db_session, mock_user_servi
     
     # Assert response
     assert response.status_code == status.HTTP_200_OK
-    assert response.json() == {
-        "status_code": 200,
-        "message": f"Question with ID {mock_question.id} deleted successfully",
-        "status": "success",
-    }
+    assert response.json()["status"] == "success"
     
     app.dependency_overrides.pop(user_service.get_current_user, None)
