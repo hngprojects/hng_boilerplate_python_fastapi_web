@@ -4,11 +4,13 @@ from unittest.mock import patch, MagicMock
 from main import app
 from api.v1.models.user import User
 from api.v1.models.profile import Profile
+from api.v1.models.session import UserSession
 from api.v1.services.user import user_service
+from api.v1.services.session import session_service
 from uuid_extensions import uuid7
 from api.db.database import get_db
 from fastapi import status
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 
 client = TestClient(app)
@@ -73,7 +75,21 @@ def create_mock_user_profile(mock_user_service, mock_db_session):
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_errors(mock_user_service, mock_db_session):
     """Test for errors in profile creation"""
-    create_mock_user(mock_user_service, mock_db_session)
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    mock_user_session = UserSession(
+        id=str(uuid7()),
+        user_id=mock_user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+        ip_address="192.168.1.1",  # Mock IP address
+        location="Lagos, Nigeria",  # Mock location
+        device="test-client",  # Mock device
+        refresh_token=user_service.create_refresh_token(mock_user.id),
+        is_revoked=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    session_service.create = MagicMock(return_value=mock_user_session)
+
     login = client.post(LOGIN_ENDPOINT, json={
         "email": "testuser@gmail.com",
         "password": "Testpassword@123"
@@ -97,7 +113,20 @@ def test_errors(mock_user_service, mock_db_session):
 
 @pytest.mark.usefixtures("mock_db_session", "mock_user_service")
 def test_user_profile_upload(mock_user_service, mock_db_session):
-    create_mock_user(mock_user_service, mock_db_session)
+    mock_user = create_mock_user(mock_user_service, mock_db_session)
+    mock_user_session = UserSession(
+        id=str(uuid7()),
+        user_id=mock_user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+        ip_address="192.168.1.1",  # Mock IP address
+        location="Lagos, Nigeria",  # Mock location
+        device="test-client",  # Mock device
+        refresh_token=user_service.create_refresh_token(mock_user.id),
+        is_revoked=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
+    session_service.create = MagicMock(return_value=mock_user_session)    
     login = client.post(LOGIN_ENDPOINT, json={
         "email": "testuser@gmail.com",
         "password": "Testpassword@123"

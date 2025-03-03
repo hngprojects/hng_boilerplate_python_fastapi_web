@@ -34,6 +34,7 @@ class User(BaseTableModel):
     profile = relationship(
         "Profile", uselist=False, back_populates="user", cascade="all, delete-orphan"
     )
+    
     organisations = relationship(
         "Organisation", secondary=user_organisation_roles, back_populates="users"
     )
@@ -117,6 +118,9 @@ class User(BaseTableModel):
         "Bookmark", back_populates="user", cascade="delete"
     )
     
+    sessions = relationship(
+        "UserSession", back_populates="user", cascade="all, delete-orphan"
+    )
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")

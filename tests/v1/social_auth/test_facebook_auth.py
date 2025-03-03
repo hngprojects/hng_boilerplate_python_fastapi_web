@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from tests.database import session, client
+from tests.database import client
 from api.v1.models import *
 from api.db.database import get_db
 from main import app
@@ -9,6 +9,11 @@ from main import app
 VALID_ACCESS_TOKEN = "valid_token"
 INVALID_ACCESS_TOKEN = "invalid_token"
 
+
+@pytest.fixture()
+def session():
+    from tests.database import session as test_session
+    return test_session
 
 class MockResponse:
     """This class will be used to mock the response of the Facebook API."""
@@ -19,7 +24,6 @@ class MockResponse:
 
     def json(self):
         return self.content
-
 
 class MockTestClient(TestClient):
     """This class will be used to mock the client of the Facebook API."""

@@ -25,6 +25,8 @@ from api.v1.schemas import user
 from api.v1.schemas import token
 from api.v1.services.notification_settings import notification_setting_service
 from api.v1.services.newsletter import NewsletterService, EmailSchema
+from api.v1.services.session import session_service
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -413,9 +415,13 @@ class UserService(Service):
         return token_data
 
     def verify_refresh_token(self, refresh_token: str, credentials_exception):
-        """Funtcion to decode and verify refresh token"""
+        """Function to decode and verify refresh token"""
 
         try:
+            db: Session = next(get_db())
+            is_revoked = session_service.is_revoked_or_expired(db, refresh_token)
+            if is_revoked:
+                raise credentials_exception
             payload = jwt.decode(
                 refresh_token,
                 settings.SECRET_KEY,

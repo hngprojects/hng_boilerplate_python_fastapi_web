@@ -33,4 +33,4 @@ from api.v1.models.faq_inquiries import FAQInquiries
 from api.v1.models.wishlist import Wishlist
 from api.v1.models.totp_device import TOTPDevice
 from api.v1.models.bookmark import Bookmark
-
+from api.v1.models.session import UserSession

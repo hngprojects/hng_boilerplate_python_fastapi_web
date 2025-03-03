@@ -1,9 +1,12 @@
 import pytest
+from datetime import timedelta
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock
 from main import app
 from api.v1.models.user import User
+from api.v1.models.session import UserSession
 from api.v1.services.user import user_service
+from api.v1.services.session import session_service
 from api.v1.services.totp import totp_service
 from uuid_extensions import uuid7
 from api.db.database import get_db
@@ -31,6 +34,19 @@ class TestUserLogin:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
+        self.mock_user_session = UserSession(
+            id=str(uuid7()),
+            user_id=self.mock_user.id,
+            expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+            ip_address="192.168.1.1",  # Mock IP address
+            location="Lagos, Nigeria",  # Mock location
+            device="test-client",  # Mock device
+            refresh_token=user_service.create_refresh_token(self.mock_user.id),
+            is_revoked=False,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc),
+        )
+
         self.mock_totp_device = TOTPDevice(
             user_id=self.mock_user.id,
             secret=pyotp.random_base32(),
@@ -54,6 +70,12 @@ class TestUserLogin:
         monkeypatch.setattr(
             "api.v1.services.organisation.organisation_service.retrieve_user_organizations",
             lambda user, db: []
+        )
+
+        monkeypatch.setattr(
+            session_service,
+            "create",
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -83,6 +105,11 @@ class TestUserLogin:
         monkeypatch.setattr(
             "api.v1.services.organisation.organisation_service.retrieve_user_organizations",
             lambda user, db: []
+        )
+        monkeypatch.setattr(
+            session_service,
+            "create",
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -116,6 +143,11 @@ class TestUserLogin:
             "api.v1.services.organisation.organisation_service.retrieve_user_organizations",
             lambda user, db: []
         )
+        monkeypatch.setattr(
+            session_service,
+            "create",
+            lambda db, schema, user_id: self.mock_user_session
+        )
         response = self.client.post(
             "/api/v1/auth/login",
             json={"email": "testuser1@gmail.com", "password": "Testpassword@123"},
@@ -147,6 +179,11 @@ class TestUserLogin:
             totp_service,
             "check_2fa_status_and_verify",
             lambda db, user_id, schema: mock_check_2fa_status_and_verify()
+        )
+        monkeypatch.setattr(
+            session_service,
+            "create",
+            lambda db, schema, user_id: self.mock_user_session
         )
 
         response = self.client.post(
@@ -214,6 +251,11 @@ class TestUserLogin:
             "api.v1.services.organisation.organisation_service.retrieve_user_organizations",
             lambda user, db: []
         )
+        monkeypatch.setattr(
+            session_service,
+            "create",
+            lambda db, schema, user_id: self.mock_user_session
+        )
 
         response = self.client.post(
             "/api/v1/auth/login",
@@ -279,7 +321,22 @@ def test_user_login(db_session_mock):
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
     )
+    mock_user_session = UserSession(
+        id=str(uuid7()),
+        user_id=mock_user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=1),
+        ip_address="192.168.1.1",  # Mock IP address
+        location="Lagos, Nigeria",  # Mock location
+        device="test-client",  # Mock device
+        refresh_token=user_service.create_refresh_token(mock_user.id),
+        is_revoked=False,
+        created_at=datetime.now(timezone.utc),
+        updated_at=datetime.now(timezone.utc),
+    )
     db_session_mock.query.return_value.filter.return_value.first.return_value = mock_user
+
+    # Mock the SessionService.create method
+    session_service.create = MagicMock(return_value=mock_user_session)
 
     # Login with mock user details
     login = client.post("/api/v1/auth/login", json={
