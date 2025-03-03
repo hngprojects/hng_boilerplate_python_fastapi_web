@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from api.utils.community_base_service import BaseService
 from api.v1.models.community import CommunityQuestion, CommunityAnswer
+from typing import Any
 class CommunityQuestionService(BaseService):
     """Community Question service."""
     model = CommunityQuestion
