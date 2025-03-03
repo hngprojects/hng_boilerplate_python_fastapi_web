@@ -5,9 +5,10 @@ Module contains CRUD routes for testimonial
 from fastapi.encoders import jsonable_encoder
 from api.db.database import get_db
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
 from api.v1.models.user import User
 from fastapi import Depends, APIRouter, status,Query
-from api.utils.success_response import success_response
+from api.utils.success_response import success_response, fail_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
 from api.v1.schemas.testimonial import CreateTestimonial
@@ -39,6 +40,25 @@ def get_testimonials(
         skip=max(page,0),
     )
 
+@testimonial.get("/top-rated", status_code=200)
+def get_top_rated_testimonials(
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(10, ge=1, description="Number of testimonials per page"),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to fetch top-rated testimonials"""
+    try:
+        return paginated_response(
+            db=db,
+            model=Testimonial,
+            skip=(page - 1) * per_page,
+            limit=per_page,
+            filters={},
+            order_by=desc(Testimonial.ratings)
+        )
+
+    except Exception as e:
+        return fail_response(status_code=500, message="An error occurred.", data={"error": str(e)})
 
 @testimonial.get("/{testimonial_id}", status_code=status.HTTP_200_OK)
 def get_testimonial(

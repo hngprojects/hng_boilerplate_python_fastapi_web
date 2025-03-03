@@ -1,9 +1,13 @@
 from sqlalchemy.orm import Session
 from api.core.base.services import Service
 from api.utils.db_validators import check_model_existence
+from api.utils.success_response import fail_response
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
 from api.v1.schemas.testimonial import CreateTestimonial
+from fastapi import HTTPException, status
+from sqlalchemy import desc
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class TestimonialService(Service):
@@ -54,6 +58,6 @@ class TestimonialService(Service):
         except Exception as e:
             db.rollback()
             raise e
-
+    
 
 testimonial_service = TestimonialService()
