@@ -8,7 +8,11 @@ from typing import List, Optional
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
-from api.v1.models.product import Product, ProductFilterStatusEnum, ProductStatusEnum
+from api.v1.models.product import (
+    Product,
+    ProductFilterStatusEnum,
+    ProductStatusEnum,
+)
 from api.v1.services.product import product_service, ProductCategoryService
 from api.v1.schemas.product import (
     ProductCategoryCreate,
@@ -30,13 +34,19 @@ from api.v1.models import User
 non_organisation_product = APIRouter(prefix="/products", tags=["Products"])
 
 
-@non_organisation_product.get("", response_model=success_response, status_code=200)
+@non_organisation_product.get(
+    "", response_model=success_response, status_code=200
+)
 async def get_all_products(
-    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
-    limit: Annotated[int, Query(
-        ge=1, description="Number of products per page")] = 10,
-    skip: Annotated[int, Query(
-        ge=1, description="Page number (starts from 1)")] = 0,
+    current_user: Annotated[
+        User, Depends(user_service.get_current_super_admin)
+    ],
+    limit: Annotated[
+        int, Query(ge=1, description="Number of products per page")
+    ] = 10,
+    skip: Annotated[
+        int, Query(ge=1, description="Page number (starts from 1)")
+    ] = 0,
     db: Session = Depends(get_db),
 ):
     """Endpoint to get all products. Only accessible to superadmin"""
@@ -45,7 +55,9 @@ async def get_all_products(
 
 
 # categories
-@non_organisation_product.post("/categories", status_code=status.HTTP_201_CREATED)
+@non_organisation_product.post(
+    "/categories", status_code=status.HTTP_201_CREATED
+)
 def create_product_category(
     category_schema: ProductCategoryCreate,
     current_user: User = Depends(user_service.get_current_user),
@@ -65,7 +77,8 @@ def create_product_category(
     """
 
     new_category = ProductCategoryService.create(
-        db, category_schema, current_user)
+        db, category_schema, current_user
+    )
 
     return success_response(
         status_code=status.HTTP_201_CREATED,
@@ -101,8 +114,87 @@ def retrieve_categories(
     )
 
 
+@non_organisation_product.delete(
+    "/categories/{category_name}", status_code=status.HTTP_204_NO_CONTENT
+)
+def soft_delete_product_category(
+    category_name: str,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Endpoint to soft delete a product category using its unique name.
+
+    This endpoint checks if the current user is an admin.
+    If so, it marks the category as deleted (soft delete)
+    rather than permanently removing it.
+
+    Args:
+        category_name (str): The unique name of the product category to delete.
+        current_user (User): The currently authenticated user.
+        db (Session): The database session.
+
+    Returns:
+        A success response with the soft-deleted product category data.
+    """
+    user_service.require_admin(current_user)
+    ProductCategoryService.soft_delete(db, category_name)
+    return success_response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        message="Category deleted successfully",
+    )
+
+
+@non_organisation_product.patch(
+    "/categories/{category_name}/restore", status_code=status.HTTP_200_OK
+)
+def restore_deleted_category(
+    category_name: str,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Endpoint to restore a soft-deleted product category using its name.
+
+    Checks if the current user is an admin and, if so, restores the
+    category (sets is_deleted to False).
+    """
+    user_service.require_admin(current_user)
+    restored_category = ProductCategoryService.restore_deleted(
+        db, category_name
+    )
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Category restored successfully",
+        data=jsonable_encoder(restored_category),
+    )
+
+
+@non_organisation_product.delete(
+    "/categories/{category_name}/permanent",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def permanent_delete_product_category(
+    category_name: str,
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Endpoint to permanently delete a product category using its unique name.
+
+    This endpoint checks if the current user is an admin. If so, it permanently
+    removes the category from the database.
+    """
+    user_service.require_admin(current_user)
+    ProductCategoryService.permanent_delete(db, category_name)
+    return success_response(
+        status_code=status.HTTP_204_NO_CONTENT,
+        message="Category permanently deleted successfully",
+    )
+
+
 product = APIRouter(
-    prefix="/organisations/{org_id}/products", tags=["Products"])
+    prefix="/organisations/{org_id}/products", tags=["Products"]
+)
 
 
 # create
@@ -253,10 +345,12 @@ def delete_product(
 def get_organisation_products(
     org_id: str,
     current_user: Annotated[User, Depends(user_service.get_current_user)],
-    limit: Annotated[int, Query(
-        ge=1, description="Number of products per page")] = 10,
-    page: Annotated[int, Query(
-        ge=1, description="Page number (starts from 1)")] = 1,
+    limit: Annotated[
+        int, Query(ge=1, description="Number of products per page")
+    ] = 10,
+    page: Annotated[
+        int, Query(ge=1, description="Page number (starts from 1)")
+    ] = 1,
     db: Session = Depends(get_db),
 ):
     """
@@ -329,11 +423,14 @@ async def get_products_by_filter_status(
             db=db, org_id=org_id, filter_status=filter_status
         )
         return SuccessResponse(
-            message="Products retrieved successfully", status_code=200, data=products
+            message="Products retrieved successfully",
+            status_code=200,
+            data=products,
         )
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail="Failed to retrieve products")
+            status_code=500, detail="Failed to retrieve products"
+        )
 
 
 @product.get(
@@ -350,30 +447,41 @@ async def get_products_by_status(
     """Endpoint to get products by status"""
     try:
         products = product_service.fetch_by_status(
-            db=db, org_id=org_id, status=status)
+            db=db, org_id=org_id, status=status
+        )
         return SuccessResponse(
-            message="Products retrieved successfully", status_code=200, data=products
+            message="Products retrieved successfully",
+            status_code=200,
+            data=products,
         )
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail="Failed to retrieve products")
+            status_code=500, detail="Failed to retrieve products"
+        )
 
 
-@product.get("/search", status_code=status.HTTP_200_OK, response_model=ProductList)
+@product.get(
+    "/search", status_code=status.HTTP_200_OK, response_model=ProductList
+)
 def search_products(
     org_id: str,
     name: Optional[str] = Query(None, description="Search by product name"),
     category: Optional[str] = Query(None, description="Filter by category"),
     min_price: Optional[float] = Query(
-        None, description="Filter by minimum price"),
+        None, description="Filter by minimum price"
+    ),
     max_price: Optional[float] = Query(
-        None, description="Filter by maximum price"),
-    limit: Annotated[int, Query(
-        ge=1, description="Number of products per page")] = 10,
-    page: Annotated[int, Query(
-        ge=1, description="Page number (starts from 1)")] = 1,
-    current_user: Annotated[User, Depends(
-        user_service.get_current_user)] = None,
+        None, description="Filter by maximum price"
+    ),
+    limit: Annotated[
+        int, Query(ge=1, description="Number of products per page")
+    ] = 10,
+    page: Annotated[
+        int, Query(ge=1, description="Page number (starts from 1)")
+    ] = 1,
+    current_user: Annotated[
+        User, Depends(user_service.get_current_user)
+    ] = None,
     db: Session = Depends(get_db),
 ):
     """
