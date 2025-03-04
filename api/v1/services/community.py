@@ -54,7 +54,7 @@ class CommunityQuestionService(BaseService):
         """Delete a question by its ID"""
         return super().delete(db, question_id)
 
-class CommunityAnswerService:
+class CommunityAnswerService(BaseService):
     """Community Answer service"""
     def __init__(self,model):
         super().__init__(model)
