@@ -8,8 +8,8 @@ from api.v1.models.community import CommunityQuestion, CommunityAnswer
 
 class CommunityQuestionService(BaseService):
     """Community Question service"""
-    def __init__(self) -> Any:
-        super().__init__(CommunityQuestion)
+    def __init__(self,model) -> Any:
+        super().__init__(model)
 
     def create_question(self, db: Session, title: str, message: str, user_id: str):
         """Creates a new community question"""
@@ -56,9 +56,8 @@ class CommunityQuestionService(BaseService):
 
 class CommunityAnswerService:
     """Community Answer service"""
-    def __init__(self) -> None:
-        self.model = CommunityAnswer
-        super().__init__(CommunityAnswer)
+    def __init__(self,model):
+        super().__init__(model)
 
     def create_answer(self, db: Session, message: str, user_id: str, question_id: str):
         """Creates a new answer to a community question"""
@@ -139,5 +138,5 @@ class CommunityAnswerService:
         return super().delete(db, answer_id)
 
 # Create service instances
-community_question_service = CommunityQuestionService()
-community_answer_service = CommunityAnswerService()
+community_question_service = CommunityQuestionService(CommunityQuestion)
+community_answer_service = CommunityAnswerService(CommunityAnswer)
