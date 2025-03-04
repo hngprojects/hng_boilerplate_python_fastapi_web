@@ -5,8 +5,8 @@ from typing import Optional, Any, Dict, Type, List
 
 class BaseService:
     """Base service class to handle common CRUD operations."""
-
-    model: Type[Any] = None
+    def __init__(self,model: Type[Any]) -> None:
+        self.model = model
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]) -> List[Any]:
         """Fetch all records with optional filtering."""

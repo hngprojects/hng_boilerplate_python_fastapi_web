@@ -2,12 +2,14 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Optional, Any, List, Dict
-
+from api.utils.community_base_service import BaseService
 from api.v1.models.community import CommunityQuestion, CommunityAnswer
 
 
-class CommunityQuestionService:
+class CommunityQuestionService(BaseService):
     """Community Question service"""
+    def __init__(self) -> Any:
+        super().__init__(CommunityQuestion)
 
     def create_question(self, db: Session, title: str, message: str, user_id: str):
         """Creates a new community question"""
@@ -30,29 +32,11 @@ class CommunityQuestionService:
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all questions with option to search using query parameters"""
-        query = db.query(CommunityQuestion)
-
-        # Enable filter by query parameter
-        if query_params:
-            for column, value in query_params.items():
-                if hasattr(CommunityQuestion, column) and value:
-                    query = query.filter(
-                        getattr(CommunityQuestion, column).ilike(f"%{value}%")
-                    )
-        
-        return query.all()
+        return super().fetch_all(db, **query_params)
     
     def fetch_by_id(self, db: Session, question_id: str):
         """Fetch a question by its ID"""
-        question = db.query(CommunityQuestion).filter(CommunityQuestion.id == question_id).first()
-        
-        if not question:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Question with ID {question_id} not found"
-            )
-            
-        return question
+        return super().fetch_by_id(db, question_id)
     
     def fetch_by_user_id(self, db: Session, user_id: str):
         """Fetch all questions by a specific user"""
@@ -60,22 +44,7 @@ class CommunityQuestionService:
     
     def update_question(self, db: Session, question_id: str, update_data: Dict[str, Any]):
         """Update a question with the provided data"""
-        question = self.fetch_by_id(db, question_id)
-        
-        try:
-            for key, value in update_data.items():
-                if hasattr(question, key):
-                    setattr(question, key, value)
-            
-            db.commit()
-            db.refresh(question)
-            return question
-        except SQLAlchemyError as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to update question: {str(e)}"
-            )
+        return super().update(db, question_id, update_data)
     
     def mark_as_resolved(self, db: Session, question_id: str, is_resolved: bool = True):
         """Mark a question as resolved or unresolved"""
@@ -83,22 +52,13 @@ class CommunityQuestionService:
     
     def delete_question(self, db: Session, question_id: str):
         """Delete a question by its ID"""
-        question = self.fetch_by_id(db, question_id)
-        
-        try:
-            db.delete(question)
-            db.commit()
-            return {"status": "success", "detail": f"Question with ID {question_id} deleted successfully"}
-        except SQLAlchemyError as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to delete question: {str(e)}"
-            )
-
+        return super().delete(db, question_id)
 
 class CommunityAnswerService:
     """Community Answer service"""
+    def __init__(self) -> None:
+        self.model = CommunityAnswer
+        super().__init__(CommunityAnswer)
 
     def create_answer(self, db: Session, message: str, user_id: str, question_id: str):
         """Creates a new answer to a community question"""
@@ -129,29 +89,11 @@ class CommunityAnswerService:
 
     def fetch_all(self, db: Session, **query_params: Optional[Any]):
         """Fetch all answers with option to search using query parameters"""
-        query = db.query(CommunityAnswer)
-
-        # Enable filter by query parameter
-        if query_params:
-            for column, value in query_params.items():
-                if hasattr(CommunityAnswer, column) and value:
-                    query = query.filter(
-                        getattr(CommunityAnswer, column).ilike(f"%{value}%")
-                    )
-        
-        return query.all()
+        return super().fetch_all(db, **query_params)
     
     def fetch_by_id(self, db: Session, answer_id: str):
         """Fetch an answer by its ID"""
-        answer = db.query(CommunityAnswer).filter(CommunityAnswer.id == answer_id).first()
-        
-        if not answer:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Answer with ID {answer_id} not found"
-            )
-            
-        return answer
+        return super().fetch_by_id(db, answer_id)
     
     def fetch_by_question_id(self, db: Session, question_id: str):
         """Fetch all answers for a specific question"""
@@ -163,23 +105,7 @@ class CommunityAnswerService:
     
     def update_answer(self, db: Session, answer_id: str, update_data: Dict[str, Any]):
         """Update an answer with the provided data"""
-        answer = self.fetch_by_id(db, answer_id)
-        
-        try:
-            for key, value in update_data.items():
-                if hasattr(answer, key):
-                    setattr(answer, key, value)
-            
-            db.commit()
-            db.refresh(answer)
-            return answer
-        except SQLAlchemyError as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to update answer: {str(e)}"
-            )
-    
+        return super().update(db, answer_id, update_data)
     def mark_as_accepted(self, db: Session, answer_id: str, is_accepted: bool = True):
         """Mark an answer as accepted or not accepted"""
         answer = self.fetch_by_id(db, answer_id)
@@ -210,19 +136,7 @@ class CommunityAnswerService:
     
     def delete_answer(self, db: Session, answer_id: str):
         """Delete an answer by its ID"""
-        answer = self.fetch_by_id(db, answer_id)
-        
-        try:
-            db.delete(answer)
-            db.commit()
-            return {"status": "success", "detail": f"Answer with ID {answer_id} deleted successfully"}
-        except SQLAlchemyError as e:
-            db.rollback()
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Failed to delete answer: {str(e)}"
-            )
-
+        return super().delete(db, answer_id)
 
 # Create service instances
 community_question_service = CommunityQuestionService()
