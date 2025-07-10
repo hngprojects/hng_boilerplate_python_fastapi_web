@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 from api.db.database import Base
 
 from api.utils.success_response import success_response
@@ -12,6 +12,7 @@ def paginated_response(
     skip: int,
     limit: int,
     join: Optional[Any] = None,
+    query: Optional[Query] = None,
     filters: Optional[Dict[str, Any]]=None
 ):
 
@@ -24,6 +25,7 @@ def paginated_response(
         * skip- this is the number of items to skip before fetching the next page of data. This would also
         be a query parameter
         * join- this is an optional argument to join a table to the query
+        * query- this is an optional custom query to use instead of querying all items from the model.
         * filters- this is an optional dictionary of filters to apply to the query
 
     Example use:
@@ -61,7 +63,8 @@ def paginated_response(
         ```
     '''
 
-    query = db.query(model)
+    if query is None:
+        query = db.query(model)
 
     if join is not None:
         query = query.join(join)
@@ -82,7 +85,8 @@ def paginated_response(
 
     total = int(query.count())
     results = jsonable_encoder(query.offset(skip).limit(limit).all())
-    total_pages = int(total / limit) + (total % limit > 0)
+    # total_pages = int(total / limit) + (total % limit > 0)
+    total_pages = (total + limit - 1) // limit
 
     return success_response(
         status_code=200,

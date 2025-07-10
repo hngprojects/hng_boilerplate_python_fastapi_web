@@ -8,11 +8,7 @@ from typing import List, Optional
 from api.utils.pagination import paginated_response
 from api.utils.success_response import success_response
 from api.db.database import get_db
-from api.v1.models.product import (
-    Product,
-    ProductFilterStatusEnum,
-    ProductStatusEnum,
-)
+from api.v1.models.product import Product, ProductCategory, ProductFilterStatusEnum, ProductStatusEnum
 from api.v1.services.product import product_service, ProductCategoryService
 from api.v1.schemas.product import (
     ProductCategoryCreate,
@@ -38,20 +34,30 @@ non_organisation_product = APIRouter(prefix="/products", tags=["Products"])
     "", response_model=success_response, status_code=200
 )
 async def get_all_products(
-    current_user: Annotated[
-        User, Depends(user_service.get_current_super_admin)
-    ],
-    limit: Annotated[
-        int, Query(ge=1, description="Number of products per page")
-    ] = 10,
-    skip: Annotated[
-        int, Query(ge=1, description="Page number (starts from 1)")
-    ] = 0,
+    current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
+    limit: Annotated[int, Query(
+        ge=1, description="Number of products per page")] = 10,
+    skip: Annotated[int, Query(
+        ge=1, description="Page number (starts from 1)")] = 1,
+    category: Annotated[Optional[str], Query(
+        description="Filter products by category name")] = None,
     db: Session = Depends(get_db),
 ):
-    """Endpoint to get all products. Only accessible to superadmin"""
+    """
+    Endpoint to get all products. Only accessible to superadmin.
+    Optionally filter products by category.
+    """
+    # Base query
+    query = db.query(Product)
 
-    return paginated_response(db=db, model=Product, limit=limit, skip=skip)
+    # Apply category filter if provided
+    if category:
+        query = query.join(Product.category).filter(ProductCategory.name.ilike(f"%{category}%"))
+
+    # Calculate the number of items to skip based on the page number
+    items_to_skip = (skip - 1) * limit
+
+    return paginated_response(db=db, model=Product, limit=limit, skip=items_to_skip, query=query)
 
 
 # categories

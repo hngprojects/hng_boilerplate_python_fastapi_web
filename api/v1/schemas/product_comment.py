@@ -1,10 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
 
 class ProductCommentBase(BaseModel):
-    content: str = Field(..., example="This is a comment")
+    content: str = Field(..., json_schema_extra={"example": "This is a comment"})
     author: str
 
 
@@ -21,8 +21,7 @@ class ProductCommentInDB(ProductCommentBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProductCommentResponse(BaseModel):

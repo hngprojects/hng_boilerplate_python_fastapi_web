@@ -78,7 +78,7 @@ def test_create_exisiting_plans(mock_user_service, mock_db_session):
         "currency": "Naira",
         "features": ["Multiple team", "Premium support"],
     }
-
+    print(data)
     response = client.post(
         "/api/v1/organisations/billing-plans",
         headers={"Authorization": f"Bearer {access_token}"},
