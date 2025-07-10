@@ -46,8 +46,9 @@ from api.v1.routes.privacy import privacies
 from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
 from api.v1.routes.stripe import subscription_
+from api.v1.routes.community import community_questions
+from api.v1.routes.community import community_answers
 from api.v1.routes.wishlist import wishlist
-
 api_version_one = APIRouter(prefix="/api/v1")
 
 api_version_one.include_router(api_status)
@@ -97,4 +98,6 @@ api_version_one.include_router(team)
 api_version_one.include_router(terms_and_conditions)
 api_version_one.include_router(product_comment)
 api_version_one.include_router(subscription_)
+api_version_one.include_router(community_questions)
+api_version_one.include_router(community_answers)
 api_version_one.include_router(wishlist)
