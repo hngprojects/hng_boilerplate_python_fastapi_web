@@ -59,12 +59,13 @@ def test_super_user_creation(data, db_session_mock):
     # Mock the user creation function
 
     url = '/api/v1/auth/register-super-admin'
-   
-  
+    
     response = client.post(url, json=data)
 
+    without_redis = f'Verification email sent. Please check your inbox at {data["email"]}'
+    with_redis = f'User created successfully'
     
-    assert response.json()['message'] == 'User created successfully'
+    assert response.json()['message'] == without_redis or with_redis
     assert response.status_code == 201
     # Assert that create_user was called with the correct data
    

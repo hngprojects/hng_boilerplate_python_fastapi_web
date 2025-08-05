@@ -1,147 +1,172 @@
 import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
-from api.v1.models import Testimonial  # noqa: F403
 from main import app
-import uuid
+from uuid_extensions import uuid7
+from sqlalchemy.orm import Session
+from api.db.database import get_db
+from datetime import datetime, timezone
+from fastapi.testclient import TestClient
+from unittest.mock import patch, MagicMock
+from api.v1.services.testimonial import testimonial_service, TestimonialService
+from api.v1.services.user import user_service
+from api.v1.models import User, Testimonial
 
 client = TestClient(app)
 
-auth_token = None
+# Mock database
+@pytest.fixture
+def mock_db_session(mocker):
+    db_session_mock = mocker.MagicMock(spec=Session)
+    app.dependency_overrides[get_db] = lambda: db_session_mock
+    return db_session_mock
 
-payload = [
-    {
-        "content": "Testimonial 1",
-        "ratings": 2.5,
-        "status_code": 201,
-    },
-    {
-        "content": "Testimonial 2",
-        "ratings": 3.5,
-        "status_code": 201,
-    },
-    {  # missing content
-        "ratings": 3.5,
-        "status_code": 422,
-    },
-    {  # missing ratings
-        "content": "Testimonial 2",
-        "status_code": 201,
-    },
-]
+@pytest.fixture
+def mock_user_service():
+    with patch("api.v1.services.user.user_service", autospec=True) as user_service_mock:
+        yield user_service_mock
 
-@pytest.fixture(scope='module')
-def mock_send_email():
-    with patch("api.core.dependencies.email_sender.send_email") as mock_email_sending:
-        with patch("fastapi.BackgroundTasks.add_task") as add_task_mock:
-            add_task_mock.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
-            yield mock_email_sending
 
-@pytest.fixture(scope="function")
-def client_with_mocks(mock_send_email):
-    with patch('api.db.database.get_db') as mock_get_db:
-        mock_db = MagicMock()
-        mock_get_db.return_value = mock_db
-        
-        # Reset the mock_db state for each test
-        mock_db.query.return_value.filter.return_value.first.return_value = None
-        mock_db.add.reset_mock()
-        mock_db.commit.reset_mock()
-        mock_db.refresh.reset_mock()
-        
-        yield client, mock_db
 
-@pytest.fixture(autouse=True)
-def before_all(client_with_mocks):
-    client, mock_db = client_with_mocks
-    
-    # Simulate the user not existing before registration
-    mock_db.query.return_value.filter.return_value.first.return_value = None
-    email = f"test{uuid.uuid4()}@gmail.com"
-    user_response = client.post(
-        "/api/v1/auth/register",
+@pytest.fixture
+def mock_testimonial_service(mock_db_session):
+    with patch("api.v1.services.testimonial.TestimonialService", autospec=True) as mock_testimonial_service:
+        yield mock_testimonial_service(mock_db_session)
+
+
+# Test User
+@pytest.fixture
+def test_user():
+    return User(
+        id=str(uuid7()),
+        email="testuser@gmail.com",
+        password="hashedpassword",
+        first_name="test",
+        last_name="user",
+        is_active=True,
+    )
+
+@pytest.fixture()
+def test_testimonial(test_user):
+    return Testimonial(
+        id=str(uuid7()),
+        content= "Testimonial 1",
+        ratings=2.5,
+    )
+
+
+
+@pytest.fixture
+def access_token_user(test_user):
+    return user_service.create_access_token(user_id=test_user.id)
+
+
+
+@patch("api.v1.services.testimonial.TestimonialService.create")
+def test_successful_testimonial(
+    mock_create_testimonial,
+    mock_db_session, 
+    test_user, 
+    test_testimonial,
+    access_token_user
+):
+    # mock current-user AND blog-post
+    mock_db_session.query().filter().first.side_effect = [test_user, test_testimonial]
+
+    # mock existing-blog-like
+    mock_db_session.query().filter_by().first.return_value = None
+
+    # mock like-count
+    mock_db_session.query().filter_by().count.return_value = 1
+
+    resp = client.post(
+        f"api/v1/testimonials/",
+        headers={"Authorization": f"Bearer {access_token_user}"},
         json={
-            "password": "strin8Hsg263@",
-            "confirm_password": "strin8Hsg263@",
-            "first_name": "string",
-            "last_name": "string",
-            "email": email,
+        "content": "Testimonial 1",
+        "ratings": 2.5
         }
     )
-    print("USER RESPONSE", user_response.json())
-    
-    if user_response.status_code != 201:
-        raise Exception(f"Setup failed: {user_response.json()}")
+    resp_d = resp.json()
+    assert resp.status_code == 201
 
-    global auth_token
-    # auth_token = user_response.json()["access_token"]
-    auth_token = user_response.json()['data']["access_token"]
-    print(auth_token)
+@patch("api.v1.services.testimonial.TestimonialService.create")
+def test_unauthorized_testimonial(
+    mock_create_testimonial,
+    mock_db_session, 
+    test_user, 
+    test_testimonial,
+):
+    # mock current-user AND blog-post
+    mock_db_session.query().filter().first.side_effect = [test_user, test_testimonial]
 
-def test_create_testimonial(client_with_mocks):
-    client, mock_db = client_with_mocks
-    status_code = payload[0].pop("status_code")
+    # mock existing-blog-like
+    mock_db_session.query().filter_by().first.return_value = None
 
-    res = client.post(
-        "api/v1/testimonials/",
-        json=payload[0],
-        headers={"Authorization": f"Bearer {auth_token}"},
+    # mock like-count
+    mock_db_session.query().filter_by().count.return_value = 1
+
+    resp = client.post(
+        f"api/v1/testimonials/",
+        json={
+        "content": "Testimonial 1",
+        "ratings": 2.5
+        }
     )
+    resp_d = resp.json()
+    assert resp.status_code == 401
 
-    assert res.status_code == status_code
-    
-    testimonial_id = res.json()["data"]["id"]
-    testimonial = MagicMock()
-    testimonial.content = payload[0]["content"]
-    testimonial.ratings = payload[0]["ratings"]
-    
-    mock_db.query(Testimonial).get.return_value = testimonial
-    retrieved_testimonial = mock_db.query(Testimonial).get(testimonial_id)
-    
-    assert retrieved_testimonial.content == payload[0]["content"]
-    assert retrieved_testimonial.ratings == payload[0]["ratings"]
 
-def test_create_testimonial_unauthorized(client_with_mocks):
-    client, _ = client_with_mocks
-    status_code = 401
+@patch("api.v1.services.testimonial.TestimonialService.create")
+def test_missing_content_testimonial(
+    mock_create_testimonial,
+    mock_db_session, 
+    test_user, 
+    test_testimonial,
+    access_token_user
+):
+    # mock current-user AND blog-post
+    mock_db_session.query().filter().first.side_effect = [test_user, test_testimonial]
 
-    res = client.post(
-        "api/v1/testimonials/",
-        json=payload[1],
+    # mock existing-blog-like
+    mock_db_session.query().filter_by().first.return_value = None
+
+    # mock like-count
+    mock_db_session.query().filter_by().count.return_value = 1
+
+    resp = client.post(
+        f"api/v1/testimonials/",
+        headers={"Authorization": f"Bearer {access_token_user}"},
+        json={
+        "ratings": 2.5
+        }
     )
+    resp_d = resp.json()
+    assert resp.status_code == 422
 
-    assert res.status_code == status_code
 
-def test_create_testimonial_missing_content(client_with_mocks):
-    client, _ = client_with_mocks
-    status_code = payload[2].pop("status_code")
+@patch("api.v1.services.testimonial.TestimonialService.create")
+def test_missing_ratings_testimonial(
+    mock_create_testimonial,
+    mock_db_session, 
+    test_user, 
+    test_testimonial,
+    access_token_user
+):
+    # mock current-user AND blog-post
+    mock_db_session.query().filter().first.side_effect = [test_user, test_testimonial]
 
-    res = client.post(
-        "api/v1/testimonials/",
-        json=payload[2],
-        headers={"Authorization": f"Bearer {auth_token}"},
+    # mock existing-blog-like
+    mock_db_session.query().filter_by().first.return_value = None
+
+    # mock like-count
+    mock_db_session.query().filter_by().count.return_value = 1
+
+    resp = client.post(
+        f"api/v1/testimonials/",
+        headers={"Authorization": f"Bearer {access_token_user}"},
+        json={
+        "content": "Testimonial 1",
+        }
     )
-
-    assert res.status_code == status_code
-
-def test_create_testimonial_missing_ratings(client_with_mocks):
-    client, mock_db = client_with_mocks
-    status_code = payload[3].pop("status_code")
-
-    res = client.post(
-        "api/v1/testimonials/",
-        json=payload[3],
-        headers={"Authorization": f"Bearer {auth_token}"},
-    )
-
-    assert res.status_code == status_code
+    resp_d = resp.json()
+    assert resp.status_code == 201
     
-    testimonial_id = res.json()["data"]["id"]
-    testimonial = MagicMock()
-    testimonial.content = payload[3]["content"]
-    testimonial.ratings = 0  # Default value when ratings are missing
-    
-    mock_db.query(Testimonial).get.return_value = testimonial
-    retrieved_testimonial = mock_db.query(Testimonial).get(testimonial_id)
-    
-    assert retrieved_testimonial.ratings == 0

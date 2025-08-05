@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% block title %}Email Verification{% endblock %}
-{% block style %}<link rel="stylesheet" href="{{ url_for('email_static', path='css/email-verification.css') }}">{% endblock %}
+{% block style %}
+<link rel="stylesheet" href="{{ url_for('email_static', path='css/email-verification.css') }}">{% endblock %}
 
 {% block content %}
 <div class="template-main">
@@ -9,7 +10,7 @@
     <p class="template-header">Email Verification</p>
   </div>
   <div class="content">
-    <p class="template-receiver-name">Hi John Doe,</p>
+    <p class="template-receiver-name">Hi {{first_name}}, {{last_name}}</p>
     <p class="template-message">
       Thanks for registering your account with us Boilerplate. Before we get
       started, we just need to confirm that this is you.
@@ -23,11 +24,8 @@
       <button class="template-btn">Verify Account</button>
       <p>
         Or copy this link:
-        <a
-          href="https://carbonated-umbra-a35.notion.site/Language-Learning-AI-game-608b687875cf4b48a9a0194ee82ae17d"
-          class="copy-link"
-        >
-          https://carbonated-umbra-a35.notion.site/Language-Learning-AI-game-608b687875cf4b48a9a0194ee82ae17d
+        <a href="{{ cta_link }}" class="copy-link">
+          {{ cta_link }}
         </a>
       </p>
       <div class="template-farewell">

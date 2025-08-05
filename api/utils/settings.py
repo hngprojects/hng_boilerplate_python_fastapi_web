@@ -14,6 +14,16 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = config("ACCESS_TOKEN_EXPIRE_MINUTES")
     JWT_REFRESH_EXPIRY: int = config("JWT_REFRESH_EXPIRY")
 
+    # Redis configurations
+    REDIS_HOST: str = config("REDIS_HOST")
+    REDIS_DB: int = config("REDIS_DB", cast=int)
+    REDIS_PORT: int = config("REDIS_PORT", cast=int)
+    REDIS_PASSWORD: str = config("REDIS_PASSWORD")
+
+    FRONTEND_URL: str = config("FRONTEND_URL")
+    SERVER_PORT_NUMBER: int = config("SERVER_PORT_NUMBER", cast=int)
+
+
     # Database configurations
     DB_HOST: str = config("DB_HOST")
     DB_PORT: int = config("DB_PORT", cast=int)
