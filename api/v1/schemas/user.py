@@ -438,3 +438,13 @@ class UserRoleSchema(BaseModel):
         if value not in ["admin", "user", "guest", "owner"]:
             raise ValueError("Role has to be one of admin, guest, user, or owner")
         return value
+
+
+
+
+class AdminDeleteUserSchema(BaseModel):
+    """Schema for admin for deleting a user account"""
+    
+    user_id: str = Field(..., title="User ID", description="The ID of the user to be deleted")
+
+

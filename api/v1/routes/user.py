@@ -7,10 +7,17 @@ from api.utils.success_response import success_response
 from api.v1.models.user import User
 from api.v1.schemas.user import (
     AllUsersResponse, UserUpdate,
-    AdminCreateUserResponse, AdminCreateUser
+    AdminCreateUserResponse, AdminCreateUser,AdminDeleteUserSchema,
 )
 from api.db.database import get_db
 from api.v1.services.user import user_service
+
+from api.utils.dependencies import get_current_user,get_super_admin
+
+from fastapi.responses import JSONResponse
+
+from api.core.dependencies.google_email import mail_service
+
 
 
 user_router = APIRouter(prefix="/users", tags=["Users"])
@@ -209,4 +216,69 @@ def get_user_by_id(
             user, 
             exclude=['password', 'is_superadmin', 'is_deleted', 'is_verified', 'updated_at', 'created_at', 'is_active']
         )
+    )
+    
+    
+
+
+@user_router.post('/deactivate', status_code=200)
+async def deactivate_account(
+    request: Request, 
+    schema: AdminDeleteUserSchema, 
+    db: Session = Depends(get_db), 
+    super_admin: User = Depends(user_service.get_current_super_admin)
+):
+    '''Endpoint for super admin to deactivate a user account by user ID'''
+
+    
+    if not super_admin.is_superadmin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only super admins can deactivate users"
+        )
+
+    user_to_deactivate = db.query(User).filter(User.id == schema.user_id).first()
+
+    if user_to_deactivate is None:
+        return JSONResponse(
+            status_code=404,
+            content={
+                "status": "error",
+                "status_code": 404,
+                "message": "User not found",
+                "data": {}
+            }
+        )
+
+    if not user_to_deactivate.is_active:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "status": "error",
+                "status_code": 400,
+                "message": "User is already deactivated",
+                "data": {}
+            }
+        )
+
+    user_to_deactivate.is_active = False
+
+    # Send email to user
+    mail_service.send_mail(
+        to=user_to_deactivate.email,
+        subject='Account Deactivation',
+        body=f'Hello {user_to_deactivate.first_name},\n\nYour account has been deactivated successfully.\n\nTo reactivate your account, visit:\n{request.url.hostname}/api/v1/users/accounts/reactivate\n\nThis link will expire in 15 minutes.'
+    )
+
+    db.commit()
+
+    
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": "success",
+            "status_code": 200,
+            "message": "User account deactivated successfully",
+            "data": {}
+        }
     )
