@@ -244,6 +244,23 @@ class TestUserLogin:
         assert response_json.get("status_code") == 422
         assert response_json.get("message") == "Invalid input" or "Invalid" in response_json.get("message", "")
 
+    def test_user_login_failure_without_password(self, monkeypatch):
+        """Test login failure when password is not provided"""
+
+        monkeypatch.setattr(
+            user_service,
+            "authenticate_user",
+            lambda db, email, password: self.mock_user
+        )
+
+        response = self.client.post(
+            "/api/v1/auth/login",
+            json={"email": "testuser1@gmail.com"},
+        )
+        response_json = response.json()
+
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert response_json.get("message") == "Invalid input"
 
 # Mock the database dependency
 @pytest.fixture
