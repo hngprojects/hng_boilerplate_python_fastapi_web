@@ -69,8 +69,13 @@ def paginated_response(
     if filters and join is None:
         # Apply filters
         for attr, value in filters.items():
+            
             if value is not None:
-                query = query.filter(getattr(model, attr).like(f"%{value}%"))
+                column = getattr(model, attr)
+                if isinstance(value, bool):
+                    query = query.filter(column == value)
+                else:
+                    query = query.filter(column.like(f"%{value}%"))
 
     elif filters and join is not None:
         # Apply filters
@@ -84,10 +89,7 @@ def paginated_response(
     results = jsonable_encoder(query.offset(skip).limit(limit).all())
     total_pages = int(total / limit) + (total % limit > 0)
 
-    return success_response(
-        status_code=200,
-        message="Successfully fetched items",
-        data={
+    return {
             "pages": total_pages,
             "total": total,
             "skip": skip,
@@ -102,4 +104,4 @@ def paginated_response(
                 }
             )
         }
-    )
+    
