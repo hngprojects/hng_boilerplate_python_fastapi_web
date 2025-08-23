@@ -117,33 +117,24 @@ def delete_user(
 async def get_users(
     current_user: Annotated[User, Depends(user_service.get_current_super_admin)],
     db: Annotated[Session, Depends(get_db)],
-    page: int = 1, per_page: int = 10,
-    is_active: Optional[bool] = Query(None),
-    is_deleted: Optional[bool] = Query(None),
-    is_verified: Optional[bool] = Query(None),
-    is_superadmin: Optional[bool] = Query(None)
+    page: int = Query(1, ge=1, description="Page number, starting from 1"),
+    limit: int = Query(20, ge=1, le=50, description="Users per page, max 50"),
+    search: Optional[str] = Query(None, description="Search term for first_name, last_name, or email"),
+    is_active: Optional[bool] = Query(None, description="Filter by active status"),
 ):
     """
-    Retrieves all users.
+    Retrieves all users with search, filtering, and pagination.
     Args:
-        current_user: The current user(admin) making the request
+        current_user: The current superadmin making the request
         db: database Session object
-        page: the page number
-        per_page: the maximum size of users for each page
-        is_active: boolean to filter active users
-        is_deleted: boolean to filter deleted users
-        is_verified: boolean to filter verified users
-        is_superadmin: boolean to filter users that are super admin
+        page: page number (default: 1)
+        limit: maximum users per page (default: 20, max: 50)
+        search: term to search in first_name, last_name, or email
+        is_active: filter by active status
     Returns:
-        UserData
+        AllUsersResponse
     """
-    query_params = {
-        'is_active': is_active,
-        'is_deleted': is_deleted,
-        'is_verified': is_verified,
-        'is_superadmin': is_superadmin,
-    }
-    return user_service.fetch_all(db, page, per_page, **query_params)
+    return user_service.fetch_all(db, page, limit, search, is_active)
 
 @user_router.post("", status_code=status.HTTP_201_CREATED, response_model=AdminCreateUserResponse)
 def admin_registers_user(
