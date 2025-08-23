@@ -1,6 +1,6 @@
 from typing import Annotated
 from api.db.database import get_db
-from api.v1.schemas.api_status import APIStatusPost
+from api.v1.schemas.api_status import APIStatusPost, APIStatusUpdate
 from api.v1.services.api_status import APIStatusService
 from api.utils.success_response import success_response
 from fastapi import APIRouter, Depends, status
@@ -31,4 +31,16 @@ async def post_api_status(
         message='API Status created successfully',
         data=new_status,
         status_code=status.HTTP_201_CREATED
+    )
+@api_status.put('/{api_group}', response_model=success_response, status_code=200)
+async def update_api_status(
+    api_group: str,
+    schema: APIStatusUpdate,
+    db: Annotated[Session, Depends(get_db)]
+):
+    updated_status = APIStatusService.update(db, api_group, schema)
+    return success_response(
+        message='API Status updated successfully',
+        data=updated_status,
+        status_code=status.HTTP_200_OK
     )
