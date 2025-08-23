@@ -32,5 +32,5 @@ from api.v1.models.reset_password_token import ResetPasswordToken
 from api.v1.models.faq_inquiries import FAQInquiries
 from api.v1.models.wishlist import Wishlist
 from api.v1.models.totp_device import TOTPDevice
+from api.v1.models.report import Report
 from api.v1.models.bookmark import Bookmark
-
