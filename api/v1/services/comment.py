@@ -45,18 +45,24 @@ class CommentService(Service):
         comment = check_model_existence(db, Comment, id)
         return comment
 
-    def update(self, db: Session, id: str, schema):
-        """Updates a comment"""
+    def update(self, db: Session, id: str, schema: Optional[dict] = None, content: Optional[str] = None):
+        """Updates a comment with either schema data or content"""
 
         comment = self.fetch(db=db, id=id)
+        if comment is None:
+            return None
 
-        # Update the fields with the provided schema data
-        update_data = schema.dict(exclude_unset=True)
-        for key, value in update_data.items():
-            setattr(comment, key, value)
+        if schema:
+            update_data = schema.dict(exclude_unset=True)
+            for key, value in update_data.items():
+                setattr(comment, key, value)
+        
+        if content:
+            comment.content = content
 
         db.commit()
         db.refresh(comment)
+        
         return comment
 
     def delete(self, db: Session, id: str):

@@ -36,7 +36,24 @@ class CommentDislike(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+class EditComment(BaseModel):
+    id: str = ""
+    comment_id: str = ""
+    user_id: str = ""
+    ip_address: str = ""
+    created_at: datetime = ""
+    updated_at: datetime = ""
+    model_config = ConfigDict(from_attributes=True)
 
+class CommentEditResponse(BaseModel):
+    status_code: int = 201
+    message: str
+    success: bool = True
+    data: EditComment
+
+class EditCommentRequest(BaseModel):
+    content: str 
+    
 class DislikeSuccessResponse(BaseModel):
     status_code: int = 201
     message: str
