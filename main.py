@@ -177,5 +177,8 @@ STATIC_DIR = "static/profile_images"
 os.makedirs(STATIC_DIR, exist_ok=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+if settings.DEV_MODE == "test":
+    populate_roles_and_permissions()
+
 if __name__ == "__main__":
     uvicorn.run("main:app", port=7001, reload=True)

@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     TWILIO_PHONE_NUMBER: str = config("TWILIO_PHONE_NUMBER")
 
     APP_NAME: str = config("APP_NAME")
+    DEV_MODE:str = config("DEV_MODE")
 
     # Base URLs
     ANCHOR_PYTHON_BASE_URL: str = config(
