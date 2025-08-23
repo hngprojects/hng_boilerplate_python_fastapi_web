@@ -2,7 +2,9 @@
 """
 Module contains CRUD routes for testimonial
 """
+
 from fastapi.encoders import jsonable_encoder
+from fastapi import HTTPException
 from api.db.database import get_db
 from sqlalchemy.orm import Session
 from api.v1.models.user import User
@@ -11,6 +13,7 @@ from api.utils.success_response import success_response
 from api.v1.services.testimonial import testimonial_service
 from api.v1.services.user import user_service
 from api.v1.schemas.testimonial import CreateTestimonial
+from api.v1.schemas.testimonial import UpdateTestimonial
 from api.core.responses import SUCCESS
 from typing import Annotated
 from api.utils.pagination import paginated_response
@@ -93,6 +96,35 @@ def create_testimonial(
         status_code=201,
         message=SUCCESS,
         data={"id": testimonial.id}
+    )
+    return response
+
+
+@testimonial.put("/{testimonial_id}", response_model=success_response)
+def update_testimonial(
+    testimonial_id: str,
+    testimonial_data: UpdateTestimonial,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: User = Depends(user_service.get_current_user)
+):
+    """Endpoint to update a testimonial"""
+
+    existing_testimonial = testimonial_service.fetch(db, testimonial_id)
+    if not existing_testimonial:
+        raise HTTPException(status_code=404, detail="Testimonial not found")
+
+    if existing_testimonial.author_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to update this testimonial")
+
+    updated_testimonial = testimonial_service.update(db, testimonial_id, testimonial_data)
+
+    if not updated_testimonial:
+        raise HTTPException(status_code=500, detail="Failed to update testimonial")
+
+    response = success_response(
+        status_code=200,
+        message="Testimonial updated successfully",
+        data={"id": updated_testimonial.id}
     )
     return response
 

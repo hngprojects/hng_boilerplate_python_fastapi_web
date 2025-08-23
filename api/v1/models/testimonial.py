@@ -16,3 +16,5 @@ class Testimonial(BaseTableModel):
     ratings = Column(Float, nullable=True)
 
     author = relationship("User", back_populates="testimonials")
+
+    

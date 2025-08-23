@@ -4,6 +4,8 @@ from api.utils.db_validators import check_model_existence
 from api.v1.models.testimonial import Testimonial
 from api.v1.models.user import User
 from api.v1.schemas.testimonial import CreateTestimonial
+from api.v1.schemas.testimonial import UpdateTestimonial
+
 
 
 class TestimonialService(Service):
@@ -34,9 +36,19 @@ class TestimonialService(Service):
 
         return check_model_existence(db, Testimonial, id)
 
-    def update(self, db: Session, id: str, schema):
+    def update(self, db: Session, id: str, schema: UpdateTestimonial):
         """Updates a testimonial"""
-        pass
+        testimonial = self.fetch(db, id)
+        if not testimonial:
+            return None
+         
+        for key, value in schema.dict(exclude_unset=True).items():
+            setattr(testimonial, key, value)
+            
+        db.commit()
+        db.refresh(testimonial)
+        return testimonial
+
 
     def delete(self, db: Session, id: str):
         """Deletes a specific testimonial"""
