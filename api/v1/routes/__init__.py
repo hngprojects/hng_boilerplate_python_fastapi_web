@@ -47,6 +47,7 @@ from api.v1.routes.settings import settings
 from api.v1.routes.terms_and_conditions import terms_and_conditions
 from api.v1.routes.stripe import subscription_
 from api.v1.routes.wishlist import wishlist
+from api.v1.routes.feature_request import feature_request
 
 api_version_one = APIRouter(prefix="/api/v1")
 
@@ -98,3 +99,4 @@ api_version_one.include_router(terms_and_conditions)
 api_version_one.include_router(product_comment)
 api_version_one.include_router(subscription_)
 api_version_one.include_router(wishlist)
+api_version_one.include_router(feature_request)

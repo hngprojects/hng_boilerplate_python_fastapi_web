@@ -117,6 +117,10 @@ class User(BaseTableModel):
         "Bookmark", back_populates="user", cascade="delete"
     )
     
+    feature_requests = relationship(
+        "FeatureRequest", back_populates="user", cascade="all, delete-orphan"
+    )
+    
     def to_dict(self):
         obj_dict = super().to_dict()
         obj_dict.pop("password")
