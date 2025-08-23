@@ -312,6 +312,66 @@ async def update_product(
     )
 
 
+# batch update
+@product.put("/batch_update", status_code=status.HTTP_200_OK)
+async def batch_update_products(
+    org_id: str,
+    product_updates: List[ProductUpdate], 
+    current_user: User = Depends(user_service.get_current_user),
+    db: Session = Depends(get_db),
+):
+    """
+    Batch update multiple products in a single request.
+
+    Args:
+        org_id (str): The unique identifier of the organisation.
+        product_updates (List[ProductUpdate]): List of product update data.
+        current_user (User): The currently authenticated user.
+        db (Session): The database session.
+
+    Returns:
+        A structured response indicating success/failure for each product.
+    """
+    results = []
+    for update in product_updates:
+        try:
+            
+            product = product_service.fetch_single_by_organisation(
+                db, org_id, update.product_id, current_user
+            )
+            if not product:
+                raise HTTPException(status_code=404, detail=f"Product {update.product_id} not found")
+            
+            updated_product = product_service.update(
+                db=db, product_id=update.product_id, schema=update, org_id=org_id, current_user=current_user
+            )
+
+            results.append({
+                "product_id": update.product_id,
+                "status": "success",
+                "message": "Product updated successfully",
+                "data": updated_product,
+            })
+        except HTTPException as e:
+            results.append({
+                "product_id": update.product_id,
+                "status": "failed",
+                "error": str(e.detail),
+            })
+        except Exception as e:
+            results.append({
+                "product_id": update.product_id,
+                "status": "failed",
+                "error": str(e),
+            })
+
+    
+    return success_response(
+        status_code=status.HTTP_200_OK,
+        message="Batch update completed",
+        data={"updated": results},
+    )
+
 # delete
 @product.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_product(
